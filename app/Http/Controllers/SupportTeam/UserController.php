@@ -114,7 +114,7 @@ class UserController extends Controller implements HasMiddleware
             $f = Qs::getFileMetaData($photo);
             $f['name'] = 'photo.' . $f['ext'];
             $f['path'] = $data['photo'] = Qs::getUploadPath($user_type) . $data['code'] . '/' . $f['name'];
-            $photo->storeAs('public/' . $f['path']);
+            $photo->storeAs($f['path']);
         }
 
         /* Ensure that both username and Email are not blank*/
@@ -178,7 +178,7 @@ class UserController extends Controller implements HasMiddleware
             $f = Qs::getFileMetaData($photo);
             $f['name'] = 'photo.' . $f['ext'];
             $f['path'] = $data['photo'] = Qs::getUploadPath($user_type) . $user->code . '/' . $f['name'];
-            $photo->storeAs('public/' . $f['path']);
+            $photo->storeAs($f['path']);
         }
 
         $this->user->update($id, $data);   /* UPDATE USER RECORD */

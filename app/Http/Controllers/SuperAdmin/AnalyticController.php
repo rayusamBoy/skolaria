@@ -103,7 +103,7 @@ class AnalyticController extends Controller
             $file = $req->file('service_account_credential_file');
             $fdata = Qs::getFileMetaData($file);
             $fpath = 'analytics/service-acc-credential-file.' . $fdata['ext'];
-            $file->storeAs('public/', $fpath);
+            $file->storeAs($fpath);
 
             $this->setting->update('google_analytic_service_account_credential_file', $fpath);
         }

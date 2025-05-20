@@ -90,7 +90,7 @@ class StudentRecordController extends Controller implements HasMiddleware
             $f = Qs::getFileMetaData($photo);
             $f['name'] = 'photo.' . $f['ext'];
             $f['path'] = $data['photo'] = Qs::getUploadPath('student') . $data['code'] . '/' . $f['name'];
-            $photo->storeAs('public/' . $f['path']);
+            $photo->storeAs($f['path']);
         }
 
         if ($req->hasFile('birth_certificate')) {
@@ -98,7 +98,7 @@ class StudentRecordController extends Controller implements HasMiddleware
             $f = Qs::getFileMetaData($birth_certificate);
             $f['name'] = 'birth_certificate.' . $f['ext'];
             $f['path'] = $sr['birth_certificate'] = Qs::getUploadPath('student') . $data['code'] . '/' . $f['name'];
-            $birth_certificate->storeAs('public/' . $f['path']);
+            $birth_certificate->storeAs($f['path']);
         }
 
         $user = $this->user->create($data);
@@ -254,10 +254,8 @@ class StudentRecordController extends Controller implements HasMiddleware
             $f = Qs::getFileMetaData($photo);
             $f['name'] = 'photo.' . $f['ext'];
             $f['path'] = $d['photo'] = Qs::getUploadPath('student') . $sr->user->code . '/' . $f['name'];
-            $photo->storeAs('public/' . $f['path']);
+            $photo->storeAs($f['path']);
         }
-
-        // $d['photo'] = Usr::createAvatar($d['name'], $sr->user->code, $sr->user->user_type);
 
         $this->user->update($sr->user->id, $d); // Update User Details
 
@@ -268,9 +266,10 @@ class StudentRecordController extends Controller implements HasMiddleware
             $f = Qs::getFileMetaData($birth_certificate);
             $f['name'] = 'birth_certificate.' . $f['ext'];
             $f['path'] = $srec['birth_certificate'] = Qs::getUploadPath('student') . $sr->user->code . '/' . $f['name'];
-            $birth_certificate->storeAs('public/' . $f['path']);
+            $birth_certificate->storeAs($f['path']);
         }
-        // Format string according to the enforced input
+
+        // Format string according to the enforced rules
         $srec['house_no'] = strtoupper($srec['house_no']);
         $srec['ps_name'] = ucfirst($srec['ps_name']);
         $srec['ss_name'] = ucfirst($srec['ss_name']);

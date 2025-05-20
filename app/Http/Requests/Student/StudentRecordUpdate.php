@@ -3,8 +3,10 @@
 namespace App\Http\Requests\Student;
 
 use App\Helpers\Usr;
+use App\Models\StudentRecord;
+use App\Rules\StartsWithProperPhoneCode;
+use App\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class StudentRecordUpdate extends FormRequest
@@ -15,14 +17,19 @@ class StudentRecordUpdate extends FormRequest
         return true;
     }
 
-    protected function getAuthUserId()
+    protected function getStudentIdIParam()
     {
-        return Auth::id();
+        return Usr::decodeHash($this->route('student'));
     }
 
-    protected function getRouteUserIdParameter()
+    /**
+     * Get the user ID from the request input.
+     *
+     * @return int|null
+     */
+    protected function getUserIdInput()
     {
-        return Usr::decodeHash($this->input('student'));
+        return $this->input('user_id') ? Usr::decodeHash($this->input('user_id')) : null;
     }
 
     /**
@@ -36,9 +43,9 @@ class StudentRecordUpdate extends FormRequest
             'name' => 'required|string|min:6|max:150',
             'gender' => 'required|string',
             'date_admitted' => 'required|date_format:' . Usr::getDateFormat(),
-            'phone' => ['sometimes', 'nullable', 'string', Rule::unique('users', 'phone')->ignore($this->getAuthUserId(), 'id')],
-            'phone2' => ['sometimes', 'nullable', 'string', Rule::unique('users', 'phone2')->ignore($this->getAuthUserId(), 'id')],
-            'email' => 'sometimes|nullable|email|max:100|unique:users,id',
+            'phone' => ['sometimes', 'nullable', 'string', Rule::unique(User::class)->ignore($this->getUserIdInput()), new StartsWithProperPhoneCode],
+            'phone2' => ['sometimes', 'nullable', 'string', Rule::unique(User::class)->ignore($this->getUserIdInput()), new StartsWithProperPhoneCode],
+            'email' => ['sometimes', 'nullable', 'email', 'max:100', Rule::unique(User::class)->ignore($this->getUserIdInput())],
             'photo' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:2048',
             'address' => 'required|string|min:4|max:120',
             'bg_id' => 'sometimes|nullable',
@@ -55,15 +62,15 @@ class StudentRecordUpdate extends FormRequest
             'disability' => 'sometimes|nullable',
             'chp' => 'sometimes|nullable|string',
             'food_taboos' => 'sometimes|nullable|string',
-            'p_status' => 'required|string', 
-            'adm_no' => ['sometimes', 'nullable', 'regex:/^[a-zA-Z0-9\s\-\/]+$/', 'min:4', 'max:20', 'unique:student_records,id'],
+            'p_status' => 'required|string',
+            'adm_no' => ['sometimes', 'nullable', 'regex:/^[a-zA-Z0-9\s\-\/]+$/', 'min:4', 'max:20', Rule::unique(StudentRecord::class)->ignore($this->getStudentIdIParam())],
             'dob' => 'required|date_format:' . Usr::getDateFormat(),
         ];
     }
 
     public function attributes()
     {
-        return  [
+        return [
             'nal_id' => 'nationality',
             'dorm_id' => 'dormitory',
             'state_id' => 'state',

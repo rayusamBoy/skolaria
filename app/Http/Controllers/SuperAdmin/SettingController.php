@@ -41,7 +41,7 @@ class SettingController extends Controller
             $f = Qs::getFileMetaData($logo);
             $f['name'] = 'logo.' . $f['ext'];
             $f['path'] = $logo_path = Qs::getPublicUploadPath() . '/' . $f['name'];
-            $logo->storeAs('public/' . $f['path']);
+            $logo->storeAs($f['path']);
             $this->setting->update('logo', $logo_path);
         }
 
@@ -50,7 +50,7 @@ class SettingController extends Controller
             $f = Qs::getFileMetaData($login_and_related_pages_bg);
             $f['name'] = 'login_and_related_pages_bg.' . $f['ext'];
             $f['path'] = $login_page_path = Qs::getPublicUploadPath() . '/' . $f['name'];
-            $login_and_related_pages_bg->storeAs('public/' . $f['path']);
+            $login_and_related_pages_bg->storeAs($f['path']);
             $this->setting->update('login_and_related_pages_bg', $login_page_path);
 
             switch ($req->texts_and_bg_colors) {

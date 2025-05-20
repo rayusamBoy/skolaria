@@ -59,14 +59,14 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="phone">Phone:</label>
-                            <input value="{{ $user->phone }}" type="text" id="phone" name="phone" data-mask="+9999?999999999" class="form-control" placeholder="+255 1234 567 89">
+                            <input value="{{ $user->phone }}" type="text" id="phone" name="phone" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
                     {{--TELEPHONE--}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="telephone">Telephone:</label>
-                            <input value="{{ $user->phone2 }}" type="text" id="telephone" name="phone2" data-mask="+9999?999999999" class="form-control" placeholder="+255 1234 567 89">
+                            <input value="{{ $user->phone2 }}" type="text" id="telephone" name="phone2" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
                     {{--BLOOD GROUP--}}
@@ -194,13 +194,13 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="phone3">Close Relative Phone: <span class="text-danger">*</span></label>
-                                <input value="{{ $p_relative->phone3 ?? ''  }}" required type="text" id="phone3" name="phone3" data-mask="+999 9999 999 999" class="form-control" placeholder="+255 1234 567 89">
+                                <input value="{{ $p_relative->phone3 ?? ''  }}" required type="text" id="phone3" name="phone3" class="form-control" placeholder="+255123456789">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="phone4">Close Relative Mobile: </label>
-                                <input value="{{ $p_relative->phone4 ?? ''  }}" type="text" id="phone4" name="phone4" data-mask="+999 9999 999 999" class="form-control" placeholder="+255 1234 567 89">
+                                <input value="{{ $p_relative->phone4 ?? ''  }}" type="text" id="phone4" name="phone4" class="form-control" placeholder="+255123456789">
                             </div>
                         </div>
                     </div>

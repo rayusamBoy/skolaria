@@ -59,14 +59,14 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="phone">Phone:</label>
-                            <input id="phone" value="{{ $user->phone }}" type="text" name="phone" data-mask="+9999?999999999" class="form-control" placeholder="+255 1234 567 89">
+                            <input id="phone" value="{{ $user->phone }}" type="text" name="phone" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
                     {{--TELEPHONE--}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="phone2">Telephone:</label>
-                            <input id="phone2" value="{{ $user->phone2 }}" type="text" name="phone2" data-mask="+9999?999999999" class="form-control" placeholder="+255 1234 567 89">
+                            <input id="phone2" value="{{ $user->phone2 }}" type="text" name="phone2" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
                     {{--BLOOD GROUP--}}

@@ -48,8 +48,8 @@ class MyAccountController extends Controller
             $f['name'] = 'photo.' . $f['ext'];
 
             if (Usr::tenancyInitilized()) {
-                $f['path'] = $d['photo'] = Qs::getUploadPath($user_type) . $code . '/' . $f['name'];
-                $photo->storeAs('public/' . $f['path']);
+                $f['path'] = $d['photo'] = Qs::getUploadPath($user_type) . '/' . $code . '/' . $f['name'];
+                $photo->storeAs($f['path']);
             } else {
                 $f['path'] = $photo->storeAs(Qs::getUploadPath($user_type) . $code, $f['name']);
                 $d['photo'] = 'storage/' . $f['path'];

@@ -13,6 +13,9 @@
 
     <form method="post" enctype="multipart/form-data" class="wizard-form steps-validation ajax-update" data-reload="#ajax-title" action="{{ route('students.update', Qs::hash($sr->id)) }}" data-fouc>
         @csrf @method('PUT')
+
+        <input type="hidden" name="user_id" value="{{ Qs::hash($sr->user->id) }}">
+
         <h6>Personal data</h6>
         <fieldset>
             <div class="row">

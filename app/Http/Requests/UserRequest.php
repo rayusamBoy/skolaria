@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Helpers\Usr;
+use App\Models\ParentRelative;
 use App\Rules\StartsWithProperPhoneCode;
+use App\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -14,15 +16,6 @@ class UserRequest extends FormRequest
     public function authorize()
     {
         return true;
-    }
-
-    protected function getRouteUserIdParameter()
-    {
-        // If not data store
-        if ($this->method() !== "POST") {
-            // Get id of the user being updated
-            return Usr::decodeHash($this->route('user'));
-        }
     }
 
     /**
@@ -49,8 +42,8 @@ class UserRequest extends FormRequest
             'work' => 'sometimes|required|string|max:150',
             'name2' => 'sometimes|required|string|min:6|max:150',
             'relation' => 'sometimes|required|string|min:4|max:150',
-            'phone3' => ['sometimes', 'nullable', 'string', new StartsWithProperPhoneCode],
-            'phone4' => ['sometimes', 'nullable', 'string', new StartsWithProperPhoneCode],
+            'phone3' => ['sometimes', 'nullable', 'string', 'unique:users', new StartsWithProperPhoneCode],
+            'phone4' => ['sometimes', 'nullable', 'string', 'unique:users', new StartsWithProperPhoneCode],
             'primary_id' => 'sometimes|nullable|string|unique:users|min:9|max:9',
             'secondary_id' => 'sometimes|nullable|string|unique:users|min:23|max:23',
             'file_number' => 'sometimes|nullable|string|max:15',
@@ -70,11 +63,11 @@ class UserRequest extends FormRequest
         $update = [
             'name' => 'required|string|min:6|max:150',
             'gender' => 'required|string',
-            'phone' => ['sometimes', 'nullable', 'string', "unique:users,phone,{$this->user}", new StartsWithProperPhoneCode],
-            'phone2' => ['sometimes', 'nullable', 'string', "unique:users,phone,{$this->user}", new StartsWithProperPhoneCode],
-            'phone3' => ['sometimes', 'nullable', 'string', "unique:users,phone,{$this->user}", new StartsWithProperPhoneCode],
-            'phone4' => ['sometimes', 'nullable', 'string', "unique:users,phone,{$this->user}", new StartsWithProperPhoneCode],
-            'email' => "sometimes|nullable|email|max:100|unique:users,email,{$this->user}",
+            'phone' => ['sometimes', 'nullable', 'string', Rule::unique(User::class)->ignore($this->user), new StartsWithProperPhoneCode],
+            'phone2' => ['sometimes', 'nullable', 'string', Rule::unique(User::class)->ignore($this->user), new StartsWithProperPhoneCode],
+            'phone3' => ['sometimes', 'nullable', 'string', Rule::unique(ParentRelative::class)->ignore($this->user, 'user_id'), new StartsWithProperPhoneCode],
+            'phone4' => ['sometimes', 'nullable', 'string', Rule::unique(ParentRelative::class)->ignore($this->user), new StartsWithProperPhoneCode],
+            'email' => ["sometimes", "nullable", "email", "max:100", Rule::unique(User::class)->ignore($this->user)],
             'photo' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:2048',
             'address' => 'required|string|min:3|max:120',
             'state_id' => 'required',
@@ -85,12 +78,12 @@ class UserRequest extends FormRequest
             'relation' => 'sometimes|required|string|min:4|max:150',
             'bank_name' => 'sometimes|nullable|required_with:bank_acc_no',
             'file_number' => 'sometimes|nullable|string|max:15',
-            'primary_id' => ['sometimes', 'nullable', 'alpha_num', 'min:3', 'max:20', Rule::unique('users', 'primary_id')->ignore($this->getRouteUserIdParameter(), 'id')],
-            'secondary_id' => ['sometimes', 'nullable', 'alpha_num', 'min:3', 'max:20', Rule::unique('users', 'secondary_id')->ignore($this->getRouteUserIdParameter(), 'id')],
-            'bank_acc_no' => ['sometimes', 'nullable', 'string', 'min:5', 'max:11', 'required_unless:bank_name,null', Rule::unique('staff_records', 'bank_acc_no')->ignore($this->getRouteUserIdParameter(), 'user_id')],
-            'tin_number' => ['sometimes', 'nullable', 'alpha_num', 'min:3', 'max:15', Rule::unique('staff_records', 'tin_number')->ignore($this->getRouteUserIdParameter(), 'user_id')],
-            'ss_number' => ['sometimes', 'nullable', 'string', 'min:3', 'max:15', Rule::unique('staff_records', 'ss_number')->ignore($this->getRouteUserIdParameter(), 'user_id')],
-            'licence_number' => ['sometimes', 'nullable', 'string', 'max:10', Rule::unique('staff_records', 'licence_number')->ignore($this->getRouteUserIdParameter(), 'user_id')],
+            'primary_id' => ['sometimes', 'nullable', 'alpha_num', 'min:3', 'max:20', Rule::unique(User::class)->ignore($this->user)],
+            'secondary_id' => ['sometimes', 'nullable', 'alpha_num', 'min:3', 'max:20', Rule::unique(User::class)->ignore($this->user)],
+            'bank_acc_no' => ['sometimes', 'nullable', 'string', 'min:5', 'max:11', 'required_unless:bank_name,null', Rule::unique('staff_records', 'bank_acc_no')->ignore($this->user, 'user_id')],
+            'tin_number' => ['sometimes', 'nullable', 'alpha_num', 'min:3', 'max:15', Rule::unique('staff_records')->ignore($this->user, 'user_id')],
+            'ss_number' => ['sometimes', 'nullable', 'string', 'min:3', 'max:15', Rule::unique('staff_records')->ignore($this->user, 'user_id')],
+            'licence_number' => ['sometimes', 'nullable', 'string', 'max:10', Rule::unique('staff_records')->ignore($this->user, 'user_id')],
             'place_of_living' => 'sometimes|nullable|string|max:100|min:3',
             'dob' => 'sometimes|nullable|date_format:' . Usr::getDateFormat(),
             'subjects_studied' => 'sometimes|nullable|max:250|regex:/^([a-zA-Z\s]+)(,\s*[a-zA-Z\s]+)*$/',
@@ -125,7 +118,7 @@ class UserRequest extends FormRequest
     {
         $input = $this->all();
 
-        $data_masked_attributes = ['phone', 'phone2', 'phone3', 'phone4', 'primary_id', 'secondary_id'];
+        $data_masked_attributes = ['primary_id', 'secondary_id'];
         foreach ($data_masked_attributes as $attribute) {
             if (isset($input[$attribute])) {
                 $input[$attribute] = rtrim($input[$attribute], "_");

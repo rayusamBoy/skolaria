@@ -82,14 +82,14 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label id="phone">Phone:</label>
-                                    <input value="{{ old('phone') }}" type="text" name="phone" id="phone" data-mask="+9999?999999999" class="form-control" placeholder="+255 1234 567 89">
+                                    <input value="{{ old('phone') }}" type="text" name="phone" id="phone" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
                                 </div>
                             </div>
 
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="phone2">Telephone:</label>
-                                    <input value="{{ old('phone2') }}" type="text" id="phone2" name="phone2" data-mask="+9999?999999999" class="form-control" placeholder="+255 1234 567 89">
+                                    <input value="{{ old('phone2') }}" type="text" id="phone2" name="phone2" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
                                 </div>
                             </div>
                         </div>
@@ -204,13 +204,13 @@
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="phone3">Close Relative Phone: <span class="text-danger">*</span></label>
-                                        <input disabled value="{{ old('phone3') }}" required type="text" id="phone3" name="phone3" data-mask="+9999?999999999" class="form-control" placeholder="+255 1234 567 89">
+                                        <input disabled value="{{ old('phone3') }}" required type="text" id="phone3" name="phone3" class="form-control" placeholder="+255123456789">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="phone4">Close Relative Mobile: </label>
-                                        <input disabled value="{{ old('phone4') }}" type="text" id="phone4" name="phone4" data-mask="+9999?999999999" class="form-control" placeholder="+255 1234 567 89">
+                                        <input disabled value="{{ old('phone4') }}" type="text" id="phone4" name="phone4" class="form-control" placeholder="+255123456789">
                                     </div>
                                 </div>
                             </div>

@@ -55,14 +55,14 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="phone">Phone:</label>
-                            <input value="{{ old('phone') }}" type="text" id="phone" data-mask="+999 9999 999 999" name="phone" class="form-control" placeholder="+255-1234-567-89">
+                            <input value="{{ old('phone') }}" type="text" id="phone" name="phone" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
 
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="phone2">Telephone:</label>
-                            <input value="{{ old('phone2') }}" type="text" id="phone2" name="phone2" data-mask="+999 9999 999 999" class="form-control" placeholder="+255-1234-567-89">
+                            <input value="{{ old('phone2') }}" type="text" id="phone2" name="phone2" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
                 </div>

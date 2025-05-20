@@ -122,7 +122,7 @@
                             <div class="form-group row">
                                 <label for="phone" class="col-lg-3 col-form-label font-weight-semibold">Phone </label>
                                 <div class="col-lg-9">
-                                    <input id="phone" value="{{ $my->phone ?? old('phone') }}" name="phone" type="text" data-mask="+9999?999999999" placeholder="+255 1234 567 89" class="form-control">
+                                    <input id="phone" value="{{ $my->phone ?? old('phone') }}" name="phone" type="text" data-mask="+9999?999999999" placeholder="+255123456789" class="form-control">
                                 </div>
                             </div>
                             {{--TELEPHONE--}}

@@ -27,8 +27,6 @@ class StudentRecordCreate extends FormRequest
             'date_admitted' => 'required|date_format:' . Usr::getDateFormat(),
             'phone' => ['sometimes', 'nullable', 'string', new StartsWithProperPhoneCode],
             'phone2' => ['sometimes', 'nullable', 'string', new StartsWithProperPhoneCode],
-            'phone3' => ['sometimes', 'nullable', 'string', new StartsWithProperPhoneCode],
-            'phone4' => ['sometimes', 'nullable', 'string', new StartsWithProperPhoneCode],
             'email' => 'sometimes|nullable|email|max:100|unique:users',
             'photo' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:2048',
             'address' => 'required|string|min:4|max:120',
