@@ -29,7 +29,7 @@
                     <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenantAwarePhoto($s->user->photo) }}" alt="photo"></td>
                     <td>{{ $s->user->name }}</td>
                     <td>{{ $s->adm_no }}</td>
-                    <td>{{ $s->my_class->name.' '.$s->section->name }}</td>
+                    <td>{{ $s->my_class->name . ' ' . $s->section->name }}</td>
                     <td class="text-center">
                         <div class="list-icons">
                             <div class="dropdown">

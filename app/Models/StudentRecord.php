@@ -13,7 +13,28 @@ class StudentRecord extends Eloquent
     use HasFactory, LogsActivity;
 
     protected $fillable = [
-        'session', 'user_id', 'my_class_id', 'section_id', 'my_parent_id', 'dorm_id', 'dorm_room_no', 'adm_no', 'date_admitted', 'wd', 'wd_date', 'grad', 'grad_date', 'house_no', 'age', 'ps_name', 'ss_name', 'birth_certificate', 'disability', 'chp', 'p_status', 'food_taboos'
+        'session',
+        'user_id',
+        'my_class_id',
+        'section_id',
+        'my_parent_id',
+        'dorm_id',
+        'dorm_room_no',
+        'adm_no',
+        'date_admitted',
+        'wd',
+        'wd_date',
+        'grad',
+        'grad_date',
+        'house_no',
+        'age',
+        'ps_name',
+        'ss_name',
+        'birth_certificate',
+        'disability',
+        'chp',
+        'p_status',
+        'food_taboos'
     ];
 
     public function user()

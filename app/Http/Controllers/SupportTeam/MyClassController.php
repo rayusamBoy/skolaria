@@ -75,6 +75,9 @@ class MyClassController extends Controller implements HasMiddleware
 
     public function destroy($id)
     {
+        if ($this->my_class->hasStudents())
+            return back()->with('pop_warning', 'This class has student(s) with it, you cannot delete it.');
+
         $this->my_class->delete($id);
 
         return back()->with('flash_success', __('msg.del_ok'));

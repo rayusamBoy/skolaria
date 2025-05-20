@@ -24,7 +24,7 @@
                             <th>#</th>
                             <th>Title</th>
                             <th>Description</th>
-                            <th>Pay_Ref</th>
+                            <th>Pay Ref</th>
                             <th>Amount</th>
                             <th>Paid</th>
                             <th>Balance</th>
@@ -58,9 +58,9 @@
                         <tr>
                             <th>#</th>
                             <th>Title</th>
-                            <th>Pay_Ref</th>
+                            <th>Pay Ref</th>
                             <th>Amount</th>
-                            <th>Receipt_No</th>
+                            <th>Receipt No</th>
                             <th>Year</th>
                         </tr>
                     </thead>

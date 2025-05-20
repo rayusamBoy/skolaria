@@ -183,10 +183,12 @@ class PaymentController extends Controller implements HasMiddleware
 
         $receipt = $this->pay->createReceipt($d2);
         $st_rec = $this->student->getRecord(['user_id' => $pr->student_id])->with(['my_parent', 'user'])->get();
-
         $parent = $st_rec->pluck('my_parent')->first();
-        //return (new StudentPaymentPaid($receipt))->toMail($parent); // For Testing on browser
-        $parent->notify(new StudentPaymentPaid($receipt, $st_rec->first()));
+
+        if ($parent) {
+            //return (new StudentPaymentPaid($receipt))->toMail($parent); // For Testing on browser
+            $parent->notify(new StudentPaymentPaid($receipt, $st_rec->first()));
+        }
 
         return Qs::jsonUpdateOk();
     }

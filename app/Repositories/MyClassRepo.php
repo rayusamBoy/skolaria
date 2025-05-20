@@ -68,6 +68,11 @@ class MyClassRepo
         return MyClass::destroy($id);
     }
 
+    public function hasStudents()
+    {
+        return MyClass::whereHas('student_record')->exists();
+    }
+
     /*********** Student record ***************/
 
     public function sectionHasStudent($section_id)

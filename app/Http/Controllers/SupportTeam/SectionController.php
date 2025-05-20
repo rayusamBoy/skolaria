@@ -71,7 +71,7 @@ class SectionController extends Controller implements HasMiddleware
             return back()->with('pop_warning', 'Every class must have a default section, You cannot delete It.');
 
         if ($this->my_class->sectionHasStudent($id))
-            return back()->with('pop_warning', 'This Section has Student(s) with it, You cannot delete it.');
+            return back()->with('pop_warning', 'This section has student(s) with it, you cannot delete it.');
 
         $this->my_class->deleteSection($id);
 
