@@ -14,7 +14,13 @@ class Domain implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (stripos($value, 'localhost') === false || !preg_match('/^(?:[a-z0-9](?:[a-z0-9-æøå]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/isu', $value)) {
+        // Allow localhost explicitly
+        if (stripos($value, 'localhost') !== false) {
+            return;
+        }
+        
+        // Otherwise check if it's a valid domain pattern
+        if (!preg_match('/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/isu', $value)) {
             $fail('The :attribute is not a valid domain.');
         }
     }
