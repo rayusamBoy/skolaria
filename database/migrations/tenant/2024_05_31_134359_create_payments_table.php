@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('amount');
             $table->string('ref_no', 100)->unique();
             $table->string('method', 100)->default('cash');
-            $table->unsignedInteger('my_class_id')->nullable()->index('payments_my_class_id_foreign');
+            $table->unsignedInteger('my_class_id')->nullable()->index();
             $table->string('description')->nullable();
             $table->string('year');
             $table->timestamps();

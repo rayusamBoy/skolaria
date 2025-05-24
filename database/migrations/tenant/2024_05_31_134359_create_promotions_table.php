@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('promotions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('student_id')->index('promotions_student_id_foreign');
-            $table->unsignedBigInteger('user_id')->index('user_id');
+            $table->unsignedBigInteger('student_id')->index();
+            $table->unsignedBigInteger('user_id')->index();
             $table->text('remarks')->nullable();
-            $table->unsignedInteger('from_class')->index('promotions_from_class_foreign');
-            $table->unsignedInteger('from_section')->index('promotions_from_section_foreign');
-            $table->unsignedInteger('to_class')->index('promotions_to_class_foreign');
-            $table->unsignedInteger('to_section')->index('promotions_to_section_foreign');
+            $table->unsignedInteger('from_class')->index();
+            $table->unsignedInteger('from_section')->index();
+            $table->unsignedInteger('to_class')->index();
+            $table->unsignedInteger('to_section')->index();
             $table->tinyInteger('grad');
             $table->string('from_session');
             $table->string('to_session');

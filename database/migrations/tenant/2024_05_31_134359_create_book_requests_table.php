@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('book_requests', function (Blueprint $table) {
             $table->unsignedBigInteger('id');
-            $table->unsignedInteger('book_id')->index('book_requests_book_id_foreign');
-            $table->unsignedBigInteger('user_id')->index('book_requests_user_id_foreign');
-            $table->unsignedBigInteger('borrower_id')->index('book_requests_user_id_foreign_2');
+            $table->unsignedInteger('book_id')->index();
+            $table->unsignedBigInteger('user_id')->index();
+            $table->unsignedBigInteger('borrower_id')->index();
             $table->string('start_date');
             $table->string('end_date');
             $table->string('returned')->default('0');

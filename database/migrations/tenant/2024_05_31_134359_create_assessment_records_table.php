@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('assessment_records', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('student_id')->index('marks_student_id_foreign');
-            $table->unsignedInteger('subject_id')->index('marks_subject_id_foreign');
-            $table->unsignedInteger('my_class_id')->index('marks_my_class_id_foreign');
-            $table->unsignedInteger('section_id')->index('marks_section_id_foreign');
-            $table->unsignedInteger('exam_id')->index('marks_exam_id_foreign');
-            $table->unsignedBigInteger('mark_id')->index('mark_id');
-            $table->unsignedInteger('assessment_id')->index('assesment_records_ibfk_7');
+            $table->unsignedBigInteger('student_id')->index();
+            $table->unsignedInteger('subject_id')->index();
+            $table->unsignedInteger('my_class_id')->index();
+            $table->unsignedInteger('section_id')->index();
+            $table->unsignedInteger('exam_id')->index();
+            $table->unsignedBigInteger('mark_id')->index();
+            $table->unsignedInteger('assessment_id')->index();
             $table->integer('cw1')->nullable();
             $table->integer('cw2')->nullable();
             $table->integer('cw3')->nullable();
@@ -48,7 +48,7 @@ return new class extends Migration
             $table->integer('total')->nullable();
             $table->decimal('ave')->nullable();
             $table->decimal('class_ave')->nullable();
-            $table->unsignedInteger('grade_id')->nullable()->index('marks_grade_id_foreign');
+            $table->unsignedInteger('grade_id')->nullable()->index();
             $table->string('year');
             $table->timestamps();
         });

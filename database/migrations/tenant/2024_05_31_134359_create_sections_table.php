@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('sections', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name', 100);
-            $table->unsignedInteger('my_class_id')->index('sections_my_class_id_foreign');
-            $table->unsignedBigInteger('teacher_id')->nullable()->index('sections_teacher_id_foreign');
+            $table->unsignedInteger('my_class_id')->index();
+            $table->unsignedBigInteger('teacher_id')->nullable()->index();
             $table->tinyInteger('active')->default(0);
             $table->timestamps();
 

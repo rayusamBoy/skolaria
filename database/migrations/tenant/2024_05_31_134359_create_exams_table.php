@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('exams', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->unsignedInteger('category_id')->index('category_id');
-            $table->unsignedInteger('class_type_id')->index('exams_ibfk_1');
-            $table->unsignedInteger('editable')->default(0)->index('exam_status_id');
+            $table->unsignedInteger('category_id')->index();
+            $table->unsignedInteger('class_type_id')->index();
+            $table->unsignedInteger('editable')->default(0)->index();
             $table->unsignedInteger('locked')->default(0);
             $table->unsignedInteger('published')->default(0);
             $table->tinyInteger('term');

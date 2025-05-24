@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('books', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name', 100);
-            $table->unsignedInteger('my_class_id')->nullable()->index('books_my_class_id_foreign');
+            $table->unsignedInteger('my_class_id')->nullable()->index();
             $table->string('description')->nullable();
             $table->string('author')->nullable();
             $table->string('book_type')->nullable();

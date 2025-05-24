@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('student_records', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id')->index('student_records_user_id_foreign');
+            $table->unsignedBigInteger('user_id')->index();
             $table->string('ps_name');
             $table->string('ss_name')->nullable();
             $table->string('birth_certificate')->nullable();

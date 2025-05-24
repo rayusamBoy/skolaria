@@ -15,8 +15,8 @@ return new class extends Migration
             $table->increments('id');
             $table->string('name', 100)->unique();
             $table->unsignedInteger('my_class_id');
-            $table->unsignedInteger('section_id')->nullable()->index('section_id');
-            $table->unsignedInteger('exam_id')->nullable()->index('time_table_records_exam_id_foreign');
+            $table->unsignedInteger('section_id')->nullable()->index();
+            $table->unsignedInteger('exam_id')->nullable()->index();
             $table->string('year', 100);
             $table->timestamps();
 

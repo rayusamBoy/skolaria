@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('time_slots', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('ttr_id')->index('time_slots_ttr_id_foreign');
+            $table->unsignedInteger('ttr_id')->index();
             $table->tinyInteger('hour_from');
             $table->string('min_from', 2);
             $table->string('meridian_from', 2);

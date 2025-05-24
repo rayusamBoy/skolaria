@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('lgas', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('nationality_id')->index('nationality_id');
-            $table->unsignedBigInteger('state_id')->index('state_id');
+            $table->unsignedBigInteger('nationality_id')->index();
+            $table->unsignedBigInteger('state_id')->index();
             $table->string('name', 100);
             $table->string('country_code', 3);
         });

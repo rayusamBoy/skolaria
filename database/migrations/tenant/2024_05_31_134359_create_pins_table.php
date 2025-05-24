@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('code', 40)->unique();
             $table->string('used')->default('0');
             $table->string('times_used')->default('0');
-            $table->unsignedBigInteger('user_id')->nullable()->index('pins_user_id_foreign');
-            $table->unsignedBigInteger('student_id')->nullable()->index('pins_student_id_foreign');
+            $table->unsignedBigInteger('user_id')->nullable()->index();
+            $table->unsignedBigInteger('student_id')->nullable()->index();
             $table->timestamps();
         });
     }

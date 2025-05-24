@@ -28,10 +28,10 @@ return new class extends Migration {
             $table->string('secondary_id')->nullable();
             $table->string('phone')->nullable();
             $table->string('phone2')->nullable();
-            $table->unsignedInteger('bg_id')->nullable()->index('users_bg_id_foreign');
-            $table->unsignedBigInteger('state_id')->nullable()->index('users_state_id_foreign');
-            $table->unsignedBigInteger('lga_id')->nullable()->index('users_lga_id_foreign');
-            $table->unsignedBigInteger('nal_id')->nullable()->index('users_nal_id_foreign');
+            $table->unsignedInteger('bg_id')->nullable()->index();
+            $table->unsignedBigInteger('state_id')->nullable()->index();
+            $table->unsignedBigInteger('lga_id')->nullable()->index();
+            $table->unsignedBigInteger('nal_id')->nullable()->index();
             $table->string('address')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

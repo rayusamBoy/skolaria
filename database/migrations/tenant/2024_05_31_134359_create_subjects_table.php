@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name', 100);
             $table->string('slug', 100);
             $table->unsignedInteger('core')->default(1);
-            $table->unsignedInteger('my_class_id')->nullable()->index('subjects_ibfk_5');
+            $table->unsignedInteger('my_class_id')->nullable()->index();
             $table->timestamps();
 
             $table->unique(['name', 'my_class_id'], 'name');

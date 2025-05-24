@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('participants', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('thread_id')->index('thread_id');
-            $table->unsignedBigInteger('user_id')->index('user_id');
+            $table->unsignedBigInteger('thread_id')->index();
+            $table->unsignedBigInteger('user_id')->index();
             $table->timestamp('last_read')->nullable();
             $table->timestamps();
             $table->softDeletes();

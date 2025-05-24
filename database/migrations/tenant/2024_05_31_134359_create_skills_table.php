@@ -15,7 +15,7 @@ return new class extends Migration
             $table->increments('id');
             $table->string('name');
             $table->string('skill_type');
-            $table->unsignedInteger('class_type_id')->nullable()->index('class_type_id');
+            $table->unsignedInteger('class_type_id')->nullable()->index();
             $table->timestamps();
         });
     }

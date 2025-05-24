@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('payment_records', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedInteger('payment_id')->index('payment_records_payment_id_foreign');
-            $table->unsignedBigInteger('student_id')->index('payment_records_student_id_foreign');
+            $table->unsignedInteger('payment_id')->index();
+            $table->unsignedBigInteger('student_id')->index();
             $table->string('ref_no', 100)->nullable()->unique();
             $table->integer('amt_paid')->nullable();
             $table->integer('balance')->nullable();

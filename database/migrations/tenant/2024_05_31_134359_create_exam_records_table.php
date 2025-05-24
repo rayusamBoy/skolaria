@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('exam_records', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('exam_id')->index('exam_records_exam_id_foreign');
-            $table->unsignedBigInteger('student_id')->index('exam_records_student_id_foreign');
-            $table->unsignedInteger('my_class_id')->index('exam_records_my_class_id_foreign');
-            $table->unsignedInteger('section_id')->index('exam_records_section_id_foreign');
+            $table->unsignedInteger('exam_id')->index();
+            $table->unsignedBigInteger('student_id')->index();
+            $table->unsignedInteger('my_class_id')->index();
+            $table->unsignedInteger('section_id')->index();
             $table->integer('total')->nullable();
             $table->decimal('ave')->nullable();
             $table->decimal('class_ave')->nullable();

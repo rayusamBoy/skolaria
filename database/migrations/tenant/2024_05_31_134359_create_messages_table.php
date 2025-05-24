@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('thread_id')->index('thread_id');
-            $table->unsignedBigInteger('user_id')->index('user_id');
-            $table->unsignedBigInteger('deleted_by')->nullable()->index('deleted_by');
+            $table->unsignedBigInteger('thread_id')->index();
+            $table->unsignedBigInteger('user_id')->index();
+            $table->unsignedBigInteger('deleted_by')->nullable()->index();
             $table->text('body');
             $table->timestamps();
             $table->softDeletes();

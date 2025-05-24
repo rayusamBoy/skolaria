@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('parent_relatives', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedBigInteger('user_id')->index('parent_relatives_ibfk_1');
+            $table->unsignedBigInteger('user_id')->index();
             $table->string('name');
             $table->string('phone3');
             $table->string('phone4')->nullable();

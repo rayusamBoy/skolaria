@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('subject_records', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('subject_id')->nullable();
-            $table->unsignedInteger('section_id')->nullable()->index('subject_records_ibfk_1');
-            $table->unsignedBigInteger('teacher_id')->nullable()->index('subject_records_ibfk_3');
+            $table->unsignedInteger('section_id')->nullable()->index();
+            $table->unsignedBigInteger('teacher_id')->nullable()->index();
             $table->longText('students_ids')->nullable();
             $table->timestamps();
 

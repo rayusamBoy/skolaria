@@ -13,9 +13,9 @@ return new class extends Migration {
     {
         Schema::create('staff_records', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id')->index('staff_records_user_id_foreign');
+            $table->unsignedBigInteger('user_id')->index();
             $table->unsignedInteger('staff_data_edit')->default(0);
-            $table->string('place_of_living', 100)->nullable()->index('lga_id');
+            $table->string('place_of_living', 100)->nullable()->index();
             $table->string('role')->nullable();
             $table->string('code', 100)->nullable()->unique();
             $table->string('emp_date')->nullable();

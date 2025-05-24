@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('year');
             $table->integer('month');
             $table->integer('day');
-            $table->unsignedBigInteger('user_id')->index('user_id');
+            $table->unsignedBigInteger('user_id')->index();
             $table->timestamps();
         });
     }

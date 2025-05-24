@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('timezones', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('nationality_id')->index('nationality_id');
+            $table->unsignedBigInteger('nationality_id')->index();
             $table->string('name', 100);
         });
     }

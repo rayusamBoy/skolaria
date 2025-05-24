@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('marks', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('student_id')->index('marks_student_id_foreign');
-            $table->unsignedInteger('subject_id')->index('marks_subject_id_foreign');
-            $table->unsignedInteger('my_class_id')->index('marks_my_class_id_foreign');
-            $table->unsignedInteger('section_id')->index('marks_section_id_foreign');
-            $table->unsignedInteger('exam_id')->index('marks_exam_id_foreign');
+            $table->unsignedBigInteger('student_id')->index();
+            $table->unsignedInteger('subject_id')->index();
+            $table->unsignedInteger('my_class_id')->index();
+            $table->unsignedInteger('section_id')->index();
+            $table->unsignedInteger('exam_id')->index();
             $table->integer('exm')->nullable();
             $table->integer('tex1')->nullable();
             $table->integer('tex2')->nullable();

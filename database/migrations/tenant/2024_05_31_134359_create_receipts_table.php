@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('receipts', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedBigInteger('pr_id')->index('receipts_pr_id_foreign');
+            $table->unsignedBigInteger('pr_id')->index();
             $table->integer('amt_paid');
             $table->integer('balance');
             $table->string('year');

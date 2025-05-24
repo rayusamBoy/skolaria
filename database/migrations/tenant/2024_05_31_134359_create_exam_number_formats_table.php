@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('exam_number_formats', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->unsignedInteger('exam_id')->index('exam_id');
-            $table->unsignedInteger('my_class_id')->index('exam_number_formats_ibfk_2');
+            $table->unsignedInteger('exam_id')->index();
+            $table->unsignedInteger('my_class_id')->index();
             $table->string('format');
             $table->timestamps();
         });
