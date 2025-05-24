@@ -22,10 +22,10 @@ return new class extends Migration
             $table->decimal('class_ave')->nullable();
             $table->integer('pos')->nullable();
             $table->integer('class_pos')->nullable();
-            $table->unsignedInteger('grade_id')->nullable()->index('grade_id');
+            $table->unsignedInteger('grade_id')->nullable()->index();
             $table->unsignedInteger('points')->nullable();
             $table->decimal('gpa', 8, 1)->nullable();
-            $table->unsignedInteger('division_id')->nullable()->index('exam_records_ibfk_2');
+            $table->unsignedInteger('division_id')->nullable()->index();
             $table->string('af')->nullable();
             $table->string('ps')->nullable();
             $table->string('p_comment')->nullable();
@@ -33,7 +33,7 @@ return new class extends Migration
             $table->string('year');
             $table->timestamps();
 
-            $table->unique(['exam_id', 'student_id', 'my_class_id', 'section_id'], 'exam_id');
+            $table->unique(['exam_id', 'student_id', 'my_class_id', 'section_id']);
         });
     }
 
