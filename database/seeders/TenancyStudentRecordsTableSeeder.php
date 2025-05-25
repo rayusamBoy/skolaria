@@ -21,9 +21,8 @@ class TenancyStudentRecordsTableSeeder extends Seeder
         \DB::table('student_records')->insert(array (
             0 => 
             array (
-                'id' => 1,
-                'user_id' => 7,
-                'ps_name' => '',
+                'user_id' => \DB::table('users')->where('username', 'student')->value('id'),
+                'ps_name' => 'school',
                 'ss_name' => '',
                 'birth_certificate' => NULL,
                 'disability' => NULL,
@@ -39,7 +38,7 @@ class TenancyStudentRecordsTableSeeder extends Seeder
                 'dorm_room_no' => NULL,
                 'session' => date("Y") - 1 . '-' . date('Y'),
                 'age' => NULL,
-                'date_admitted' => '01/01/2022',
+                'date_admitted' => \Carbon\Carbon::now()->format('m-d-Y'),
                 'grad' => 0,
                 'grad_date' => NULL,
                 'created_at' => NULL,

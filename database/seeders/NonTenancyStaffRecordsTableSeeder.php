@@ -21,8 +21,7 @@ class NonTenancyStaffRecordsTableSeeder extends Seeder
         \DB::table('staff_records')->insert(array (
             0 => 
             array (
-                'id' => 1,
-                'user_id' => 1,
+                'user_id' => \DB::table('users')->where('username', 'it_guy')->value('id'),
                 'staff_data_edit' => 0,
                 'place_of_living' => 'Zanzibar Town',
                 'role' => 'An IT person',
@@ -39,7 +38,7 @@ class NonTenancyStaffRecordsTableSeeder extends Seeder
                 'education_level' => 'Degree',
                 'college_attended' => 'Mzumbe University',
                 'year_graduated' => '2018',
-                'subjects_studied' => '["Information and Computer Studies","Basic Mathematics","Additional Mathematics"]',
+                'subjects_studied' => '["Information and Computer Studies", "Basic Mathematics", "Additional Mathematics"]',
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),

@@ -22,7 +22,6 @@ class TenancyUsersTableSeeder extends Seeder
         \DB::table('users')->insert(array(
             0 =>
                 array(
-                    'id' => 1,
                     'name' => 'Super Admin',
                     'blocked' => 0,
                     'religion' => 'Islam',
@@ -57,7 +56,6 @@ class TenancyUsersTableSeeder extends Seeder
                 ),
             1 =>
                 array(
-                    'id' => 2,
                     'name' => 'Admin',
                     'blocked' => 0,
                     'religion' => 'Islam',
@@ -92,7 +90,6 @@ class TenancyUsersTableSeeder extends Seeder
                 ),
             2 =>
                 array(
-                    'id' => 3,
                     'name' => 'Teacher',
                     'blocked' => 0,
                     'religion' => 'Islam',
@@ -127,7 +124,6 @@ class TenancyUsersTableSeeder extends Seeder
                 ),
             3 =>
                 array(
-                    'id' => 4,
                     'name' => 'Companion',
                     'blocked' => 0,
                     'religion' => 'Islam',
@@ -162,7 +158,6 @@ class TenancyUsersTableSeeder extends Seeder
                 ),
             4 =>
                 array(
-                    'id' => 5,
                     'name' => 'Parent',
                     'blocked' => 0,
                     'religion' => 'Islam',
@@ -197,7 +192,6 @@ class TenancyUsersTableSeeder extends Seeder
                 ),
             5 =>
                 array(
-                    'id' => 6,
                     'name' => 'Accountant',
                     'blocked' => 0,
                     'religion' => 'Islam',
@@ -232,7 +226,6 @@ class TenancyUsersTableSeeder extends Seeder
                 ),
             6 =>
                 array(
-                    'id' => 7,
                     'name' => 'Student',
                     'blocked' => 0,
                     'religion' => 'Islam',
@@ -267,7 +260,6 @@ class TenancyUsersTableSeeder extends Seeder
                 ),
             7 =>
                 array(
-                    'id' => 8,
                     'name' => 'Librarian',
                     'blocked' => 0,
                     'religion' => 'Islam',

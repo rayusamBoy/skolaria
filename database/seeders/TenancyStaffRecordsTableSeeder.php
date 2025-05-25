@@ -21,8 +21,7 @@ class TenancyStaffRecordsTableSeeder extends Seeder
         \DB::table('staff_records')->insert(array(
             0 =>
                 array(
-                    'id' => 1,
-                    'user_id' => 1,
+                    'user_id' => \DB::table('users')->where('username', 'superadmin')->value('id'),
                     'staff_data_edit' => 0,
                     'place_of_living' => 'Zanzibar Town',
                     'role' => 'An IT person',
@@ -46,8 +45,7 @@ class TenancyStaffRecordsTableSeeder extends Seeder
                 ),
             1 =>
                 array(
-                    'id' => 2,
-                    'user_id' => 2,
+                    'user_id' => \DB::table('users')->where('username', 'admin')->value('id'),
                     'staff_data_edit' => 0,
                     'place_of_living' => 'Zanzibar Town',
                     'role' => NULL,
@@ -71,8 +69,7 @@ class TenancyStaffRecordsTableSeeder extends Seeder
                 ),
             2 =>
                 array(
-                    'id' => 3,
-                    'user_id' => 3,
+                    'user_id' => \DB::table('users')->where('username', 'teacher')->value('id'),
                     'staff_data_edit' => 0,
                     'place_of_living' => 'Zanzibar Town',
                     'role' => NULL,
@@ -96,8 +93,7 @@ class TenancyStaffRecordsTableSeeder extends Seeder
                 ),
             3 =>
                 array(
-                    'id' => 4,
-                    'user_id' => 4,
+                    'user_id' => \DB::table('users')->where('username', 'companion')->value('id'),
                     'staff_data_edit' => 0,
                     'place_of_living' => 'Zanzibar Town',
                     'role' => NULL,
@@ -121,8 +117,7 @@ class TenancyStaffRecordsTableSeeder extends Seeder
                 ),
             4 =>
                 array(
-                    'id' => 5,
-                    'user_id' => 6,
+                    'user_id' => \DB::table('users')->where('username', 'accountant')->value('id'),
                     'staff_data_edit' => 0,
                     'place_of_living' => 'Zanzibar Town',
                     'role' => NULL,
@@ -146,8 +141,7 @@ class TenancyStaffRecordsTableSeeder extends Seeder
                 ),
             5 =>
                 array(
-                    'id' => 6,
-                    'user_id' => 8,
+                    'user_id' => \DB::table('users')->where('username', 'librarian')->value('id'),
                     'staff_data_edit' => 0,
                     'place_of_living' => 'Zanzibar Town',
                     'role' => NULL,

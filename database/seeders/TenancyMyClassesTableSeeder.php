@@ -21,9 +21,8 @@ class TenancyMyClassesTableSeeder extends Seeder
         \DB::table('my_classes')->insert(array (
             0 => 
             array (
-                'id' => 1,
                 'name' => 'Form One',
-                'class_type_id' => 2,
+                'class_type_id' => \DB::table('class_types')->where('code', 'SE')->value('id'),
                 'created_at' => NULL,
                 'updated_at' => NULL,
                 'deleted_at' => NULL,

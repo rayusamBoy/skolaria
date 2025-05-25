@@ -21,8 +21,7 @@ class ParentRelativesTableSeeder extends Seeder
         \DB::table('parent_relatives')->insert(array (
             0 => 
             array (
-                'id' => 1,
-                'user_id' => 5,
+                'user_id' => \DB::table('users')->where('username', 'parent')->value('id'),
                 'name' => 'Relative Name',
                 'phone3' => '+255 1111 222 333',
                 'phone4' => NULL,

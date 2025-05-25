@@ -21,7 +21,6 @@ class TenancyClassTypesTableSeeder extends Seeder
         \DB::table('class_types')->insert(array (
             0 => 
             array (
-                'id' => 1,
                 'name' => 'Primary',
                 'code' => 'PE',
                 'subjects_considered' => 7,
@@ -30,7 +29,6 @@ class TenancyClassTypesTableSeeder extends Seeder
             ),
             1 => 
             array (
-                'id' => 2,
                 'name' => 'Secondary',
                 'code' => 'SE',
                 'subjects_considered' => 7,
@@ -39,7 +37,6 @@ class TenancyClassTypesTableSeeder extends Seeder
             ),
             2 => 
             array (
-                'id' => 3,
                 'name' => 'Tertiary (Advance)',
                 'code' => 'ASE',
                 'subjects_considered' => 3,

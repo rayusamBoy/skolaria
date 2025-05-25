@@ -22,7 +22,6 @@ class NonTenancyUsersTableSeeder extends Seeder
         \DB::table('users')->insert(array (
             0 => 
             array (
-                'id' => 1,
                 'name' => 'It Guy',
                 'blocked' => 0,
                 'religion' => 'Islam',

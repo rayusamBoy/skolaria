@@ -21,7 +21,6 @@ class NonTenancyUserTypesTableSeeder extends Seeder
         \DB::table('user_types')->insert(array (
             0 => 
             array (
-                'id' => 1,
                 'title' => 'it_guy',
                 'name' => 'IT Guy',
                 'level' => '1',
