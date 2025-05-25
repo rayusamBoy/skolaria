@@ -17,8 +17,7 @@ class ArtisanCommandsController extends Controller
     public function optimize()
     {
         $command_name = 'optimize';
-        $response_name = __FUNCTION__;
-        $status = $this->handle_command($command_name, $response_name);
+        $status = $this->handle_command($command_name);
 
         return $status;
     }
@@ -27,8 +26,7 @@ class ArtisanCommandsController extends Controller
     public function optimize_clear()
     {
         $command_name = 'optimize:clear';
-        $response_name = __FUNCTION__;
-        $status = $this->handle_command($command_name, $response_name);
+        $status = $this->handle_command($command_name);
 
         return $status;
     }
@@ -37,8 +35,7 @@ class ArtisanCommandsController extends Controller
     public function route_cache()
     {
         $command_name = 'route:cache';
-        $response_name = __FUNCTION__;
-        $status = $this->handle_command($command_name, $response_name);
+        $status = $this->handle_command($command_name);
 
         return $status;
     }
@@ -47,8 +44,7 @@ class ArtisanCommandsController extends Controller
     public function route_clear()
     {
         $command_name = 'route:clear';
-        $response_name = __FUNCTION__;
-        $status = $this->handle_command($command_name, $response_name);
+        $status = $this->handle_command($command_name);
 
         return $status;
     }
@@ -57,8 +53,7 @@ class ArtisanCommandsController extends Controller
     public function config_cache()
     {
         $command_name = 'config:cache';
-        $response_name = __FUNCTION__;
-        $status = $this->handle_command($command_name, $response_name);
+        $status = $this->handle_command($command_name);
 
         return $status;
     }
@@ -67,8 +62,7 @@ class ArtisanCommandsController extends Controller
     public function config_clear()
     {
         $command_name = 'config:clear';
-        $response_name = __FUNCTION__;
-        $status = $this->handle_command($command_name, $response_name);
+        $status = $this->handle_command($command_name);
 
         return $status;
     }
@@ -77,8 +71,7 @@ class ArtisanCommandsController extends Controller
     public function event_cache()
     {
         $command_name = 'event:cache';
-        $response_name = __FUNCTION__;
-        $status = $this->handle_command($command_name, $response_name);
+        $status = $this->handle_command($command_name);
 
         return $status;
     }
@@ -87,8 +80,7 @@ class ArtisanCommandsController extends Controller
     public function event_clear()
     {
         $command_name = 'event:clear';
-        $response_name = __FUNCTION__;
-        $status = $this->handle_command($command_name, $response_name);
+        $status = $this->handle_command($command_name);
 
         return $status;
     }
@@ -97,8 +89,7 @@ class ArtisanCommandsController extends Controller
     public function view_cache()
     {
         $command_name = 'view:cache';
-        $response_name = __FUNCTION__;
-        $status = $this->handle_command($command_name, $response_name);
+        $status = $this->handle_command($command_name);
 
         return $status;
     }
@@ -107,8 +98,7 @@ class ArtisanCommandsController extends Controller
     public function view_clear()
     {
         $command_name = 'view:clear';
-        $response_name = __FUNCTION__;
-        $status = $this->handle_command($command_name, $response_name);
+        $status = $this->handle_command($command_name);
 
         return $status;
     }
@@ -117,8 +107,7 @@ class ArtisanCommandsController extends Controller
     public function log_viewer_publish()
     {
         $command_name = 'vendor:publish --tag=log-viewer-assets --force';
-        $response_name = __FUNCTION__;
-        $status = $this->handle_command($command_name, $response_name);
+        $status = $this->handle_command($command_name);
 
         return $status;
     }
@@ -127,8 +116,7 @@ class ArtisanCommandsController extends Controller
     public function activity_log_clean()
     {
         $command_name = 'activitylog:clean --force';
-        $response_name = __FUNCTION__;
-        $status = $this->handle_command($command_name, $response_name);
+        $status = $this->handle_command($command_name);
 
         return $status;
     }
@@ -137,8 +125,7 @@ class ArtisanCommandsController extends Controller
     public function storage_link()
     {
         $command_name = 'storage:link';
-        $response_name = __FUNCTION__;
-        $status = $this->handle_command($command_name, $response_name);
+        $status = $this->handle_command($command_name);
 
         return $status;
     }
@@ -147,8 +134,7 @@ class ArtisanCommandsController extends Controller
     public function storage_unlink()
     {
         $command_name = 'storage:unlink';
-        $response_name = __FUNCTION__;
-        $status = $this->handle_command($command_name, $response_name);
+        $status = $this->handle_command($command_name);
 
         return $status;
     }
@@ -159,20 +145,48 @@ class ArtisanCommandsController extends Controller
      * @param mixed $response_name
      * @return mixed|\Illuminate\Http\JsonResponse
      */
-    private function handle_command($command_name, $response_name)
+    private function handle_command($command_name)
     {
         // Some commands can be prohibited for some reasons; 
         // eg., for route:cache; routes with the same name cannot be cached (routes that are used in both tenant and central domains).
         $prohibited_commands_name = ['route:cache', 'optimize'];
-        $response_name = str_replace("_", " ", $response_name);
+        $response_name = str_replace(":", " ", $command_name);
 
-        if (in_array($command_name, $prohibited_commands_name))
+        if (in_array($command_name, $prohibited_commands_name)) {
             return Qs::json("The $response_name command is prohibited.", false);
+        }
 
         $status = Artisan::call($command_name);
-        if ($status === 0)
+        if ($status === 0) {
             return Qs::json("The $response_name command run successfully.", true);
+        }
 
         return Qs::json("The $response_name command failed to run.", false);
+    }
+
+    public function tenants_command_runner(string $command_id, $tenant_id)
+    {
+        $command_name = match ($command_id) {
+            '1' => 'tenants:migrate-fresh',
+            '2' => 'tenants:seed',
+            default => null,
+        };
+        $response_name = str_replace(':', ' ', $command_name);
+
+        $tenant_id = Qs::decodeHash($tenant_id);
+        try {
+            $status = Artisan::call('tenants:run', [
+                'commandname' => $command_name,
+                '--tenants' => [$tenant_id],
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['command_error' => $e->getMessage()]);
+        }
+
+        if ($status === 0) {
+            return back()->with('pop_success', "The $response_name command run successfully for the specified tenant.")->with('pop_timer', 0);
+        }
+
+        return back()->with('pop_error', "The $response_name command failed to run for the specified tenant.")->with('pop_timer', 0);
     }
 }

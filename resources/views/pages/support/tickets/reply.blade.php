@@ -115,6 +115,7 @@
                     <span><span class="text-muted">Status </span><span class="badge {{ $ticket->is_closed() ? 'text-success' : 'text-danger' }} font-size-sm">{{ $ticket->status }}</span></span>
                 </div>
 
+                <span class="text-muted">Requestor</span>
                 <p>{{ $tenant_user->name }} <span class="badge bg-success">Owner</span></p>
                 <span class="text-muted">Contact</span>
 

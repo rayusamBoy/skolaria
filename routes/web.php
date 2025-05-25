@@ -112,6 +112,10 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'itGuy', 'handleCoo
                 Route::post('user/update/user/blocked_state', 'UserController@update_user_blocked_state')->name('users.update_user_blocked_state');
             });
 
+            Route::group(['prefix' => 'tenants'], function () {
+                Route::post('run_command/{command_name}/{tenant_id}', 'ArtisanCommandsController@tenants_command_runner')->name('tenants.run_command');
+            });
+
             /*************** Controller's resources **************/
             Route::resource('users', 'UserController');
             Route::resource('tenants', 'TenantController');

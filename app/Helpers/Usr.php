@@ -301,8 +301,9 @@ class Usr extends Qs
         $dir_for_db = Qs::getUploadPath($user_type) . $code;
         $dir_for_store = storage_path() . '/app/public/' . Qs::getUploadPath($user_type) . $code;
 
-        if (!file_exists($dir_for_store))
-            mkdir($dir_for_store);
+        if (!is_dir($dir_for_store))
+            mkdir($dir_for_store, 0755, true);
+
         // Save the image to a file
         $avatar_path = "$dir_for_db/photo.png";
         $img_path = "$dir_for_store/photo.png";

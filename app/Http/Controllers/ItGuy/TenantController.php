@@ -9,6 +9,7 @@ use App\Repositories\TenantRepo;
 use App\Repositories\UserRepo;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Carbon;
 
 class TenantController extends Controller implements HasMiddleware
 {
@@ -59,15 +60,18 @@ class TenantController extends Controller implements HasMiddleware
         try {
             $tenant = $this->tenant->create($data);
         } catch (\Exception $e) {
-            // When creating tenant, database, and seeding the database etc., operations will proceed as usual.
-            // If there was any exception ie., error. Delete the created ones and return the error.
-            // The session's key 'created_tenant_id' is defined in TenancyServiceProvider.
-            // Can't access the '$tenant' variable in try block above, since it is in different scope.
-            if (session()->has("created_tenant_id"))
-                $this->tenant->delete(session()->get("created_tenant_id"));
+            $cleaning_error = null;
 
-            session()->forget("created_tenant_id");
-            return Qs::json($e->getMessage(), false);
+            try {
+                if (session()->has("created_tenant_id")) {
+                    $this->tenant->delete(session()->get("created_tenant_id"));
+                    session()->forget("created_tenant_id");
+                }
+            } catch (\Throwable $t) {
+                $cleaning_error = $t->getMessage();
+            }
+
+            return redirect()->back()->withErrors(['tenant_create_error' => $e->getMessage(), 'cleaning_error' => $cleaning_error]);
         }
 
         $tenant->createDomain(['domain' => $request->domain]);
@@ -94,21 +98,22 @@ class TenantController extends Controller implements HasMiddleware
     public function update(TenantRequest $request, string $id)
     {
         $id = Qs::decodeHash($id);
-        $domain = $request->domain;
         $tenant = $this->tenant->find($id);
 
-        $tenant->domain = $domain; // Try to update domain
-        // If domain appear to change
-        if ($tenant->isDirty('domain')) {
+        $data = $request->only(['account_status', 'payment_status', 'remarks']);
+        $data['updated_at'] = Carbon::now();
+
+        // Handle domain update if provided
+        if ($request->has('domain') && $request->domain !== $tenant->domain) {
             // Invalidate the cached domain for this tenant
             app(\Stancl\Tenancy\Resolvers\DomainTenantResolver::class)->invalidateCache($tenant);
-            $this->tenant->updateDomain(['tenant_id' => $tenant->id], ['domain' => $domain]); // Update the domain
+            $this->tenant->updateDomain(['tenant_id' => $tenant->id], ['domain' => $request->domain]);
+            $data['domain'] = $request->domain;
         }
 
-        $data = $request->only(['account_status', 'payment_status', 'remarks', 'domain']);
         $this->tenant->update($id, $data);
 
-        return Qs::json(null, null, ['msg' => __('msg.update_ok'), 'ok' => TRUE, 'pop' => TRUE]);
+        return Qs::json(null, null, ['msg' => __('msg.update_ok'), 'ok' => true, 'pop' => true]);
     }
 
     /**
@@ -117,7 +122,11 @@ class TenantController extends Controller implements HasMiddleware
     public function destroy(string $id)
     {
         $id = Qs::decodeHash($id);
-        $this->tenant->delete($id);
+        try {
+            $this->tenant->delete($id);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['delete_error' => $e->getMessage()]);
+        }
 
         return back()->with('pop_success', __('msg.del_ok'))->with('pop_timer', 0);
     }

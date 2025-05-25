@@ -56,7 +56,7 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-left">
                         <a target="_blank" href="#" class="dropdown-item"><i class="material-symbols-rounded">quick_reference</i>Knowledgebase</a>
-                        <a target="_blank" href="{{ route('tickets.index') }}" class="dropdown-item"><i class="material-symbols-rounded">local_activity</i>Tickets</a>
+                        <a href="{{ route('tickets.index') }}" class="dropdown-item"><i class="material-symbols-rounded">local_activity</i>Tickets</a>
                     </div>
                 </div>
                 @else
