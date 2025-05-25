@@ -1482,6 +1482,22 @@ function unhideSection(sectionId) {
     return $section.closest("div.form-group").show(150);
 }
 
+/**
+ *-------------------------------------------------------------
+ * Pop-up modals/notifications
+ *-------------------------------------------------------------
+ */
+function pop(data) {
+    Toast.fire({
+        position: "top-right",
+        title: data.title ?? "Oops...",
+        text: data.msg,
+        icon: data.type,
+        timer: data.timer ?? pop_timer, // You can set timer to 0 to prevent autohide (pop_timer defined in custom.blade.php)
+        showConfirmButton: false,
+    });
+}
+
 function popConfirm(data) {
     if (!sessionStorage.getItem(data.msg))
         Toast.fire({

@@ -1,6 +1,13 @@
 <script>
     /**
      *-------------------------------------------------------------
+     * Useful js variables
+     *-------------------------------------------------------------
+     */
+    const pop_timer = {{ session('pop_timer') ?? 20000 }};
+
+    /**
+     *-------------------------------------------------------------
      * Login and related pages texts and background preview
      *-------------------------------------------------------------
      */
@@ -52,23 +59,6 @@
     @if (session('flash_error') || session('flash_danger'))
       flash({msg: '{{ session('flash_error') ?: session('flash_danger') }}', type: 'error'});
     @endif
-
-    /**
-     *-------------------------------------------------------------
-     * Pop-up modals/notifications
-     *-------------------------------------------------------------
-     */
-    function pop(data)
-    {
-        Toast.fire({
-            position: "top-right",
-            title: data.title ?? 'Oops...',
-            text: data.msg,
-            icon: data.type,
-            timer: data.timer ?? {{ session('pop_timer') ?? 20000 }}, // You can set timer to 0 to prevent autohide
-            showConfirmButton: false,
-        });
-    }
     
     /**
      *-------------------------------------------------------------
