@@ -4,8 +4,8 @@ use App\Helpers\Qs;
 return [
     'name' => 'LaravelPWA',
     'manifest' => [
-        'name' => env('APP_NAME', 'School Management System'),
-        'short_name' => Qs::getStringAbbreviation(env('APP_NAME', 'School Management System')),
+        'name' => config('app.name'),
+        'short_name' => Qs::getStringAbbreviation(config('app.name')),
         'start_url' => '/',
         'background_color' => '#ffffff',
         'theme_color_dark' => '#181818',
