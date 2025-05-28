@@ -32,7 +32,7 @@ $("table.float-head").on(
  */
 const blockUI = (message = "Please wait...", textColor = "orange") =>
     $.blockUI({
-        message: `<i class="mr-1 m-auto material-symbols-rounded spinner">progress_activity</i> ${message}`,
+        message: `<i class="mr-1 m-auto material-symbols-rounded spinner">progress_activity</i> <span class="align-middle">${message}</span>`,
         css: {
             padding: "3px",
             color: textColor,
@@ -2082,20 +2082,26 @@ $(".print-this button.this").on("click", function () {
             customClass: { confirmButton: "bg-warning", denyButton: "bg-info" },
         }).then((result) => {
             if (result.isConfirmed) {
-                doElementPrint($parent);
+                printElement($parent);
             } else if (result.isDenied) {
                 scrollTo("body");
             }
         });
     } else {
-        doElementPrint($parent);
+        printElement($parent);
     }
 });
 
-function doElementPrint($element) {
+function printElement($element) {
+    blockUI("Preparing Print...");
     if ($element.hasClass("card-collapsed"))
         $element.removeClass("card-collapsed");
-    $element.printThis({ base: "https://jasonday.github.io/printThis/" });
+    $element.printThis({ 
+        base: "https://jasonday.github.io/printThis/",
+        afterPrint: function () {
+            unblockUI();
+        }
+    });
 }
 
 function resizeChartInstances() {
