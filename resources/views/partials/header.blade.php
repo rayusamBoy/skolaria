@@ -10,8 +10,8 @@
 
                 <a href="javascript:;" data-toggle="popover" data-placement="bottom" data-html="true" data-content="
                     <small>
-                        <span class='text-default'>School Management System</span><br />
-                        <i><span class='text-default'>Source:</span> <a target='_blank' href='https://github.com/rayusamBoy/Laravel_tenancy_sms'>Laravel_tenancy_sms</a></i><br />
+                        <span class='text-default'>{{ config('app.name') }}</span><br />
+                        <em><i class='material-symbols-rounded text-default'>arrow_right</i><span class='text-default'>version: {{ config('app.version') }}</span></em><br />
                     </small>" class="btn btn-link btn-float text-default">
                     <i class="material-symbols-rounded text-primary">info</i> <span class="d-none d-sm-block">About</span>
                 </a>

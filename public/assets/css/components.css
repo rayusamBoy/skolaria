@@ -1071,11 +1071,6 @@
     box-shadow: none;
 }
 
-.select2-container--disabled .select2-selection--single:not([class*="bg-"]) {
-    color: #999;
-    background-color: #fafafa;
-}
-
 .select2-container--disabled .select2-selection--single[class*="bg-"] {
     opacity: 0.75;
     box-shadow: none;
@@ -1904,6 +1899,16 @@
 
 .wizard > .actions > ul > li + li {
     margin-left: 1.25rem;
+}
+
+.wizard-form .steps [role="tab"].disabled .text-default {
+    opacity: 0.7;
+}
+
+.wizard > .steps > ul > li.current:after,
+.wizard > .steps > ul > li.current ~ li:before,
+.wizard > .steps > ul > li.current ~ li:after {
+    background-color: var(--tertiary-border-color);
 }
 
 /* ------------------------------------------------------------------------------
@@ -6854,8 +6859,7 @@ and below; since some of the menu options are obscured by the data table footer.
     border-radius: 4px;
     /* border: 1px solid #eee; */
     position: relative;
-        background-color: var(--messages-left-div-color);
-
+    background-color: var(--messages-left-div-color);
 }
 
 .messages ul li div.left {
@@ -8956,6 +8960,7 @@ body:has(.just-me) .modal-backdrop {
  * @link https://github.com/NextStepWebs/simplemde-markdown-editor
  * @license MIT
  */
+
 .CodeMirror {
     color: inherit;
 }
@@ -9356,15 +9361,11 @@ div.CodeMirror-dragcursors {
     visibility: visible;
 }
 
-.CodeMirror-selected {
-    background: var(--codemirror-bg-color);
-}
-
 .CodeMirror-focused .CodeMirror-selected,
 .CodeMirror-line::selection,
 .CodeMirror-line > span::selection,
 .CodeMirror-line > span > span::selection {
-    background: var(--codemirror-bg-color);
+    background: var(--codemirror-selected-bg-color);
 }
 
 .CodeMirror-crosshair {
@@ -9397,23 +9398,18 @@ div.CodeMirror-dragcursors {
 }
 
 span.CodeMirror-selectedtext {
-    background: 0 0;
-}
-
-span.CodeMirror-selectedtext {
-    background: var(--codemirror-bg-color);
+    background: transparent;
 }
 
 .CodeMirror {
     height: auto;
     min-height: 300px;
+    border: 1px solid var(--tertiary-border-color);
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
     padding: 10px;
     font: inherit;
     z-index: 1;
-        border: 1px solid var(--navbar-border-color);
-
 }
 
 .CodeMirror-scroll {
@@ -9444,11 +9440,11 @@ span.CodeMirror-selectedtext {
     -o-user-select: none;
     user-select: none;
     padding: 0 10px;
+    border-top: 1px solid var(--codemirror-editor-toolbar-border-color);
+    border-left: 1px solid var(--codemirror-editor-toolbar-border-color);
+    border-right: 1px solid var(--codemirror-editor-toolbar-border-color);
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
-     border-top: 1px solid var(--navbar-border-color);
-    border-left: 1px solid var(--navbar-border-color);
-    border-right: 1px solid var(--navbar-border-color);
 }
 
 .editor-toolbar:after,
@@ -9589,9 +9585,9 @@ span.CodeMirror-selectedtext {
 
 .editor-toolbar a.active,
 .editor-toolbar a:hover {
-    color: #fff !important;
-    background-color: var(--navbar-nav-bg-color);
-    border-color: var(--navbar-border-color);
+    color: #fff;
+    background-color: var(--navbar-nav-bg-colo);
+    border-color: var(--codemirror-editor-toolbar-border-color);
 }
 
 .editor-toolbar a:before {
@@ -9601,8 +9597,8 @@ span.CodeMirror-selectedtext {
 .editor-toolbar i.separator {
     display: inline-block;
     width: 0;
-       border-left: 1px solid var(--navbar-border-color);
-    border-right: 1px solid var(--navbar-border-color);
+    border-left: 1px solid var(--tertiary-border-color);
+    border-right: 1px solid var(--tertiary-border-color);
     color: transparent;
     text-indent: -10px;
     margin: 0 6px;
@@ -9637,7 +9633,7 @@ span.CodeMirror-selectedtext {
 
 .editor-toolbar.disabled-for-preview a:not(.no-disable) {
     pointer-events: none;
-    background: var(--navbar-bg-color);
+    background: var(--secondary-bg-color);
     border-color: transparent;
     text-shadow: inherit;
 }
@@ -9664,7 +9660,7 @@ span.CodeMirror-selectedtext {
 .editor-preview,
 .editor-preview-side {
     padding: 10px;
-    background: var(--editor-preview-bg-color);
+    background: var(--codemirror-preview-bg-color);
     overflow: auto;
     display: none;
     box-sizing: border-box;
@@ -9672,14 +9668,17 @@ span.CodeMirror-selectedtext {
 
 .editor-statusbar .lines:before {
     content: "lines: ";
+    padding-right: 3px;
 }
 
 .editor-statusbar .words:before {
     content: "words: ";
+    padding-right: 3px;
 }
 
 .editor-statusbar .characters:before {
     content: "characters: ";
+    padding-right: 3px;
 }
 
 .editor-preview {
@@ -9738,7 +9737,7 @@ span.CodeMirror-selectedtext {
 }
 
 .CodeMirror .CodeMirror-selected {
-    background: var(--codemirror-bg-color);
+    background: var(--codemirror-selected-bg-color);
 }
 
 .CodeMirror .CodeMirror-code .cm-header-1 {
