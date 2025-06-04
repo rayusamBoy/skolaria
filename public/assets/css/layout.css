@@ -760,7 +760,7 @@ div.cards-row .card {
     .nav-sidebar
     .nav-item
     > .nav-link.active {
-    background-color: var(--navbar-nav-bg-color);
+    background-color: var(--nav-link-active-bg-color);
     color: var(--default-color);
 }
 
@@ -867,12 +867,8 @@ div.cards-row .card {
 }
 
 .sidebar .sidebar-mobile-toggler {
-    color: rgba(51, 51, 51, 0.8);
-    border-bottom-color: rgba(0, 0, 0, 0.125);
-}
-
-.sidebar-mobile-toggler:not([class*="bg-"]) {
-    background-color: whitesmoke;
+    color: var(--default-color);
+    border-bottom-color: var(--tertiary-border-color);
 }
 
 .sidebar-mobile-toggler a:hover {
