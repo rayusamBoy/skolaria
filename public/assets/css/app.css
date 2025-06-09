@@ -28,7 +28,7 @@ div.card.intro {
 }
 
 div.page-content.app-cover {
-    background-color: rgb(35 39 53);
+    background-color: var(--app-cover-bg-color);
 }
 
 .card {

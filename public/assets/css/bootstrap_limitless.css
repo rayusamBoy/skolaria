@@ -10,7 +10,7 @@
 
 :root {
     color-scheme: light;
-    --primary-color: initial;
+    --primary-color: black;
     --secondary-color: #777;
     --tertiary-color: initial;
     --default-color: #333;
@@ -63,6 +63,7 @@
     --element-hover-bg-color: #ececec;
     --sidebar-item-active-bg-color: lightblue;
     --nav-link-active-bg-color: #dddddd;
+    --app-cover-bg-color: rgb(35 39 53);
 }
 
 [data-theme="dark"]:root {
@@ -121,6 +122,7 @@
     --element-hover-bg-color: rgba(255, 255, 255, 0.1);
     --sidebar-item-active-bg-color: #26a69a;
     --nav-link-active-bg-color: rgb(59 65 64);
+    --app-cover-bg-color: #141414;
 }
 
 body {
@@ -2577,6 +2579,13 @@ hr {
 
 .modal .nav-tabs {
     border-bottom: 1px solid var(--element-state-border-color);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-text-color);
+    background-color: transparent;
+    border-color: var(--element-state-border-color)
+        var(--element-state-border-color) var(--bg-color);
 }
 
 .nav-tabs .nav-item.show .nav-link,

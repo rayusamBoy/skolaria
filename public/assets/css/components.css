@@ -5777,7 +5777,7 @@ and below; since some of the menu options are obscured by the data table footer.
 }
 
 .border-none {
-    border: none;
+    border: none !important;
 }
 
 .border-y-0 {
