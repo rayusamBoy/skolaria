@@ -25,7 +25,7 @@
     --primary-border-color: initial;
     --secondary-border-color: #ddd;
     --tertiary-border-color: rgba(0, 0, 0, 0.15);
-    --border-color: initial;
+    --border-color: #fff;
     --navbar-component-border-color: rgba(0, 0, 0, 0.125);
     --navbar-toggler-element-state-color: #333;
     --navbar-border-bottom-color: rgba(0, 0, 0, 0.125);
@@ -5112,31 +5112,4 @@ a.badge[class*="bg-"]:not(.bg-transparent):not(.bg-white):not(.bg-light):focus,
         .btn-outline
     ):not(body) {
     color: #fff;
-}
-
-/* ------------------------------------------------------------------------------
- *
- *  Date picker override for dark mode
- *
- * ---------------------------------------------------------------------------- */
-
-.datepicker td,
-.datepicker th {
-    color: var(--tertiary-color);
-}
-
-.datepicker-dropdown.datepicker-orient-top:after {
-    border-top: 6px solid var(--border-color);
-}
-
-.datepicker-dropdown.datepicker-orient-top:before {
-    border-top: 7px solid var(--tertiary-border-color);
-}
-
-.datepicker-dropdown:after {
-    border-bottom: 6px solid var(--border-color);
-}
-
-.datepicker-dropdown:before {
-    border-bottom: 7px solid var(--tertiary-border-color);
 }
