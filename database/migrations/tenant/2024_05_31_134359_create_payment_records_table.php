@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('ref_no', 100)->nullable()->unique();
             $table->integer('amt_paid')->nullable();
             $table->integer('balance')->nullable();
-            $table->tinyInteger('paid')->default(0);
+            $table->boolean('paid')->default(false);
             $table->string('year');
             $table->timestamps();
         });

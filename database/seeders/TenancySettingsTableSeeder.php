@@ -271,7 +271,7 @@ class TenancySettingsTableSeeder extends Seeder
             array(
                 'id' => 32,
                 'type' => 'login_and_related_pgs_txts_and_bg_colors',
-                'description' => 0,
+                'description' => NULL,
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
