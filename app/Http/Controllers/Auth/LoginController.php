@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Events\UserLoggedIn;
-use App\Helpers\Qs;
 use App\Helpers\Usr;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CookieController;
@@ -11,6 +10,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller implements HasMiddleware
 {
@@ -53,18 +53,10 @@ class LoginController extends Controller implements HasMiddleware
      */
     public function showLoginForm()
     {
-        $settings = Qs::getSettings();
         $account_status = tenant('account_status');
 
-        $data['colors'] = $colors = $settings->where('type', 'login_and_related_pgs_txts_and_bg_colors')->value('description');
-        if ($colors !== null) {
-            $colors_exploaded = explode(Qs::getDelimiter(), $colors);
-            $data['texts_color'] = $colors_exploaded[0];
-            $data['bg_color'] = $colors_exploaded[1];
-        }
-
         // If account not active ie., blocked, susupended etc., abort as forbidden.
-        if (in_array($account_status, Usr::getAccountStatuses(['active']))) {
+        if (in_array($account_status, Usr::getAccountStatuses(['Active']))) {
             $message = 'ACCOUNT ' . strtoupper($account_status);
             session()->flash('tenant_account_not_active', $message);
             abort(403, $message);
@@ -75,7 +67,7 @@ class LoginController extends Controller implements HasMiddleware
             if ($this->cookie->has('was_logged_in') && $this->cookie->get('was_logged_in') == true)
                 session()->flash('session_expired', __('msg.session_expired'));
 
-        return view('auth.login', $data);
+        return view('auth.login');
     }
 
     /**
@@ -127,7 +119,7 @@ class LoginController extends Controller implements HasMiddleware
     {
         $user = auth()->user();
         if ($user->blocked) {
-            auth()->logout();
+            Auth::logout();
             return redirect()->route('login')->with('access_denied', __('msg.restricted') . ' ACCOUNT BLOCKED.');
         }
 

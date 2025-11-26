@@ -5,7 +5,7 @@
      *-------------------------------------------------------------
      */
     const authId = {{ auth()->id() }};
-    const authUserType = "{{ auth()->user()->user_type }}";
+    const authUserRole = "{{ auth()->user()->role }}";
     const $textarea = $('#message');
     const $sendBtn = $('#send-message-btn');
     const $typingStatus = $('#user-is-typing');
@@ -114,7 +114,7 @@
                 <img src="${message.user.photo}" alt="${message.user.name}" class="rounded-circle f-left">
             `);
             $listItem.append($userPhoto);
-            if (authUserType === 'super_admin' && message.deleted_at === null) {
+            if (authUserRole === 'super_admin' && message.deleted_at === null) {
                 const $deleteBtn = $(`
                     <button data-toggle="popover" data-placement="right" data-html="true" class="material-symbols-rounded position-absolute right-neg-25 text-info-400 opacity-75 opacity-100-on-hover border-0 outline-0 action-btn"
                         data-content="
@@ -133,7 +133,7 @@
         // Message box and heading
         const senderName = message.user.id == authId
             ? "Me"
-            : `${message.user.name} (${message.user.user_type.replace('_', ' ')})`;
+            : `${message.user.name} (${message.user.role})`;
         const $messageBox = $(`<div class="${message.user.id == authId ? 'right' : 'left'}"></div>`);
         const $messageContent = $(`
             <span class="media-body break-all">
@@ -150,7 +150,7 @@
             let deletionNotice = "";
             if (message.deleted_by == authId) {
                 deletionNotice = `<p class="text-muted"><i class="material-symbols-rounded font-size-sm pb-lg-1">block</i> You deleted this message.</p>`;
-            } else if (message.deletor.user_type === 'super_admin' && message.user_id != message.deleted_by) {
+            } else if (message.deletor.role === 'Super Admin' && message.user_id != message.deleted_by) {
                 deletionNotice = `<p class="text-muted"><i class="material-symbols-rounded font-size-sm pb-lg-1">block</i> This message was deleted by super admin ${message.deletor.name}.</p>`;
             } else {
                 deletionNotice = `<p class="text-muted"><i class="material-symbols-rounded font-size-sm pb-lg-1">block</i> This message was deleted.</p>`;
@@ -171,7 +171,7 @@
         if (message.user.id == authId) {
             if (!message.deleted_at) {
                 const $deleteBtn = $(`
-                    <button data-toggle="popover" data-placement="left" data-html="true" class="material-symbols-rounded position-absolute left-neg-25 text-info-400 opacity-75 opacity-100-on-hover bg-transparent border-0 outline-0"
+                    <button data-toggle="popover" data-placement="left" data-html="true" class="material-symbols-rounded position-absolute left-neg-25 text-info-400 opacity-75 opacity-100-on-hover border-0 outline-0 action-btn"
                         data-content="
                             <div class='d-flex justify-center'>
                                 <button type='button' data-text='Deleting...' id='${message.id}' onclick='prepareDeleteUserMessageForm(this.id)' data-toggle='modal' data-target='#confirm-message-delete' class='btn btn-sm p-0 pr-1 pl-1 m-auto text-danger-800 w-100 text-left bg-transparent'>
@@ -245,7 +245,7 @@
         if (document.hidden) return;
         let url = '{{ route("messages.update_participant_last_read", [":thread_id"]) }}'.replace(':thread_id', threadId);
         processRequest({
-            url
+            url: url
         });
     }
 

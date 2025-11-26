@@ -16,13 +16,13 @@
     --default-color: #333;
     --element-disabled-color: initial;
     --element-state-color: rgba(51, 51, 51, 0.75);
-    --element-state-border-color: #ddd;
+    --element-state-border-color: #b1b1b1;
     --code-bg-color: #fafafa;
     --primary-bg-color: #efefef;
     --secondary-bg-color: #fff;
     --secondary-bg-color-inverse: #171717;
     --tertiary-bg-color: #f5f5f5;
-    --primary-border-color: initial;
+    --primary-border-color: #ddd;
     --secondary-border-color: #ddd;
     --tertiary-border-color: rgba(0, 0, 0, 0.15);
     --border-color: #fff;
@@ -46,7 +46,7 @@
     --offline-alert-bg-color: #ffe8e1;
     --body-bg-color: #f5f5f5;
     --header-elements-bg-color: #cfcfcf;
-    --form-switch-bg: initial;
+    --form-switch-bg: whitesmoke;
     --skeleton-bg-color-at-0: hsl(200, 20%, 70%);
     --skeleton-bg-color-at-100: hsl(200, 20%, 95%);
     --codemirror-bg-color: #d9d9d9;
@@ -58,12 +58,13 @@
     --swal2-bg-color: #fff;
     --datatable-header-border-color: #ddd;
     --cat-bg-color: initial;
-    --messages-left-div-color: initial;
-    --messages-right-div-color: initial;
-    --element-hover-bg-color: #ececec;
+    --messages-left-div-color: #E8F6F6;
+    --messages-right-div-color: #F4F6F8;
+    --element-hover-bg-color: #dddddd;
     --sidebar-item-active-bg-color: lightblue;
-    --nav-link-active-bg-color: #dddddd;
+    --nav-link-active-bg-color: #ececec;
     --app-cover-bg-color: rgb(35 39 53);
+    --participant-bg-color: rgb(235, 235, 240);
 }
 
 [data-theme="dark"]:root {
@@ -119,10 +120,11 @@
     --cat-bg-color: rgb(56 56 56);
     --messages-left-div-color: #1e1d1d;
     --messages-right-div-color: #1b1f23;
-    --element-hover-bg-color: rgba(255, 255, 255, 0.1);
+    --element-hover-bg-color: rgb(59 65 64);
     --sidebar-item-active-bg-color: #26a69a;
-    --nav-link-active-bg-color: rgb(59 65 64);
+    --nav-link-active-bg-color: rgba(255, 255, 255, 0.1);
     --app-cover-bg-color: #141414;
+    --participant-bg-color: #313131;
 }
 
 body {
@@ -197,7 +199,6 @@ h6,
 .h5,
 .h6 {
     letter-spacing: -0.015em;
-    color: var(--primary-color);
 }
 
 .list > li,
@@ -519,6 +520,10 @@ pre {
 
 .table {
     margin-bottom: 0;
+}
+
+.table .table {
+    background-color: transparent !important;
 }
 
 .table th,
@@ -1292,7 +1297,7 @@ table.marks td input {
 }
 
 .form-control:not(.border-1):not(.border-2):not(.border-3):focus {
-    border-color: var(--element-state-border-color);
+    border-color: var(--element-state-border-color) !important;
 }
 
 .form-group .form-group:last-child {
@@ -1525,7 +1530,7 @@ input[class*="bg-"]:not(.bg-light):not(.bg-white):not(.bg-transparent)
 
 .btn.disabled,
 .btn:disabled {
-    cursor: default;
+    cursor: not-allowed;
 }
 
 .btn-light {
@@ -2309,7 +2314,7 @@ hr {
 }
 
 .nav-link.disabled {
-    cursor: default;
+    cursor: not-allowed;
 }
 
 .nav-tabs {
@@ -2779,7 +2784,7 @@ hr {
 .navbar-nav-link.disabled {
     color: rgba(0, 0, 0, 0.5);
     background-color: transparent;
-    cursor: default;
+    cursor: not-allowed;
 }
 
 .navbar-nav-link.disabled .badge,
@@ -3956,7 +3961,6 @@ a.breadcrumb-elements-item:focus,
 
 .page-header-content .page-title h4 i {
     margin: auto;
-    padding-bottom: 0.05rem;
 }
 
 .breadcrumb-dash > .breadcrumb-item + .breadcrumb-item:before {
@@ -4028,10 +4032,6 @@ a.breadcrumb-elements-item:focus,
 .page-header .breadcrumb-line-component {
     margin-left: 1.25rem;
     margin-right: 1.25rem;
-}
-
-.breadcrumb-elements-item {
-    padding: 0.625rem 0;
 }
 
 .breadcrumb-elements-item + .breadcrumb-elements-item {
@@ -4659,7 +4659,7 @@ a.badge[class*="bg-"]:not(.bg-transparent):not(.bg-white):not(.bg-light):focus,
 
 .list-group-item.disabled,
 .list-group-item:disabled {
-    cursor: default;
+    cursor: not-allowed;
 }
 
 .list-group-flush {

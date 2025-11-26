@@ -27,7 +27,7 @@ class Thread extends OriginalThread
      */
     public function messagesWithTrashed()
     {
-        return $this->hasMany(Models::classname(Message::class), 'thread_id', 'id')->withTrashed();
+        return $this->hasMany(Models::classname(Message::class), 'thread_id', 'id')->orderBy('created_at')->withTrashed();
     }
 
     /**
@@ -55,13 +55,13 @@ class Thread extends OriginalThread
     }
 
     /**
-     * Remove participants from thread.
+     * Remove participants from thread by user id.
      *
      * @param mixed $userId
      *
      * @return void
      */
-    public function removeParticipant2($userId, $threadId)
+    public function removeParticipantByUserId($userId, $threadId)
     {
         Models::participant()->where('thread_id', $threadId)->where('user_id', $userId)->delete();
     }

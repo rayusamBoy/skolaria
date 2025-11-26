@@ -1,4 +1,4 @@
-@if($user_as_participant->isNotEmpty() || Qs::userIsSuperAdmin())
+@if($user_as_participant->isNotEmpty())
 <!-- Message Form Input -->
 <form class="message ajax-store" action="{{ route('messages.update', $thread->id) }}" method="post">
     {{ method_field('put') }}
@@ -10,7 +10,7 @@
         <button id="send-message-btn" type="submit" data-text=" " class="btn input-group-text"><i class="material-symbols-rounded">send</i></button>
     </div>
 
-    @if($users->count() > 0 && Qs::userIsSuperAdmin())
+    @if($users->count() > 0)
     <div>
         <select id="recipients-ids" name="recipients[]" multiple="multiple" data-placeholder="Select to add recipient" class="form-control select">
             <option value=""></option>

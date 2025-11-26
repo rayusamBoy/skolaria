@@ -59,7 +59,7 @@
                                 </div>
                                 @endif
 
-                                {{-- Look for login controller for more --}}
+                                {{-- Look in login controller for more --}}
                                 @if (session("session_expired") && $errors->isEmpty())
                                 <div class="alert alert-danger alert-styled-left alert-dismissible">
                                     <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
@@ -75,11 +75,11 @@
                                 </div>
                                 @endif
 
-                                <div class="form-group ">
+                                <div class="form-group">
                                     <input type="text" class="form-control" name="identity" value="{{ old('identity') }}" placeholder="Login ID or Email" autocomplete="identity">
                                 </div>
 
-                                <div class="form-group ">
+                                <div class="form-group">
                                     <input required name="password" type="password" class="form-control" placeholder="{{ __('Password') }}" autocomplete="password">
                                 </div>
 

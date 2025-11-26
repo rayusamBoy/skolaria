@@ -82,7 +82,7 @@
 
 .file-caption-disabled {
     background-color: #fafafa;
-    cursor: default;
+    cursor: not-allowed;
 }
 
 .file-preview-detail-modal {
@@ -344,8 +344,6 @@
     text-overflow: ellipsis;
     text-align: center;
     padding: 0.75rem;
-    background-color: #fff;
-    border-bottom: 1px solid #ddd;
     margin-left: auto;
     margin-right: auto;
 }
@@ -590,7 +588,7 @@
 .uniform-checker.disabled input,
 .uniform-choice.disabled,
 .uniform-choice.disabled input {
-    cursor: default;
+    cursor: not-allowed;
 }
 
 .uniform-checker span {
@@ -906,7 +904,7 @@
 }
 
 .uniform-select.disabled select {
-    cursor: default;
+    cursor: not-allowed;
 }
 
 .uniform-select.disabled[class*="bg-"]:not(.bg-white):not(.bg-light):not(
@@ -1673,10 +1671,6 @@
     padding: 0;
 }
 
-.wizard > .content > .body {
-    padding: 0 1.25rem;
-}
-
 .wizard > .content > iframe {
     border: 0;
     width: 100%;
@@ -1775,7 +1769,7 @@
 }
 
 .wizard > .steps > ul > li.disabled a {
-    cursor: default;
+    cursor: not-allowed;
 }
 
 .wizard > .steps > ul > li.done a,
@@ -2046,7 +2040,7 @@
 }
 
 .daterangepicker td.disabled {
-    cursor: default;
+    cursor: not-allowed;
 }
 
 .daterangepicker td.in-range {
@@ -2136,7 +2130,7 @@
 
 .daterangepicker .calendar-time select.disabled {
     color: #999;
-    cursor: default;
+    cursor: not-allowed;
 }
 
 .ranges {
@@ -4379,7 +4373,7 @@ body.swal2-toast-shown .swal2-container.swal2-bottom-right {
 .dataTables_paginate .paginate_button.disabled,
 .dataTables_paginate .paginate_button.disabled:hover,
 .dataTables_paginate .paginate_button.disabled:focus {
-    cursor: default;
+    cursor: not-allowed;
     background-color: transparent;
     color: #999;
 }
@@ -5184,7 +5178,7 @@ body.swal2-toast-shown .swal2-container.swal2-bottom-right {
 * ---------------------------------------------------------------------------- */
 
 div.modal .participant {
-    background-color: rgb(235, 235, 240);
+    background-color: var(--participant-bg-color);
     color: #fff !important;
     cursor: pointer;
     display: inline-flex;
@@ -5194,10 +5188,6 @@ div.modal .participant {
     padding: 0.2rem 0.5rem;
     border-radius: 0.1875rem;
     transition: color ease-in-out 0.15s, background-color ease-in-out 0.15s;
-}
-
-div.modal .participant {
-    background: #313131;
 }
 
 div.modal .participant .icon-cross {
@@ -5287,7 +5277,7 @@ div.go-to-bottom button {
 .breadcrumb-line .header-elements {
     margin-left: -1.25rem;
     margin-right: -1.25rem;
-    padding: 0 1.25rem;
+    padding: 0 0 1rem;
     border-top: 1px solid transparent;
 }
 
@@ -5529,10 +5519,6 @@ div.go-to-bottom button {
 
 .marks-converter .invalid-feedback {
     font-size: 100%;
-}
-
-.marks-converter input {
-    border-color: #ccc !important;
 }
 
 .w-1pcnt {
@@ -8557,14 +8543,6 @@ div.login-cover .alert-warning {
     border-color: #ff7b522b;
 }
 
-#admin-contact-modal .modal-content * {
-    background: #090909;
-}
-
-#admin-contact-modal .modal-content {
-    opacity: 0.8;
-}
-
 .login-form {
     width: 100%;
     min-width: 17rem;
@@ -9925,7 +9903,7 @@ span.CodeMirror-selectedtext {
 .datepicker table tr td.disabled:hover {
     background: none;
     color: #999;
-    cursor: default;
+    cursor: not-allowed;
 }
 
 .datepicker table tr td.highlighted {
@@ -10213,7 +10191,7 @@ span.CodeMirror-selectedtext {
 .datepicker table tr td span.disabled:hover {
     background: none;
     color: #999;
-    cursor: default;
+    cursor: not-allowed;
 }
 
 .datepicker table tr td span.active,

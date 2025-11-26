@@ -8,9 +8,9 @@
     </span>
 
     <ul class="navbar-nav ml-lg-auto">
-        <li class="nav-item"><a href="{{ route('privacy_policy') }}" class="navbar-nav-link text-color-custom" target="_blank"><i class="material-symbols-rounded mr-2">policy</i><span class="d-none d-md-block">{{ 'Privacy Policy' }} </span></a></li>
-        <li class="nav-item"><a href="{{ route('terms_of_use') }}" class="navbar-nav-link text-color-custom" target="_blank"><i class="material-symbols-rounded mr-2">gavel</i><span class="d-none d-md-block">{{ 'Terms of Use' }} </span></a></li>
-        <li class="nav-item"><a class="navbar-nav-link text-color-custom" id="contact-link" data-toggle="modal" data-target="#admin-contact-modal"><i class="material-symbols-rounded mr-2">call</i> <span class="d-none d-md-block"> {{ 'Contact Admin' }} </span></a></li>
+        <li class="nav-item"><a href="{{ route('pages.privacy_policy') }}" class="navbar-nav-link text-color-custom" target="_blank"><i class="material-symbols-rounded mr-2">policy</i><span class="d-none d-md-block">{{ 'Privacy Policy' }} </span></a></li>
+        <li class="nav-item"><a href="{{ route('pages.terms_of_use') }}" class="navbar-nav-link text-color-custom" target="_blank"><i class="material-symbols-rounded mr-2">gavel</i><span class="d-none d-md-block">{{ 'Terms of Use' }} </span></a></li>
+        <li class="nav-item"><a href="javascript:;" class="navbar-nav-link text-color-custom" id="contact-link" data-toggle="modal" data-target="#admin-contact-modal"><i class="material-symbols-rounded mr-2">call</i> <span class="d-none d-md-block"> {{ 'Contact Admin' }} </span></a></li>
     </ul>
 </div>
 

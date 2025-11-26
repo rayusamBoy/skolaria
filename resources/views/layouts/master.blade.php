@@ -6,13 +6,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta id="csrf-token" name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="authors" content="Chinedu Okemiri (4jean) & Rashidi Said (rayusam)">
+    <meta name="author" content="Rashidi Said (rayusam)">
 
     @php $settings = Qs::getSettings() @endphp
 
     @if(Qs::googleAnalyticsSetUpOkAndEnabled())
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ $settings->where("type", "google_analytic_tag_id")->value("description") }}"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ $settings->firstWhere("type", "google_analytic_tag_id")->description }}"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
 
@@ -20,12 +20,12 @@
             dataLayer.push(arguments);
         }
         gtag('js', new Date());
-        gtag('config', '{{ $settings->where("type", "google_analytic_tag_id")->value("description") }}');
+        gtag('config', '{{ $settings->firstWhere("type", "google_analytic_tag_id")->description }}');
 
     </script>
     @endif
 
-    <title>{{ Qs::getStringAbbreviation(config('app.name')) }} &#183; @yield('page_title')</title>
+    <title>@yield('page_title') &bull; {{ Qs::getStringAbbreviation(config('app.name')) }}</title>
 
     @laravelPWA
 

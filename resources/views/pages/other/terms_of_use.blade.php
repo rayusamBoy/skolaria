@@ -29,7 +29,7 @@
                             <p class="text-justify">
                                 Please read the Terms of Use carefully before you start to use the Website. By using the
                                 Website, you accept and agree to be bound and abide by these Terms of Use and our
-                                Privacy Policy, found at <a target="_blank" href="{{ route('privacy_policy') }}">{{ route('privacy_policy') }}</a>,
+                                Privacy Policy, found at <a target="_blank" href="{{ route('pages.privacy_policy') }}">{{ route('pages.privacy_policy') }}</a>,
                                 incorporated herein by reference. If you do not want to agree to these Terms of Use or the Privacy Policy, you must not access or use the Website.
                             </p>
 
@@ -328,7 +328,7 @@
                                     Violate the legal rights (including the rights of publicity and privacy) of others
                                     or contain any material that could give rise to any civil or criminal liability
                                     under applicable laws or regulations or that otherwise may be in conflict with these
-                                    Terms of Use and our <a target="_blank" href="{{ route('privacy_policy') }}">Privacy Policy</a>.
+                                    Terms of Use and our <a target="_blank" href="{{ route('pages.privacy_policy') }}">Privacy Policy</a>.
                                 </li>
                                 <li>Be likely to deceive any person.</li>
                                 <li>Promote any illegal activity, or advocate, promote or assist any unlawful act.</li>
@@ -387,7 +387,7 @@
                             <p class="text-justify">
                                 All information we collect on this Website is subject to our Privacy Policy. By using the
                                 Website, you consent to all actions taken by us with respect to your information in
-                                compliance with the <a target="_blank" href="{{ route('privacy_policy') }}">Privacy Policy</a>.
+                                compliance with the <a target="_blank" href="{{ route('pages.privacy_policy') }}">Privacy Policy</a>.
                             </p>
 
                             <h3>Article II</h3>
@@ -552,7 +552,7 @@
                             <h4 class="font-weight-semibold" id="entire-agreement">Entire Agreement</h4>
 
                             <p class="text-justify">
-                                These Terms of Use and our <a target="_blank" href="{{ route('privacy_policy') }}">Privacy Policy</a> constitute the sole and
+                                These Terms of Use and our <a target="_blank" href="{{ route('pages.privacy_policy') }}">Privacy Policy</a> constitute the sole and
                                 entire agreement between you and {{ $app_name }} with respect to the Website and
                                 supersede all prior and contemporaneous understandings, agreements, representations and
                                 warranties, both written and oral, with respect to the Website.

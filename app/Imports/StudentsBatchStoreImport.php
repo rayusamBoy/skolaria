@@ -3,7 +3,7 @@
 namespace App\Imports;
 
 use App\Helpers\Usr;
-use App\Http\Controllers\SupportTeam\StudentRecordController;
+use App\Http\Controllers\StudentRecordController;
 use App\Http\Requests\Student\StudentRecordCreate;
 use App\Repositories\DormRepo;
 use App\Repositories\LocationRepo;
@@ -104,11 +104,11 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
                 $data[$param] = $row[$param];
             }
 
-            $data['user_type'] = $user_type = 'student';
+            $data['user_role'] = $user_role = 'student';
             $data['name'] = $name = strtoupper($row['name']);
             $data['code'] = $code = strtoupper(Str::random(10));
             $data['password'] = Hash::make('student');
-            $data['photo'] = Usr::createAvatar($name, $code, $user_type);
+            $data['photo'] = Usr::createAvatar($name, $code, $user_role);
 
             $adm_no = $row['adm_no'];
             $ct = $this->my_class->findTypeByClass($row['my_class_id'])->code;

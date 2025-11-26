@@ -75,7 +75,7 @@ class ExamRepo
 
     public function all()
     {
-        return (Qs::userIsTeamSAT()) ? Exam::orderByDesc('created_at')->orderBy('year', 'desc')->with(['category', 'class_type'])->get() : $this->onlyPublished();
+        return (auth()->user()->hasRole('Super Admin')) ? Exam::orderByDesc('created_at')->orderBy('year', 'desc')->with(['category', 'class_type'])->get() : $this->onlyPublished();
     }
 
     public function getById(int $id, $only_published = true)

@@ -3,7 +3,7 @@
 namespace App\Exports;
 
 use App\Helpers\Usr;
-use App\Http\Controllers\SupportTeam\StudentRecordController;
+use App\Http\Controllers\StudentRecordController;
 use App\Http\Requests\Student\StudentRecordCreate;
 use App\Repositories\DormRepo;
 use App\Repositories\LocationRepo;
@@ -179,12 +179,10 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
 
     public function view(): View
     {
-        $this->data['parameters_with_rule_required'] = array_keys(array_filter($this->student_record_request->rules(), function ($rule) {
-            return is_array($rule) ? in_array('required', $rule) : str_contains($rule, 'required');
-        }));
+        $this->data['parameters_with_rule_required'] = array_keys(array_filter($this->student_record_request->rules(), fn($rule) => is_array($rule) ? in_array('required', $rule) : str_contains($rule, 'required')));
         $this->data['parameters_columns_to_hide_and_populate'] = $this->parameters_columns_to_hide_and_populate;
         $this->data['end_data_row'] = $this->end_data_row;
-        return view('pages.support_team.students.batch.table', $this->data);
+        return view('pages.students.batch.table', $this->data);
     }
 
     private function mapHeadingToLetter($heading_param)

@@ -12,6 +12,7 @@ use App\Models\Section;
 use App\Models\Subject;
 use App\Models\SubjectRecord;
 use App\Models\TimeTable;
+use App\User;
 use Illuminate\Database\Eloquent\Collection;
 
 class Mk extends Qs
@@ -224,9 +225,9 @@ class Mk extends Qs
         $divisions = $divisions ?: Division::whereNull('class_type_id')->get();
 
         foreach ($divisions as $div) {
-            $divison_name .= "<th class=\"text-center\">{$div->name}</th>";
-            $male_count .= '<td class="text-center">' . ($mc = $exr_attended->where('student.gender', 'Male')->where('division_id', $div->id)->whereNotNull('division_id')->count()) . '</td>';
-            $female_count .= '<td class="text-center">' . ($fc = $exr_attended->where('student.gender', 'Female')->where('division_id', $div->id)->whereNotNull('division_id')->count()) . '</td>';
+            $divison_name .= "<th class='text-center'>{$div->name}</th>";
+            $male_count .= '<td class="text-center">' . ($mc = $exr_attended->where('student.gender', User::GENDER_MALE)->where('division_id', $div->id)->whereNotNull('division_id')->count()) . '</td>';
+            $female_count .= '<td class="text-center">' . ($fc = $exr_attended->where('student.gender', User::GENDER_FEMALE)->where('division_id', $div->id)->whereNotNull('division_id')->count()) . '</td>';
             $count_per_div .= '<td class="text-center">' . $mc + $fc . "</td>";
         }
 
@@ -506,11 +507,11 @@ class Mk extends Qs
         $grades = ($class_type_id == 1) ? Grade::where('class_type_id', 1)->orderBy('name')->get() : ($class_type_id == 2 ? Grade::where('class_type_id', 2)->orderBy('name')->get() : Grade::where('class_type_id', 3)->orderBy('name')->get());
 
         foreach ($grades as $grade) {
-            $grades_name .= "<th class=\"text-center\">{$grade->name}</th>";
-            $marks_from .= "<td class=\"text-center\">{$grade->mark_from}</td>";
-            $marks_to .= "<td class=\"text-center\">{$grade->mark_to}</td>";
-            $points .= "<td class=\"text-center\">{$grade->point}</td>";
-            $credits .= "<td class=\"text-center\">{$grade->credit}</td>";
+            $grades_name .= "<th class='text-center'>{$grade->name}</th>";
+            $marks_from .= "<td class='text-center'>{$grade->mark_from}</td>";
+            $marks_to .= "<td class='text-center'>{$grade->mark_to}</td>";
+            $points .= "<td class='text-center'>{$grade->point}</td>";
+            $credits .= "<td class='text-center'>{$grade->credit}</td>";
         }
 
         $a = '<table class="table-styled float-head"><thead><tr><th class="text-center">Grade</th>';
@@ -531,9 +532,9 @@ class Mk extends Qs
         $divisions = ($class_type_id == 1) ? Division::where('class_type_id', 1)->orderBy('name')->get() : ($class_type_id == 2 ? Division::where('class_type_id', 2)->orderBy('name')->get() : Division::where('class_type_id', 3)->orderBy('name')->get());
 
         foreach ($divisions as $division) {
-            $name .= "<th class=\"text-center\">{$division->name}</th>";
-            $points_from .= "<td class=\"text-center\">{$division->points_from}</td>";
-            $points_to .= "<td class=\"text-center\">{$division->points_to}</td>";
+            $name .= "<th class='text-center'>{$division->name}</th>";
+            $points_from .= "<td class='text-center'>{$division->points_from}</td>";
+            $points_to .= "<td class='text-center'>{$division->points_to}</td>";
         }
 
         $a = '<table class="table-styled float-head"><thead><tr><th class="text-center">Division</th>';
@@ -557,7 +558,7 @@ class Mk extends Qs
 
     public static function getSubjects($class_id)
     {
-        if (Qs::userIsTeacher())
+        if (auth()->user()->hasRole('teacher'))
             return SubjectRecord::where('teacher_id', auth()->id())->rightJoin(Subject::getTable(), function ($rightjoin) {
                 $rightjoin->on(SubjectRecord::getTable() . '.subject_id', '=', Subject::getTable() . '.id');
             })->select('*')->where(Subject::getTable() . '.my_class_id', '=', $class_id)->distinct()->get();

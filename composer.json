@@ -32,7 +32,8 @@
         "silviolleite/laravelpwa": "^2.0",
         "spatie/laravel-activitylog": "^4.8",
         "spatie/laravel-analytics": "^5.3",
-        "stancl/tenancy": "^3.8"
+        "spatie/laravel-permission": "^6.19",
+        "stancl/tenancy": "dev-master"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.5",
@@ -89,6 +90,6 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true
 }

@@ -9,7 +9,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <table class="table table-bordered table-responsive">
+                <table class="table table-bordered">
                     <tr>
                         <td class="font-weight-bold">Subject</td>
                         <td>{{ ucfirst($ticket->subject) }}</td>

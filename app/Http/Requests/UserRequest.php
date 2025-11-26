@@ -28,7 +28,7 @@ class UserRequest extends FormRequest
         $store = [
             'name' => 'required|string|unique:users|min:6|max:150',
             'password' => 'nullable|string|min:3|max:50',
-            'user_type' => 'required',
+            'user_role' => 'required',
             'gender' => 'required|string',
             'phone' => ['sometimes', 'nullable', 'string', 'unique:users', new StartsWithProperPhoneCode],
             'phone2' => ['sometimes', 'nullable', 'string', 'unique:users', new StartsWithProperPhoneCode],
@@ -125,12 +125,8 @@ class UserRequest extends FormRequest
             }
         }
 
-        if ($this->method() === 'POST') {
-            $input['user_type'] = Usr::decodeHash($input['user_type']);
-        }
-
         if ($this->method() === 'PUT') {
-            $this->user = Usr::decodeHash($this->user);
+            $this->user = Usr::decodeHash($this->user ?? $this->central_user);
         }
 
         $this->getInputSource()->replace($input);

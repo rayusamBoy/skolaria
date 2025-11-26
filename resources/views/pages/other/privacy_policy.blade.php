@@ -183,7 +183,7 @@
                                     government or regulatory request.
                                 </li>
                                 <li>
-                                    To enforce or apply our <a target="_blank" href="{{ route('terms_of_use') }}">Terms of Use</a>.
+                                    To enforce or apply our <a target="_blank" href="{{ route('pages.terms_of_use') }}">Terms of Use</a>.
                                 </li>
                                 <li>
                                     If we believe disclosure is necessary or appropriate to protect our rights,

@@ -1,8 +1,5 @@
 @if(isset($last_exam))
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{{-- <script src="{{ asset('global_assets/js/plugins/charts/chart.js') }}"></script> --}}
-
 <script type="text/javascript">
     // Global variables
     const options = {
@@ -79,7 +76,7 @@
 
 <span>
     {{-- CHARTS TO BE DISPLAYED FOR STUDENTS AND PARENTS --}}
-    @if (Qs::userIsParent() OR Qs::userIsStudent())
+    @if (auth()->user()->hasRole('parent') OR auth()->user()->hasRole('student'))
 
     {{-- Exam performances Chart --}}
     @foreach($exams_recs->groupBy('student_id') as $exam_recs)
@@ -196,7 +193,7 @@
     {{-- End Last Exam Subjects Peformances Chart --}}
 
     {{-- ELSE CHARTS FOR ADMINS, TEACHERS, LIBRARIANS, AND COMPANIONS --}}
-    @elseif(Qs::userIsTeamSATCL())
+    @else
 
     {{-- Classes Performance Chart --}}
     <div class="row">

@@ -28,7 +28,6 @@ class NonTenancyUsersTableSeeder extends Seeder
                 'email' => 'itguy@sms.com',
                 'code' => 'ITGUY',
                 'username' => 'itguy',
-                'user_type' => 'it_guy',
                 'work' => 'NULL',
                 'dob' => '01/11/1111',
                 'gender' => 'Male',

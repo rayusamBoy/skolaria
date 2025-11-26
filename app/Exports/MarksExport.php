@@ -84,6 +84,6 @@ class MarksExport implements FromView, ShouldAutoSize, WithStyles, WithPropertie
 
     public function view(): View
     {
-        return view('pages.support_team.marks.batch.table', $this->data);
+        return view('pages.marks.batch.table', $this->data);
     }
 }

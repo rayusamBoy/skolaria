@@ -1,4 +1,4 @@
-@if($thread->hasParticipant(Auth::id()) || Qs::userIsSuperAdmin())
+@if($thread->hasParticipant(Auth::id()) || auth()->user()->hasRole('super_admin'))
 @php $unread = $thread->userUnreadMessagesCount(Auth::id()) @endphp
 <div class="{{ $unread == 0 ? 'card card-collapsed' : 'card' }}">
     <div class="card-header header-elements-inline">

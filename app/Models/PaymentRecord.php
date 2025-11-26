@@ -13,6 +13,10 @@ class PaymentRecord extends Eloquent
 
     protected $fillable =['student_id', 'payment_id', 'amt_paid', 'year', 'paid', 'balance', 'ref_no'];
 
+    protected $casts = [
+        'paid' => 'boolean',
+    ];
+    
     public function payment()
     {
         return $this->belongsTo(Payment::class);

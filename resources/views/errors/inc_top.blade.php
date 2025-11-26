@@ -11,6 +11,6 @@
 <link href="{{ asset('assets/css/components-min.css') }}" rel="stylesheet" type="text/css">
 
 <!-- Theme JS files -->
+<script src="{{ asset('global_assets/js/main/jquery.min.js') }}"></script>
 <script src="{{ asset('assets/js/app.js') }} "></script>
-<script src="{{ asset('global_assets/js/plugins/scrollers/jquery.marquee.min.js') }}"></script>
 <script src="{{ asset('global_assets/js/main/color-modes.js') }}"></script>

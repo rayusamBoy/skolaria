@@ -6,16 +6,9 @@ use Illuminate\Database\Seeder;
 
 class NonTenancySettingsTableSeeder extends Seeder
 {
-    protected $login_and_related_pages_bg_desc;
-
-    public function __construct()
+    public static function getLoginAndRelatedPagesBgDescription()
     {
-        $this->login_and_related_pages_bg_desc = 'storage/uploads/login_and_related_pages_bg.png';
-    }
-
-    public function getLoginAndRelatedPagesBgDescription()
-    {
-        return $this->login_and_related_pages_bg_desc;
+        return 'storage/uploads/login_and_related_pages_bg.png';
     }
 
     /**
@@ -98,7 +91,7 @@ class NonTenancySettingsTableSeeder extends Seeder
                 array(
                     'id' => 9,
                     'type' => 'login_and_related_pages_bg',
-                    'description' => $this->login_and_related_pages_bg_desc,
+                    'description' => self::getLoginAndRelatedPagesBgDescription(),
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),

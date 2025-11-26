@@ -18,7 +18,7 @@
                 @if($users->isNotEmpty())
                 <div>
                     <label class="control-label">Recipients</label>
-                    <select id="recipients-ids" name="recipients[]" onchange="toggleElementDisabledState(this.value, '#user_types-ids')" multiple="multiple" data-placeholder="select recipient(s)" class="form-control select-search">
+                    <select id="recipients-ids" name="recipients[]" onchange="toggleElementDisabledState(this.value, '#user_roles-ids')" multiple="multiple" data-placeholder="select recipient(s)" class="form-control select-search">
                         @foreach($users as $user)
                         <option value="{{ $user->id }}">{{ $user->name }}</option>
                         @endforeach
@@ -29,11 +29,11 @@
                 <h6 class="text-info mb-0 mt-2">Or</h6>
 
                 <div>
-                    <label class="control-label">Broadcast to user type group(s) instead</label>
-                    <select id="user_types-ids" name="user_types[]" onchange="toggleElementDisabledState(this.value, '#recipients-ids');" multiple="multiple" data-placeholder="select recipient(s)" class="form-control select">
-                        @foreach($user_types as $type)
-                        @if($type->title == 'student')
-                        <option disabled value="{{ $type->title }}">{{ $type->name }}s</option>
+                    <label class="control-label">Broadcast to user role group(s) instead</label>
+                    <select id="user_roles-ids" name="user_roles[]" onchange="toggleElementDisabledState(this.value, '#recipients-ids');" multiple="multiple" data-placeholder="select recipient(s)" class="form-control select">
+                        @foreach($user_roles as $role)
+                        @if($role->title == 'student')
+                        <option disabled value="{{ $role->title }}">{{ $role->name }}s</option>
                         <option value="0">&xrArr; Active</option>
                         <option value="1">&xrArr; Graduated</option>
                         <option value="students">&xrArr; All</option>

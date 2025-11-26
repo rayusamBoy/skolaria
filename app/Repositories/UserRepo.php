@@ -8,6 +8,7 @@ use App\Models\ParentRelative;
 use App\Models\StaffRecord;
 use App\Models\UserType;
 use App\User;
+use Spatie\Permission\Models\Role;
 
 class UserRepo
 {
@@ -68,16 +69,6 @@ class UserRepo
         return User::firstOrNew($data);
     }
 
-    public function getUserByType(string $type)
-    {
-        return User::where(['user_type' => $type])->orderBy('name', 'asc')->get();
-    }
-
-    public function getUserByTypes(array $types)
-    {
-        return User::whereIn('user_type', $types)->orderBy('name', 'asc')->get();
-    }
-
     public function find(int $id)
     {
         return User::find($id);
@@ -93,36 +84,14 @@ class UserRepo
         return User::all();
     }
 
-    public function getPTAUsers()
+    public function getUsersByRoleNames(array $role_names)
     {
-        return User::with('staff')->where('user_type', '<>', 'student')->orderBy('name', 'asc')->get();
-    }
-
-    public function isStudent(int $id)
-    {
-        return User::where(['id' => $id, 'user_type' => 'student'])->exists();
+        return User::role($role_names)->orderBy('name', 'asc')->get();
     }
 
     public function getTrashed()
     {
         return User::onlyTrashed()->get();
-    }
-
-    /*********** User type ***************/
-
-    public function getAllTypes()
-    {
-        return UserType::all();
-    }
-
-    public function getAllNotStudentType()
-    {
-        return UserType::where('title', '!=', 'student')->get();
-    }
-
-    public function findType(int $id)
-    {
-        return UserType::find($id);
     }
 
     /********** STAFF RECORD ********/
@@ -186,5 +155,17 @@ class UserRepo
     public function getDeviceTokens()
     {
         return User::whereNotNull("firebase_device_token")->pluck("firebase_device_token")->toArray();
+    }
+
+    /********** Roles ********/
+    public function getRoles($exclude_roles = [])
+    {
+        $roles = $exclude_roles ? Role::whereNotIn('name', $exclude_roles)->get() : Role::all();
+        return $roles;
+    }
+
+    public function findByRoleName(string $role_name)
+    {
+        return Role::where('name', $role_name)->with('users')->first();
     }
 }

@@ -8,12 +8,10 @@ use App\Models\Section;
 use App\Models\Setting;
 use App\Models\StudentRecord;
 use App\Models\SubjectRecord;
-use App\Models\UserType;
 use DateTime;
 use Dompdf\Adapter\CPDF;
 use Hashids\Hashids;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
 use NotificationChannels\Fcm\FcmChannel;
 use Parsedown;
 
@@ -27,7 +25,7 @@ class Qs
         return '<div class="alert alert-danger alert-styled-left alert-dismissible">
 				    <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
 				    <span class="font-weight-semibold">Oops!</span> ' . implode(' ', $data) .
-                '</div>';
+            '</div>';
     }
 
     public static function getAppCode()
@@ -71,39 +69,14 @@ class Qs
         return ParentRelative::where('user_id', $user_id)->first();
     }
 
-    public static function getTeamAccount()
-    {
-        return ['admin', 'super_admin', 'accountant'];
-    }
-
     public static function getTeamSAT()
     {
         return ['admin', 'super_admin', 'teacher'];
     }
 
-    public static function getTeamSATC()
-    {
-        return ['admin', 'super_admin', 'teacher', 'companion'];
-    }
-
     public static function getTeamSATCL()
     {
         return ['admin', 'super_admin', 'teacher', 'companion', 'librarian'];
-    }
-
-    public static function getTeamLibrary()
-    {
-        return ['super_admin', 'librarian', 'admin'];
-    }
-
-    public static function getTeamAcademic()
-    {
-        return ['admin', 'super_admin', 'teacher', 'student'];
-    }
-
-    public static function getTeamAdministrative()
-    {
-        return ['super_admin', 'accountant', 'admin'];
     }
 
     protected static function getHashidsInstance()
@@ -220,109 +193,9 @@ class Qs
         return chr(64 + $number);
     }
 
-    public static function userIsTeamAccount()
-    {
-        return in_array(auth()->user()->user_type, self::getTeamAccount());
-    }
-
-    public static function userIsTeamSA()
-    {
-        return in_array(auth()->user()->user_type, self::getTeamSA());
-    }
-
-    public static function userIsTeamSA2($user_type)
-    {
-        return in_array($user_type, self::getTeamSA());
-    }
-
-    public static function userIsTeamSAT()
-    {
-        return in_array(auth()->user()->user_type, self::getTeamSAT());
-    }
-
-    public static function userIsTeamSATC()
-    {
-        return in_array(auth()->user()->user_type, self::getTeamSATC());
-    }
-
-    public static function userIsTeamSATCL()
-    {
-        return in_array(auth()->user()->user_type, self::getTeamSATCL());
-    }
-
-    public static function userIsTeamLibrary()
-    {
-        return in_array(auth()->user()->user_type, self::getTeamLibrary());
-    }
-
-    public static function userIsAcademic()
-    {
-        return in_array(auth()->user()->user_type, self::getTeamAcademic());
-    }
-
-    public static function userIsAdministrative()
-    {
-        return in_array(auth()->user()->user_type, self::getTeamAdministrative());
-    }
-
-    public static function userIsAdmin()
-    {
-        return auth()->user()->user_type == 'admin';
-    }
-
-    public static function userIsLibrarian()
-    {
-        return auth()->user()->user_type == 'librarian';
-    }
-
-    public static function userIsAccountant()
-    {
-        return auth()->user()->user_type == 'accountant';
-    }
-
-    public static function userIsCompanion()
-    {
-        return auth()->user()->user_type == 'companion';
-    }
-
     public static function userIsClassSectionTeacher()
     {
-        return self::userIsTeacher() ? Section::where("teacher_id", auth()->id())->exists() : false;
-    }
-
-    public static function userIsClassSectionTeacher2($section_id)
-    {
-        return self::userIsTeacher() ? Section::where(["id" => $section_id, "teacher_id" => auth()->id()])->exists() : false;
-    }
-
-    public static function getUserType()
-    {
-        return auth()->user()->user_type;
-    }
-
-    public static function authUserGenderIsMale(): bool
-    {
-        return auth()->user()->gender == 'Male';
-    }
-
-    public static function authUserGenderIsFemale(): bool
-    {
-        return auth()->user()->gender == 'Female';
-    }
-
-    public static function getUserTypeById($type_id)
-    {
-        return UserType::where('id', $type_id)->get();
-    }
-
-    public static function getUserTypeId($user_type)
-    {
-        return UserType::where('title', $user_type)->value('id');
-    }
-
-    public static function userIsSuperAdmin(): bool
-    {
-        return auth()->user()->user_type == 'super_admin';
+        return auth()->user()->hasRole('teacher') ? Section::where("teacher_id", auth()->id())->exists() : false;
     }
 
     public static function userIsHead(): bool
@@ -334,41 +207,6 @@ class Qs
     public static function getHeadSAIDs(): array
     {
         return [1];
-    }
-
-    public static function userIsItGuy(): bool
-    {
-        return auth()->user()->user_type == 'it_guy';
-    }
-
-    public static function userIsStudent(): bool
-    {
-        return auth()->user()->user_type == 'student';
-    }
-
-    public static function userIsTeacher(): bool
-    {
-        return auth()->user()->user_type == 'teacher';
-    }
-
-    public static function userIsParent(): bool
-    {
-        return auth()->user()->user_type == 'parent';
-    }
-
-    public static function userIsStudent2($user_type): bool
-    {
-        return $user_type == 'student';
-    }
-
-    public static function userIsParent2($user_type): bool
-    {
-        return $user_type == 'parent';
-    }
-
-    public static function userIsStaff(): bool
-    {
-        return in_array(auth()->user()->user_type, self::getStaff());
     }
 
     public static function getStaff($remove = [])
@@ -392,26 +230,6 @@ class Qs
     public static function headSA(int $user_id): bool
     {
         return in_array($user_id, self::getHeadSAIDs());
-    }
-
-    public static function userIsPTA()
-    {
-        return in_array(auth()->user()->user_type, self::getPTA());
-    }
-
-    public static function userIsPTAC()
-    {
-        return in_array(auth()->user()->user_type, self::getPTAC());
-    }
-
-    public static function userIsPTACL()
-    {
-        return in_array(auth()->user()->user_type, self::getPTACL());
-    }
-
-    public static function userIsPTACLA()
-    {
-        return in_array(auth()->user()->user_type, self::getPTACLA());
     }
 
     public static function userIsMyChild($student_id, $parent_id)
@@ -455,9 +273,9 @@ class Qs
         return 'uploads/' . date('Y') . '/' . date('m') . '/' . date('d') . '/';
     }
 
-    public static function getUploadPath($user_type)
+    public static function getUploadPath($user_role)
     {
-        return "uploads/$user_type";
+        return "uploads/$user_role";
     }
 
     public static function getFileMetaData($file)
@@ -491,11 +309,9 @@ class Qs
     public static function getSetting($type, $use_central_connection = false)
     {
         if ($use_central_connection) {
-            $db_connection = env('DB_CONNECTION', 'mysql');
-            $settings = new Setting();
-            $settings_table = $settings->getTable();
+            $settting = tenancy()->central(fn() => Setting::where('type', $type)->value('description'));
 
-            return DB::connection($db_connection)->table($settings_table)->where('type', $type)->value('description');
+            return $settting;
         }
 
         return Setting::where('type', $type)->value('description');
@@ -523,11 +339,16 @@ class Qs
         return self::getSetting('system_name');
     }
 
-    public static function getStringAbbreviation(string $system_name = NULL)
+    /**
+     * Get the abbreviation of a string
+     * @param string $string Default null; if null, system name will be used
+     * @return string
+     */
+    public static function getStringAbbreviation(string $string = null)
     {
-        $system_name ??= self::getSystemName();
+        $string ??= self::getSystemName();
 
-        preg_match_all('/(?<=\b)\w/iu', $system_name, $matches);
+        preg_match_all('/(?<=\b)\w/iu', $string, $matches);
         return mb_strtoupper(implode('', $matches[0]));
     }
 
@@ -656,11 +477,6 @@ class Qs
         return $datetime->format('l, j F Y. h:i A');
     }
 
-    public static function isCurrentRoute($routeName)
-    {
-        return Route::is($routeName);
-    }
-
     public static function getTableNames()
     {
         return [
@@ -691,7 +507,6 @@ class Qs
                 "secondary_id" => "secondary ID",
                 "work" => "work",
                 "address" => "address",
-                "user_type" => "user type",
                 "email" => "email",
                 "gender" => "gender",
                 "dob" => "date of birth",
@@ -954,13 +769,7 @@ class Qs
     public static function getTenancyAwareIDCardsThemeDir($tenant_id = null)
     {
         $id = $tenant_id ?? tenant('id');
-        return resource_path() . '/views/pages/support_team/students/id_cards/themes/' . config('tenancy.database.prefix') . $id . '/';
-    }
-
-    public static function getTenantStorageDir($tenant_id = null)
-    {
-        $id = $tenant_id ?? tenant('id');
-        return storage_path() . '/' . config('tenancy.database.prefix') . $id . '/';
+        return resource_path() . '/views/pages/students/id_cards/themes/' . config('tenancy.database.prefix') . $id . '/';
     }
 
     public static function is_serialized($data, $strict = true)

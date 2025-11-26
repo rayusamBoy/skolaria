@@ -86,7 +86,7 @@ class AjaxController extends Controller
 
     public function get_class_subjects($class_id)
     {
-        $subjects = Qs::userIsTeacher()
+        $subjects = auth()->user()->hasRole('teacher')
             ? $this->my_class->findSubjectByRecord(auth()->id(), $class_id)
             : $this->my_class->findSubjectByClass($class_id);
 

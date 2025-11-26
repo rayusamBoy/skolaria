@@ -17,9 +17,7 @@ class ScheduleController extends Controller
 
     public function index()
     {
-        if (Qs::userIsTeamSA())
-            $data['events'] = $this->event->all();
-
+        $data['events'] = $this->event->all();
         $data['selected'] = false;
 
         return view('pages.schedule.index', $data);
