@@ -44,48 +44,77 @@
     @php session()->put('error_code', $error_code ?? null) @endphp
 
     <script type="module">
-        anime({
-            targets: 'svg path',
-            strokeDashoffset: [anime.setDashoffset, 0],
-            easing: getRandomEasing(),
-            duration: 1500,
-            delay: function(el, i) {
-                return i * 250
-            },
-            direction: 'alternate',
-            loop: true
-        });
+        import { animate, stagger, splitText, svg, eases, cubicBezier, spring, irregular, steps } from 'https://cdn.jsdelivr.net/npm/animejs/dist/bundles/anime.esm.min.js';
 
-        function getRandomEasing() {
-            var easings = [
-                'easeInBack', 'easeInBounce', 'easeInCirc', 'easeInCubic', 'easeInElastic(' + getRandomNumberBtnTwoInclusive(1, 10) + ',' + getRandomNumberBtnTwoInclusive(0.2, 2) + ')',
-                'easeOutElastic(' + getRandomNumberBtnTwoInclusive(1, 10) + ',' + getRandomNumberBtnTwoInclusive(0.2, 2) + ')', 'easeInOutElastic(' + getRandomNumberBtnTwoInclusive(1, 10) + ',' + getRandomNumberBtnTwoInclusive(0.2, 2) + ')', 'easeOutInElastic(' + getRandomNumberBtnTwoInclusive(1, 10) + ',' + getRandomNumberBtnTwoInclusive(0.2, 2) + ')',
-                'easeInElastic(' + getRandomNumberBtnTwoInclusive(1, 10) + ',' + getRandomNumberBtnTwoInclusive(0.2, 2) + ')', 'easeInExpo', 'easeInOutBack', 'easeInOutBounce', 'easeInOutCirc',
-                'easeInOutCubic', 'easeInOutExpo', 'easeInOutQuint', 'easeInOutQuart', 'easeInOutSine',
-                'easeInOutQuad', 'easeInQuad', 'easeInQuint', 'easeInSine', 'easeInExpo',
-                'easeOutBack', 'easeOutBounce', 'easeOutCirc', 'easeOutCubic', 'easeOutExpo',
-                'easeOutInBack', 'easeOutInBounce', 'easeOutInCirc', 'easeOutInCubic', 'easeOutInExpo',
-                'easeOutInQuad', 'easeOutInQuart', 'easeOutInSine', 'easeOutInQuint', 'easeOutQuad',
-                'easeOutQuart', 'easeOutSine', 'easeOutQuint', 'linear', 'steps(' + getRandomNumber() + ')',
-                'spring(' + getRandomNumberBtnTwoInclusive(0, 100) + ', ' + getRandomNumberBtnTwoInclusive(0, 100) + ', ' + getRandomNumberBtnTwoInclusive(0, 100) + ', ' + getRandomNumberBtnTwoInclusive(0, 100) + ')',
+        // Returns a random easing, sometimes as a string, sometimes as a function
+        function getRandomEaseMixed() {
+            const easeNames = [
+                'inOutQuad', 'inQuad', 'outQuad',
+                'inCubic', 'outCubic', 'inOutCubic',
+                'inSine', 'outSine', 'inOutSine',
+                'inExpo', 'outExpo', 'inOutExpo',
+                'inBack', 'outBack', 'inOutBack',
+                'inBounce', 'outBounce', 'inOutBounce',
+                'inCirc', 'outCirc', 'inOutCirc'
             ];
 
-            var easing = easings[Math.floor(Math.random() * easings.length)];
-            return easing;
+            const parametric = [
+                `easeInElastic(${Math.random() * 5 + 1}, ${Math.random() * 2 + 0.2})`,
+                `easeOutElastic(${Math.random() * 5 + 1}, ${Math.random() * 2 + 0.2})`,
+                `easeInOutElastic(${Math.random() * 5 + 1}, ${Math.random() * 2 + 0.2})`
+            ];
+
+            const funcEases = [
+                eases.inQuad,
+                eases.outQuad,
+                eases.inOutCubic,
+                cubicBezier(Math.random(), Math.random(), Math.random(), Math.random()),
+                spring({
+                    mass: Math.random() * 2 + 0.5,
+                    stiffness: Math.random() * 200 + 50,
+                    damping: Math.random() * 20 + 5,
+                    velocity: 0
+                }),
+                irregular(Math.round(Math.random() * 20 + 5), Math.random() * 1.5 + 0.5),
+                steps(Math.round(Math.random() * 10 + 2))
+            ];
+
+            const all = [
+                ...easeNames,
+                ...parametric,
+                ...funcEases
+            ];
+
+            const choice = all[Math.floor(Math.random() * all.length)];
+            return choice;
         }
 
-        function getRandomNumberBtnTwoInclusive(min, max) {
-            if (Number.isInteger(min) && Number.isInteger(max))
-                return Math.floor(Math.random() * (max - min + 1)) + min;
-            return Math.random() * (max - min + 1) + min;
+        // Returns a random draw keyframes array
+        function getRandomDraw() {
+            // possible draw states
+            const states = [
+                '0 0',
+                '0 1',
+                '1 1',
+                '0 .5',
+                '.5 1',
+                '.25 .75'
+            ];
+
+            // pick three random states for a 3-step animation
+            const pick = () => states[Math.floor(Math.random() * states.length)];
+            return [ pick(), pick(), pick() ];
         }
 
-        function getRandomNumber(min = 1) {
-            return Math.floor(Math.random() * Number.MAX_VALUE + min);
-        }
+        animate(svg.createDrawable('svg'), {
+            draw: getRandomDraw(),
+            ease: getRandomEaseMixed(),
+            duration: 2000,
+            delay: stagger(100),
+            alternate: true,
+            loop: true
+        });
     </script>
-
-    <script src="{{ asset('global_assets/js/plugins/animejs/anime.min.js') }} "></script>
 </body>
 
 </html>

@@ -4,6 +4,7 @@
 
 @section('content')
 
+@can('create_ticket')
 <div class="card card-collapsed card-ticket">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Open a Ticket</h6>
@@ -91,16 +92,10 @@
                             </div>
                             <div class="form-group row float-right">
                                 <div class="col-6">
-                                    {{-- Submit button --}}
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-sm btn-success">Submit<span class="material-symbols-rounded ml-2 pb-2px">send</span></button>
-                                    </div>
+                                    <button type="submit" class="btn btn-sm btn-success">Submit<span class="material-symbols-rounded ml-2 pb-2px">send</span></button>
                                 </div>
                                 <div class="col-6">
-                                    {{-- Cancel button --}}
-                                    <div class="form-group">
-                                        <button type="button" class="btn btn-sm btn-warning cancel-editor">Cancel<span class="material-symbols-rounded ml-2 pb-2px">cancel</span></button>
-                                    </div>
+                                    <button type="button" class="btn btn-sm btn-warning cancel-editor">Cancel<span class="material-symbols-rounded ml-2 pb-2px">cancel</span></button>
                                 </div>
                             </div>
                         </div>
@@ -110,6 +105,7 @@
         </form>
     </div>
 </div>
+@endcan
 
 <div class="card">
     <div class="card-header header-elements-inline">
@@ -143,13 +139,21 @@
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
-
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Reply --}}
-                                            <a href="{{ route('tickets.reply', Qs::hash($ticket->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">reply</i> Reply</a>
-                                            {{-- Archive --}}
-                                            <a id="{{ $ticket->id }}" onclick="confirmArchive(this.id)" href="javascript:;" class="dropdown-item text-warning"><i class="material-symbols-rounded">archive</i> Archive</a>
-                                            <form class="d-none" method="post" id="item-archive-{{ $ticket->id }}" action="{{ route('tickets.archive', $ticket->id) }}" class="hidden">@method('put') @csrf</form>
+                                            @can('reply_ticket')
+                                            <a href="{{ route('tickets.reply', Qs::hash($ticket->id)) }}" class="dropdown-item">
+                                                <i class="material-symbols-rounded">reply</i> Reply
+                                            </a>
+                                            @endcan
+
+                                            @can('archive_ticket')
+                                            <a id="{{ $ticket->id }}" onclick="confirmArchive(this.id)" href="javascript:;" class="dropdown-item text-warning">
+                                                <i class="material-symbols-rounded">archive</i> Archive
+                                            </a>
+                                            <form class="d-none" method="post" id="item-archive-{{ $ticket->id }}" action="{{ route('tickets.archive', $ticket->id) }}">
+                                                @method('put') @csrf
+                                            </form>
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>
@@ -163,8 +167,9 @@
     </div>
 </div>
 
+@can('view_archived_tickets')
 @if ($archived_tickets->isNotEmpty())
-<div class="card card-collapsed ">
+<div class="card card-collapsed">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Archived Tickets</h6>
         {!! Qs::getPanelOptions() !!}
@@ -196,11 +201,15 @@
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
-
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Un-archive--}}
-                                            <a id="{{ $ticket->id }}" onclick="$('form#item-unarchive-'+this.id).submit()" href="javascript:;" class="dropdown-item text-warning"><i class="material-symbols-rounded">unarchive</i> Unarchive</a>
-                                            <form class="d-none" method="post" id="item-unarchive-{{ $ticket->id }}" action="{{ route('tickets.unarchive', $ticket->id) }}" class="hidden">@method('put') @csrf</form>
+                                            @can('unarchive_ticket')
+                                            <a id="{{ $ticket->id }}" onclick="$('form#item-unarchive-'+this.id).submit()" href="javascript:;" class="dropdown-item text-warning">
+                                                <i class="material-symbols-rounded">unarchive</i> Unarchive
+                                            </a>
+                                            <form class="d-none" method="post" id="item-unarchive-{{ $ticket->id }}" action="{{ route('tickets.unarchive', $ticket->id) }}">
+                                                @method('put') @csrf
+                                            </form>
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>
@@ -214,6 +223,7 @@
     </div>
 </div>
 @endif
+@endcan
 
 @include('pages.modals.simplemde_markdown_guide')
 

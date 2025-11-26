@@ -8,11 +8,9 @@ use App\Http\Requests\Support\TicketPropertiesCreate;
 use App\Repositories\TicketRepo;
 use App\Repositories\UserRepo;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Validator;
 
-class TicketController extends Controller implements HasMiddleware
+class TicketController extends Controller
 {
     protected $ticket, $user;
     public function __construct(TicketRepo $ticket, UserRepo $user)
@@ -21,24 +19,17 @@ class TicketController extends Controller implements HasMiddleware
         $this->user = $user;
     }
 
-    public static function middleware(): array
-    {
-        return [
-            new middleware('headSA', only: ['delete', 'lock_ticket', 'unlock_ticket', 'update_assignee']),
-        ];
-    }
-
-    public function getPriorities()
+    private function getPriorities()
     {
         return ['low', 'medium', 'high'];
     }
 
-    public function getDepartments()
+    private function getDepartments()
     {
         return ['help desk', 'sales', 'support', 'technical'];
     }
 
-    public function getTenantUserTickets()
+    private function getTenantUserTickets()
     {
         $where = ['tenant_id' => tenant('id'), 'user_id' => auth()->id()];
         $tickets = $this->ticket->getTickets($where);
@@ -107,7 +98,7 @@ class TicketController extends Controller implements HasMiddleware
         $data['categories'] = $this->ticket->getCategories();
         $data['labels'] = $this->ticket->getLabels()->pluck('name')->toArray();
 
-        return view('pages.it_guy.support.tickets.answer', $data);
+        return view('pages.central.support.tickets.answer', $data);
     }
 
     /**
@@ -121,7 +112,7 @@ class TicketController extends Controller implements HasMiddleware
         $data['categories'] = $this->ticket->getCategories();
         $data['labels'] = $this->ticket->getLabels();
 
-        return view('pages.it_guy.support.tickets.index', $data);
+        return view('pages.central.support.tickets.index', $data);
     }
 
     /**

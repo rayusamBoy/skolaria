@@ -50,9 +50,9 @@ $calendar_events = json_encode(['events' => Evt::all() ]);
                     </table>
                 </div>
 
-                @if(Qs::userIsTeamSA())
+                @can('add_events')
                 <button class="btn btn-info btn-sm float-right" id="add-button">Add Event</button>
-                @endif
+                @endcan
 
             </div>
         </div>

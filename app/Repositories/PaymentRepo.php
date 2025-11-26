@@ -118,9 +118,9 @@ class PaymentRepo
         return PaymentRecord::where('paid', true)->get()->count();
     }
 
-    public function countAllCleanPaidRecs()
+    public function allCleanPaidRecs()
     {
-        return PaymentRecord::where('paid', true)->with('payment')->get()->whereNotNull('payment')->count();
+        return PaymentRecord::where('paid', true)->with('payment')->get()->whereNotNull('payment');
     }
 
     /************** PAYMENT RECEIPTS ***************/

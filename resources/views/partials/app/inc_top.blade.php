@@ -19,3 +19,4 @@
 
 <!-- Theme JS files -->
 <script src="{{ asset('assets/js/app.js') }} "></script>
+<script src="{{ asset('global_assets/js/main/color-modes.js') }}"></script>

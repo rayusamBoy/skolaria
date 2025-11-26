@@ -40,8 +40,7 @@ class ForgotPasswordController extends Controller implements HasMiddleware
      */
     public function showLinkRequestForm()
     {
-        $settings = Qs::getSettings();
-        $data['colors'] = $colors = $settings->where('type', 'login_and_related_pgs_txts_and_bg_colors')->value('description');
+        $data['colors'] = $colors = Qs::getSetting('login_and_related_pgs_txts_and_bg_colors');
 
         if ($colors !== null) {
             $colors_exploaded = explode(Qs::getDelimiter(), $colors);

@@ -7,7 +7,7 @@
 {{-- 2fa set up --}}
 <div class="{{ $google2FAIsActive ? 'card card-collapsed' : 'card' }}">
     <div class="card-header header-elements-inline">
-        <h6 class="card-title font-weight-semibold">Google Two Factor Authentication</h6>
+        <h6 class="card-title">Google Two Factor Authentication</h6>
         <div class="header-elements">
             <div class="list-icons">
                 <span class="list-icons-item">@if($google2FAIsActive)<span class="badge bg-success font-size-base">active</span>@else <span class="badge bg-warning font-size-base">inactive</span> @endif</a></span>
@@ -52,7 +52,7 @@
                                     {!! $QR_Image !!}
                                 </div>
 
-                                <form method="post" action="{{ route('2fa.update_secret_codes') }}">
+                                <form method="post" action="{{ route('two_factor.update_secret_codes') }}">
                                     @csrf
                                     <input type="hidden" name="twofa_secret_code" value="{{ $twofa_secret_code }}">
                                     <div class="mt-2">
@@ -158,8 +158,8 @@
                             <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ str_starts_with($user->photo, "global_assets") ? asset($user->photo) : tenant_asset($user->photo) }}" alt="photo"></td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->username }}</td>
-                            <td>{{ ucwords(str_replace('_', ' ',$user->user_type)) }}</td>
-                            @if($user->user_type == 'student')
+                            <td>{{ ucwords(str_replace('_', ' ',$user->role)) }}</td>
+                            @if($user->hasRole('student'))
                             @php $s_recs = Usr::getStudentRecordByUserId($user->id, ['my_class', 'section']) @endphp
                             <td class="text-center" colspan="2">{{ $s_recs->first()->my_class->name . ' - ' . $s_recs->first()->section->name }}</td>
 

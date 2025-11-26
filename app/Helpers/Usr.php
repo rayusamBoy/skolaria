@@ -9,13 +9,22 @@ use App\Models\MyClass;
 use App\Models\Nationality;
 use App\Models\StudentRecord;
 use App\Models\Ticket;
+use App\Repositories\UserRepo;
 use App\User;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class Usr extends Qs
 {
     public static function getUsersByIds($ids, $with_trashed = false)
     {
         return $with_trashed ? User::withTrashed()->whereIn("id", $ids)->get() : User::whereIn("id", $ids)->get();
+    }
+
+    public static function getUsersByRoleNames(array $role_names)
+    {
+        $userRepo = new UserRepo();
+        return $userRepo->getUsersByRoleNames($role_names);
     }
 
     public static function getEducationLevels()
@@ -145,9 +154,14 @@ class Usr extends Qs
         ];
     }
 
-    public static function getClasses($id)
+    public static function getClassesByClassType($id)
     {
         return MyClass::orderBy('name', 'asc')->where('class_type_id', $id)->with(['class_type', 'section'])->get();
+    }
+
+    public static function getAllClassesOrdered($order_by = "name")
+    {
+        return MyClass::orderBy($order_by)->get();
     }
 
     public static function getClassTypes()
@@ -176,20 +190,20 @@ class Usr extends Qs
     }
 
     // Students Classes
-    public static function renderClasses($id)
+    public static function renderClasses($id, Collection $class_collection)
     {
         $collection = '';
-        foreach (self::getClasses($id) as $class) {
-            $collection .= '<th colspan="' . count($class->section) . '" class="text-center">' . $class->name . '</th>';
+        foreach ($class_collection as $class) {
+            $collection .= '<th colspan="' . $class->section->count() . '" class="text-center">' . $class->name . '</th>';
         }
         return $collection;
     }
 
     // Class Sections
-    public static function renderClassSections($id)
+    public static function renderClassSections($id, Collection $class_collection)
     {
         $collection = '';
-        foreach (self::getClasses($id) as $class) {
+        foreach ($class_collection as $class) {
             foreach ($class->section as $section) {
                 $collection .= "<td>{$section->name}</td>";
             }
@@ -198,12 +212,12 @@ class Usr extends Qs
     }
 
     // Total Male Students per Section ie., A, B, and C
-    public static function renderMaleCountPerSection($id)
+    public static function renderMaleCountPerSection($id, Collection $class_collection)
     {
         $collection = $counts = '';
-        foreach (self::getClasses($id) as $class) {
+        foreach ($class_collection as $class) {
             foreach ($class->section as $section) {
-                $counts .= '<td>' . self::getStudents(['my_class_id' => $class->id, 'section_id' => $section->id, 'grad' => 0])->where('user.gender', 'Male')->count() . '</td>';
+                $counts .= '<td>' . self::getStudents(['my_class_id' => $class->id, 'section_id' => $section->id, 'grad' => 0])->where('user.gender', User::GENDER_MALE)->count() . '</td>';
             }
             $collection .= $counts;
             $counts = '';
@@ -212,12 +226,12 @@ class Usr extends Qs
     }
 
     // Total Female Students per Section ie., A, B, and C
-    public static function renderFemaleCountPerSection($id)
+    public static function renderFemaleCountPerSection($id, Collection $class_collection)
     {
         $collection = $counts = '';
-        foreach (self::getClasses($id) as $class) {
+        foreach ($class_collection as $class) {
             foreach ($class->section as $section) {
-                $counts .= '<td>' . self::getStudents(['my_class_id' => $class->id, 'section_id' => $section->id, 'grad' => 0])->where('user.gender', 'Female')->count() . '</td>';
+                $counts .= '<td>' . self::getStudents(['my_class_id' => $class->id, 'section_id' => $section->id, 'grad' => 0])->where('user.gender', User::GENDER_FEMALE)->count() . '</td>';
             }
             $collection .= $counts;
             $counts = '';
@@ -226,10 +240,10 @@ class Usr extends Qs
     }
 
     // Total Students (Male and Female) per Section
-    public static function renderTotalPerSection($id)
+    public static function renderTotalPerSection($id, $class_collection)
     {
         $collection = $counts = '';
-        foreach (self::getClasses($id) as $class) {
+        foreach ($class_collection as $class) {
             foreach ($class->section as $section) {
                 $counts .= '<td>' . self::getStudents(['my_class_id' => $class->id, 'section_id' => $section->id, 'grad' => 0])->count() . '</td>';
             }
@@ -240,33 +254,34 @@ class Usr extends Qs
     }
 
     // Total Students (Male and Female) per Class
-    public static function renderTotalPerClass($id)
+    public static function renderTotalPerClass($id, Collection $class_collection)
     {
         $counts = '';
-        foreach (self::getClasses($id) as $class) {
-            $counts .= '<td colspan="' . count($class->section) . '">' . self::getStudents(['my_class_id' => $class->id, 'grad' => 0])->count() . '</td>';
+        foreach ($class_collection as $class) {
+            $counts .= '<td colspan="' . $class->section->count() . '">' . self::getStudents(['my_class_id' => $class->id, 'grad' => 0])->count() . '</td>';
         }
         return $counts;
     }
 
     public static function renderTable($id)
     {
-        if (self::getClasses($id)->count() <= 0)
+        $class_collection = self::getClassesByClassType($id);
+        if ($class_collection->count() <= 0)
             return 'No record found.';
 
         return
             '<table class="table table-sm table-responsive text-center">
                 <thead>
-                    <tr><th>Class</th>' . self::renderClasses($id) . ' </tr>
-                    <tr><th>Section</th>' . self::renderClassSections($id) . '</tr>
+                    <tr><th>Class</th>' . self::renderClasses($id, $class_collection) . ' </tr>
+                    <tr><th>Section</th>' . self::renderClassSections($id, $class_collection) . '</tr>
                 </thead>
                 <tbody>
-                    <tr><td>Male</td>' . self::renderMaleCountPerSection($id) . '</tr>
-                    <tr><td>Female</td>' . self::renderFemaleCountPerSection($id) . '</tr>
+                    <tr><td>Male</td>' . self::renderMaleCountPerSection($id, $class_collection) . '</tr>
+                    <tr><td>Female</td>' . self::renderFemaleCountPerSection($id, $class_collection) . '</tr>
                 </tbody>
                 <tfoot>
-                    <tr><td>Total per Section</td>' . self::renderTotalPerSection($id) . '</tr>
-                    <tr><td>Total per Class</td>' . self::renderTotalPerClass($id) . ' </tr>
+                    <tr><td>Total per Section</td>' . self::renderTotalPerSection($id, $class_collection) . '</tr>
+                    <tr><td>Total per Class</td>' . self::renderTotalPerClass($id, $class_collection) . ' </tr>
                 </tfoot>
             </table>';
     }
@@ -276,7 +291,7 @@ class Usr extends Qs
         return Nationality::where('id', $nal_id)->get();
     }
 
-    public static function createAvatar($name, $code, $user_type)
+    public static function createAvatar($name, $code, $user_role)
     {
         $words = explode(" ", $name);
         // Assume the names parts (first, middle, surname) are separated by a space.
@@ -298,8 +313,8 @@ class Usr extends Qs
         imagettftext($image, 60, 0, 40, 130, $text, public_path('global_assets/fonts/CASTELAR.ttf'), $initials);
 
         // Try to create directory first if does not exists
-        $dir_for_db = Qs::getUploadPath($user_type) . $code;
-        $dir_for_store = storage_path() . '/app/public/' . Qs::getUploadPath($user_type) . $code;
+        $dir_for_db = Qs::getUploadPath($user_role) . $code;
+        $dir_for_store = storage_path() . '/app/public/' . Qs::getUploadPath($user_role) . $code;
 
         if (!is_dir($dir_for_store))
             mkdir($dir_for_store, 0755, true);
@@ -340,7 +355,7 @@ class Usr extends Qs
 
     public static function getAccountStatuses(array $remove = []): array
     {
-        $statuses = ['active', 'inactive', 'suspended', 'blocked'];
+        $statuses = ['Active', 'Inactive', 'Suspended', 'Blocked'];
 
         return $remove ? array_values(array_diff($statuses, $remove)) : $statuses;
     }
@@ -357,7 +372,7 @@ class Usr extends Qs
 
     public static function getGenders()
     {
-        return ['Male', 'Female'];
+        return [User::GENDER_MALE, User::GENDER_FEMALE];
     }
 
     public static function getReligions()
@@ -374,5 +389,10 @@ class Usr extends Qs
     {
         $user_id ??= auth()->id();
         return Ticket::where('assigned_to', $user_id)->where('status', '!=', 'closed')->where('is_archived', false)->get();
+    }
+
+    public static function getUserMediaHeadingColor($name)
+    {
+        return '#' . substr(md5($name), 0, 6);
     }
 }

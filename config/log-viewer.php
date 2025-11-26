@@ -1,5 +1,4 @@
 <?php
-use App\Http\Middleware\Custom\ITGuy;
 
 return [
 
@@ -74,7 +73,6 @@ return [
 
     'middleware' => [
         'web',
-        ITGuy::class,
     ],
 
     /*

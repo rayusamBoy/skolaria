@@ -14,7 +14,7 @@ class SettingRepo
         return Setting::where('type', $type)->update(['description' => $desc]);
     }
 
-    public function getSetting(string $type)
+    public function get(string $type)
     {
         return Setting::where('type', $type)->get();
     }

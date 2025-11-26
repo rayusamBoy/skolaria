@@ -19,10 +19,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, SoftDeletes, Messagable, CanResetPassword, LogsActivity;
+    use HasFactory, Notifiable, SoftDeletes, Messagable, CanResetPassword, LogsActivity, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -45,7 +46,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'state_id',
         'lga_id',
         'code',
-        'user_type',
         'email_verified_at',
         'work',
         'religion',
@@ -62,6 +62,13 @@ class User extends Authenticatable implements MustVerifyEmail
         'firebase_device_token',
         'hidden_alert_ids',
     ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    public const GENDER_MALE = 'Male';
+    public const GENDER_FEMALE = 'Female';
 
     /**
      * The attributes that should be hidden for arrays.

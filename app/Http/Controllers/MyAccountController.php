@@ -26,7 +26,7 @@ class MyAccountController extends Controller
         $where = ['user_id' => $user->id];
         $d['staff_rec'] = $this->user->getStaffRecord($where)->first();
 
-        return view('pages.support_team.my_account', $d);
+        return view('pages.my_account', $d);
     }
 
     public function update_profile(UserUpdate $req)
@@ -39,7 +39,7 @@ class MyAccountController extends Controller
         $except = ['_token', '_method'];
         $d = $user->username ? $req->except(array_merge(Qs::getStaffRecord(['username']), $except)) : $req->except(array_merge(Qs::getStaffRecord(), $except));
 
-        $user_type = $user->user_type;
+        $user_role = $user->role;
         $code = $user->code;
 
         if ($req->hasFile('photo')) {
@@ -48,10 +48,10 @@ class MyAccountController extends Controller
             $f['name'] = 'photo.' . $f['ext'];
 
             if (Usr::tenancyInitilized()) {
-                $f['path'] = $d['photo'] = Qs::getUploadPath($user_type) . '/' . $code . '/' . $f['name'];
+                $f['path'] = $d['photo'] = Qs::getUploadPath($user_role) . '/' . $code . '/' . $f['name'];
                 $photo->storeAs($f['path']);
             } else {
-                $f['path'] = $photo->storeAs(Qs::getUploadPath($user_type) . $code, $f['name']);
+                $f['path'] = $photo->storeAs(Qs::getUploadPath($user_role) . $code, $f['name']);
                 $d['photo'] = 'storage/' . $f['path'];
             }
         }
@@ -63,7 +63,7 @@ class MyAccountController extends Controller
         $this->user->update($user->id, $d);
         $staff_data_edit = $this->user->whereStaffRecord(['user_id' => $user->id])->first()->staff_data_edit;
 
-        if ((Qs::userIsTeamSATCL() && $staff_data_edit == true) || Qs::userIsItGuy() || Qs::userIsTeamSA()) {
+        if (($staff_data_edit == true) || auth()->user()->hasRole('Itguy')) {
             $d2 = $req->only(Qs::getStaffRecord());
             $d2['subjects_studied'] = json_encode(explode(",", $d2['subjects_studied']));
             $this->user->updateStaffRecord(['user_id' => $user->id], $d2);

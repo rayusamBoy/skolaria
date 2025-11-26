@@ -57,12 +57,12 @@ $(window).on("load", unblockUI);
  */
 autosize($("textarea"));
 
-/**
- *-------------------------------------------------------------
- * Form and Date Picker Handlers
- *-------------------------------------------------------------
- */
 $(document).ready(() => {
+    /**
+     *-------------------------------------------------------------
+     * Form and Date Picker Handlers
+     *-------------------------------------------------------------
+     */
     $("form.page-block").on("submit", () => blockUI());
 
     $(".date-pick").datepicker({
@@ -80,7 +80,7 @@ $(document).ready(() => {
      * Handle user type change on select.
      *-------------------------------------------------------------
      */
-    $("select#user_type").on("change", function () {
+    $("select#user_role").on("change", function () {
         const $fieldset = $(this).closest("fieldset");
         const $parentData = $fieldset.find("#parent-data");
         const $parentDataInputs = $("#parent-data input");
@@ -292,8 +292,9 @@ $(".full-screen-handle").on("click", function (event) {
         }
         $(this)
             .find("a")
-            .text("fullscreen_exit")
-            .attr("title", "Exit Full Screen");
+            .attr("title", "Exit Full Screen")
+            .find(".material-symbols-rounded")
+            .text("fullscreen_exit");
     } else {
         if (document.cancelFullScreen) {
             document.cancelFullScreen();
@@ -304,8 +305,9 @@ $(".full-screen-handle").on("click", function (event) {
         }
         $(this)
             .find("a")
-            .text("fullscreen")
-            .attr("title", "Request Full Screen");
+            .attr("title", "Request Full Screen")
+            .find(".material-symbols-rounded")
+            .text("fullscreen");
     }
 });
 
@@ -550,11 +552,7 @@ updatedoNotShowAgainElsState();
  * Remove element method - with animation
  *-------------------------------------------------------------
  */
-const removeElement = ($el) => {
-    $el.animate({ height: "0px" }, 500, function () {
-        $(this).remove();
-    });
-};
+const removeElement = ($el) => $el.fadeOut(500, function(){ $(this).remove(); });
 
 /**
  *-------------------------------------------------------------
@@ -1026,14 +1024,15 @@ const setNoticeAsViwed = (el) => {
     });
 };
 
+let hashChangedProgrammatically = false;
+
 $(document).on("click", ".pagination a", function (event) {
     event.preventDefault();
     $("li").removeClass("active");
     $(this).parent("li").addClass("active");
+    hashChangedProgrammatically = true;
     getNoticesData($(this).attr("href"));
 });
-
-let hashChangedProgrammatically = false;
 
 const getNoticesData = (url) => {
     const status = url.includes("unviewed") ? "unviewed" : "viewed";
@@ -1066,7 +1065,6 @@ const getNoticesData = (url) => {
     })
         .done((data) => {
             $notices.replaceWith(data);
-            hashChangedProgrammatically = true;
             window.location.hash = url;
         })
         .fail(() => {
@@ -1078,6 +1076,7 @@ const getNoticesData = (url) => {
 $(window).on("hashchange", () => {
     if (window.location.hash && !hashChangedProgrammatically) {
         const url = window.location.hash.replace("#", "");
+        hashChangedProgrammatically = false;
         getNoticesData(url);
     }
 });
@@ -1189,7 +1188,7 @@ const removeClassCursorNotAllowed = (selector) =>
  */
 function getTableColumns(tableName) {
     const $btn = $("button[type=submit]");
-    toggleElDisableState("NULL", $btn);
+    toggleElDisableState("none", $btn);
     let url = get_table_cols_url.replace(":name", tableName);
     const $select = $("#select");
     const $where = $(".where");
@@ -1519,7 +1518,7 @@ $(document).on("click", "#do-not-show-for-this-session", function () {
     Swal.close();
     sessionStorage.setItem(this.value, "do-not-show-for-this-session");
     flash({
-        msg: "Success. The message will not be shown again for this browser's tab session.",
+        msg: "Success. The message will not be shown again for this browser's session.",
         type: "success",
     });
 });
@@ -1553,7 +1552,7 @@ function displayToast(type, message) {
             closeButton: true,
         };
         return toastr.error(message);
-    } else if (type === "warning") return toastr.info(message);
+    } else if (type === "warning") return toastr.warning(message);
     else return false;
 }
 
@@ -1586,6 +1585,20 @@ function confirmOperation(id) {
     }).then((result) => {
         if (result.isConfirmed) {
             $(`form#item-confirm-operation-${id}`).submit();
+        }
+    });
+}
+
+function confirmOperationTwice(id) {
+    Modal.fire({
+        title: "Just in case",
+        text: "Do you really wish to proceed with this operation?",
+        icon: "warning",
+        confirmButtonText: "Yes, I do",
+        customClass: { confirmButton: "bg-danger" },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            confirmOperation(id);
         }
     });
 }
@@ -2096,11 +2109,11 @@ function printElement($element) {
     blockUI("Preparing Print...");
     if ($element.hasClass("card-collapsed"))
         $element.removeClass("card-collapsed");
-    $element.printThis({ 
+    $element.printThis({
         base: "https://jasonday.github.io/printThis/",
         afterPrint: function () {
             unblockUI();
-        }
+        },
     });
 }
 
@@ -2120,7 +2133,7 @@ const $submitBtns = $("button[type=submit]");
 const currentUrl = window.location.href;
 
 const updateOfflineStatus = () => {
-    if (!currentUrl.includes("localhost")) {
+    if (!currentUrl.includes("localhost") && !currentUrl.includes("127.0.0.1")) {
         if (navigator.onLine) {
             offlineDiv.style.display = "none";
             $submitBtns
@@ -2137,3 +2150,160 @@ window.addEventListener("offline", updateOfflineStatus);
 window.addEventListener("online", updateOfflineStatus);
 
 updateOfflineStatus();
+
+/**
+ *-------------------------------------------------------------
+ * Dashboard Charts Initialization
+ * Uses Chart.js for rendering various charts and sparklines.
+ *-------------------------------------------------------------
+ */
+document.addEventListener("DOMContentLoaded", function () {
+    // Lightweight chart factory (sparklines)
+    function createSparkline(canvasId, data, opts = {}) {
+        const el = document.getElementById(canvasId);
+        if (!el) return null;
+        return new Chart(el.getContext("2d"), {
+            type: "line",
+            data: {
+                labels: data.map((_, i) => i + 1),
+                datasets: [
+                    {
+                        data: data,
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false,
+                        tension: 0.3,
+                    },
+                ],
+            },
+            options: Object.assign(
+                {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false },
+                    },
+                    scales: { x: { display: false }, y: { display: false } },
+                },
+                opts
+            ),
+        });
+    }
+
+    // Big chart creators
+    function createDoughnut(canvasId, labels, data) {
+        const el = document.getElementById(canvasId);
+        if (!el) return null;
+        return new Chart(el.getContext("2d"), {
+            type: "doughnut",
+            data: { labels: labels, datasets: [{ data: data }] },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: "bottom" },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.label}: ${ctx.parsed}`,
+                        },
+                    },
+                },
+            },
+        });
+    }
+
+    function createLine(canvasId, labels, data, label) {
+        const el = document.getElementById(canvasId);
+        if (!el) return null;
+        return new Chart(el.getContext("2d"), {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: label || "",
+                        data: data,
+                        tension: 0.25,
+                        fill: true,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { mode: "index", intersect: false },
+                },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+            },
+        });
+    }
+
+    function createBar(canvasId, labels, data, opts = {}) {
+        const el = document.getElementById(canvasId);
+        if (!el) return null;
+        return new Chart(el.getContext("2d"), {
+            type: "bar",
+            data: { labels: labels, datasets: [{ data: data }] },
+            options: Object.assign(
+                {
+                    responsive: true,
+                    plugins: { legend: { display: false }, tooltip: {} },
+                    scales: { y: { beginAtZero: true } },
+                },
+                opts
+            ),
+        });
+    }
+
+    // Lazy init using IntersectionObserver to reduce CPU on page load
+    const observers = [];
+    function lazyInit(selector, factory) {
+        const el = document.querySelector(selector);
+        if (!el) return;
+        if ("IntersectionObserver" in window) {
+            const obs = new IntersectionObserver(
+                function (entries, o) {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            factory();
+                            o.unobserve(entry.target);
+                        }
+                    });
+                },
+                { rootMargin: "200px" }
+            );
+            obs.observe(el);
+            observers.push(obs);
+        } else {
+            // fallback: init immediately
+            factory();
+        }
+    }
+
+    // Sparklines (cards)
+    lazyInit("#spark-overall-students", () =>
+        createSparkline("spark-overall-students", studentsMonthly)
+    );
+
+    // Big charts
+    lazyInit("#chart-gender", () =>
+        createDoughnut(
+            "chart-gender",
+            ["Male", "Female"],
+            [genderCounts.male || 0, genderCounts.female || 0]
+        )
+    );
+    lazyInit("#chart-payments", () =>
+        createLine("chart-payments", months, paymentsMonthly, "Payments")
+    );
+    lazyInit("#chart-students-per-class", () =>
+        createBar(
+            "chart-students-per-class",
+            studentsPerClassLabels,
+            studentsPerClassCounts
+        )
+    );
+});

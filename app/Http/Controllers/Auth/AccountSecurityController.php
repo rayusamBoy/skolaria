@@ -8,6 +8,7 @@ use App\Repositories\UserRepo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -32,7 +33,7 @@ class AccountSecurityController extends Controller
 
         $QR_Image = $google2fa->getQRCodeInline(
             config('app.name'),
-            Qs::getSetting('system_email') ?? auth()->user()->email,
+            auth()->user()->email ?? Qs::getSetting('system_email'),
             $data['twofa_secret_code']
         );
 
@@ -40,8 +41,7 @@ class AccountSecurityController extends Controller
         $data['recovery_codes'] = $this->get_recovery_codes();
         $data['browser_sessions'] = $this->get_browser_sessions();
 
-        if (Qs::userIsHead())
-            $data['users_with_2fa_enabled'] = $this->user->all()->whereNotNull('twofa_secret_code');
+        $data['users_with_2fa_enabled'] = $this->user->all()->whereNotNull('twofa_secret_code');
 
         return view('auth.2fa.account_security', $data);
     }
@@ -119,7 +119,7 @@ class AccountSecurityController extends Controller
         return $secret !== null && !empty($secret);
     }
 
-    /* 
+    /**
      * The route for this method is bound to '2fa' middleware. Meaning this method will not run unless the request passed the middleware.
      * Thus, if the user entered wrong otp in the verification form the middleware will return the response with error message to the form.
      * This method will only run if the user logged in by the middleware; hence we will redirect the user to the intended route (hopefully; dashboard).
@@ -175,7 +175,7 @@ class AccountSecurityController extends Controller
         Validator::make(request()->toArray(), ['password' => ['required', 'current_password:web']])->validate();
 
         $password = request()->password;
-        auth()->logoutOtherDevices($password);
+        Auth::logoutOtherDevices($password);
 
         $this->delete_other_session_records();
 

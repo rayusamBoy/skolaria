@@ -482,7 +482,7 @@ div.cards-row .card {
 }
 
 .nav-tabs .nav-link i {
-    padding-top: 1px;
+    padding-top: 3px;
 }
 
 .nav-tabs .nav-link {
@@ -1872,7 +1872,15 @@ div.cards-row .card {
 }
 
 .btn-primary .material-symbols-rounded {
-    padding-top: 2px;
+    margin-top: 3px;
+}
+
+.btn-danger .material-symbols-rounded {
+    margin-bottom: 2px;
+}
+
+.btn.do-not-show-again {
+    border-top-right-radius: 0px !important;
 }
 
 #offline-alert {

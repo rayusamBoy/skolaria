@@ -1,7 +1,7 @@
 @php
 $unread_notifications_count = auth()->user()->unreadNotifications()->count();
 @endphp
-<a href="javascript:;" class="breadcrumb-elements-item d-flex" data-toggle="dropdown" title="Notifications">
+<a href="javascript:;" class="breadcrumb-elements-item" data-toggle="dropdown" title="Notifications">
     @if($unread_notifications_count > 0)
     <span class="badge"><span class="material-symbols-rounded mr-1">notifications_unread</span><span class="font-family-nunito align-middle unread-notifications-count">{{ $unread_notifications_count }}</span></span>
     <span class="sr-only">unread notifications</span>

@@ -23,10 +23,12 @@
 
 @php
     use Database\Seeders\NonTenancySettingsTableSeeder;
-    $settings_table_seeder = new NonTenancySettingsTableSeeder();
-    $color = (isset($colors) && $colors !== null) ? "$texts_color !important" : 'white !important';
+    $color = (isset($colors) && $colors !== null) ? '$texts_color !important' : 'white !important';
     $bg_color = (isset($colors) && $colors !== null) ? $bg_color : 'rgb(35 39 53)';
-    $bg = $settings->where('type', 'login_and_related_pages_bg')->value('description');
+    $bg = $settings->firstWhere('type', 'login_and_related_pages_bg');
+    $bg_desc = $bg->description;
+    $bg_url = $bg_desc === null ? asset(NonTenancySettingsTableSeeder::getLoginAndRelatedPagesBgDescription()) : (Usr::tenancyInitilized() ? tenant_asset($bg_desc) : asset($bg_desc));
+    $bg_url = $bg_url . "?" . strtotime($bg->updated_at);
 @endphp
 
 <style>
@@ -35,7 +37,7 @@
     }
 
     div.page-content.login-cover {
-        background-image: url({{ Usr::tenancyInitilized() ? ($bg === null ? asset($settings_table_seeder->getLoginAndRelatedPagesBgDescription()) : tenant_asset($bg)) : asset($bg) }});
+        background-image: url({{ $bg_url }});
         background-repeat: no-repeat;
         background-position: center;
         background-size: cover;

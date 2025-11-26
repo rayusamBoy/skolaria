@@ -15,7 +15,7 @@ class Domain implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         // Allow localhost explicitly
-        if (stripos($value, 'localhost') !== false) {
+        if (str_contains($value, 'localhost')) {
             return;
         }
         

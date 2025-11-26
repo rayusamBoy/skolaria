@@ -9,7 +9,6 @@
         background-repeat: no-repeat;
         background-position: center;
         background-size: contain;
-        background-color: #141414 !important;
         background-blend-mode: multiply;
 
     }
@@ -28,7 +27,7 @@
                     <i class="material-symbols-rounded symbol-2x text-danger border-danger border-3 rounded-round p-3 mb-3 mt-1">passkey</i>
                 </div>
 
-                <div class="card col-12 border-color-1d1d1d">
+                <div class="card col-12 border-color-1d1d1d border-none">
                     <div class="card-header text-green">
                         <h5 class="mb-0 text-danger"><strong>Confirm Access</strong></h5>
                     </div>
@@ -38,7 +37,7 @@
                         <form method="POST" action="{{ route('password.confirm') }}">
                             @csrf
 
-                            <label for="password" class="col-form-label text-md-end">Password</label>
+                            <label for="password" class="col-form-label text-md-end text-muted">Password</label>
 
                             <div class="row mb-3">
                                 <div class="col-12">

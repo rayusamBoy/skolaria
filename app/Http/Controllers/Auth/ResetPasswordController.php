@@ -54,7 +54,7 @@ class ResetPasswordController extends Controller implements HasMiddleware
         $data['token'] = $request->route()->parameter('token');
         $data['email'] = $request->email;
         $settings = Qs::getSettings();
-        $data['colors'] = $colors = $settings->where('type', 'login_and_related_pgs_txts_and_bg_colors')->value('description');
+        $data['colors'] = $colors = $settings->firstWhere('type', 'login_and_related_pgs_txts_and_bg_colors')->description;
 
         if ($colors !== null) {
             $colors_exploaded = explode(Qs::getDelimiter(), $colors);

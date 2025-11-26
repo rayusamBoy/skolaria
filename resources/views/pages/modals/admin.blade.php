@@ -7,7 +7,7 @@
             </div>
 
             <div class="modal-body pt-0 pb-0">
-                <div class="card contact m-0 border-0">
+                <div class="card contact m-0 border-0 bg-transparent">
                     <div class="card-body p-0">
                         <h4 class="card-title"></h4>
                         <div class="card-text">
@@ -15,14 +15,14 @@
 
                             <ul>
                                 <h5 class="text-lightslategray">{{ "The Contacts." }}</h5>
-                                <li class="pb-1"><a href="{{ $settings->where('type', 'admin_whatsapp_link')->value('description') }}" target="_blank"><i class="material-symbols-rounded pb-2px">hdr_strong</i> <span class="align-middle">WhatsApp</span></a></li>
-                                <li class="pb-1 break-all"><a href="mailto: {{ $settings->where('type', 'admin_email')->value('description') }}"><i class="material-symbols-rounded pb-2px">hdr_strong</i> {{ $settings->where('type', 'admin_email')->value('description') }}</a></li>
+                                <li class="pb-1"><a href="{{ $settings->firstWhere('type', 'admin_whatsapp_link')->description }}" target="_blank"><i class="material-symbols-rounded pb-2px">hdr_strong</i> <span class="align-middle">WhatsApp</span></a></li>
+                                <li class="pb-1 break-all"><a href="mailto: {{ $settings->firstWhere('type', 'admin_email')->description }}"><i class="material-symbols-rounded pb-2px">hdr_strong</i> {{ $settings->firstWhere('type', 'admin_email')->description }}</a></li>
                             </ul>
 
                             @php
-                            $admin_fb_link = $settings->where('type', 'admin_facebook_link')->value('description');
-                            $admin_linkedin_link = $settings->where('type', 'admin_linkedin_link')->value('description');
-                            $admin_github_link = $settings->where('type', 'admin_github_link')->value('description');
+                            $admin_fb_link = $settings->firstWhere('type', 'admin_facebook_link')->description;
+                            $admin_linkedin_link = $settings->firstWhere('type', 'admin_linkedin_link')->description;
+                            $admin_github_link = $settings->firstWhere('type', 'admin_github_link')->description;
                             @endphp
 
                             @if($admin_fb_link !== null || $admin_linkedin_link !== null || $admin_github_link !== null)

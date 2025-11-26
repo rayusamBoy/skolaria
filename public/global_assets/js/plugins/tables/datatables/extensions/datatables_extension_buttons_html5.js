@@ -54,7 +54,6 @@ var DatatableButtonsHtml5 = (function () {
                     "pdfHtml5",
                     {
                         extend: "colvis",
-                        text: '<i class="material-symbols-rounded">visibility</i> Visibility',
                         className: "btn bg-blue btn-icon dropdown-toggle",
                     },
                 ],
@@ -107,7 +106,6 @@ var DatatableButtonsHtml5 = (function () {
                     },
                     {
                         extend: "colvis",
-                        text: '<i class="material-symbols-rounded">visibility</i> Visibility',
                         className: "btn bg-blue btn-icon dropdown-toggle",
                     },
                 ],

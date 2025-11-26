@@ -12,7 +12,7 @@
                 <table class="table table-bordered table-responsive">
                     <tr>
                         <td class="font-weight-bold">Name</td>
-                        <td>{{ $owner->name }} ({{ str_replace("_", " ", $owner->user_type) }})</td>
+                        <td>{{ $owner->name }} ({{ $owner->role }})</td>
                     </tr>
                     <tr>
                         <td class="font-weight-bold">Email</td>

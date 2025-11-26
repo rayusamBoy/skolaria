@@ -22,12 +22,13 @@
     </div>
 
     <div class="card-body">
+        @can('update_notification_settings')
         <form method="post" action="{{ route('notifications.update_is_notifiable') }}">
             @csrf @method('put')
             <div class="form-group row">
                 <div class="col-lg-3">
                     <label for="email_channel" class="col-form-label font-weight-semibold">Email notification</label>
-                    <div class="form-group text-center">
+                    <div class="text-center">
                         <select class="form-control select" name="on_email_channel" id="email_channel">
                             <option @selected($email_channel_on==1) value="1">On</option>
                             <option @selected($email_channel_on==0) value="0">Off</option>
@@ -36,7 +37,7 @@
                 </div>
                 <div class="col-lg-3">
                     <label for="push_channel" class="col-form-label font-weight-semibold">Push notification</label>
-                    <div class="form-group text-center">
+                    <div class="text-center">
                         <select class="form-control select" name="on_push_channel" id="push_channel">
                             <option @selected($push_channel_on==1) value="1">On</option>
                             <option @selected($push_channel_on==0) value="0">Off</option>
@@ -45,7 +46,7 @@
                 </div>
                 <div class="col-lg-3">
                     <label for="sms_channel" class="col-form-label font-weight-semibold">SMS notification</label>
-                    <div class="form-group text-center">
+                    <div class="text-center">
                         <select class="form-control select" name="on_sms_channel" id="sms_channel">
                             <option @selected($sms_channel_on==1) value="1">On</option>
                             <option @selected($sms_channel_on==0) value="0">Off</option>
@@ -53,8 +54,8 @@
                     </div>
                 </div>
                 <div class="col-lg-3">
-                    <label for="status" class="col-form-label font-weight-semibold">Allow Notifications <span class="text-danger">*</span></label>
-                    <div class="form-group">
+                    <label for="status" class="col-form-label font-weight-semibold">Allow Notifications</label>
+                    <div>
                         <select class="form-control select" name="status" id="status">
                             <option @selected($notification_status==1) value="1">Yes</option>
                             <option @selected($notification_status==0) value="0">No</option>
@@ -64,23 +65,27 @@
             </div>
             <div class="form-group row">
                 <div class="offset-lg-9 col-lg-3">
-                    {{-- SUBMIT BUTTON --}}
-                    <div class="form-group float-right">
-                        <button type="submit" class="btn btn-sm btn-danger">Submit form<span class="material-symbols-rounded ml-2 pb-2px">send</span></button>
-                    </div>
+                    <button type="submit" class="btn btn-sm btn-danger float-right">
+                        Submit form <span class="material-symbols-rounded ml-2 pb-2px">send</span>
+                    </button>
                 </div>
             </div>
         </form>
+        @endcan
 
-        {{-- Cloud messaging or Web push notification --}}
+        {{-- Cloud messaging / Web push --}}
         <div class="row mt-2" id="notifications-row">
             <div class="col-12">
                 <div id="token-div" class="display-none">
                     <div class="alert alert-info border-0"><span id="token-info"></span></div>
-                    <button id="delete-token-button" class="btn btn-warning btn-sm float-right ml-1 d-none">Delete Token</button>
+                    <button id="delete-token-button" class="btn btn-warning btn-sm float-right ml-1 d-none">
+                        Delete Token
+                    </button>
                 </div>
                 <div id="permission-div">
-                    <button id="request-permission-button" class="btn btn-primary btn-sm float-right">Request Permission</button>
+                    <button id="request-permission-button" class="btn btn-primary btn-sm float-right">
+                        Request Permission
+                    </button>
                 </div>
             </div>
         </div>
@@ -98,11 +103,14 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach(auth()->user()->notifications()->get() as $notification)
+                @foreach(auth()->user()->notifications as $notification)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>
-                        <a target="_blank" @if(isset($notification->data['receipt'])) href="{{ route('payments.receipts', [Qs::hash($notification->data['receipt']['pr_id']), $notification->id]) }}" @elseif($notification->data['url']) href="{{ $notification->data['url'] }}" @endif><strong>{{ $notification->data['subject'] }}</strong></a>
+                        @php $data = $notification->data; @endphp
+                        <a target="_blank" @if(isset($data['receipt'])) href="{{ route('payments.receipts', [Qs::hash($data['receipt']['pr_id']), $notification->id]) }}" @elseif(!empty($data['url'])) href="{{ $data['url'] }}" @endif>
+                            <strong>{{ $data['subject'] }}</strong>
+                        </a>
                     </td>
                     <td>{{ $notification->created_at }}</td>
                     <td>{{ $notification->read_at ?? 'Never' }}</td>
@@ -110,15 +118,21 @@
                         <div class="list-icons">
                             <div class="dropdown">
                                 <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
-
                                 <div class="dropdown-menu dropdown-menu-left">
-                                    {{-- Mark as read --}}
-                                    @if($notification->read_at === null)
-                                    <a href="{{ route('notifications.mark_as_read', $notification->id) }}" class="dropdown-item"><i class="material-symbols-rounded">done</i> Mark as read</a>
+                                    @if(is_null($notification->read_at) && auth()->user()->can('mark_notifications'))
+                                    <a href="{{ route('notifications.mark_as_read', $notification->id) }}" class="dropdown-item">
+                                        <i class="material-symbols-rounded">done</i> Mark as read
+                                    </a>
                                     @endif
-                                    {{-- Delete --}}
-                                    <a id="{{ $notification->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
-                                    <form method="post" id="item-delete-{{ $notification->id }}" action="{{ route('notifications.destroy', $notification->id) }}" class="hidden">@csrf @method('delete')</form>
+
+                                    @can('delete_notifications')
+                                    <a id="{{ $notification->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
+                                        <i class="material-symbols-rounded">delete</i> Delete
+                                    </a>
+                                    <form method="post" id="item-delete-{{ $notification->id }}" action="{{ route('notifications.destroy', $notification->id) }}" class="hidden">
+                                        @csrf @method('delete')
+                                    </form>
+                                    @endcan
                                 </div>
                             </div>
                         </div>
@@ -128,10 +142,17 @@
             </tbody>
         </table>
 
-        @if(auth()->user()->unreadNotifications()->get()->isNotEmpty())
-        <a href="javascript:;" id="mark_all_read" class="btn btn-warning float-right mt-3" onclick="confirmOperation(this.id)">Mark all Read<i class="material-symbols-rounded ml-1 pb-2px">done_all</i></a>
-        <form id="item-confirm-operation-mark_all_read" method="POST" action="{{ route('notifications.mark_all_read') }}">@csrf @method('PUT')</form>
+        @can('mark_all_notifications')
+        @if(auth()->user()->unreadNotifications->isNotEmpty())
+        <a href="javascript:;" id="mark_all_read" class="btn btn-warning float-right mt-3" onclick="confirmOperation(this.id)">
+            Mark all Read<i class="material-symbols-rounded ml-1 pb-2px">done_all</i>
+        </a>
+        <form id="item-confirm-operation-mark_all_read" method="POST" action="{{ route('notifications.mark_all_read') }}">
+            @csrf @method('PUT')
+        </form>
         @endif
+        @endcan
+
     </div>
 </div>
 

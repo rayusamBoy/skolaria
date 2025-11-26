@@ -19,6 +19,18 @@ Breadcrumbs::for('dashboard', function (BreadcrumbTrail $trail) {
     $trail->push('Dashboard', route('dashboard'));
 });
 
+Breadcrumbs::for('central_index', function (BreadcrumbTrail $trail) {
+    $trail->push('Home', route('central_index'));
+});
+
+Breadcrumbs::for('central_home', function (BreadcrumbTrail $trail) {
+    $trail->push('Home', route('central_home'));
+});
+
+Breadcrumbs::for('central_dashboard', function (BreadcrumbTrail $trail) {
+    $trail->push('Dashboard', route('central_dashboard'));
+});
+
 // 2fa (two factor authentication (google)) 
 Breadcrumbs::for('account_security.index', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
@@ -26,9 +38,9 @@ Breadcrumbs::for('account_security.index', function (BreadcrumbTrail $trail) {
 });
 
 // My Account 
-Breadcrumbs::for('my_account', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('my_account.edit', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
-    $trail->push('My Account', route('my_account'));
+    $trail->push('My Account', route('my_account.edit'));
 });
 
 Breadcrumbs::for('my_account.update', function (BreadcrumbTrail $trail) {
@@ -52,14 +64,14 @@ Breadcrumbs::for('students.index', function (BreadcrumbTrail $trail) {
     $trail->push('Admit Student', route('students.index'));
 });
 
-Breadcrumbs::for('students.list', function (BreadcrumbTrail $trail, $class_id) {
+Breadcrumbs::for('students.list_by_class', function (BreadcrumbTrail $trail, $class_id) {
     $trail->parent('dashboard');
-    $trail->push('Students List', route('students.list', $class_id));
+    $trail->push('Students List', route('students.list_by_class', $class_id));
 });
 
-Breadcrumbs::for('st.reset_pass', function (BreadcrumbTrail $trail, $st_id) {
+Breadcrumbs::for('students.password.reset', function (BreadcrumbTrail $trail, $st_id) {
     $trail->parent('dashboard');
-    $trail->push('Reset Student Password', route('st.reset_pass', $st_id));
+    $trail->push('Reset Student Password', route('students.password.reset', $st_id));
 });
 
 Breadcrumbs::for('students.graduated', function (BreadcrumbTrail $trail) {
@@ -72,20 +84,20 @@ Breadcrumbs::for('students.id_cards', function (BreadcrumbTrail $trail) {
     $trail->push('Students ID Cards', route('students.id_cards'));
 });
 
-Breadcrumbs::for('students.id_cards_manage', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('students.id_cards.manage', function (BreadcrumbTrail $trail) {
     $trail->parent('students.id_cards');
-    $trail->push('Manage Students ID Cards', route('students.id_cards_manage'));
+    $trail->push('Manage Students ID Cards', route('students.id_cards.manage'));
 });
 
 Breadcrumbs::for('students.show', function (BreadcrumbTrail $trail, $st_id) {
     $class_id = StudentRepo::getRecordValue(Qs::decodeHash($st_id), 'my_class_id');
-    $trail->parent('students.list', $class_id);
+    $trail->parent('students.list_by_class', $class_id);
     $trail->push('Profile View', route('students.show', $st_id));
 });
 
 Breadcrumbs::for('students.edit', function (BreadcrumbTrail $trail, $st_id) {
     $class_id = StudentRepo::getRecordValue(Qs::decodeHash($st_id), 'my_class_id');
-    $trail->parent('students.list', $class_id);
+    $trail->parent('students.list_by_class', $class_id);
     $trail->push('Profile Edit', route('students.edit', $st_id));
 });
 
@@ -94,9 +106,9 @@ Breadcrumbs::for('students.promotion', function (BreadcrumbTrail $trail, $st_id)
     $trail->push('Promote Student', route('students.promotion', $st_id));
 });
 
-Breadcrumbs::for('students.promotion_manage', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('students.promotion.manage', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
-    $trail->push('Manage Promotion', route('students.promotion_manage'));
+    $trail->push('Manage Promotion', route('students.promotion.manage'));
 });
 
 // Users
@@ -113,6 +125,22 @@ Breadcrumbs::for('users.edit', function (BreadcrumbTrail $trail, $user) {
 Breadcrumbs::for('users.show', function (BreadcrumbTrail $trail, $user) {
     $trail->parent('users.index');
     $trail->push('View User Profile', route('users.show', $user));
+});
+
+// Central Users
+Breadcrumbs::for('central_users.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('dashboard');
+    $trail->push('Manage Users', route('central_users.index'));
+});
+
+Breadcrumbs::for('central_users.edit', function (BreadcrumbTrail $trail, $user) {
+    $trail->parent('central_users.index');
+    $trail->push('Edit User Details', route('central_users.edit', $user));
+});
+
+Breadcrumbs::for('central_users.show', function (BreadcrumbTrail $trail, $user) {
+    $trail->parent('central_users.index');
+    $trail->push('View User Profile', route('central_users.show', $user));
 });
 
 // Classes
@@ -198,9 +226,9 @@ Breadcrumbs::for('marks.index', function (BreadcrumbTrail $trail) {
     $trail->push('Manage Exam Marks', route('marks.index'));
 });
 
-Breadcrumbs::for('marks.tabulation', function (BreadcrumbTrail $trail, $exam, $class, $sec_id) {
+Breadcrumbs::for('marks.tabulation', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
-    $trail->push('Tabulation Sheet', route('marks.tabulation', [$exam, $sec_id], $class));
+    $trail->push('Tabulation Sheet', route('marks.tabulation'));
 });
 
 Breadcrumbs::for('marks.batch', function (BreadcrumbTrail $trail) {
@@ -210,12 +238,12 @@ Breadcrumbs::for('marks.batch', function (BreadcrumbTrail $trail) {
 
 Breadcrumbs::for('marks.manage', function (BreadcrumbTrail $trail, $exam, $class, $section, $subject) {
     $trail->parent('dashboard');
-    $trail->push('Manage Exam Marks', route('marks.selector', [$exam, $section, $subject], $class));
+    $trail->push('Manage Exam Marks', route('marks.selector', [$exam, $section, $subject, $class]));
 });
 
 Breadcrumbs::for('marks.bulk', function (BreadcrumbTrail $trail, $class, $section) {
     $trail->parent('dashboard');
-    $trail->push('Select Student Marksheet', route('marks.bulk', $class, $section));
+    $trail->push('Select Student Marksheet', route('marks.bulk', [$class, $section]));
 });
 
 Breadcrumbs::for('marks.bulk_select', function (BreadcrumbTrail $trail) {
@@ -231,7 +259,7 @@ Breadcrumbs::for('marks.year_selector', function (BreadcrumbTrail $trail, $id) {
 Breadcrumbs::for('marks.show', function (BreadcrumbTrail $trail, $id, $year) {
     $sid = Qs::hash($id);
     $trail->parent('marks.year_selector', $sid);
-    $trail->push('Student Marksheet', route('marks.index', $id, $year));
+    $trail->push('Student Marksheet', route('marks.index', [$id, $year]));
 });
 
 Breadcrumbs::for('marks.convert', function (BreadcrumbTrail $trail) {
@@ -252,17 +280,17 @@ Breadcrumbs::for('assessments.index', function (BreadcrumbTrail $trail) {
 
 Breadcrumbs::for('assessments.manage', function (BreadcrumbTrail $trail, $exam, $class, $section, $subject) {
     $trail->parent('dashboard');
-    $trail->push('Select Continous Assessments', route('assessments.selector', [$exam, $section, $subject], $class));
+    $trail->push('Select Continous Assessments', route('assessments.selector', [$exam, $section, $subject, $class]));
 });
 
 Breadcrumbs::for('assessments.progressive', function (BreadcrumbTrail $trail, $exam, $class, $sec_id) {
     $trail->parent('dashboard');
-    $trail->push('Progressive Sheet', route('assessments.progressive', [$exam, $sec_id], $class));
+    $trail->push('Progressive Sheet', route('assessments.progressive', [$exam, $sec_id, $class]));
 });
 
 Breadcrumbs::for('assessments.bulk', function (BreadcrumbTrail $trail, $class, $section) {
     $trail->parent('dashboard');
-    $trail->push('Select Student Assessmentsheet', route('assessments.bulk', $class, $section));
+    $trail->push('Select Student Assessmentsheet', route('assessments.bulk', [$class, $section]));
 });
 
 Breadcrumbs::for('assessments.bulk_select', function (BreadcrumbTrail $trail) {
@@ -278,7 +306,7 @@ Breadcrumbs::for('assessments.year_selector', function (BreadcrumbTrail $trail, 
 Breadcrumbs::for('assessments.show', function (BreadcrumbTrail $trail, $id, $year) {
     $sid = Qs::hash($id);
     $trail->parent('assessments.year_selector', $sid);
-    $trail->push('Student Assessmentsheet', route('assessments.index', $id, $year));
+    $trail->push('Student Assessmentsheet', route('assessments.index', [$id, $year]));
 });
 
 // Settings
@@ -293,23 +321,23 @@ Breadcrumbs::for('settings_non_tenancy.index', function (BreadcrumbTrail $trail)
 });
 
 // Timetable
-Breadcrumbs::for('tt.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('timetables.index', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
-    $trail->push('Manage Timetables', route('tt.index'));
+    $trail->push('Manage Timetables', route('timetables.index'));
 });
 
 Breadcrumbs::for('ttr.show', function (BreadcrumbTrail $trail, $ttr) {
-    $trail->parent('tt.index');
+    $trail->parent('timetables.index');
     $trail->push('View Timetable', route('ttr.show', $ttr));
 });
 
 Breadcrumbs::for('ttr.edit', function (BreadcrumbTrail $trail, $ttr) {
-    $trail->parent('tt.index');
+    $trail->parent('timetables.index');
     $trail->push('Edit Timetable', route('ttr.edit', $ttr));
 });
 
 Breadcrumbs::for('ttr.manage', function (BreadcrumbTrail $trail, $ttr) {
-    $trail->parent('tt.index');
+    $trail->parent('timetables.index');
     $trail->push('Manage Timetable Record', route('ttr.manage', $ttr));
 });
 
@@ -339,15 +367,15 @@ Breadcrumbs::for('payments.manage', function (BreadcrumbTrail $trail, $class_id)
     $trail->push('Student Payments', route('payments.manage', $class_id));
 });
 
-Breadcrumbs::for('payments.invoice', function (BreadcrumbTrail $trail, $id, $year) {
-    $class_id = PaymentRepo::getRecordValue($id, 'my_class_id');
+Breadcrumbs::for('payments.invoice', function (BreadcrumbTrail $trail, $payment_id, $year) {
+    $class_id = PaymentRepo::getRecordValue($payment_id, 'my_class_id');
     $trail->parent('payments.manage', $class_id);
-    $trail->push('Manage Payments', route('payments.invoice', $id, $year));
+    $trail->push('Manage Payments', route('payments.invoice', [$payment_id, $year]));
 });
 
-Breadcrumbs::for('payments.status', function (BreadcrumbTrail $trail, $id, $year) {
-    $trail->parent('my_children');
-    $trail->push('Payments Status', route('payments.status', $id, $year));
+Breadcrumbs::for('payments.status', function (BreadcrumbTrail $trail, $payment_id, $year) {
+    $trail->parent('parent.my_children');
+    $trail->push('Payments Status', route('payments.status', [$payment_id, $year]));
 });
 
 // Pins
@@ -367,9 +395,9 @@ Breadcrumbs::for('pins.enter', function (BreadcrumbTrail $trail, $sid) {
 });
 
 // Children
-Breadcrumbs::for('my_children', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('parent.my_children', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
-    $trail->push('My Children', route('my_children'));
+    $trail->push('My Children', route('parent.my_children'));
 });
 
 // Time Slots
@@ -414,9 +442,9 @@ Breadcrumbs::for('events.manage', function (BreadcrumbTrail $trail) {
     $trail->push('Manage Events', route('events.manage'));
 });
 
-Breadcrumbs::for('events.edit', function (BreadcrumbTrail $trail, $id) {
+Breadcrumbs::for('events.edit', function (BreadcrumbTrail $trail, $event_id) {
     $trail->parent('home');
-    $trail->push('Edit Event', route('events.edit', $id));
+    $trail->push('Edit Event', route('events.edit', $event_id));
 });
 
 // Artisan Commands
@@ -442,9 +470,9 @@ Breadcrumbs::for('notices.index', function (BreadcrumbTrail $trail) {
     $trail->push('Notices', route('notices.index'));
 });
 
-Breadcrumbs::for('notices.edit', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('notices.edit', function (BreadcrumbTrail $trail, $notice_id) {
     $trail->parent('notices.index');
-    $trail->push('Edit', route('notices.edit'));
+    $trail->push('Edit', route('notices.edit', $notice_id));
 });
 
 // Messages
@@ -458,9 +486,9 @@ Breadcrumbs::for('messages.index', function (BreadcrumbTrail $trail) {
     $trail->push('Messages', route('messages.index'));
 });
 
-Breadcrumbs::for('messages.show', function (BreadcrumbTrail $trail, $id) {
+Breadcrumbs::for('messages.show', function (BreadcrumbTrail $trail, $message_id) {
     $trail->parent('messages.index');
-    $trail->push('Show', route('messages.show', $id));
+    $trail->push('Show', route('messages.show', $message_id));
 });
 
 Breadcrumbs::for('messages.create', function (BreadcrumbTrail $trail) {
@@ -474,9 +502,9 @@ Breadcrumbs::for('logs.index', function (BreadcrumbTrail $trail) {
     $trail->push('Manage Logs', route('logs.index'));
 });
 
-Breadcrumbs::for('tenancy_logs.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('central_logs.index', function (BreadcrumbTrail $trail) {
     $trail->parent('home');
-    $trail->push('Manage Logs', route('tenancy_logs.index'));
+    $trail->push('Manage Logs', route('central_logs.index'));
 });
 
 // Books
@@ -490,14 +518,14 @@ Breadcrumbs::for('book_requests.index', function (BreadcrumbTrail $trail) {
     $trail->push('Manage Book Requests', route('book_requests.index'));
 });
 
-Breadcrumbs::for('books.edit', function (BreadcrumbTrail $trail, $id) {
+Breadcrumbs::for('books.edit', function (BreadcrumbTrail $trail, $book_id) {
     $trail->parent('books.index');
-    $trail->push('Edit a Book', route('books.edit', $id));
+    $trail->push('Edit a Book', route('books.edit', $book_id));
 });
 
-Breadcrumbs::for('book_requests.edit', function (BreadcrumbTrail $trail, $id) {
+Breadcrumbs::for('book_requests.edit', function (BreadcrumbTrail $trail, $book_req_id) {
     $trail->parent('book_requests.index');
-    $trail->push('Edit Book Request', route('book_requests.edit', $id));
+    $trail->push('Edit Book Request', route('book_requests.edit', $book_req_id));
 });
 
 // Tenants
@@ -506,14 +534,14 @@ Breadcrumbs::for('tenants.index', function (BreadcrumbTrail $trail) {
     $trail->push('Manage Tenants', route('tenants.index'));
 });
 
-Breadcrumbs::for('tenants.edit', function (BreadcrumbTrail $trail, $id) {
+Breadcrumbs::for('tenants.edit', function (BreadcrumbTrail $trail, $tenant_id) {
     $trail->parent('tenants.index');
-    $trail->push('Edit Tenant', route('tenants.edit', $id));
+    $trail->push('Edit Tenant', route('tenants.edit', $tenant_id));
 });
 
-Breadcrumbs::for('tenants.show', function (BreadcrumbTrail $trail, $id) {
+Breadcrumbs::for('tenants.show', function (BreadcrumbTrail $trail, $tenant_id) {
     $trail->parent('tenants.index');
-    $trail->push('View Tenant', route('tenants.show', $id));
+    $trail->push('View Tenant', route('tenants.show', $tenant_id));
 });
 
 // Notifications
@@ -533,14 +561,25 @@ Breadcrumbs::for('tickets.index_central', function (BreadcrumbTrail $trail) {
     $trail->push('Manage Tickets', route('tickets.index_central'));
 });
 
-Breadcrumbs::for('tickets.reply', function (BreadcrumbTrail $trail, $id) {
+Breadcrumbs::for('tickets.reply', function (BreadcrumbTrail $trail, $ticket_id) {
     $trail->parent('tickets.index');
-    $trail->push('Ticket', route('tickets.reply', $id));
+    $trail->push('Ticket', route('tickets.reply', $ticket_id));
 });
 
-Breadcrumbs::for('tickets.answer', function (BreadcrumbTrail $trail, $id) {
+Breadcrumbs::for('tickets.answer', function (BreadcrumbTrail $trail, $ticket_id) {
     $trail->parent('tickets.index_central');
-    $trail->push('Ticket', route('tickets.answer', $id));
+    $trail->push('Ticket', route('tickets.answer', $ticket_id));
+});
+
+// Roles
+Breadcrumbs::for('roles.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('home');
+    $trail->push('Manage Roles', route('roles.index'));
+});
+
+Breadcrumbs::for('roles.edit', function (BreadcrumbTrail $trail, $role_id) {
+    $trail->parent('roles.index');
+    $trail->push('Edit Role', route('roles.edit', $role_id));
 });
 
 // TEST

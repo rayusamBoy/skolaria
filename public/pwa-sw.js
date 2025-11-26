@@ -1,4 +1,4 @@
-importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.4.1/workbox-sw.js');
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.3.0/workbox-sw.js');
 
 workbox.recipes.pageCache();
 
@@ -7,7 +7,7 @@ workbox.recipes.googleFontsCache();
 workbox.recipes.staticResourceCache();
 
 workbox.recipes.imageCache({
-    maxEntries: 200,
+    maxEntries: 500,
 });
 
 workbox.recipes.offlineFallback({
