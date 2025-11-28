@@ -41,19 +41,18 @@
 <script src="{{ asset('global_assets/js/plugins/uploaders/uploader_bootstrap.js') }}"></script>
 <script src="{{ asset('global_assets/js/plugins/ui/autosize.min.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{{-- <script src="{{ asset('global_assets/js/plugins/charts/chart.js') }}"></script> --}}
 
 {{-- Scrollers --}}
 <script src="{{ asset('global_assets/js/plugins/scrollers/jquery.floatingscroll.min.js') }}"></script>
-
-{{-- Theme JS files --}}
-<script src="{{ asset('assets/js/custom-min.js') }} "></script>
 
 {{-- Prints --}}
 <script src="{{ asset('global_assets/js/plugins/prints/printThis-min.js') }}"></script>
 
 {{-- Editors --}}
 <script src="{{ asset('global_assets/js/plugins/editors/simplemde.min.js') }}"></script>
+
+{{-- Theme JS files --}}
+<script src="{{ asset('assets/js/custom-min.js') }} "></script>
 
 @vite('resources/js/app.js')
 
