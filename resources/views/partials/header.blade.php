@@ -23,7 +23,7 @@
 
                 {{-- <a href="javascript:;" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary">calculate</i> <span class="d-none d-sm-block">Invoices</span></a> --}}
                 <a href="{{ route('schedule.index') }}" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary">calendar_month</i> <span class="d-none d-sm-block">Schedule</span></a>
-                <a href="{{ auth()->user()->canany($tenant_permissions['settings']) ? route('settings.index') : '' }}" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary d-none d-sm-block">arrow_downward_alt</i> <span class="font-weight-semibold d-flex" id="current-session"><span class="d-none d-sm-block pr-1">Current Session:</span>{{ Qs::getCurrentSession() }}</span></a>
+                <a href="{{ auth()->user()->canany(array_values($tenant_permissions['settings'])) ? route('settings.index') : '' }}" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary d-none d-sm-block">arrow_downward_alt</i> <span class="font-weight-semibold d-flex" id="current-session"><span class="d-none d-sm-block pr-1">Current Session:</span>{{ Qs::getCurrentSession() }}</span></a>
                 @endif
             </div>
         </div>

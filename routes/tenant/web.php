@@ -57,7 +57,7 @@ Route::group(["middleware" => ["universal"]], function () {
     Auth::routes();
 
     /****************** My Account ***************/
-    Route::prefix('my-account')->group(function () {
+    Route::group(['prefix' => 'my-account', 'middleware' => ['universal']], function () {
         Route::get('profile/edit', [MyAccountController::class, 'edit_profile'])->name('my_account.edit');
         Route::put('profile', [MyAccountController::class, 'update_profile'])->name('my_account.update');
         Route::put('password/change', [MyAccountController::class, 'change_pass'])->name('my_account.change_pass');

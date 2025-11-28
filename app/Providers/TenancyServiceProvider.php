@@ -5,23 +5,16 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Jobs\DeleteIDCardsThemeDir;
-use App\Jobs\DeleteStorageDir;
-use Illuminate\Routing\Route;
-use Stancl\Tenancy\Jobs;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Route as RouteFacade;
+use Illuminate\Support\ServiceProvider;
+use Stancl\JobPipeline\JobPipeline;
+use Stancl\Tenancy\Actions\CloneRoutesAsTenant;
 use Stancl\Tenancy\Events;
-use Stancl\Tenancy\ResourceSyncing;
+use Stancl\Tenancy\Jobs;
 use Stancl\Tenancy\Listeners;
 use Stancl\Tenancy\Middleware;
-use Stancl\JobPipeline\JobPipeline;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
-use Stancl\Tenancy\Actions\CloneRoutesAsTenant;
-use Stancl\Tenancy\Overrides\TenancyUrlGenerator;
-use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Route as RouteFacade;
-use Stancl\Tenancy\Middleware\InitializeTenancyByPath;
-use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
-use Stancl\Tenancy\Bootstrappers\Integrations\FortifyRouteBootstrapper;
+use Stancl\Tenancy\ResourceSyncing;
 
 /**
  * Tenancy for Laravel.
@@ -53,7 +46,7 @@ class TenancyServiceProvider extends ServiceProvider
                     Jobs\CreateDatabase::class,
                     Jobs\MigrateDatabase::class,
                     Jobs\SeedDatabase::class,
-                    Jobs\CreateStorageSymlinks::class,
+                    // Jobs\CreateStorageSymlinks::class,
 
                     // Your own jobs to prepare the tenant.
                     // Provision API keys, create S3 buckets, anything you want!
@@ -73,7 +66,7 @@ class TenancyServiceProvider extends ServiceProvider
             Events\DeletingTenant::class => [
                 JobPipeline::make([
                     Jobs\DeleteDomains::class,
-                    Jobs\RemoveStorageSymlinks::class,
+                    // Jobs\RemoveStorageSymlinks::class,
                 ])->send(function (Events\DeletingTenant $event) {
                     return $event->tenant;
                 })->shouldBeQueued(false),
@@ -255,7 +248,7 @@ class TenancyServiceProvider extends ServiceProvider
     protected function makeTenancyMiddlewareHighestPriority()
     {
         // PreventAccessFromUnwantedDomains has even higher priority than the identification middleware
-        $tenancyMiddleware = array_merge([Middleware\PreventAccessFromUnwantedDomains::class], config('tenancy.identification.middleware'));
+        $tenancyMiddleware = [Middleware\PreventAccessFromUnwantedDomains::class, ...config('tenancy.identification.middleware')];
 
         foreach (array_reverse($tenancyMiddleware) as $middleware) {
             $this->app[\Illuminate\Contracts\Http\Kernel::class]->prependToMiddlewarePriority($middleware);

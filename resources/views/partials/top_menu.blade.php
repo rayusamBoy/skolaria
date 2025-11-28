@@ -95,16 +95,28 @@
                     </a>
                     @endcan
 
+                    @canany(array_values($central_permissions['artisan_commands']))
                     <a href="{{ route('artisan_commands.index') }}" class="dropdown-item {{ request()->routeIs('artisan_commands.index') ? 'active' : '' }}">
                         <i class="material-symbols-rounded">terminal</i>
                         Artisan Commands
                     </a>
+                    @endcanany
 
-                    <a href="{{ route(Usr::tenancyInitilized() ? 'logs.index' : 'central_logs.index') }}" class="dropdown-item {{ request()->routeIs('logs.index', 'central_logs.index') ? 'active' : '' }}">
+                    @else
+                    @canany(array_values(array_values($central_permissions['central_logs'])))
+                    <a href="{{ route('central_logs.index') }}" class="dropdown-item {{ request()->routeIs('central_logs.index') ? 'active' : '' }}">
                         <i class="material-symbols-rounded">browse_activity</i>
                         Manage Activity Log
                     </a>
+                    @endcanany
                     @endunless
+
+                    @canany(array_values(array_values($tenant_permissions['logs'])))
+                    <a href="{{ route('logs.index') }}" class="dropdown-item {{ request()->routeIs('logs.index') ? 'active' : '' }}">
+                        <i class="material-symbols-rounded">browse_activity</i>
+                        Manage Activity Log
+                    </a>
+                    @endcanany
 
                     <div class="dropdown-divider"></div>
 
