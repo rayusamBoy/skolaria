@@ -20,6 +20,8 @@ class UserController extends Controller
 
     public function __construct(UserRepo $user, LocationRepo $loc, MyClassRepo $my_class, PermissionRepo $permission)
     {
+       // $this->permissionMap = config('permissions.names.central.central_users');
+       // parent::__construct();
         $this->user = $user;
         $this->loc = $loc;
         $this->my_class = $my_class;
@@ -28,10 +30,11 @@ class UserController extends Controller
 
     public function index()
     {
-        $d['users'] = $this->user->getUsersByRoleNames(['Super Admin']);
+        $d['users'] = $this->user->getUsersByRoleNames(['Root']);
         $d['nationals'] = $this->loc->getAllNationals();
         $d['blood_groups'] = $this->user->getBloodGroups();
         $d['roles'] = $this->permission->getRoles();
+        $d['permissions'] = $this->permission->getPermissions();
 
         return view('pages.central.users.index', $d);
     }
@@ -39,11 +42,12 @@ class UserController extends Controller
     public function edit($id)
     {
         $id = Usr::decodeHash($id);
-     
-        $d['roles'] = $this->permission->getRoles();
+
+        $d['roles'] = $roles = $this->permission->getRoles();
+        $d['permissions'] = $this->permission->getPermissions();
         $d['user'] = $this->user->find($id);
         $d['staff_rec'] = $this->user->getStaffRecord(['user_id' => $id])->first();
-        $d['users'] = $this->user->getUsersByRoleNames(['Super Admin']);
+        $d['users'] = $this->user->getUsersByRoleNames($roles->pluck('name')->toArray());
         $d['blood_groups'] = $this->user->getBloodGroups();
         $d['nationals'] = $this->loc->getAllNationals();
 
@@ -63,7 +67,7 @@ class UserController extends Controller
     {
         $user_role = $req->user_role;
         $except = ['_token', '_method'];
-        $data = $req->except(array_merge(Usr::getStaffRecord(), Usr::getParentRelativeRecord(), $except));
+        $data = $req->except([...Usr::getStaffRecord(), ...Usr::getParentRelativeRecord(), ...$except]);
 
         $data['name'] = $name = ucwords(strtolower($req->name));
         $data['user_role'] = $user_role;
@@ -108,19 +112,17 @@ class UserController extends Controller
     {
         $id = (int) Usr::decodeHash($id);
         $user = $this->user->find($id);
-        $user_type = 'hhh';
-        $except = array_merge(Usr::getStaffRecord(), ['_token', '_method', 'user_roles']);
+        $except = [...Usr::getStaffRecord(), '_token', '_method', 'user_roles'];
         $data = $req->except($except);
 
         $data['name'] = $name = ucwords(strtolower($req->name));
-        $data['user_type'] = $user_type;
         $data['message_media_heading_color'] = Usr::getUserMediaHeadingColor($name); // Use a unique text color based on the name
 
         if ($req->hasFile('photo')) {
             $photo = $req->file('photo');
             $f = Usr::getFileMetaData($photo);
             $f['name'] = 'photo.' . $f['ext'];
-            $f['path'] = $photo->storeAs(Usr::getUploadPath($user_type) . $user->code, $f['name']);
+            $f['path'] = $photo->storeAs(Usr::getUploadPath('test') . $user->code, $f['name']);
             $data['photo'] = 'storage/' . $f['path'];
         }
 
@@ -146,7 +148,7 @@ class UserController extends Controller
 
         /* Prevent other Users from viewing Profile of others */
         // if (auth()->id() != $user_id && !Usr::userIsHead())
-            // return back()->with('pop_error', __('msg.denied'));
+        // return back()->with('pop_error', __('msg.denied'));
 
         $data['staff_rec'] = $this->user->getStaffRecord(where: ['user_id' => $user_id])->first() ?: null;
 

@@ -104,7 +104,7 @@ class MarkController extends Controller
     public function print_view($student_id, $exam_id, $year)
     {
         /* Prevent Other Students/Parents from viewing Result of others */
-        if ((auth()->id() != $student_id && !Mk::userIsMyChild($student_id, auth()->id())) && (!Mk::marksheetPrintNotAllowed() || auth()->user()->hasRole('super_admin')))
+        if (auth()->id() != $student_id && !Mk::userIsMyChild($student_id, auth()->id()) && (!Mk::marksheetPrintNotAllowed() || auth()->user()->hasRole('super_admin')))
             return redirect(route('dashboard'))->with('pop_error', __('msg.denied'));
 
         if (Mk::examIsLocked() && !auth()->user()->hasAnyRole(['Super Admin', 'Admin'])) {
@@ -155,7 +155,7 @@ class MarkController extends Controller
 
         if ($req->section_id == null && $sub_recs->whereNull('section_id')->whereNotNull('students_ids')->isNotEmpty())
             $students = $this->student->getRecordByUserIDs(unserialize($sub_recs->value('students_ids')))->get();
-        elseif (($req->section_id == null && $sub_recs->whereNull('section_id')->whereNull('students_ids')->isNotEmpty()) || ($req->section_id != null && $sub_recs->whereNotNull('students_ids')->isNotEmpty()))
+        elseif ($req->section_id == null && $sub_recs->whereNull('section_id')->whereNull('students_ids')->isNotEmpty() || $req->section_id != null && $sub_recs->whereNotNull('students_ids')->isNotEmpty())
             return back()->with('pop_error', __('msg.rnf'));
         else
             $students = $this->student->getRecord($d)->get();
@@ -216,7 +216,7 @@ class MarkController extends Controller
     {
         $exam = $this->exam->find($exam_id);
 
-        if ($this->exam->isLocked($exam_id) or (Mk::isDisabled($exam->editable) and !Mk::userIsTeamSA()))
+        if ($this->exam->isLocked($exam_id) or Mk::isDisabled($exam->editable))
             return Mk::jsonUpdateDenied();
 
         switch ($section_id) {
@@ -379,10 +379,10 @@ class MarkController extends Controller
                         $students_ids = unserialize($students_ids);
 
                         array_walk($students_ids, function (&$arr) { // note the reference (&)
-                            $arr = intval($arr); // Convert each array value to integer
+                            $arr = \intval($arr); // Convert each array value to integer
                         });
 
-                        if (in_array((int) $st_rec->user_id, $students_ids)) {
+                        if (\in_array((int) $st_rec->user_id, $students_ids)) {
                             $mk = $this->mark->firstOrCreate($st_rec->user_id, $class->id, $sec->id, $exam->id, $this->year, $sub->id);
                             $this->exam->firstOrCreateExmRec($st_rec->user_id, $class->id, $sec->id, $exam->id, $this->year);
                             if (Mk::isTerminalExam($exam->category_id) || Mk::isAnnualExam($exam->category_id))
@@ -698,7 +698,7 @@ class MarkController extends Controller
                     $sub_ids = $this->mark->getSubjectIDs($wh);
                     $st_ids = $this->mark->getStudentIDs($wh);
 
-                    if (count($sub_ids) < 1 or count($st_ids) < 1)
+                    if (\count($sub_ids) < 1 or \count($st_ids) < 1)
                         return Mk::goWithDanger('marks.tabulation', __('msg.srnf'));
 
                     $d['exr'] = $exr = $this->exam->getRecord($wh);
@@ -725,7 +725,7 @@ class MarkController extends Controller
                     $sub_ids = $this->mark->getSubjectIDs($wh);
                     $st_ids = $this->mark->getStudentIDs($wh);
 
-                    if (count($sub_ids) < 1 || count($st_ids) < 1)
+                    if (\count($sub_ids) < 1 || \count($st_ids) < 1)
                         return Mk::goWithDanger('marks.tabulation', __('msg.srnf'));
 
                     $d['exr'] = $exr = $this->exam->getRecord($wh);
@@ -774,7 +774,7 @@ class MarkController extends Controller
                     $sub_ids = $this->mark->getSubjectIDs($wh);
                     $st_ids = $this->mark->getStudentIDs($wh);
 
-                    if (count($sub_ids) < 1 or count($st_ids) < 1)
+                    if (\count($sub_ids) < 1 or \count($st_ids) < 1)
                         return Mk::goWithDanger('marks.tabulation', __('msg.srnf'));
 
                     $d['subjects'] = $this->my_class->getSubjectsByIDs($sub_ids);
@@ -797,7 +797,7 @@ class MarkController extends Controller
                     $sub_ids = $this->mark->getSubjectIDs($wh);
                     $st_ids = $this->mark->getStudentIDs($wh);
 
-                    if (count($sub_ids) < 1 or count($st_ids) < 1)
+                    if (\count($sub_ids) < 1 or \count($st_ids) < 1)
                         return Mk::goWithDanger('marks.tabulation', __('msg.srnf'));
 
                     $d['subjects'] = $this->my_class->getSubjectsByIDs($sub_ids);

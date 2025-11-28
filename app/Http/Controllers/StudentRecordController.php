@@ -108,7 +108,7 @@ class StudentRecordController extends Controller
         $ur = self::getUserHeadings(false);
         $sr = self::getStudentHeadings(false);
 
-        $data['heading_names'] = array_merge($ur, $sr);
+        $data['heading_names'] = [...$ur, ...$sr];
         $data['class'] = $class = $this->my_class->find($req->my_class_id);
         $data['my_class_id'] = $req->my_class_id;
         $data['nationality'] = $this->loc->getNationality($req->nal_id);
@@ -285,7 +285,7 @@ class StudentRecordController extends Controller
     private function getThemeFilesNames()
     {
         $id_card_theme_dir = Qs::getTenancyAwareIDCardsThemeDir();
-        $tenant_storage_dir = tenancy()->run(tenant(), fn () => storage_path()) . "app/public/";
+        $tenant_storage_dir = tenancy()->run(tenant(), storage_path(...)) . "app/public/";
 
         $file_names_to_copy = ['0001.blade.php'];
         $dir_names_to_copy = ['backgrounds', 'others'];
@@ -305,7 +305,7 @@ class StudentRecordController extends Controller
             }
         }
 
-        $exclude = array_merge(['.', '..'], $dir_names_to_copy);
+        $exclude = ['.', '..', ...$dir_names_to_copy];
         $files = array_diff(scandir($id_card_theme_dir), $exclude);
         array_walk_recursive($files, function (&$arr) {
             $arr = explode(".", $arr)[0]; // Leave out '.blade.php' part

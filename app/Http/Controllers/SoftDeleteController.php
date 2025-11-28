@@ -41,7 +41,7 @@ class SoftDeleteController extends Controller
     {
         $can_soft_delete_models = ['users', 'pyaments', 'my_classes', 'exams', 'threads'];
 
-        if (!in_array($model_name, $can_soft_delete_models))
+        if (!\in_array($model_name, $can_soft_delete_models))
             return back()->with('pop_error', __('msg.denied'));
 
         Qs::getDbFacadesTable($model_name)->whereNotNull("deleted_at")->delete();

@@ -1,11 +1,11 @@
 <?php
 
-use Diglactic\Breadcrumbs\Breadcrumbs;
-use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
+use App\Helpers\Qs;
 use App\Repositories\PaymentRepo;
 use App\Repositories\StudentRepo;
 use App\Repositories\TimeTableRepo;
-use App\Helpers\Qs;
+use Diglactic\Breadcrumbs\Breadcrumbs;
+use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
 
 Breadcrumbs::for('index', function (BreadcrumbTrail $trail) {
     $trail->push('Home', route('index'));

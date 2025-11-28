@@ -32,17 +32,16 @@ class AppServiceProvider extends ServiceProvider
     {
         require base_path('routes/tenant/channels.php');
 
-        Route::bind('id', fn($value) => Qs::decodeHash($value));
+        Route::bind('id', Qs::decodeHash(...));
         RateLimiter::for('api', fn(Request $request) => Limit::perMinute(60)->by($request->user()?->id ?: $request->ip()));
-        LogViewer::auth(fn($request) => $request->user() && $request->user()->hasRole('Itguy'));
+        LogViewer::auth(fn($request) => $request?->user()?->hasRole('Itguy'));
         Event::subscribe(TenantEventSubscriber::class);
         Paginator::useBootstrapFour();
         View::share('central_permissions', config('permissions.names.central'));
         View::share('tenant_permissions', config('permissions.names.tenant'));
 
-        // Implicitly grant "super_admin" role all permissions
-        // This works in the app by using gate-related functions like auth()->user->can() and @can()
-       // Gate::before(fn($user, $ability) => $user->hasRole('super_admin') || $user->hasRole('Itguy') ? true : null);
-        Gate::before(fn($user, $ability) => true);
+        // Implicitly grant "Super Admin, Root" role all permissions
+        // This works in the app that uses gate-related functions like auth()->user->can() and @can()
+        Gate::before(fn($user, $ability) => $user->hasRole('Super Admin') || $user->hasRole('Root') ? true : null);
     }
 }

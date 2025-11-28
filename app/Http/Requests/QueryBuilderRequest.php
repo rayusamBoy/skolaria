@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\ExistsInTableNames;
 use App\Rules\ExistsInTableColsNames;
+use App\Rules\ExistsInTableNames;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 

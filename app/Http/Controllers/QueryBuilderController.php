@@ -472,7 +472,7 @@ class QueryBuilderController extends Controller
         $d['keys'] = array_unique($keys);
 
         $teachers_arr = $teachers->toArray();
-        $total = count($teachers_arr);
+        $total = \count($teachers_arr);
         $per_page = $req->per_page;
         $data_str = '';
 
@@ -484,7 +484,7 @@ class QueryBuilderController extends Controller
         for ($i = 1; $i <= $last_page; $i++) {
             $point = $i * $per_page - $per_page;
             $starting_point = ($i === $last_page) ? $point - $total : $point;
-            $d['staff'] = array_slice($teachers_arr, $starting_point, $per_page, true);
+            $d['staff'] = \array_slice($teachers_arr, $starting_point, $per_page, true);
             $d['page_number'] = $i;
             $data_str .= view("pages.query_builder.print.staff_data.body", $d)->render();
         }

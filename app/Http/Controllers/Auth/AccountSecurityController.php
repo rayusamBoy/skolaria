@@ -64,7 +64,7 @@ class AccountSecurityController extends Controller
         if ($request->method() === 'POST') {
             $recovery_code = $request->recovery_codes;
 
-            if (in_array($recovery_code, json_decode(auth()->user()->twofa_recovery_codes))) {
+            if (\in_array($recovery_code, json_decode(auth()->user()->twofa_recovery_codes))) {
                 $data['twofa_secret_code'] = null;
                 $data['twofa_recovery_codes'] = null;
                 $this->user->update(auth()->id(), $data);

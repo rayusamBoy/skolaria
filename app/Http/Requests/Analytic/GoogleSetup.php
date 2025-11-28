@@ -10,7 +10,7 @@ use Illuminate\Validation\Rule;
 class GoogleSetup extends FormRequest
 {
     protected $property_id_type, $tag_id_type, $credential_file_attr, $credential_file_name;
-    function __construct()
+    public function __construct()
     {
         $this->property_id_type = 'google_analytic_property_id';
         $this->tag_id_type = 'google_analytic_tag_id';

@@ -35,7 +35,7 @@ class MarksImport implements ToCollection, WithHeadingRow, WithValidation
 
                 if ($students_ids != NULL) {
                     $students_ids = unserialize($students_ids); // Get students ids
-                    if (in_array($sid, $students_ids)) {
+                    if (\in_array($sid, $students_ids)) {
                         // If the subject record has students ids, and current student id is in there, update
                         $this->updateMark($row, $sid, $sec_id, $sub->id, $sub->name);
                     } else {
@@ -97,7 +97,7 @@ class MarksImport implements ToCollection, WithHeadingRow, WithValidation
             $attr = [
                 $this->replaceSpaceWithUnderscore($sub->name) => $sub->name,
             ];
-            $attributes = array_merge($attr, $attributes);
+            $attributes = [...$attr, ...$attributes];
         }
 
         return $attributes;
@@ -111,16 +111,14 @@ class MarksImport implements ToCollection, WithHeadingRow, WithValidation
             $rule = [
                 '*.' . $this->replaceSpaceWithUnderscore($sub->name) => ['min:0', 'max:100', 'integer', 'nullable', 'sometimes'],
             ];
-            $sub_rules = array_merge($rule, $sub_rules); // Merge sub array rule to main array rules per each iteration.
+            $sub_rules = [...$rule, ...$sub_rules]; // Merge sub array rule to main array rules per each iteration.
         }
 
         // Validation rules for students admission number
-        $collection = array_merge(
-            [
-                '*.admission_number' => ['exists:users,username', 'string', 'required']
-            ],
-            $sub_rules
-        );
+        $collection = [
+            '*.admission_number' => ['exists:users,username', 'string', 'required'],
+            ...$sub_rules
+        ];
 
         return $collection;
     }

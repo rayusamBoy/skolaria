@@ -9,7 +9,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\StudentRecord;
 use App\Models\Thread;
-use App\Models\UserType;
 use App\Notifications\MessageSent;
 use App\Repositories\UserRepo;
 use App\User;

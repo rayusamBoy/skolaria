@@ -32,7 +32,7 @@ class HasOrderedClassExamSession implements ValidationRule
             $exam = strtolower($exam);
         });
 
-        if ((!isset($exploded_value[0]) || !isset($exploded_value[1]) || !isset($exploded_value[2]) || !isset($exploded_value[3])))
+        if (!isset($exploded_value[0]) || !isset($exploded_value[1]) || !isset($exploded_value[2]) || !isset($exploded_value[3]))
             $fail('The :attribute is invalid.');
         else {
             // The value to be compared to
@@ -40,7 +40,7 @@ class HasOrderedClassExamSession implements ValidationRule
             $exam_received = strtolower(str_replace('_', ' ', $exploded_value[1] ?? null)); // Get exam name from the filename
             $year_received = "$exploded_value[2]-$exploded_value[3]"; // Get year from the filename
             // If any of the three data from the file as retrieved above do not exists in the database records return error.
-            if (!in_array($class_received, $class_names) || !in_array($exam_received, $exam_names) || $year_received != Mk::getCurrentSession())
+            if (!\in_array($class_received, $class_names) || !\in_array($exam_received, $exam_names) || $year_received != Mk::getCurrentSession())
                 $fail('The :attribute must be a valid file name.');
         }
     }

@@ -28,7 +28,7 @@ class SendTenantEvent extends Notification
         $channels = [];
 
         if (Qs::is_serialized($notifiable->is_notifiable)) {
-            if (is_array(unserialize($notifiable->is_notifiable)) && unserialize($notifiable->is_notifiable)['status'] === 1) {
+            if (\is_array(unserialize($notifiable->is_notifiable)) && unserialize($notifiable->is_notifiable)['status'] === 1) {
                 $channels = FcmChannel::class;
             }
         }

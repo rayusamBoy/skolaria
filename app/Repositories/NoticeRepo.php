@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Models\Notice;
 use Auth;
-use Qs;
 
 class NoticeRepo
 {

@@ -32,18 +32,21 @@ class UserController extends Controller
         $d['nationals'] = $this->loc->getAllNationals();
         $d['blood_groups'] = $this->user->getBloodGroups();
         $d['roles'] = $this->permission->getRoles();
+        $d['permissions'] = $this->permission->getPermissions();
 
         return view('pages.users.index', $d);
     }
+
 
     public function edit($id)
     {
         $id = Usr::decodeHash($id);
 
-        $d['roles'] = $this->permission->getRoles();
+        $d['roles'] = $roles = $this->permission->getRoles();
+        $d['permissions'] = $this->permission->getPermissions();
         $d['user'] = $this->user->find($id);
         $d['staff_rec'] = $this->user->getStaffRecord(['user_id' => $id])->first();
-        $d['users'] = $this->user->getUsersByRoleNames(['Super Admin']);
+        $d['users'] = $this->user->getUsersByRoleNames($roles->pluck('name')->toArray());
         $d['blood_groups'] = $this->user->getBloodGroups();
         $d['nationals'] = $this->loc->getAllNationals();
 
@@ -68,7 +71,7 @@ class UserController extends Controller
     {
         $except = ['_token', '_method'];
         $user_role = $req->user_role;
-        $data = $req->except(array_merge(Usr::getStaffRecord(), Usr::getParentRelativeRecord(), $except));
+        $data = $req->except([...Usr::getStaffRecord(), ...Usr::getParentRelativeRecord(), ...$except]);
 
         $data['name'] = $name = ucwords(strtolower($req->name));
         $data['user_role'] = $user_role;
@@ -76,9 +79,9 @@ class UserController extends Controller
         $data['photo'] = Usr::createAvatar($name, $code, $user_role);
         $data['dob'] = $req->dob;
 
-        $user_is_staff = in_array($user_role, Usr::getStaff());
-        $user_is_teamSA = in_array($user_role, Usr::getTeamSA());
-        $user_is_parent = in_array($user_role, Usr::getParent());
+        $user_is_staff = \in_array($user_role, Usr::getStaff());
+        $user_is_teamSA = \in_array($user_role, Usr::getTeamSA());
+        $user_is_parent = \in_array($user_role, Usr::getParent());
 
         $emp_date = $req->emp_date ?: now();
         $staff_id = Usr::getAppCode() . '/STAFF/' . date('Y/m', strtotime($emp_date)) . '/' . mt_rand(1000, 9999);
@@ -142,11 +145,11 @@ class UserController extends Controller
         $user = $this->user->find($id);
 
         $user_role = $user->role;
-        $user_was_staff = in_array($user->role, Usr::getStaff());
-        $user_is_staff = in_array($user_role, Usr::getStaff());
+        $user_was_staff = \in_array($user->role, Usr::getStaff());
+        $user_is_staff = \in_array($user_role, Usr::getStaff());
         $user_is_parent = $user->hasRole('parent');
 
-        $except = array_merge(Usr::getStaffRecord(), Usr::getParentRelativeRecord(), ['_token', '_method', 'user_roles']);
+        $except = [...Usr::getStaffRecord(), ...Usr::getParentRelativeRecord(), '_token', '_method', 'user_roles'];
         $data = $req->except($except);
         $user->syncRoles($req->user_roles);
 
@@ -201,11 +204,11 @@ class UserController extends Controller
         $data['user'] = $this->user->find($user_id);
 
         /* Prevent other Users from viewing Profile of others */
-      //  if (auth()->id() != $user_id && !Usr::userIsTeamSA() && !Usr::userIsMyChild(auth()->id(), $user_id))
-    //        return redirect(route('dashboard'))->with('pop_error', __('msg.denied'));
+        //  if (auth()->id() != $user_id && !Usr::userIsTeamSA() && !Usr::userIsMyChild(auth()->id(), $user_id))
+        //        return redirect(route('dashboard'))->with('pop_error', __('msg.denied'));
 
-       // if (Usr::userIsTeamSATCL())
-       //     $data['staff_rec'] = $this->user->getStaffRecord(['user_id' => $user_id])->first() ?: null;
+        // if (Usr::userIsTeamSATCL())
+        //     $data['staff_rec'] = $this->user->getStaffRecord(['user_id' => $user_id])->first() ?: null;
 
         return view('pages.users.show', $data);
     }

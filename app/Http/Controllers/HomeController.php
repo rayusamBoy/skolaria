@@ -126,8 +126,7 @@ class HomeController extends Controller
         }
 
         // Put together $d (view data)
-        $d = array_merge($d, [
-            'unviewed_notices' => $un_paginated,
+        $d = [...$d, 'unviewed_notices' => $un_paginated,
             'viewed_notices' => $vn_paginated,
 
             'subjects' => $this->class->getUniqueSubjectsNames(),
@@ -159,8 +158,7 @@ class HomeController extends Controller
             'grad_students_male_count' => $grad_students->where('user.gender', User::GENDER_MALE)->count(),
             'grad_students_female_count' => $grad_students->where('user.gender', User::GENDER_FEMALE)->count(),
             'students_per_class_labels' => $class_labels,
-            'students_per_class_counts' => $class_counts,
-        ]);
+            'students_per_class_counts' => $class_counts];
 
         $view = Usr::tenancyInitilized() ? 'pages.dashboard' : 'pages.central.dashboard';
         return view($view, $d);
@@ -184,7 +182,7 @@ class HomeController extends Controller
         foreach ($notices as $ntc) {
             $v_ids = $ntc->viewers_ids;
             $viewers = $v_ids === null ? [] : json_decode($v_ids, true);
-            if ($v_ids === null || !is_array($viewers) || !in_array($auth_id, $viewers, true)) {
+            if ($v_ids === null || !\is_array($viewers) || !\in_array($auth_id, $viewers, true)) {
                 $unviewed_count++;
                 $unviewed_notices->push($ntc);
             } else {

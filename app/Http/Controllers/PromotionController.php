@@ -93,8 +93,8 @@ class PromotionController extends Controller
             $promote['from_class'] = $fc;
             $promote['from_section'] = $fs;
             $promote['grad'] = ($p === 'G') ? 1 : 0;
-            $promote['to_class'] = in_array($p, ['D', 'G']) ? $fc : $tc;
-            $promote['to_section'] = in_array($p, ['D', 'G']) ? $fs : $ts;
+            $promote['to_class'] = \in_array($p, ['D', 'G']) ? $fc : $tc;
+            $promote['to_section'] = \in_array($p, ['D', 'G']) ? $fs : $ts;
             $promote['student_id'] = $st->id;
             $promote['user_id'] = $st->user_id;
             $promote['user'] = $st->user_id;

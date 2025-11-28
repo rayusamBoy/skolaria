@@ -76,7 +76,7 @@ class Mk extends Qs
                 // Get all subject exam sums - for finding subject rank
                 foreach ($marks_all_subjects as $mark) {
                     $p = Mark::where(['subject_id' => $mark->subject->id, 'my_class_id' => $my_class->id, 'exam_id' => $exam_id]);
-                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: count(json_decode($sids)));
+                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count(json_decode($sids)));
                     $q = Mark::whereIn('student_id', $sids);
 
                     $avg_sum = $q->where(['subject_id' => $mark->subject->id, 'exam_id' => $exam_id, 'my_class_id' => $my_class->id])->avg('exm');
@@ -89,7 +89,7 @@ class Mk extends Qs
 
                 foreach ($marks_all_subjects as $mark) {
                     $p = Mark::where(['subject_id' => $mark->subject->id, 'my_class_id' => $my_class->id, 'exam_id' => $exam_id]);
-                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: count(json_decode($sids)));
+                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count(json_decode($sids)));
                     $q = Mark::whereIn('student_id', $sids);
 
                     $sat = $q->where(['exam_id' => $exam_id, 'subject_id' => $mark->subject->id])->whereNotNull('exm')->count();
@@ -112,7 +112,7 @@ class Mk extends Qs
                     foreach ($grades as $grd) {
                         $r = $p->get()->where('grade_id', $grd->id);
 
-                        $collection .= '<td class="w-1pcnt unstyled text-center">' . '<strong>' . $grd->name . '</strong>' . ': ' . sprintf("%02d", $grd_cnt = $r->count()) . '</td>';
+                        $collection .= '<td class="w-1pcnt unstyled text-center">' . '<strong>' . $grd->name . '</strong>' . ': ' . \sprintf("%02d", $grd_cnt = $r->count()) . '</td>';
                         // GPA = sum of (grade_count times grade_credit for all grades) divide by sum of all grade_count only. 
                         $all_grd_count += $grd_cnt;
 
@@ -129,7 +129,7 @@ class Mk extends Qs
                 // Get all subject exam sums - for finding subject rank
                 foreach ($marks_per_section as $mark) {
                     $p = Mark::where(['subject_id' => $mark->subject->id, 'my_class_id' => $my_class->id, 'exam_id' => $exam_id, 'section_id' => $section_id]);
-                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: count(json_decode($sids)));
+                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count(json_decode($sids)));
                     $q = Mark::whereIn('student_id', $sids);
 
                     $avg_sum = $q->where(['subject_id' => $mark->subject->id, 'exam_id' => $exam_id, 'my_class_id' => $my_class->id, 'section_id' => $section_id])->avg('exm');
@@ -142,7 +142,7 @@ class Mk extends Qs
 
                 foreach ($marks_per_section as $mark) {
                     $p = Mark::where(['subject_id' => $mark->subject->id, 'my_class_id' => $my_class->id, 'exam_id' => $exam_id, 'section_id' => $section_id]);
-                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: count(json_decode($sids)));
+                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count(json_decode($sids)));
                     $q = Mark::whereIn('student_id', $sids);
 
                     $sat = $q->where(['exam_id' => $exam_id, 'subject_id' => $mark->subject->id, 'section_id' => $section_id])->whereNotNull('exm')->count();
@@ -164,7 +164,7 @@ class Mk extends Qs
                     foreach ($grades as $grd) {
                         $r = $p->get()->where('grade_id', $grd->id);
 
-                        $collection .= '<td class="w-1pcnt unstyled text-center">' . '<strong>' . $grd->name . '</strong>' . ': ' . sprintf("%02d", $grd_cnt = $r->count()) . '</td>';
+                        $collection .= '<td class="w-1pcnt unstyled text-center">' . '<strong>' . $grd->name . '</strong>' . ': ' . \sprintf("%02d", $grd_cnt = $r->count()) . '</td>';
 
                         $all_grd_count += $grd_cnt;
 
@@ -309,16 +309,12 @@ class Mk extends Qs
 
     protected static function markGradeFilter(Collection $marks, $gradeIDS)
     {
-        return $marks->filter(function ($mks) use ($gradeIDS) {
-            return in_array($mks->grade_id, $gradeIDS);
-        })->count();
+        return $marks->filter(fn($mks) => \in_array($mks->grade_id, $gradeIDS))->count();
     }
 
     public static function countSubjectsOffered(Collection $mark)
     {
-        return $mark->filter(function ($mk) {
-            return ($mk->tca + $mk->exm) > 0;
-        })->count();
+        return $mark->filter(fn($mk) => $mk->tca + $mk->exm > 0)->count();
     }
 
     /*Get Exam Avg Per Term*/
@@ -484,9 +480,7 @@ class Mk extends Qs
         }
 
         rsort($all_mks);
-        $filtered_mks = array_filter($all_mks, function ($mk) {
-            return $mk != null;
-        });
+        $filtered_mks = array_filter($all_mks, fn($mk) => $mk != null);
 
         $flipped_mks = array_flip($filtered_mks);
 

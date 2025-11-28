@@ -26,9 +26,9 @@ class NotificationController extends Controller
         $channels = Qs::getActiveNotificationChannels(auth()->user(), false, true, true, true);
 
         $data['notification_status'] = Qs::is_serialized(auth()->user()->is_notifiable) ? unserialize(auth()->user()->is_notifiable)['status'] : 0;
-        $data['email_channel_on'] = in_array('mail', $channels);
-        $data['sms_channel_on'] = in_array('vonage', $channels);
-        $data['push_channel_on'] = in_array(FcmChannel::class, $channels);
+        $data['email_channel_on'] = \in_array('mail', $channels);
+        $data['sms_channel_on'] = \in_array('vonage', $channels);
+        $data['push_channel_on'] = \in_array(FcmChannel::class, $channels);
 
         return view('pages.notifications.index', $data);
     }
@@ -102,7 +102,7 @@ class NotificationController extends Controller
         $current_tokens = auth()->user()->firebase_device_token === null ? [] : unserialize(auth()->user()->firebase_device_token);
         $incoming_token = $request->token;
 
-        if ($current_tokens === null or !in_array($incoming_token, $current_tokens)) {
+        if ($current_tokens === null or !\in_array($incoming_token, $current_tokens)) {
             $current_tokens[] = $incoming_token; // Add a new one or the only one
 
             $data = ['firebase_device_token' => serialize($current_tokens)];

@@ -6,7 +6,6 @@ use App\Models\BloodGroup;
 use App\Models\Notification;
 use App\Models\ParentRelative;
 use App\Models\StaffRecord;
-use App\Models\UserType;
 use App\User;
 use Spatie\Permission\Models\Role;
 

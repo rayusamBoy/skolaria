@@ -33,7 +33,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
         $this->student_record_request = new StudentRecordCreate();
         $user_headings = StudentRecordController::getUserHeadings();
         $student_headings = StudentRecordController::getStudentHeadings();
-        $this->all_headings = array_merge($user_headings, $student_headings);
+        $this->all_headings = [...$user_headings, ...$student_headings];
         $this->parameters_columns_to_hide_and_populate = ['state_id', 'nal_id', 'my_class_id'];
         $this->end_data_row = 1000;
     }
@@ -42,7 +42,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
     {
         $column_widths = [];
         foreach ($this->all_headings as $heading) {
-            if (in_array(strtolower($heading), ['name', 'email', 'address', 'food_taboos', 'chp'])) {
+            if (\in_array(strtolower($heading), ['name', 'email', 'address', 'food_taboos', 'chp'])) {
                 $column_widths[$this->mapHeadingToLetter($heading)] = match ($heading) {
                     'name' => 35,
                     'email' => 25,
@@ -74,7 +74,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
         $number_of_heading_rows = 5;
         $start_data_row = $number_of_heading_rows + 1;
 
-        $headings_names_count = count($this->data['heading_names']);
+        $headings_names_count = \count($this->data['heading_names']);
         $end_col_index = $headings_names_count;
         $start_data_col = 1;
 
@@ -133,7 +133,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
             $type_list_validation->setError('Value is not in list.');
             $type_list_validation->setPromptTitle('Select from list.');
             $type_list_validation->setPrompt('Please, select a value from the drop-down list.');
-            $type_list_validation->setFormula1(sprintf('"%s"', implode(',', $dropdown_options)));
+            $type_list_validation->setFormula1(\sprintf('"%s"', implode(',', $dropdown_options)));
 
             for ($col = $validation_col; $col <= $validation_col; $col++) {
                 for ($row = $start_data_row; $row <= $this->end_data_row + $number_of_heading_rows; $row++) {
@@ -179,7 +179,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
 
     public function view(): View
     {
-        $this->data['parameters_with_rule_required'] = array_keys(array_filter($this->student_record_request->rules(), fn($rule) => is_array($rule) ? in_array('required', $rule) : str_contains($rule, 'required')));
+        $this->data['parameters_with_rule_required'] = array_keys(array_filter($this->student_record_request->rules(), fn($rule) => \is_array($rule) ? \in_array('required', $rule) : str_contains($rule, 'required')));
         $this->data['parameters_columns_to_hide_and_populate'] = $this->parameters_columns_to_hide_and_populate;
         $this->data['end_data_row'] = $this->end_data_row;
         return view('pages.students.batch.table', $this->data);

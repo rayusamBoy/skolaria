@@ -161,10 +161,10 @@ class MarkRepo
     {
         sort($weight); // Sort points
         $weight = array_filter($weight);
-        if (count($weight) < $length) // If the points are not suffucient compared to subjects considered, return null
+        if (\count($weight) < $length) // If the points are not suffucient compared to subjects considered, return null
             return null;
         // Start from offset (default 0). Take only the sum of the first considered points
-        return array_sum(array_slice($weight, $offset, $length));
+        return array_sum(\array_slice($weight, $offset, $length));
     }
 
     public function getRecordValue($data, $value)

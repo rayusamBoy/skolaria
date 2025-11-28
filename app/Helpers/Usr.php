@@ -12,7 +12,6 @@ use App\Models\Ticket;
 use App\Repositories\UserRepo;
 use App\User;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 
 class Usr extends Qs
 {
@@ -296,7 +295,7 @@ class Usr extends Qs
         $words = explode(" ", $name);
         // Assume the names parts (first, middle, surname) are separated by a space.
         // Take the first letter of the name parts in upper case.
-        $initials = strtoupper(substr($words[0], 0, 1) . (array_key_exists(1, $words) && $words[1] != "" ? substr($words[1], 0, 1) : (array_key_exists(2, $words) && $words[2] != "" ? substr($words[2], 0, 1) : substr($words[0], 1, 1))));
+        $initials = strtoupper(substr($words[0], 0, 1) . (\array_key_exists(1, $words) && $words[1] != "" ? substr($words[1], 0, 1) : (\array_key_exists(2, $words) && $words[2] != "" ? substr($words[2], 0, 1) : substr($words[0], 1, 1))));
 
         // Define a background color and text color for the avatar
         $textColor = '#' . substr(md5($name), 0, 6); // Use a unique text color based on the name

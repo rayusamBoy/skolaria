@@ -22,7 +22,7 @@ trait AuthorizesPermissions
 
     public function bootPermissionMap(): void
     {
-        if (property_exists($this, 'permissionMap') && is_array($this->permissionMap)) {
+        if (property_exists($this, 'permissionMap') && \is_array($this->permissionMap)) {
             $this->enforceResolvedPermission();
         } else {
             // still attempt prefix-based auto-mapping if prefix set
@@ -50,7 +50,7 @@ trait AuthorizesPermissions
         }
 
         // permission may be string or array
-        if (is_array($permission)) {
+        if (\is_array($permission)) {
             if (!$this->userHasAny($permission))
                 $this->forbidden();
             return;
@@ -74,7 +74,7 @@ trait AuthorizesPermissions
         $route = request()->route();
         $actionArr = $route ? $route->getAction() : [];
         // 1) Route action explicit
-        if (!empty($actionArr) && array_key_exists('permission', $actionArr) && $actionArr['permission']) {
+        if (!empty($actionArr) && \array_key_exists('permission', $actionArr) && $actionArr['permission']) {
             return $actionArr['permission'];
         }
 
@@ -93,12 +93,12 @@ trait AuthorizesPermissions
         }
 
         // 3) explicit exact mapping
-        if (property_exists($this, 'permissionMap') && is_array($this->permissionMap) && array_key_exists($action, $this->permissionMap)) {
+        if (property_exists($this, 'permissionMap') && \is_array($this->permissionMap) && \array_key_exists($action, $this->permissionMap)) {
             return $this->permissionMap[$action];
         }
 
         // 4) wildcard/pattern mapping (use fnmatch)
-        if (property_exists($this, 'permissionMap') && is_array($this->permissionMap)) {
+        if (property_exists($this, 'permissionMap') && \is_array($this->permissionMap)) {
             foreach ($this->permissionMap as $pattern => $perm) {
                 // skip exact keys (already checked)
                 if ($pattern === $action)

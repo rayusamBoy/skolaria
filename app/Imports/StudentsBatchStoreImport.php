@@ -44,16 +44,14 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
     {
         $date_columns = [];
 
-        $date_parameters = array_keys(array_filter($this->student_record_request->rules(), function ($rule) {
-            return is_array($rule) ? in_array(['date', 'date_format'], $rule) : str_contains($rule, 'date');
-        }));
+        $date_parameters = array_keys(array_filter($this->student_record_request->rules(), fn($rule) => \is_array($rule) ? \in_array(['date', 'date_format'], $rule) : str_contains($rule, 'date')));
 
         foreach ($date_parameters as $date_parameter) {
             $date_columns[] = $this->mapHeadingToLetter($date_parameter);
         }
 
         // If the value is empty and is a part of date column convert the excel serialized date to php date
-        if (!empty($value) && in_array($cell->getColumn(), $date_columns)) {
+        if (!empty($value) && \in_array($cell->getColumn(), $date_columns)) {
             $cell->setValueExplicit(Date::excelToDateTimeObject($value)->format(Usr::getDateFormat()), DataType::TYPE_STRING);
             return true;
         }
@@ -65,7 +63,7 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
     public function isEmptyWhen(array $row)
     {
         $when = false;
-        $attributes = array_merge($this->user_parameters, $this->student_parameters);
+        $attributes = [...$this->user_parameters, ...$this->student_parameters];
 
         foreach ($attributes as $name => $attribute) {
             // Skip user representative heading row; Just we will check the first column if it contains the name.
@@ -75,11 +73,9 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
             break;
         }
         // Skip all rows that has only hidden populated parameters; Let's check if are the only values that exist
-        $non_null_row_values = array_keys(array_filter($row, function ($value) {
-            return $value != NULL;
-        }));
+        $non_null_row_values = array_keys(array_filter($row, fn($value) => $value != NULL));
         // If the condition is true already, just return it. Else if the difference is 0; that means the arrays are the same
-        return $when ?: count(array_diff($non_null_row_values, $this->parameters_columns_to_hide_and_populate)) === 0;
+        return $when ?: \count(array_diff($non_null_row_values, $this->parameters_columns_to_hide_and_populate)) === 0;
     }
 
     public function collection(Collection $rows)
@@ -135,7 +131,7 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
 
     public function customValidationAttributes()
     {
-        $attributes = array_merge($this->user_parameters, $this->student_parameters);
+        $attributes = [...$this->user_parameters, ...$this->student_parameters];
         return array_flip($attributes);
     }
 
@@ -152,7 +148,7 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
 
     private function mapHeadingToLetter($heading_param)
     {
-        $all_headings = array_values(array_merge($this->user_parameters, $this->student_parameters));
+        $all_headings = array_values([...$this->user_parameters, ...$this->student_parameters]);
         return Usr::numberToLetter(array_search($heading_param, $all_headings) + 1);
     }
 }

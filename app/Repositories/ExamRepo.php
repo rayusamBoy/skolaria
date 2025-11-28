@@ -14,7 +14,6 @@ use App\Models\Mark;
 use App\Models\Section;
 use App\Models\Skill;
 use Illuminate\Support\Facades\DB;
-use Qs;
 
 class ExamRepo
 {
@@ -80,7 +79,7 @@ class ExamRepo
 
     public function getById(int $id, $only_published = true)
     {
-        return ($only_published) ? Exam::where('id', $id)->where('published', 1)->with(['category', 'class_type'])->first() : Exam::where('id', $id)->with(['category', 'class_type'])->first();
+        return $only_published ? Exam::where('id', $id)->where('published', 1)->with(['category', 'class_type'])->first() : Exam::where('id', $id)->with(['category', 'class_type'])->first();
     }
 
     public function getExam(array $data, bool $withoutLockedOnes = true)

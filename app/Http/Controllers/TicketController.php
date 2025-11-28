@@ -216,7 +216,7 @@ class TicketController extends Controller
         $user_tickets_ids = $this->getTenantUserTickets()->where('is_archived', false)->pluck('id')->toArray();
         $ticket_id = Usr::decodeHash($ticket_id);
 
-        if (!in_array($ticket_id, $user_tickets_ids))
+        if (!\in_array($ticket_id, $user_tickets_ids))
             return back()->with('flash_danger', __('msg.denied'));
 
         $this->ticket->updateTicket($ticket_id, ['status' => 'closed']);
@@ -230,7 +230,7 @@ class TicketController extends Controller
     public function archive_ticket(string $ticket_id)
     {
         $user_tickets_ids = $this->getTenantUserTickets()->where('is_archived', false)->pluck('id')->toArray();
-        if (!in_array($ticket_id, $user_tickets_ids))
+        if (!\in_array($ticket_id, $user_tickets_ids))
             return back()->with('flash_danger', __('msg.denied'));
 
         $ticket = $this->ticket->findTicket($ticket_id);
@@ -248,7 +248,7 @@ class TicketController extends Controller
     public function unarchive_ticket(string $ticket_id)
     {
         $user_tickets_ids = $this->getTenantUserTickets()->where('is_archived', true)->pluck('id')->toArray();
-        if (!in_array($ticket_id, $user_tickets_ids))
+        if (!\in_array($ticket_id, $user_tickets_ids))
             return back()->with('flash_danger', __('msg.denied'));
 
         $this->ticket->updateTicket($ticket_id, ['is_archived' => false]);

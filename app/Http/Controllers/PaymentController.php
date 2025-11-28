@@ -41,7 +41,7 @@ class PaymentController extends Controller
     {
         $d['payments'] = $p = $this->pay->getPayment(['year' => $year])->get();
 
-        if (($p->count() < 1))
+        if ($p->count() < 1)
             return Qs::goWithDanger('payments.index');
 
         $d['selected'] = true;

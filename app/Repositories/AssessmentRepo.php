@@ -86,7 +86,7 @@ class AssessmentRepo
 
     public function getValueOutOfQuantity($value, $quantity, $precision = 0)
     {
-        return round(($value / 100) * $quantity, $precision);
+        return round($value / 100 * $quantity, $precision);
     }
 
     public function updateRecord(array $where, array $data)

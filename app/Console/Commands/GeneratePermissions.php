@@ -59,7 +59,7 @@ class GeneratePermissions extends Command
                 continue;
 
             // ignore controllers by name
-            if (in_array($short, $ignoreControllers, true) || in_array($rc->getName(), $ignoreControllers, true)) {
+            if (\in_array($short, $ignoreControllers, true) || \in_array($rc->getName(), $ignoreControllers, true)) {
                 continue;
             }
 
@@ -110,7 +110,7 @@ class GeneratePermissions extends Command
                 $mname = $m->getName();
                 if (str_starts_with($mname, '_'))
                     continue;
-                if (in_array($mname, ['__construct', '__call', 'callAction', 'middleware', 'authorize', 'middlewarePriority'], true))
+                if (\in_array($mname, ['__construct', '__call', 'callAction', 'middleware', 'authorize', 'middlewarePriority'], true))
                     continue;
 
                 $perm = $this->buildPermissionName($resource, $m, $short, $methodMap, $useDots, $overrides);
@@ -186,7 +186,7 @@ class GeneratePermissions extends Command
 
         $parts = explode('_', $s);
         $verb = $parts[0] ?? $s;
-        $rest = array_slice($parts, 1);
+        $rest = \array_slice($parts, 1);
 
         if (isset($methodMap[$verb])) {
             $action = $methodMap[$verb];

@@ -15,7 +15,7 @@ class ExistsInTableNames implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (!in_array($value, array_keys(Qs::getTableNames()))) {
+        if (!\in_array($value, array_keys(Qs::getTableNames()))) {
             $fail('The :attribute field is invalid.');
         }
     }

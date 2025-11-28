@@ -37,7 +37,7 @@ class MyAccountController extends Controller
             return back()->with('pop_error', __('msg.user_invalid'));
 
         $except = ['_token', '_method'];
-        $d = $user->username ? $req->except(array_merge(Qs::getStaffRecord(['username']), $except)) : $req->except(array_merge(Qs::getStaffRecord(), $except));
+        $d = $user->username ? $req->except([...Qs::getStaffRecord(['username']), ...$except]) : $req->except([...Qs::getStaffRecord(), ...$except]);
 
         $user_role = $user->role;
         $code = $user->code;
@@ -63,7 +63,7 @@ class MyAccountController extends Controller
         $this->user->update($user->id, $d);
         $staff_data_edit = $this->user->whereStaffRecord(['user_id' => $user->id])->first()->staff_data_edit;
 
-        if (($staff_data_edit == true) || auth()->user()->hasRole('Itguy')) {
+        if ($staff_data_edit == true || auth()->user()->hasRole('Itguy')) {
             $d2 = $req->only(Qs::getStaffRecord());
             $d2['subjects_studied'] = json_encode(explode(",", $d2['subjects_studied']));
             $this->user->updateStaffRecord(['user_id' => $user->id], $d2);

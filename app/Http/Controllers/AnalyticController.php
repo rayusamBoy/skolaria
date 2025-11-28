@@ -42,7 +42,7 @@ class AnalyticController extends Controller
         if (Qs::googleAnalyticsSetUpOkAndEnabled()) {
             $d['google_analytics_setup_ok'] = true;
 
-            $d['data'] = $data = count($data) <= 0 ? ['period_number' => 6, 'period_name' => 'months'] : $data;
+            $d['data'] = $data = \count($data) <= 0 ? ['period_number' => 6, 'period_name' => 'months'] : $data;
 
             $period = match ($data["period_name"]) {
                 'days' => Period::days($data["period_number"]),
@@ -83,7 +83,7 @@ class AnalyticController extends Controller
         $d = $req->only(['period_number', 'period_name']);
         $period_names = array_keys(Qs::getSpatieAnalyticsPackagePeriods());
 
-        if (!in_array($d['period_name'], $period_names))
+        if (!\in_array($d['period_name'], $period_names))
             return redirect()->route('analytics.index')->with('flash_warning', __('msg.invalid_period_name'));
 
         return $this->index($d);

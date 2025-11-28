@@ -39,7 +39,7 @@ class HasOrderedClassDescriptionSession implements ValidationRule
             $description_received = strtolower(str_replace('_', ' ', $exploded_value[1] ?? null)); // Get description from the filename
             $year_received = "$exploded_value[2]-$exploded_value[3]"; // Get year from the filename
             // If any of the three data from the file as retrieved above do not exists in the database records return error.
-            if (!in_array($class_received, $class_names) || $description_received != $this->description || $year_received != Mk::getCurrentSession())
+            if (!\in_array($class_received, $class_names) || $description_received != $this->description || $year_received != Mk::getCurrentSession())
                 $fail('The :attribute must be a valid file name.');
         }
     }

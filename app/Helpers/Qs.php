@@ -190,7 +190,7 @@ class Qs
      */
     public static function numberToLetter($number)
     {
-        return chr(64 + $number);
+        return \chr(64 + $number);
     }
 
     public static function userIsClassSectionTeacher()
@@ -200,7 +200,7 @@ class Qs
 
     public static function userIsHead(): bool
     {
-        return in_array(auth()->user()->id, self::getHeadSAIDs());
+        return \in_array(auth()->user()->id, self::getHeadSAIDs());
     }
 
     // Get ids of super admins heads
@@ -229,7 +229,7 @@ class Qs
 
     public static function headSA(int $user_id): bool
     {
-        return in_array($user_id, self::getHeadSAIDs());
+        return \in_array($user_id, self::getHeadSAIDs());
     }
 
     public static function userIsMyChild($student_id, $parent_id)
@@ -415,8 +415,8 @@ class Qs
     public static function goToRoute($goto, $status = 302, $headers = [], $secure = null)
     {
         $data = [];
-        $to = (is_array($goto) ? $goto[0] : $goto) ?: 'dashboard';
-        if (is_array($goto)) {
+        $to = (\is_array($goto) ? $goto[0] : $goto) ?: 'dashboard';
+        if (\is_array($goto)) {
             array_shift($goto);
             $data = $goto;
         }
@@ -628,7 +628,7 @@ class Qs
         // Flip the array to get the keys. The keys are the actual database column names
         $flipped = array_flip($data);
 
-        if (in_array("*", $columns))
+        if (\in_array("*", $columns))
             return implode(",", $flipped);
         else {
             $intersected = array_intersect($columns, $flipped);
@@ -642,7 +642,7 @@ class Qs
         // Flip the array to get the keys. The keys are the actual database column names
         $flipped = array_flip($data);
 
-        if (in_array("*", $columns)) {
+        if (\in_array("*", $columns)) {
             $cols = array_flip($flipped);
         } else {
             $intersected = array_intersect($flipped, $columns);
@@ -659,7 +659,7 @@ class Qs
         $current_page_no = $paginator->currentPage();
         $to = $per_page * $current_page_no;
         // If it is the first page
-        ($current_page_no == 1) ? $from = 1 : $from = $to - ($per_page - 1);
+        ($current_page_no == 1) ? $from = 1 : $from = $to - $per_page - 1;
         // If current page is the last - re-assign to as total
         if ($paginator->lastPage() == $current_page_no)
             $to = $total;
@@ -775,14 +775,14 @@ class Qs
     public static function is_serialized($data, $strict = true)
     {
         // If it isn't a string, it isn't serialized.
-        if (!is_string($data)) {
+        if (!\is_string($data)) {
             return false;
         }
         $data = trim($data);
         if ('N;' === $data) {
             return true;
         }
-        if (strlen($data) < 4) {
+        if (\strlen($data) < 4) {
             return false;
         }
         if (':' !== $data[1]) {
@@ -834,7 +834,7 @@ class Qs
 
     public static function getActiveNotificationChannels($notifiable, $include_database = false, $include_email = false, $include_push_notification = false, $include_sms = false)
     {
-        if (!self::is_serialized($notifiable->is_notifiable) || !is_array(unserialize($notifiable->is_notifiable)))
+        if (!self::is_serialized($notifiable->is_notifiable) || !\is_array(unserialize($notifiable->is_notifiable)))
             return [];
 
         $is_notifiable = unserialize($notifiable->is_notifiable);
