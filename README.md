@@ -190,12 +190,12 @@ php artisan serve
     - `BROADCAST_CONNECTION` - default: `reverb`. You can also opt for `pusher`. For `pusher`, make sure to set the appropriate values for any keys that start with `PUSHER_`, then you will need to activate the credentials [in this file](resources/js/bootstrap.js).
     - `APP_URL` - set your app URL (include protocol and port if applicable, for example `http://localhost:8000`).
     - `VITE_VAPID_KEY` - **(optional)**. Firebase Cloud Messaging (FCM) push services access token. To get a key and more [check this out](https://firebase.google.com/docs/cloud-messaging).
-    ---
-    > These control the database connection used by Laravel and the tenancy package. You can skip these configurations unless you use connection other than the default `sqlite`. For the default connection `sqlite` you must run:
-    > 
-    > ```bash
-    >     php artisan database:ensure-sqlite
-    > ```
+
+    These control the database connection used by Laravel and the tenancy package. You can skip these configurations unless you use connection other than the default `sqlite`. For the default connection `sqlite` you must run:
+
+    ```bash
+        php artisan database:ensure-sqlite
+    ```
 
     - `DB_CONNECTION` - default: `sqlite`, more options look for `connections` section of [database configuration file](config/database.php)
     - `DB_HOST` and `DB_PORT` (if applicable).
@@ -233,7 +233,6 @@ php artisan serve
     Storage & permissions errors:
 
     - Ensure `storage/` and `bootstrap/cache` are writable by the webserver user. Run `php artisan storage:link` after migrations to create the public storage symlink.
-      When you change Vite or broadcast keys:
 
 9. Migrate the database.
 
@@ -291,10 +290,11 @@ Please review the official [Laravel deployment guide](https://laravel.com/docs/1
 
     | Account Type | Username | Email           | Password |
     | ------------ | -------- | --------------- | -------- |
-    | IT Guy       | `itguy`  | `itguy@sms.com` | `itguy`  |
+    | Root       | `rootuser`  | `rootuser@sms.com` | `root`  |
 
 > [!IMPORTANT]
-> When using a central domain other than `localhost` (e.g., `sms.edu`): <br/>
+> When using a central domain other than `localhost` (e.g., `sms.edu`):
+>
 > Set it as the `APP_URL` value as long as you use only one central domain. Otherwise, you can set the main domain as the `APP_URL` and add other domain(s) to the `central_domains` key in the `identification` section of [tenancy configuration file](config/tenancy.php).
 >
 > ```php
