@@ -24,24 +24,24 @@ class TenancyClassTypesTableSeeder extends Seeder
                 'name' => 'Primary',
                 'code' => 'PE',
                 'subjects_considered' => 7,
-                'created_at' => NULL,
-                'updated_at' => NULL,
+                'created_at' => now(),
+                'updated_at' => now(),
             ),
             1 => 
             array (
                 'name' => 'Secondary',
                 'code' => 'SE',
                 'subjects_considered' => 7,
-                'created_at' => NULL,
-                'updated_at' => NULL,
+                'created_at' => now(),
+                'updated_at' => now(),
             ),
             2 => 
             array (
                 'name' => 'Tertiary (Advance)',
                 'code' => 'ASE',
                 'subjects_considered' => 3,
-                'created_at' => NULL,
-                'updated_at' => NULL,
+                'created_at' => now(),
+                'updated_at' => now(),
             ),
         ));
     }

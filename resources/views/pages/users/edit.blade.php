@@ -17,25 +17,25 @@
 
             <fieldset>
                 <div class="row">
-                    {{--USER ROLES--}}
+                    {{-- USER ROLES --}}
                     <div class="col-md-5">
                         <div class="form-group">
-                            <label for="roles"> Select Role(s): <span class="text-danger">*</span></label>
+                            <label for="roles">Select Role(s): <span class="text-danger">*</span></label>
                             <select class="form-control select" multiple="multiple" placeholder="Select Role(s)" name="roles[]" id="roles">
                                 @foreach ($roles as $role)
-                                <option @class(['parent'=> $role->name == 'parent']) @selected(auth()->user()->hasRole($role->name)) value="{{ $role->name }}">{{ $role->name }}</option>
+                                <option @selected($user->hasRole($role->name)) data-permissions='@json($role->permissions->pluck("name"))' data-all="{{ in_array($role->name, Usr::getTenancyAwareRootRoles()) }}" value="{{ $role->name }}">{{ $role->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
-                    {{--NAME--}}
+                    {{-- NAME --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="name">Full Name: <span class="text-danger">*</span></label>
                             <input value="{{ $user->name }}" required type="text" id="name" name="name" placeholder="Full Name" class="form-control">
                         </div>
                     </div>
-                    {{--ADDRESS--}}
+                    {{-- ADDRESS --}}
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="address">Address: <span class="text-danger">*</span></label>
@@ -44,28 +44,41 @@
                     </div>
                 </div>
                 <div class="row">
-                    {{--EMAIL ADDRESS--}}
+                    <div class="col-12">
+                        {{-- PERMISSIONS --}}
+                        <div class="form-group">
+                            <label for="permissions">Select Permission(s) (Optional):</label>
+                            <select class="form-control select" multiple="multiple" placeholder="Select Permission(s)" name="permissions[]" id="permissions">
+                                @foreach ($permissions as $perm)
+                                <option value="{{ $perm->name }}">{{ $perm->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    {{-- EMAIL ADDRESS --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="email">Email address: </label>
                             <input value="{{ $user->email }}" type="email" id="email" name="email" class="form-control" placeholder="your@email.com">
                         </div>
                     </div>
-                    {{--PHONE--}}
+                    {{-- PHONE --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="phone">Phone:</label>
                             <input value="{{ $user->phone }}" type="text" id="phone" name="phone" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
-                    {{--TELEPHONE--}}
+                    {{-- TELEPHONE --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="telephone">Telephone:</label>
                             <input value="{{ $user->phone2 }}" type="text" id="telephone" name="phone2" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
-                    {{--BLOOD GROUP--}}
+                    {{-- BLOOD GROUP --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="bg_id">Blood Group: </label>
@@ -80,7 +93,7 @@
                 </div>
 
                 <div class="row">
-                    {{--GENDER--}}
+                    {{-- GENDER --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="gender">Gender: <span class="text-danger">*</span></label>
@@ -92,7 +105,7 @@
                             </select>
                         </div>
                     </div>
-                    {{--NATIONALITY--}}
+                    {{-- NATIONALITY --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="nal_id">Nationality: <span class="text-danger">*</span></label>
@@ -104,7 +117,7 @@
                             </select>
                         </div>
                     </div>
-                    {{--STATE OR REGION--}}
+                    {{-- STATE OR REGION --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="state_id">State/Reion: <span class="text-danger">*</span></label>
@@ -113,7 +126,7 @@
                             </select>
                         </div>
                     </div>
-                    {{--LGA--}}
+                    {{-- LGA --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="lga_id">LGA: <span class="text-danger">*</span></label>
@@ -125,21 +138,21 @@
                 </div>
 
                 <div class="row">
-                    {{--PRIMARY ID--}}
+                    {{-- PRIMARY ID --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="primary_id" class="d-block">Primary ID:</label>
                             <input value="{{ $user->primary_id ?? '' }}" type="text" id="primary_id" name="primary_id" data-mask="www?wwwwwwwwwwwwwwwww" class="form-control" placeholder="123456789">
                         </div>
                     </div>
-                    {{--SECONDARY ID--}}
+                    {{-- SECONDARY ID --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="secondary_id" class="d-block">Secondary ID:</label>
                             <input value="{{ $user->secondary_id ?? '' }}" type="text" id="secondary_id" name="secondary_id" data-mask="www?wwwwwwwwwwwwwwwww" class="form-control" placeholder="12345678123451234512">
                         </div>
                     </div>
-                    {{--RELIGION--}}
+                    {{-- RELIGION --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="religion">Religion: <span class="text-danger">*</span></label>
@@ -151,7 +164,7 @@
                             </select>
                         </div>
                     </div>
-                    {{--DOB--}}
+                    {{-- DOB --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="dob">Date of Birth:</label>
@@ -163,14 +176,14 @@
                 @php $p_relative = Qs::getParentRelative($user->id) @endphp
                 <div class="{{ $user->hasRole('parent') ? '' : 'display-none' }}" id="parent-data">
                     <div class="row">
-                        {{--CLOSE RELATIVE NAME--}}
+                        {{-- CLOSE RELATIVE NAME --}}
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="name2">Close Relative Name: <span class="text-danger">*</span></label>
                                 <input autocomplete="off" id="name2" name="name2" required value="{{ $p_relative->name ?? '' }}" type="text" class="form-control text-capitalize" placeholder="Full name">
                             </div>
                         </div>
-                        {{--RELATION WITH PARENT--}}
+                        {{-- RELATION WITH PARENT --}}
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="relation">Parent's Relation with the Relative: <span class="text-danger">*</span></label>
@@ -180,14 +193,14 @@
                     </div>
 
                     <div class="row">
-                        {{--PARENT WORK--}}
+                        {{-- PARENT WORK --}}
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="work">Parent Work: <span class="text-danger">*</span></label>
                                 <input autocomplete="off" id="work" required name="work" value="{{ $user->work ?? '' }}" type="text" class="form-control" placeholder="The Work he/she does">
                             </div>
                         </div>
-                        {{--CLOSE RELATIVE NUMBERS--}}
+                        {{-- CLOSE RELATIVE NUMBERS --}}
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="phone3">Close Relative Phone: <span class="text-danger">*</span></label>
@@ -204,7 +217,7 @@
                 </div>
 
                 <div class="row">
-                    {{--PASSPORT--}}
+                    {{-- PASSPORT --}}
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="photo" class="d-block">Upload Passport Photo:</label>
@@ -218,28 +231,28 @@
             <h6>Staff Data</h6>
             <fieldset>
                 <div class="row">
-                    {{--DATE OF EMPLOYMENT--}}
+                    {{-- DATE OF EMPLOYMENT --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="emp_date">Date of Employment:</label>
                             <input autocomplete="off" id="emp_date" name="emp_date" value="{{ $staff_rec->emp_date ?? '' }}" type="text" class="form-control date-pick" placeholder="Select Date...">
                         </div>
                     </div>
-                    {{--DATE OF CONFIRMATION--}}
+                    {{-- DATE OF CONFIRMATION --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="confirmation_date">Date of Confirmation:</label>
                             <input autocomplete="off" id="confirmation_date" name="confirmation_date" value="{{ $staff_rec->confirmation_date ?? '' }}" type="text" class="form-control date-pick" placeholder="Select Date...">
                         </div>
                     </div>
-                    {{--LICENCE NUMBER--}}
+                    {{-- LICENCE NUMBER --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="licence_number">Licence Number:</label>
                             <input name="licence_number" id="licence_number" value="{{ $staff_rec->licence_number ?? '' }}" type="text" class="form-control" placeholder="Ie., LTT 12345">
                         </div>
                     </div>
-                    {{--FILE NUMBER--}}
+                    {{-- FILE NUMBER --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="file_number">File Number:</label>
@@ -249,28 +262,28 @@
                 </div>
 
                 <div class="row">
-                    {{--SOCIAL SECURITY NUMBER--}}
+                    {{-- SOCIAL SECURITY NUMBER --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="ss_number">Social Security Number:</label>
                             <input name="ss_number" id="ss_number" value="{{ $staff_rec->ss_number ?? '' }}" type="number" min="1" 0 class="form-control">
                         </div>
                     </div>
-                    {{--EMPLOYMENT NUMBER--}}
+                    {{-- EMPLOYMENT NUMBER --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="emp_no">Employment Number:</label>
                             <input name="emp_no" id="emp_no" value="{{ $staff_rec->emp_no ?? '' }}" type="number" min="1" class="form-control">
                         </div>
                     </div>
-                    {{--TIN NUMBER--}}
+                    {{-- TIN NUMBER --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="tin_number">TIN Number:</label>
                             <input name="tin_number" id="tin_number" value="{{ $staff_rec->tin_number ?? '' }}" type="text" class="form-control">
                         </div>
                     </div>
-                    {{--BANK ACCOUNT NUMBER--}}
+                    {{-- BANK ACCOUNT NUMBER --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="bank_acc_no">Bank Account Number:</label>
@@ -280,14 +293,14 @@
                 </div>
 
                 <div class="row">
-                    {{--BANK NAME--}}
+                    {{-- BANK NAME --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="bank_name">Bank Name:</label>
                             <input name="bank_name" id="bank_name" value="{{ $staff_rec->bank_name ?? '' }}" type="text" class="form-control">
                         </div>
                     </div>
-                    {{--EDUCATION LEVEL--}}
+                    {{-- EDUCATION LEVEL --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="education_level">Education Level: </label>
@@ -299,7 +312,7 @@
                             </select>
                         </div>
                     </div>
-                    {{--COLLEGE ATTENDED--}}
+                    {{-- COLLEGE ATTENDED --}}
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="college_attended">College Ateended: </label>
@@ -309,7 +322,7 @@
                 </div>
 
                 <div class="row">
-                    {{--GRADUATION YEAR--}}
+                    {{-- GRADUATION YEAR --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="year_graduated">Graduation Year: </label>
@@ -319,7 +332,7 @@
                             </select>
                         </div>
                     </div>
-                    {{--ROLE--}}
+                    {{-- ROLE --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="role">Role: </label>
@@ -331,7 +344,7 @@
                             </select>
                         </div>
                     </div>
-                    {{--NUMBER OF PERIODS--}}
+                    {{-- NUMBER OF PERIODS --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="no_of_periods">Number of Periods:</label>
@@ -341,7 +354,7 @@
                             </select>
                         </div>
                     </div>
-                    {{--PLACE OF BIRTH--}}
+                    {{-- PLACE OF BIRTH --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="place_of_living">Place of Living: </label>
@@ -351,7 +364,7 @@
                 </div>
 
                 <div class="row">
-                    {{--SUBJECTS STUDIED--}}
+                    {{-- SUBJECTS STUDIED --}}
                     <div class="col-12">
                         <div class="form-group">
                             <label for="subjects_studied">Subjects Studied <span class="text-info">(comma (,) separated)</span>: </label>

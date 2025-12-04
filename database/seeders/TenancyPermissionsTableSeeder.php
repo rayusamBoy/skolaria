@@ -84,7 +84,7 @@ class TenancyPermissionsTableSeeder extends Seeder
                     continue;
                 }
                 if (\is_array($v)) {
-                    $out = array_merge($out, $this->collectPermissionValues($v));
+                    $out = [...$out, ...$this->collectPermissionValues($v)];
                 }
             }
         } elseif (\is_string($node) && strpos($node, '.') !== false) {

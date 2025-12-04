@@ -394,4 +394,9 @@ class Usr extends Qs
     {
         return '#' . substr(md5($name), 0, 6);
     }
+
+    public static function getTenancyAwareRootRoles()
+    {
+        return self::tenancyInitilized() ? ['Super Admin'] : ['Root'];
+    }
 }

@@ -11,7 +11,7 @@ class DatabaseSeeder extends Seeder
      * Seed the application's database.
      */
     public function run(): void
-    {       
+    {
         // Universal seeders
         $this->call(NationalitiesTableSeeder::class);
         $this->call(StatesTableSeeder::class);
@@ -24,14 +24,14 @@ class DatabaseSeeder extends Seeder
         $this->call(TenancyUserTypesTableSeeder::class);
         $this->call(TenancySkillsTableSeeder::class);
         $this->call(TenancySettingsTableSeeder::class);
+        $this->call(TenancyPermissionsTableSeeder::class);
+        $this->call(TenancyRolesTableSeeder::class);
         $this->call(TenancyUsersTableSeeder::class);
         $this->call(TenancyStaffRecordsTableSeeder::class);
-        $this->call(TenancyClassTypesTableSeeder::class);
         $this->call(TenancyClassTypesTableSeeder::class);
         $this->call(TenancyMyClassesTableSeeder::class);
         $this->call(TenancySectionsTableSeeder::class);
         $this->call(TenancyStudentRecordsTableSeeder::class);
         $this->call(ParentRelativesTableSeeder::class);
-        $this->call(TenancyPermissionsTableSeeder::class);
     }
 }

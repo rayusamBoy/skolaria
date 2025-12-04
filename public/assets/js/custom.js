@@ -552,7 +552,10 @@ updatedoNotShowAgainElsState();
  * Remove element method - with animation
  *-------------------------------------------------------------
  */
-const removeElement = ($el) => $el.fadeOut(500, function(){ $(this).remove(); });
+const removeElement = ($el) =>
+    $el.fadeOut(500, function () {
+        $(this).remove();
+    });
 
 /**
  *-------------------------------------------------------------
@@ -2133,7 +2136,10 @@ const $submitBtns = $("button[type=submit]");
 const currentUrl = window.location.href;
 
 const updateOfflineStatus = () => {
-    if (!currentUrl.includes("localhost") && !currentUrl.includes("127.0.0.1")) {
+    if (
+        !currentUrl.includes("localhost") &&
+        !currentUrl.includes("127.0.0.1")
+    ) {
         if (navigator.onLine) {
             offlineDiv.style.display = "none";
             $submitBtns
@@ -2306,4 +2312,147 @@ document.addEventListener("DOMContentLoaded", function () {
             studentsPerClassCounts
         )
     );
+});
+
+$(function () {
+    const $roles = $("#roles");
+    const $perms = $("#permissions");
+
+    const usingSelect2 = !!$perms.data("select2");
+
+    // All permission names (from Blade)
+    const allPerms = new Set(window.ALL_PERMISSIONS || []);
+
+    // Map roleName -> array of permission names
+    const rolePermMap = {};
+    // Map roleName -> boolean (grants all)
+    const roleAllMap = {};
+    $roles.find("option").each(function () {
+        const $opt = $(this);
+        const name = $opt.val();
+        try {
+            rolePermMap[name] = JSON.parse(
+                $opt.attr("data-permissions") || "[]"
+            );
+        } catch (e) {
+            rolePermMap[name] = [];
+        }
+        roleAllMap[name] =
+            $opt.attr("data-all") === "1" || $opt.attr("data-all") === "true";
+    });
+
+    // track manual selections (permissions the user explicitly chose)
+    let manualSelected = new Set();
+
+    // backup of manualSelected while a root role is active (to restore after)
+    let manualBackup = null;
+    let hadRootBefore = false;
+
+    // compute union of permissions granted by selected roles.
+    // returns { set: Set<string>, grantsAll: boolean }
+    function getRoleGrantedPermissions() {
+        const selectedRoles = $roles.val() || [];
+        const union = new Set();
+        let grantsAll = false;
+        selectedRoles.forEach((role) => {
+            if (roleAllMap[role]) {
+                grantsAll = true;
+            } else {
+                (rolePermMap[role] || []).forEach((p) => union.add(p));
+            }
+        });
+        if (grantsAll) {
+            // include all permissions
+            allPerms.forEach((p) => union.add(p));
+        }
+        return { set: union, grantsAll };
+    }
+
+    function refreshPermissionsUI() {
+        const { set: roleGranted, grantsAll } = getRoleGrantedPermissions();
+
+        $perms.find("option").each(function () {
+            const $opt = $(this);
+            const permName = $opt.val();
+
+            if (roleGranted.has(permName)) {
+                // forced: selected + disabled
+                $opt.prop("selected", true);
+                $opt.prop("disabled", true);
+                $opt.attr("aria-disabled", "true");
+            } else {
+                // not forced by roles
+                $opt.prop("disabled", false);
+                $opt.removeAttr("aria-disabled");
+
+                // selected if user manually selected it
+                $opt.prop("selected", manualSelected.has(permName));
+            }
+        });
+
+        // refresh select2 or native select visuals
+        if (usingSelect2) {
+            $perms.trigger("change.select2"); // refresh
+        } else {
+            $perms.trigger("change");
+        }
+    }
+
+    // initialize manualSelected from current selected permissions that are not role-granted
+    function initManualSelected() {
+        manualSelected.clear();
+        const { set: roleGranted } = getRoleGrantedPermissions();
+        ($perms.val() || []).forEach((p) => {
+            if (!roleGranted.has(p)) manualSelected.add(p);
+        });
+    }
+
+    // When user changes permissions manually (only non-disabled options can change)
+    $perms.on("change", function () {
+        const currentlySelected = new Set($perms.val() || []);
+        const { set: roleGranted, grantsAll } = getRoleGrantedPermissions();
+
+        // Recompute manualSelected = currentlySelected minus roleGranted
+        manualSelected.clear();
+        currentlySelected.forEach((p) => {
+            if (!roleGranted.has(p)) manualSelected.add(p);
+        });
+
+        // no full UI refresh required here, but keep states consistent
+        refreshPermissionsUI();
+    });
+
+    // When roles change: handle root roles specially and refresh UI
+    $roles.on("change", function () {
+        const { set: roleGranted, grantsAll } = getRoleGrantedPermissions();
+
+        // If a root role is now selected and wasn't before, backup manual selections
+        if (grantsAll && !hadRootBefore) {
+            manualBackup = new Set(manualSelected); // save user's manual choices
+            manualSelected.clear(); // forced all, so manual selection is irrelevant while root active
+        }
+
+        // If root role(s) were present before and now none, restore manual selections
+        if (!grantsAll && hadRootBefore) {
+            if (manualBackup) {
+                // reapply backup (but still remove permissions that other selected roles force)
+                manualSelected = new Set(manualBackup);
+                manualBackup = null;
+            }
+        }
+
+        // Remove manualSelected entries that are now role-granted (they become forced)
+        [...manualSelected].forEach((p) => {
+            if (roleGranted.has(p)) manualSelected.delete(p);
+        });
+
+        hadRootBefore = grantsAll;
+        refreshPermissionsUI();
+    });
+
+    // Initial setup
+    initManualSelected();
+    refreshPermissionsUI();
+
+    // If you initialize select2 after this script, call refreshPermissionsUI() once afterwards.
 });

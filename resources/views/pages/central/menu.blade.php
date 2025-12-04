@@ -8,8 +8,16 @@
     </a>
 </li>
 
+{{-- My Account --}}
+<li class="nav-item">
+    <a href="{{ route('my_account.edit') }}" class="nav-link {{ request()->routeIs('my_account.*') ? 'active' : '' }}">
+        <i class="material-symbols-rounded">account_circle</i>
+        <span>My Account</span>
+    </a>
+</li>
+
 {{-- Manage Users --}}
-@canany($central_permissions['central_users'])
+@canany(array_values($central_permissions['central_users']))
 <li class="nav-item">
     <a href="{{ route('central_users.index') }}" class="nav-link {{ request()->routeIs('central_users.*') ? 'active' : '' }}">
         <i class="material-symbols-rounded">group</i>
@@ -19,7 +27,7 @@
 @endcanany
 
 {{-- Manage Tenants --}}
-@canany($central_permissions['tenants'])
+@canany(array_values($central_permissions['tenants']))
 <li class="nav-item">
     <a href="{{ route('tenants.index') }}" class="nav-link {{ request()->routeIs('tenants.*') ? 'active' : '' }}">
         <i class="material-symbols-rounded">manage_accounts</i>
@@ -29,7 +37,7 @@
 @endcanany
 
 {{-- Manage Settings --}}
-@canany(array_merge($central_permissions['settings_non_tenancy'], $central_permissions['roles']))
+@canany([...array_values($central_permissions['settings_non_tenancy']), ...array_values($central_permissions['roles'])])
 <li class="nav-item nav-item-submenu {{ request()->routeIs('settings_non_tenancy.*', 'permissions.*', 'roles.*') ? 'nav-item-expanded nav-item-open' : '' }}">
     <a href="javascript:;" class="nav-link">
         <i class="material-symbols-rounded">settings</i>
@@ -55,7 +63,7 @@
 @endcanany
 
 {{-- Support --}}
-@canany($central_permissions['tickets'])
+@canany(array_values($central_permissions['tickets']))
 <li class="nav-item nav-item-submenu {{ request()->routeIs('tickets.index_central') ? 'nav-item-expanded nav-item-open' : '' }}">
     <a href="javascript:;" class="nav-link">
         <i class="material-symbols-rounded">support</i>

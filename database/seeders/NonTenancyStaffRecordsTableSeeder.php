@@ -21,7 +21,7 @@ class NonTenancyStaffRecordsTableSeeder extends Seeder
         \DB::table('staff_records')->insert(array (
             0 => 
             array (
-                'user_id' => \DB::table('users')->where('username', 'itguy')->value('id'),
+                'user_id' => \DB::table('users')->where('username', 'rootuser')->value('id'),
                 'staff_data_edit' => 0,
                 'place_of_living' => 'Zanzibar Town',
                 'role' => 'An IT person',

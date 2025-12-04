@@ -33,16 +33,14 @@
                     <h6 class="text-white">Personal Data</h6>
                     <fieldset>
                         <div class="row">
-                            {{-- USER ROLES --}}
+                            {{-- ROLES --}}
                             <div class="col-md-5">
-                                <div class="form-group">
-                                    <label for="roles"> Select Role(s): <span class="text-danger">*</span></label>
-                                    <select class="form-control select" multiple="multiple" placeholder="Select Role(s)" name="roles[]" id="roles">
-                                        @foreach ($roles as $role)
-                                        <option @class(['parent'=> $role->name == 'parent']) @selected(auth()->user()->hasRole($role->name)) value="{{ $role->name }}">{{ $role->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                                <label for="roles">Select Role(s): <span class="text-danger">*</span></label>
+                                <select class="form-control select" multiple="multiple" placeholder="Select Role(s)" name="roles[]" id="roles">
+                                    @foreach ($roles as $role)
+                                    <option value="{{ $role->name }}" data-permissions='@json($role->permissions->pluck("name"))' data-all="{{ in_array($role->name, Usr::getTenancyAwareRootRoles()) }}" @selected(auth()->user()->hasRole($role->name))>{{ $role->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             {{-- FULL NAME --}}
                             <div class="col-md-3">
@@ -56,6 +54,20 @@
                                 <div class="form-group">
                                     <label for="address">Address: <span class="text-danger">*</span></label>
                                     <input value="{{ old('address') }}" class="form-control" id="address" placeholder="Address" name="address" type="text" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                {{-- PERMISSIONS --}}
+                                <div class="form-group">
+                                    <label for="permissions">Select Permission(s) (Optional):</label>
+                                    <select class="form-control select" multiple="multiple" placeholder="Select Permission(s)" name="permissions[]" id="permissions">
+                                        @foreach ($permissions as $perm)
+                                        <option value="{{ $perm->name }}">{{ $perm->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>

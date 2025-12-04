@@ -387,6 +387,13 @@ return [
                     'update_time_slot' => 'time_tables.update.time_slot',
                     'use_time_slot' => 'time_tables.use_time_slot',
                 ],
+                'logs' => [
+                    'clean_activity_log' => 'logs.clean_activity_log',
+                    'delete_activity' => 'logs.delete.activity',
+                    'index' => 'logs.view',
+                    'reset_login_hist' => 'logs.reset_login_hist',
+                    'reset_login_histories' => 'logs.reset_login_histories',
+                ],
             ],
 
         'central' => [
@@ -450,12 +457,12 @@ return [
                 'view_cache' => 'artisan_commands.view_cache',
                 'view_clear' => 'artisan_commands.view_clear',
             ],
-            'logs' => [
-                'clean_activity_log' => 'logs.clean_activity_log',
-                'delete_activity' => 'logs.delete.activity',
-                'index' => 'logs.view',
-                'reset_login_hist' => 'logs.reset_login_hist',
-                'reset_login_histories' => 'logs.reset_login_histories',
+            'central_logs' => [
+                'clean_activity_log' => 'central_logs.clean_activity_log',
+                'delete_activity' => 'central_logs.delete.activity',
+                'index' => 'central_logs.view',
+                'reset_login_hist' => 'central_logs.reset_login_hist',
+                'reset_login_histories' => 'central_logs.reset_login_histories',
             ],
             'tenants' => [
                 'destroy' => 'tenants.delete',

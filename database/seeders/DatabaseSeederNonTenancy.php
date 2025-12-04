@@ -11,7 +11,7 @@ class DatabaseSeederNonTenancy extends Seeder
      * Seed the application's database.
      */
     public function run(): void
-    {        
+    {
         // Universal seeders       
         $this->call(NationalitiesTableSeeder::class);
         $this->call(StatesTableSeeder::class);
@@ -20,9 +20,10 @@ class DatabaseSeederNonTenancy extends Seeder
         $this->call(LanguagesTableSeeder::class);
         $this->call(TimezonesTableSeeder::class);
         // Not tenancy specific seeders
-        $this->call(NonTenancyUsersTableSeeder::class);
         $this->call(NonTenancySettingsTableSeeder::class);
         $this->call(NonTenancyStaffRecordsTableSeeder::class);
         $this->call(NonTenancyPermissionsTableSeeder::class);
+        $this->call(NonTenancyRolesTableSeeder::class);
+        $this->call(NonTenancyUsersTableSeeder::class);
     }
 }
