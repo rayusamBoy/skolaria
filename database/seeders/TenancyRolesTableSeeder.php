@@ -20,6 +20,8 @@ class TenancyRolesTableSeeder extends Seeder
         $super_admin_role = Role::create(['name' => 'Super Admin', 'guard_name' => $default_guard]);
         $admin_role = Role::create(['name' => 'Admin', 'guard_name' => $default_guard]);
         $teacher_role = Role::create(['name' => 'Teacher', 'guard_name' => $default_guard]);
+        $accountant_role = Role::create(['name'=> 'Accountant', 'guard_name' => $default_guard]);
+        $librarian_role = Role::create(['name'=> 'Librarian', 'guard_name'=> $default_guard]);
         $parent_role = Role::create(['name' => 'Parent', 'guard_name' => $default_guard]);
         $student_role = Role::create(['name' => 'Student', 'guard_name' => $default_guard]);
 

@@ -93,30 +93,6 @@ class TenancyStaffRecordsTableSeeder extends Seeder
                 ),
             3 =>
                 array(
-                    'user_id' => \DB::table('users')->where('username', 'companion')->value('id'),
-                    'staff_data_edit' => 0,
-                    'place_of_living' => 'Zanzibar Town',
-                    'role' => NULL,
-                    'code' => 'COMPANION',
-                    'emp_date' => NULL,
-                    'emp_no' => NULL,
-                    'confirmation_date' => NULL,
-                    'licence_number' => NULL,
-                    'file_number' => NULL,
-                    'bank_acc_no' => NULL,
-                    'bank_name' => NULL,
-                    'tin_number' => NULL,
-                    'ss_number' => NULL,
-                    'no_of_periods' => NULL,
-                    'education_level' => 'Degree',
-                    'college_attended' => 'State University of Zanzibar (SUZA)',
-                    'year_graduated' => '2010',
-                    'subjects_studied' => '["Civics","History"]',
-                    'created_at' => NULL,
-                    'updated_at' => NULL,
-                ),
-            4 =>
-                array(
                     'user_id' => \DB::table('users')->where('username', 'accountant')->value('id'),
                     'staff_data_edit' => 0,
                     'place_of_living' => 'Zanzibar Town',
@@ -139,7 +115,7 @@ class TenancyStaffRecordsTableSeeder extends Seeder
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
-            5 =>
+            4 =>
                 array(
                     'user_id' => \DB::table('users')->where('username', 'librarian')->value('id'),
                     'staff_data_edit' => 0,
