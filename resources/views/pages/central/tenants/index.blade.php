@@ -12,12 +12,12 @@
 
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
-            <li class="nav-item"><a href="#new-tenant" class="nav-link active" data-toggle="tab">Create Tenant</a></li>
-            <li class="nav-item"><a href="#manage-tenants" class="nav-link" data-toggle="tab">Manage Tenants</a></li>
+            <li class="nav-item"><a href="#new-tenant" class="nav-link {{ session('pop_success') ? '' : 'active' }}" data-toggle="tab">Create Tenant</a></li>
+            <li class="nav-item"><a href="#manage-tenants" class="nav-link {{ session('pop_success') ? 'active' : '' }}" data-toggle="tab">Manage Tenants</a></li>
         </ul>
 
         <div class="tab-content">
-            <div class="tab-pane fade show active" id="new-tenant">
+            <div class="tab-pane fade {{ session('pop_success') ? '' : 'show active' }}" id="new-tenant">
                 <form class="page-block" method="post" action="{{ route('tenants.store') }}">
                     @csrf
                     <div class="row">
@@ -76,7 +76,7 @@
                 </form>
             </div>
 
-            <div class="tab-pane fade" id="manage-tenants">
+            <div class="tab-pane fade {{ session('pop_success') ? 'show active' : '' }}" id="manage-tenants">
                 <table class="table datatable-button-html5-columns ">
                     <thead>
                         <tr>

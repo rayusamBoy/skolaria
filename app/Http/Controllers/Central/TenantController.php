@@ -48,7 +48,7 @@ class TenantController extends Controller
 
         try {
             $tenant = $this->tenant->create($data);
-        } catch (\Exception $e) {
+        } catch (\Error $e) {
             $cleaning_error = null;
 
             try {
