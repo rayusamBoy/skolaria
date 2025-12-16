@@ -69,16 +69,6 @@ class Qs
         return ParentRelative::where('user_id', $user_id)->first();
     }
 
-    public static function getTeamSAT()
-    {
-        return ['admin', 'super_admin', 'teacher'];
-    }
-
-    public static function getTeamSATCL()
-    {
-        return ['admin', 'super_admin', 'teacher', 'companion', 'librarian'];
-    }
-
     protected static function getHashidsInstance()
     {
         $salt = date('dMY') . tenant('id') ?? config('app.name');
@@ -211,13 +201,13 @@ class Qs
 
     public static function getStaff($remove = [])
     {
-        $data = ['super_admin', 'admin', 'teacher', 'accountant', 'librarian', 'companion'];
+        $data = ['super_admin', 'admin', 'teacher', 'accountant', 'librarian'];
         return $remove ? array_values(array_diff($data, $remove)) : $data;
     }
 
     public static function getAllUserTypes($remove = [])
     {
-        $data = ['super_admin', 'admin', 'teacher', 'accountant', 'librarian', 'student', 'parent', 'companion'];
+        $data = ['super_admin', 'admin', 'teacher', 'accountant', 'librarian', 'student', 'parent'];
         return $remove ? array_values(array_diff($data, $remove)) : $data;
     }
 
@@ -241,26 +231,6 @@ class Qs
     public static function getSRByUserID($user_id)
     {
         return StudentRecord::where('user_id', $user_id)->first();
-    }
-
-    public static function getPTA()
-    {
-        return ['super_admin', 'admin', 'teacher', 'parent'];
-    }
-
-    public static function getPTAC()
-    {
-        return ['super_admin', 'admin', 'teacher', 'parent', 'companion'];
-    }
-
-    public static function getPTACL()
-    {
-        return ['super_admin', 'admin', 'teacher', 'parent', 'companion', 'librarian'];
-    }
-
-    public static function getPTACLA()
-    {
-        return ['super_admin', 'admin', 'teacher', 'parent', 'companion', 'librarian', 'accountant'];
     }
 
     public static function getPublicUploadPath()

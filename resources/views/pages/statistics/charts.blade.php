@@ -192,7 +192,7 @@
     @endif
     {{-- End Last Exam Subjects Peformances Chart --}}
 
-    {{-- ELSE CHARTS FOR ADMINS, TEACHERS, LIBRARIANS, AND COMPANIONS --}}
+    {{-- ELSE CHARTS FOR ADMINS, TEACHERS, LIBRARIANS --}}
     @else
 
     {{-- Classes Performance Chart --}}

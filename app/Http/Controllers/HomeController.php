@@ -261,7 +261,6 @@ class HomeController extends Controller
             'admins_male_count' => $admins->where('gender', User::GENDER_MALE)->count(),
             'admins_female_count' => $admins->where('gender', User::GENDER_FEMALE)->count(),
             'teachers' => $this->user->getUsersByRoleNames(['Teacher'])->count(),
-            'companions' => $this->user->getUsersByRoleNames(['Companion'])->count(),
             'accountants' => $this->user->getUsersByRoleNames(['Accountant'])->count(),
             'librarians' => $this->user->getUsersByRoleNames(['Librarian'])->count(),
         ];

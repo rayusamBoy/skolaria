@@ -94,20 +94,15 @@
         </div>
     </div>
 
-    <!-- Support Team (Teachers & Companions) -->
+    <!-- Support Team (Teachers) -->
     <div class="card card-body bg-danger-400 has-bg-image">
         <div class="media">
             <div class="media-body ml-2">
                 <div class="row">
-                    <div class="col-6 text-left">
+                    <div class="col-12 text-left">
                         {{ $staff_breakdown['teachers'] }}
                         <br>
                         <span class="text-capitalize font-size-xs">Total Teachers</span>
-                    </div>
-                    <div class="col-6 text-left">
-                        {{ $staff_breakdown['companions'] }}
-                        <br>
-                        <span class="text-capitalize font-size-xs">Total Companions</span>
                     </div>
                 </div>
             </div>

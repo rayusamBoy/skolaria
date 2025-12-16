@@ -26,7 +26,7 @@ class BookRequestController extends Controller
     {
         $d["requests"] = $this->book->getRequests();
         $d["books"] = $this->book->getAll();
-        $d["users"] = $this->user->getUsersByRoleNames(['Student', 'Teacher', 'Companion', 'Admin', 'Super Admin']);
+        $d["users"] = $this->user->getUsersByRoleNames(['Student', 'Teacher', 'Admin', 'Super Admin']);
 
         return view('pages.books.requests.index', $d);
     }
