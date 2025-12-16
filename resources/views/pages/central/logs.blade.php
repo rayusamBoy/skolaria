@@ -26,7 +26,7 @@
         <div class="tab-content">
             @foreach ($user_roles as $ur)
             @php
-                $role_scoped_users_ids = Usr::getUsersByRoleNames([$ur->name])->pluck('id')->toArray();
+            $role_scoped_users_ids = Usr::getUsersByRoleNames([$ur->name])->pluck('id')->toArray();
             @endphp
             <div class="tab-pane fade" id="ur-{{ Qs::hash($ur->id) }}">
                 <span class="status-styled">{{ $ur->name }}</span>
@@ -94,7 +94,7 @@
                             <th>#</th>
                             <th>Event</th>
                             <th>Subject Type</th>
-                            {{-- <th>Causer Type</th> --}}
+                            <th>Causer Type</th>
                             <th>Causer</th>
                             <th>Properties</th>
                             <th>Created At</th>
@@ -107,12 +107,11 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $chk->event }}</td>
-                            @php
-                            $exploded = explode("\\", $chk->subject_type);
-                            @endphp
-                            <td>{{ end($exploded) }}</td>
-                            {{-- <td>{{ $chk->causer_type }}</td> --}}
-                            <td>{{ $chk->user->name }}</td>
+                            @php $subject = explode("\\",$chk->subject_type); @endphp
+                            <td>{{ end($subject) }}</td>
+                            @php $causer = $chk->causer_type ? explode("\\",$chk->causer_type) : []; @endphp
+                            <td>{{ $chk->causer_type ? end($causer) : 'N/A' }}</td>
+                            <td>{{ $chk->causer?->name ?? 'N/A' }}</td>
                             <td>
                                 @include('pages/modals/activity_log_properties')
                                 <a href="javascript:;" data-toggle="modal" data-target="#activity-log-properties-{{ $chk->id }}">show</a>

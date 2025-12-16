@@ -19,6 +19,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MyAccountController;
 use App\Http\Controllers\MyClassController;
 use App\Http\Controllers\MyController;
+use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PinController;
@@ -163,8 +164,8 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
         /*************** Users (admin operations) *****************/
         Route::prefix('users')->group(function () {
             Route::get('password/reset/{user}', [UserController::class, 'reset_pass'])->name('users.password.reset');
-            Route::post('user/update/staff/data/edit_state', [UserController::class, 'update_staff_data_edit_state'])->name('users.update_staff_data_edit_state');
-            Route::post('user/update/user/blocked_state', [UserController::class, 'update_user_blocked_state'])->name('users.update_user_blocked_state');
+            Route::post('update/staff-data/edit-state', [UserController::class, 'update_staff_data_edit_state'])->name('users.update_staff_data_edit_state');
+            Route::post('update/blocked-state', [UserController::class, 'update_user_blocked_state'])->name('users.update_user_blocked_state');
         });
 
         /*************** Query Builder (reports / printing) *****************/
@@ -206,12 +207,12 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
 
         /*************** Notices (CRUD + mark viewed) *****************/
         Route::prefix('notices')->group(function () {
-            Route::post('set-viewed', [\App\Http\Controllers\NoticeController::class, 'set_as_viewed'])->name('notices.set_viewed');
-            Route::get('/', [\App\Http\Controllers\NoticeController::class, 'index'])->name('notices.index');
-            Route::post('store', [\App\Http\Controllers\NoticeController::class, 'store'])->name('notices.store');
-            Route::delete('{notice}', [\App\Http\Controllers\NoticeController::class, 'destroy'])->name('notices.destroy');
-            Route::get('{notice}/edit', [\App\Http\Controllers\NoticeController::class, 'edit'])->name('notices.edit');
-            Route::post('{notice}', [\App\Http\Controllers\NoticeController::class, 'update_record'])->name('notices.update');
+            Route::post('set-viewed', [NoticeController::class, 'set_as_viewed'])->name('notices.set_viewed');
+            Route::get('/', [NoticeController::class, 'index'])->name('notices.index');
+            Route::post('store', [NoticeController::class, 'store'])->name('notices.store');
+            Route::delete('{notice}', [NoticeController::class, 'destroy'])->name('notices.destroy');
+            Route::get('{notice}/edit', [NoticeController::class, 'edit'])->name('notices.edit');
+            Route::post('{notice}', [NoticeController::class, 'update_record'])->name('notices.update');
         });
 
         /*************** Payments (invoices, receipts, actions) *****************/
@@ -407,12 +408,12 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
         });
 
         /*************** Notifications (user-specific settings) **************/
-        Route::prefix('notifications')->group(function () {
+        Route::group(['prefix' => 'notifications', 'middleware' => ['universal']], function () {
             Route::post('mark/as-read/{notification}', [NotificationController::class, 'mark_as_read'])->name('notifications.mark_as_read');
             Route::put('mark/all-read', [NotificationController::class, 'mark_all_read'])->name('notifications.mark_all_read');
             Route::put('update/notifiable', [NotificationController::class, 'update_is_notifiable'])->name('notifications.update_is_notifiable');
             Route::match(['post', 'put', 'delete'], 'update/firebase/device-token', [NotificationController::class, 'update_firebase_device_token'])->name('notifications.firebase.update_device_token');
-        })->middleware('universal');
+        });
 
         /*************** Tickets (support workflow) **************/
         Route::prefix('tickets')->group(function () {

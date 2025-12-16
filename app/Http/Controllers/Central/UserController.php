@@ -20,8 +20,8 @@ class UserController extends Controller
 
     public function __construct(UserRepo $user, LocationRepo $loc, MyClassRepo $my_class, PermissionRepo $permission)
     {
-       // $this->permissionMap = config('permissions.names.central.central_users');
-       // parent::__construct();
+        $this->permissionMap = config('permissions.names.central.central_users');
+        parent::__construct();
         $this->user = $user;
         $this->loc = $loc;
         $this->my_class = $my_class;

@@ -89,7 +89,7 @@
     const get_class_subjects_url = "{{ route('ajax.get_class_subjects', [':id']) }}";
     const update_exam_lock_state_url = "{{ route('exams.update_lock_state') }}";
     const update_exam_edit_state_url = "{{ route('exams.update_edit_state') }}";
-    const update_staff_data_edit_state_url = "{{ route('users.update_staff_data_edit_state') }}";
-    const update_user_blocked_state_url = "{{ route('users.update_user_blocked_state') }}";
+    const update_staff_data_edit_state_url = "{{ Usr::tenancyInitilized() ? route('users.update_staff_data_edit_state') : route('central_users.update_staff_data_edit_state') }}";
+    const update_user_blocked_state_url = "{{ Usr::tenancyInitilized() ? route('users.update_user_blocked_state') : route('central_users.update_user_blocked_state') }}";
 
 </script>

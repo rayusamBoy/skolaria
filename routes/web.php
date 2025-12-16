@@ -74,8 +74,8 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
         /*************** Users (central admin) *****************/
         Route::prefix('central-users')->group(function () {
             Route::get('password/reset/{user}', [CentralUserController::class, 'reset_pass'])->name('central_users.password.reset');
-            Route::post('user/update/staff/data/edit_state', [CentralUserController::class, 'update_staff_data_edit_state'])->name('central_users.update_staff_data_edit_state');
-            Route::post('user/update/user/blocked_state', [CentralUserController::class, 'update_user_blocked_state'])->name('central_users.update_user_blocked_state');
+            Route::post('update/staff-data/edit-state', [CentralUserController::class, 'update_staff_data_edit_state'])->name('central_users.update_staff_data_edit_state');
+            Route::post('update/blocked-state', [CentralUserController::class, 'update_user_blocked_state'])->name('central_users.update_user_blocked_state');
         });
 
         /*************** Tenants ***************/

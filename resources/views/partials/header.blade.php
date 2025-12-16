@@ -17,12 +17,17 @@
                 </a>
 
                 @if(Usr::tenancyInitilized())
+                @can($tenant_permissions['analytics']['index'])
                 <a href="{{ route('analytics.index') }}" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary">analytics</i> <span class="d-none d-sm-block">Analytics</span></a>
-
+                @endcan
+                @can($tenant_permissions['statistics']['index'])
                 <a href="{{ route('statistics.index') }}" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary">query_stats</i><span class="d-none d-sm-block">Statistics</span></a>
+                @endcan
 
                 {{-- <a href="javascript:;" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary">calculate</i> <span class="d-none d-sm-block">Invoices</span></a> --}}
+                @can($tenant_permissions['schedules']['index'])
                 <a href="{{ route('schedule.index') }}" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary">calendar_month</i> <span class="d-none d-sm-block">Schedule</span></a>
+                @endcan
                 <a href="{{ auth()->user()->canany(array_values($tenant_permissions['settings'])) ? route('settings.index') : '' }}" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary d-none d-sm-block">arrow_downward_alt</i> <span class="font-weight-semibold d-flex" id="current-session"><span class="d-none d-sm-block pr-1">Current Session:</span>{{ Qs::getCurrentSession() }}</span></a>
                 @endif
             </div>
@@ -42,8 +47,10 @@
                 </div>
 
                 @if(Usr::tenancyInitilized())
+                @can($tenant_permissions['messages']['index'])
                 <a class="breadcrumb-elements-item d-none d-md-block" data-toggle="tooltip" title="Messages" href="/messages">@include('messenger.unread-count')</a>
-
+                @endcan
+                @can($tenant_permissions['tickets']['index'])
                 <div class="breadcrumb-elements-item dropdown">
                     <a href="javascript:;" class="breadcrumb-elements-item" data-toggle="dropdown">
                         <i class="material-symbols-rounded mr-1">support</i>
@@ -55,13 +62,14 @@
                         <a href="{{ route('tickets.index') }}" class="dropdown-item {{ request()->routeIs('tickets.*') ? 'active' : '' }}"><i class="material-symbols-rounded">local_activity</i>Tickets</a>
                     </div>
                 </div>
-                @else
+                @endcan
+                @elseif(auth()->user()->can($central_permissions['tickets']['index']))
                 <div class="breadcrumb-elements-item d-none d-md-block">
                     @include('pages.central.support.tickets.badge')
                 </div>
                 @endif
 
-                @if(Usr::tenancyInitilized())
+                @if(Usr::tenancyInitilized() && auth()->user()->can($tenant_permissions['soft_deletes']['bin']))
                 <div class="breadcrumb-elements-item">
                     <a href="{{ route('bin') }}" @if(request()->routeIs('bin')) class="breadcrumb-elements-item is-disabled d-block" @else class="breadcrumb-elements-item" @endif>
                         <i class="material-symbols-rounded mr-1 align-middle">delete_forever</i>

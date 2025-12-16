@@ -46,18 +46,22 @@
 
     <ul class="nav nav-group-sub" data-submenu-title="Settings">
         {{-- App --}}
+        @can($central_permissions['settings_non_tenancy']['index'])
         <li class="nav-item">
             <a href="{{ route('settings_non_tenancy.index') }}" class="nav-link {{ request()->routeIs('settings_non_tenancy.index') ? 'active' : '' }}">
                 App
             </a>
         </li>
+        @endcan
 
         {{-- Roles --}}
+        @can($central_permissions['roles']['index'])
         <li class="nav-item">
             <a href="{{ route('roles.index') }}" class="nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}">
                 Roles
             </a>
         </li>
+        @endcan
     </ul>
 </li>
 @endcanany
