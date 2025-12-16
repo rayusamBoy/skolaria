@@ -21,7 +21,6 @@ class DatabaseSeeder extends Seeder
         $this->call(TimezonesTableSeeder::class);
         // Tenancy specific seeders
         $this->call(TenancyExamCategoriesTableSeeder::class);
-        $this->call(TenancyUserTypesTableSeeder::class);
         $this->call(TenancySkillsTableSeeder::class);
         $this->call(TenancySettingsTableSeeder::class);
         $this->call(TenancyPermissionsTableSeeder::class);
