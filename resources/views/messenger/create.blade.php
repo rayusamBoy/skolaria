@@ -39,7 +39,7 @@
                         <option value="students">&xrArr; All</option>
                         @continue
                         @endif
-                        <option value="{{ $type->title }}">{{ $type->name }}s</option>
+                        <option value="{{ $role->name }}">{{ $role->name }}s</option>
                         @endforeach
                     </select>
                 </div>

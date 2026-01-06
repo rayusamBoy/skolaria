@@ -11,19 +11,19 @@
 
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
-            <li class="nav-item"><a href="#create-role" class="nav-link active" data-toggle="tab">Create Role</a></li>
-            <li class="nav-item"><a href="#manage-roles" class="nav-link" data-toggle="tab">Manage Roles</a></li>
+            <li class="nav-item"><a href="#manage-roles" class="nav-link active" data-toggle="tab">Manage Roles</a></li>
+            <li class="nav-item"><a href="#create-role" class="nav-link" data-toggle="tab">Create Role</a></li>
         </ul>
 
         <div class="tab-content">
             {{-- Create Role Tab --}}
-            <div class="tab-pane fade show active" id="create-role">
+            <div class="tab-pane fade" id="create-role">
                 <form method="POST" action="{{ route('roles.store') }}" class="ajax-store">
                     @csrf
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label font-weight-semibold" for="name">Role Name <span class="text-danger">*</span></label>
                         <div class="col-lg-5">
-                            <input type="text" name="name" class="form-control text-capitalize" id="name" placeholder="e.g., Teacher, Admin" value="{{ old('name') }}" required>
+                            <input type="text" name="name" class="form-control text-capitalize" id="name" placeholder="e.g., Teacher, Super Admin" value="{{ old('name') }}" required>
                         </div>
                         <div class="col-lg-4 m-auto">
                             <span class="font-weight-bold font-italic text-info-800">capitalize words separated by single spaces</span>
@@ -48,7 +48,7 @@
             </div>
 
             {{-- Manage Roles Tab --}}
-            <div class="tab-pane fade" id="manage-roles">
+            <div class="tab-pane fade show active" id="manage-roles">
                 <table class="table datatable-button-html5-columns">
                     <thead>
                         <tr>
@@ -68,7 +68,7 @@
                             @endphp
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $role->name }}</td>
-                            <td>{{ $permissions->join(', ') }}</td>
+                            <td>{{ in_array($role->name, Usr::getTenancyAwareRootRoles()) ? 'All' : $permissions->join(', ') }}</td>
                             <td>{{ $role->created_at->diffForHumans() }}</td>
                             <td>{{ $role->updated_at->diffForHumans() }}</td>
                             <td class="text-center">

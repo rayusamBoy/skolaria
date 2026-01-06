@@ -17,10 +17,10 @@
             <div class="form-group row">
                 <label class="col-lg-3 col-form-label font-weight-semibold" for="name">Role Name <span class="text-danger">*</span></label>
                 <div class="col-lg-5">
-                    <input type="text" name="name" class="form-control text-lowercase" id="name" value="{{ old('name', $role->name) }}" required>
+                    <input type="text" name="name" class="form-control text-capitalize" id="name" value="{{ old('name', $role->name) }}" required>
                 </div>
                 <div class="col-lg-4 m-auto">
-                    <span class="font-weight-bold font-italic text-info-800">lowercase words separated by single underscores</span>
+                    <span class="font-weight-bold font-italic text-info-800">capitalize words separated by single spaces</span>
                 </div>
             </div>
 

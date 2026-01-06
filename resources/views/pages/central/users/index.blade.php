@@ -35,12 +35,14 @@
                         <div class="row">
                             {{-- ROLES --}}
                             <div class="col-md-5">
-                                <label for="roles">Select Role(s): <span class="text-danger">*</span></label>
-                                <select class="form-control select" multiple="multiple" placeholder="Select Role(s)" name="roles[]" id="roles">
-                                    @foreach ($roles as $role)
-                                    <option value="{{ $role->name }}" data-permissions='@json($role->permissions->pluck("name"))' data-all="{{ in_array($role->name, Usr::getTenancyAwareRootRoles()) }}">{{ $role->name }}</option>
-                                    @endforeach
-                                </select>
+                                <div class="form-group">
+                                    <label for="roles">Select Role(s): <span class="text-danger">*</span></label>
+                                    <select class="form-control select" multiple="multiple" placeholder="Select Role(s)" name="roles[]" id="roles">
+                                        @foreach ($roles as $role)
+                                        <option value="{{ $role->name }}" data-permissions='@json($role->permissions->pluck("name"))' data-all="{{ in_array($role->name, Usr::getTenancyAwareRootRoles()) }}">{{ $role->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                             {{-- FULL NAME --}}
                             <div class="col-md-3">

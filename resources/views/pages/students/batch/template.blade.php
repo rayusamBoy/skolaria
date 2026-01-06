@@ -7,7 +7,7 @@
     <div class="card-body">
         <form method="get" action="{{ route('students.batch_template') }}">
             <div class="row">
-                <div class="col-md-9">
+                <div class="col-12">
                     <fieldset>
 
                         <div class="row">
