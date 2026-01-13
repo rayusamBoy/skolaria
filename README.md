@@ -8,11 +8,29 @@
 
 ## About
 
-A multi-tenant, progressive web app (PWA); school management system powered by technologies including the [Laravel 12 framework](https://laravel.com), [Bootstrap v4.1.1](https://getbootstrap.com), [jQuery v3.3.1](https://jquery.com), and the [tenancyforlaravel package v4](https://v4.tenancyforlaravel.com), among others.
+The multi-tenant, progressive web app (PWA); school management system powered by technologies including the [Laravel 12 framework](https://laravel.com), [Bootstrap v4](https://getbootstrap.com), [jQuery v3](https://jquery.com), and the [tenancyforlaravel package v4](https://v4.tenancyforlaravel.com), among others.
+
+This project aims to provide a scalable and maintainable School Management System SaaS platform where each institution (tenant) has isolated data and functionality while sharing the same core codebase. Contributors are welcome to help improve features, fix issues, and enhance the overall code quality.
+
+## Current To-Do List
+
+> We’re targeting the following improvements; feel free to pick one and contribute, or suggest yours if any!
+
+* [ ] Replace hard-coded user types with permission-based user roles.
+
+Move away from fixed types (“admin”, “teacher”, etc.) and implement role/permission logic (e.g., using packages like spatie/laravel-permission) for easier management and scalability.
+
+* [ ] Update the codebase to reflect the new user roles and permissions, including any necessary UI changes.
+
+Includes adjusting backend logic, database structure, and any relevant UI/UX changes.
+
+* [x] Replace hard-coded UI css colors with CSS variables.
+  
+* [x] Refactor routes into a more scalable and maintainable structure.
 
 ## Quick Start
 
-> Run these commands to launch the app locally:
+> Run these commands to launch the app locally (you must have PHP, Composer, Node.js, and SQLite):
 
 ```bash
 # 1. Clone repository
