@@ -81,7 +81,7 @@ class Qs
         return self::getHashidsInstance()->encode($id);
     }
 
-    public static function decodeHash($str, $to_string = true)
+    public static function decodeHash($str, $to_string = true)   
     {
 
         $decoded = self::getHashidsInstance()->decode($str);
@@ -314,7 +314,7 @@ class Qs
      * @param string $string Default null; if null, system name will be used
      * @return string
      */
-    public static function getStringAbbreviation(string $string = null)
+    public static function getStringAbbreviation(?string $string = null)
     {
         $string ??= self::getSystemName();
 

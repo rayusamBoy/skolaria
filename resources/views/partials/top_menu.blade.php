@@ -101,22 +101,21 @@
                         Artisan Commands
                     </a>
                     @endcanany
-
-                    @else
-                    @canany(array_values(array_values($central_permissions['central_logs'])))
+                    @canany(array_values($central_permissions['central_logs']))
                     <a href="{{ route('central_logs.index') }}" class="dropdown-item {{ request()->routeIs('central_logs.index') ? 'active' : '' }}">
                         <i class="material-symbols-rounded">browse_activity</i>
-                        Manage Activity Log
+                        Activity Log
+                    </a>
+                    @endcanany
+
+                    @else
+                    @canany(array_values($tenant_permissions['logs']))
+                    <a href="{{ route('logs.index') }}" class="dropdown-item {{ request()->routeIs('logs.index') ? 'active' : '' }}">
+                        <i class="material-symbols-rounded">browse_activity</i>
+                        Activity Log
                     </a>
                     @endcanany
                     @endunless
-
-                    @canany(array_values(array_values($tenant_permissions['logs'])))
-                    <a href="{{ route('logs.index') }}" class="dropdown-item {{ request()->routeIs('logs.index') ? 'active' : '' }}">
-                        <i class="material-symbols-rounded">browse_activity</i>
-                        Manage Activity Log
-                    </a>
-                    @endcanany
 
                     <div class="dropdown-divider"></div>
 
