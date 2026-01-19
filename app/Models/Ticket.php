@@ -86,7 +86,7 @@ class Ticket extends Model
     {
         $template = config('database.default');
         $template_connection = config("database.connections.{$template}");
-        $template_connection['database'] = $tenant_db;
+        $template_connection['database'] = $template_connection['driver'] === 'sqlite' ? database_path($tenant_db) : $tenant_db;
 
         config()->set('database.connections.dynamic_tenant', $template_connection);
 

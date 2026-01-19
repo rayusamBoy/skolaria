@@ -419,7 +419,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
         Route::prefix('tickets')->group(function () {
             Route::get('reply/{ticket}', [TicketController::class, 'reply'])->name('tickets.reply');
             Route::put('store/message', [TicketController::class, 'store_message'])->name('tickets.store_message');
-            Route::patch('{ticket}/close', [TicketController::class, 'close_ticket'])->name('tickets.close');
+            Route::get('{ticket}/close', [TicketController::class, 'close_ticket'])->name('tickets.close');
             Route::patch('{ticket}/archive', [TicketController::class, 'archive_ticket'])->name('tickets.archive');
             Route::patch('{ticket}/unarchive', [TicketController::class, 'unarchive_ticket'])->name('tickets.unarchive');
         });

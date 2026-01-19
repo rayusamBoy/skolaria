@@ -151,7 +151,7 @@
                                                 <i class="material-symbols-rounded">archive</i> Archive
                                             </a>
                                             <form class="d-none" method="post" id="item-archive-{{ $ticket->id }}" action="{{ route('tickets.archive', $ticket->id) }}">
-                                                @method('put') @csrf
+                                                @method('patch') @csrf
                                             </form>
                                             @endcan
                                         </div>
@@ -207,7 +207,7 @@
                                                 <i class="material-symbols-rounded">unarchive</i> Unarchive
                                             </a>
                                             <form class="d-none" method="post" id="item-unarchive-{{ $ticket->id }}" action="{{ route('tickets.unarchive', $ticket->id) }}">
-                                                @method('put') @csrf
+                                                @method('patch') @csrf
                                             </form>
                                             @endcan
                                         </div>
