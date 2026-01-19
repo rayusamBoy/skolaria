@@ -4133,9 +4133,9 @@ body.swal2-toast-shown .swal2-container.swal2-bottom-right {
     content: "";
 }
 
-.dataTables_wrapper .table-bordered {
+/* .dataTables_wrapper .table-bordered {
     border-top: 0;
-}
+} */
 
 .dataTables_wrapper + .card-body {
     border-top: 1px solid #ddd;
