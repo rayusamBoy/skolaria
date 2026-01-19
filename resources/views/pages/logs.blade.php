@@ -25,8 +25,11 @@
 
         <div class="tab-content">
             @foreach ($user_roles as $ur)
+            @php
+            $role_scoped_users_ids = Usr::getUsersByRoleNames([$ur->name])->pluck('id')->toArray();
+            @endphp
             <div class="tab-pane fade" id="ut-{{ Qs::hash($ur->id) }}">
-                <span class="status-styled">{{ $ur->name }}s</span>
+                <span class="status-styled">{{ $ur->name }}</span>
                 <table class="table datatable-button-html5-columns">
                     <thead>
                         <tr>
@@ -41,12 +44,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($login_histories->where('user.user_type', $ut->title) as $lh)
+                        @foreach ($login_histories->whereIn('user.id', $role_scoped_users_ids) as $lh)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>
-                                <img class="rounded-circle" style="height:40px; width:40px;" src="{{ Usr::getTenantAwarePhoto($lh->user->photo) }}" alt="photo">
-                            </td>
+                            <td><img class="rounded-circle" style="height:40px; width:40px;" src="{{ Usr::getTenantAwarePhoto($lh->user->photo) }}" alt="photo"></td>
                             <td>{{ $lh->user->name }}</td>
                             <td>{{ $lh->login_times }}</td>
                             <td>{{ Qs::fullDateTimeFormat($lh->created_at) }}</td>
@@ -58,10 +59,7 @@
                                         <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
                                             {{-- View Profile --}}
-                                            <a href="{{ route('users.show', Qs::hash($lh->user->id)) }}" class="dropdown-item">
-                                                <i class="material-symbols-rounded">visibility</i> View Profile
-                                            </a>
-
+                                            <a href="{{ route('users.show', Qs::hash($lh->user->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> View Profile</a>
                                             {{-- Reset Login History --}}
                                             @php
                                             $route = route('login_histories.reset', Qs::hash($lh->user->id));
