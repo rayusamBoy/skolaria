@@ -31,6 +31,7 @@ use App\Http\Controllers\SectionController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SoftDeleteController;
 use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\StudentIDCardController;
 use App\Http\Controllers\StudentRecordController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TestController;
@@ -136,10 +137,10 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
             Route::get('class/{class_id}/list', [StudentRecordController::class, 'list_by_class'])->name('students.list_by_class');
 
             /* ID Cards */
-            Route::get('id-cards', [StudentRecordController::class, 'id_cards'])->name('students.id_cards');
-            Route::post('id-cards/manage/{class?}/{issued_date?}/{expire_date?}/{theme?}', [StudentRecordController::class, 'id_cards_manage'])->name('students.id_cards.manage');
-            Route::get('id-cards/print/class/{class?}/{issued?}/{expire?}/{theme?}/{phone?}/{class_from?}/{class_to?}/{motto?}/{brightness?}/{website_link?}', [StudentRecordController::class, 'print_class_id_cards'])->name('students.id_cards.print_class');
-            Route::post('id-cards/selected/print', [StudentRecordController::class, 'print_selected_id_cards'])->name('students.id_cards.print_selected');
+            Route::get('id-cards', [StudentIDCardController::class, 'index'])->name('students.id_cards');
+            Route::post('id-cards/manage/{class?}/{issued_date?}/{expire_date?}/{theme?}', [StudentIDCardController::class, 'manage'])->name('students.id_cards.manage');
+            Route::get('id-cards/print/class/{class?}/{issued?}/{expire?}/{theme?}/{phone?}/{class_from?}/{class_to?}/{motto?}/{brightness?}/{website_link?}', [StudentIDCardController::class, 'print_class'])->name('students.id_cards.print_class');
+            Route::post('id-cards/selected/print', [StudentIDCardController::class, 'print_selected'])->name('students.id_cards.print_selected');
 
             /* Promotions */
             Route::post('promote/selector', [PromotionController::class, 'selector'])->name('students.promote.selector');
