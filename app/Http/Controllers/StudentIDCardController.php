@@ -83,7 +83,7 @@ class StudentIDCardController extends Controller
         if ($req->students_ids == null)
             return Qs::goWithDanger('students.id_cards', 'You must select at least a student to print ID card');
 
-        $d = $req->except('__token');
+        $d = $req->except('_token');
         $d['students'] = $this->student->getRecordByUserIDs($req->students_ids)->with('my_class')->get()->sortBy('user.name');
         $d["year_from"] = explode(",", $req->issued)[1];
         $d["year_to"] = explode(",", $req->expire)[1];
