@@ -178,9 +178,9 @@ class Usr extends Qs
         return StudentRecord::where(['my_class_id' => $class_id])->with('user')->get()->whereNotNull('user');
     }
 
-    public static function getStudentRecordByIds($ids, $relationship = [])
+    public static function getStudentRecordByUserIds($ids, $relationship = [])
     {
-        return StudentRecord::whereIn("id", $ids)->with($relationship)->get();
+        return StudentRecord::whereIn("user_id", $ids)->with($relationship)->get();
     }
 
     public static function getStudentRecordByUserId($id, $relationship = [])
