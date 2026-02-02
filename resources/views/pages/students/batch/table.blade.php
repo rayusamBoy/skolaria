@@ -9,7 +9,7 @@ $number_of_headings_in_a_row = 4;
             <th style="text-align: center" colspan="{{ $headings_count }}"><strong>{{ Qs::getSystemName() }}</strong></th>
         </tr>
         <tr>
-            <th style="text-align: center" colspan="{{ $headings_count }}"><strong>STUDENTS ADD TEMPLATE</strong></th>
+            <th style="text-align: center" colspan="{{ $headings_count }}"><strong>STUDENTS BATCH ADD TEMPLATE</strong></th>
         </tr>
         <tr>
             <th style="text-align: center" colspan="{{ $span = round($headings_count / $number_of_headings_in_a_row) }}"><strong>CLASS: {{ strtoupper($class->name) }}</strong></th>
