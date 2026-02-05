@@ -173,7 +173,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
         Route::prefix('query-builder')->group(function () {
             Route::get('/', [QueryBuilderController::class, 'index'])->name('query_builder.index');
             Route::get('select/query', [QueryBuilderController::class, 'select'])->name('query_builder.select');
-            Route::post('staff/data/print', [QueryBuilderController::class, 'print_staff_data'])->name('query_builder.print_staff_data');
+            Route::post('users/data/print', [QueryBuilderController::class, 'print_users_data'])->name('query_builder.print_users_data');
         });
 
         /*************** TimeTables *****************/

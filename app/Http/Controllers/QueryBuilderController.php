@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\Qs;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\QueryBuilderRequest;
+use App\Repositories\PermissionRepo;
 use App\Repositories\UserRepo;
 use Dompdf\Dompdf;
 use Illuminate\Http\Request as HttpRequest;
@@ -13,11 +14,12 @@ use Illuminate\Support\Facades\Validator;
 
 class QueryBuilderController extends Controller
 {
-    protected $user;
+    protected $user, $permission;
 
-    public function __construct(UserRepo $user)
+    public function __construct(UserRepo $user, PermissionRepo $permission)
     {
         $this->user = $user;
+        $this->permission = $permission;
     }
 
     /**
@@ -26,7 +28,7 @@ class QueryBuilderController extends Controller
     public function index()
     {
         $d["queryed"] = false;
-        $d["user_roles"] = $this->user->getRoles(['parent']);
+        $d["user_roles"] = $this->user->getRoles();
 
         return view("pages.query_builder.index", $d);
     }
@@ -37,7 +39,7 @@ class QueryBuilderController extends Controller
      */
     public function select(QueryBuilderRequest $req)
     {
-        $d["user_roles"] = $this->user->getRoles(['parent']);
+        $d["user_roles"] = $this->user->getRoles();
 
         // If is query select
         if ($req->type == "select") {
@@ -407,19 +409,16 @@ class QueryBuilderController extends Controller
         return $d;
     }
 
-    public function print_staff_data(HttpRequest $req)
+    public function print_users_data(HttpRequest $req)
     {
         Validator::make($req->toArray(), [
-            'user_types' => 'required|array',
-            'user_types.*' => 'string|in:' . implode(",", Qs::getAllUserTypes(['student', 'parent'])),
+            'user_roles' => 'required|array',
             'per_page' => 'integer|min:3|max:15|required',
             'paper_size' => 'required|string|in:' . implode(",", array_keys(Qs::getDompdfSupportedPaperSizes())),
             'paper_orientation' => 'sometimes|nullable|in:landscape'
-        ], [], ['per_page' => 'number of data per page', 'user_types.*' => 'user type'])->validate();
+        ], [], ['per_page' => 'number of data per page'])->validate();
 
-        $user_types = $req->user_types;
-
-        $teachers = DB::table('users')
+        $users = DB::table('users')
             ->leftJoin('staff_records', function ($leftjoin) {
                 $leftjoin->on('users.id', '=', 'staff_records.user_id');
             })
@@ -451,16 +450,26 @@ class QueryBuilderController extends Controller
                 'staff_records.subjects_studied',
                 'staff_records.no_of_periods AS number of periods',
             ])
-            ->whereIn("users.user_type", $user_types)
+            ->whereIn('users.id', function ($query) use ($req) {
+                $query->select('model_id')
+                    ->from('model_has_roles')
+                    ->whereIn('role_id', function ($subquery) use ($req) {
+                        $subquery->select('id')
+                            ->from('roles')
+                            ->whereIn('name', $req->user_roles);
+                    })
+                    ->where('model_type', 'App\User');
+            })
             ->orderBy('users.name')
             ->get();
 
-        $teachers = $teachers->map(function ($teacher) {
+        $users = $users->map(function ($teacher) {
             $teacher->photo = Qs::imgToBase64($teacher->photo); // Update photo from normal url to base64 encoding format required by dompdf.
             return $teacher;
         });
 
-        foreach ($teachers->sortBy('name') as $teacher) {
+        $keys = [];
+        foreach ($users->sortBy('name') as $teacher) {
             foreach ($teacher as $key => $value) {
                 $keys[] = $key; // Take table names from the collection
             }
@@ -471,8 +480,8 @@ class QueryBuilderController extends Controller
         // Get unique array keys - the seleted table names
         $d['keys'] = array_unique($keys);
 
-        $teachers_arr = $teachers->toArray();
-        $total = \count($teachers_arr);
+        $users_arr = $users->toArray();
+        $total = \count($users_arr);
         $per_page = $req->per_page;
         $data_str = '';
 
@@ -484,7 +493,7 @@ class QueryBuilderController extends Controller
         for ($i = 1; $i <= $last_page; $i++) {
             $point = $i * $per_page - $per_page;
             $starting_point = ($i === $last_page) ? $point - $total : $point;
-            $d['staff'] = \array_slice($teachers_arr, $starting_point, $per_page, true);
+            $d['staff'] = \array_slice($users_arr, $starting_point, $per_page, true);
             $d['page_number'] = $i;
             $data_str .= view("pages.query_builder.print.staff_data.body", $d)->render();
         }
@@ -502,6 +511,6 @@ class QueryBuilderController extends Controller
         $dompdf->loadHtml($dompdfhtml);
         $dompdf->setPaper($paper_size, $paper_orientation);
         $dompdf->render();
-        return $dompdf->stream(Qs::getAppCode() . ' Staff.pdf');
+        return $dompdf->stream(Qs::getAppCode() . ' Users Data.pdf');
     }
 }

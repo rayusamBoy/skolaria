@@ -4,9 +4,7 @@
 
 @section('content')
 
-@can('use_query_builder')
 {{-- Query Print --}}
-@can('print_queries')
 <div class="card card-collapsed">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded mr-2">print</i> Query Print</h6>
@@ -14,14 +12,14 @@
     </div>
 
     <div class="card-body">
-        <form method="POST" target="_blank" action="{{ route('query_builder.print_staff_data') }}">
+        <form method="POST" target="_blank" action="{{ route('query_builder.print_users_data') }}">
             @csrf
             <div class="row">
                 <div class="col-md-3 form-group">
                     <label for="user-roles">Select user role(s) to print</label>
                     <select required multiple name="user_roles[]" id="user-roles" class="form-control select">
                         @foreach ($user_roles as $ur)
-                        <option value="{{ $ur->title }}">{{ $ur->name }}s</option>
+                        <option value="{{ $ur->name }}">{{ Str::plural($ur->name) }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -33,7 +31,7 @@
                     <label for="paper-size">Select Paper</label>
                     <select name="paper_size" id="paper-size" class="form-control select select-search">
                         @foreach(Qs::getDompdfSupportedPaperSizes() as $name => $size)
-                        <option value="{{ $name }}" @if($name==='a3' ) selected @endif>{{ $name }}</option>
+                        <option value="{{ $name }}" @selected($name === 'a4')>{{ $name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -53,10 +51,8 @@
         </form>
     </div>
 </div>
-@endcan
 
 {{-- Query Select --}}
-@can('run_queries')
 <div class="card card-collapsed" id="query-box">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded mr-2">lasso_select</i> Query Select</h6>
@@ -167,7 +163,6 @@
         </form>
     </div>
 </div>
-@endcan
 
 {{-- Query Results --}}
 @if($queryed)
@@ -236,6 +231,5 @@
     });
 
 </script>
-@endcan
 
 @endsection
