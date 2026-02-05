@@ -58,8 +58,8 @@
     --swal2-bg-color: #fff;
     --datatable-header-border-color: #ddd;
     --cat-bg-color: initial;
-    --messages-left-div-color: #E8F6F6;
-    --messages-right-div-color: #F4F6F8;
+    --messages-left-div-color: #e8f6f6;
+    --messages-right-div-color: #f4f6f8;
     --element-hover-bg-color: #dddddd;
     --sidebar-item-active-bg-color: lightblue;
     --nav-link-active-bg-color: #ececec;
@@ -1233,7 +1233,8 @@ select[size] option + option {
 }
 
 .form-control:disabled,
-.select2-container--disabled .select2-selection--single:not([class*="bg-"]) {
+.select2-container--disabled .select2-selection--single:not([class*="bg-"]),
+.form-control[readonly] {
     background: var(--tertiary-bg-color);
 }
 
@@ -1754,7 +1755,9 @@ a:not([href]):not([tabindex]) {
     text-overflow: ellipsis;
     cursor: pointer;
     margin-bottom: 0;
-    transition: background-color ease-in-out 0.15s, color ease-in-out 0.15s;
+    transition:
+        background-color ease-in-out 0.15s,
+        color ease-in-out 0.15s;
 }
 
 @media screen and (prefers-reduced-motion: reduce) {
@@ -4890,7 +4893,9 @@ a.badge[class*="bg-"]:not(.bg-transparent):not(.bg-white):not(.bg-light):focus,
 .close {
     cursor: pointer;
     opacity: 0.75;
-    transition: color ease-in-out 0.15s, opacity ease-in-out 0.15s;
+    transition:
+        color ease-in-out 0.15s,
+        opacity ease-in-out 0.15s;
 }
 
 @media screen and (prefers-reduced-motion: reduce) {

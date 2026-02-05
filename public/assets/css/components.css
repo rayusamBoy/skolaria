@@ -1107,7 +1107,7 @@
 }
 
 .select2-container--disabled .select2-selection--multiple:not([class*="bg-"]) {
-    background-color: #fafafa;
+    background-color: var(--codemirror-preview-bg-color);
 }
 
 .select2-container--disabled .select2-selection--multiple[class*="bg-"] {
