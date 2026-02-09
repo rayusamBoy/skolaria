@@ -15,10 +15,10 @@
             <li class="nav-item">
                 <a href="#all-classes" class="nav-link active" data-toggle="tab">Manage Classes</a>
             </li>
-          
+
             <li class="nav-item">
                 <a href="#new-class" class="nav-link" data-toggle="tab">
-                    <i class="material-symbols-rounded">add</i> Create New Class
+                    Create New Class
                 </a>
             </li>
         </ul>

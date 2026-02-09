@@ -18,7 +18,7 @@
        
             <li class="nav-item">
                 <a href="#new-division" class="nav-link" data-toggle="tab">
-                    <i class="material-symbols-rounded">add</i> Add Division
+                    Add Division
                 </a>
             </li>
         </ul>
