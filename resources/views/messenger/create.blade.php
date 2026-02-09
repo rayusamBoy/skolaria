@@ -20,7 +20,7 @@
                     <label class="control-label">Recipients</label>
                     <select id="recipients-ids" name="recipients[]" onchange="toggleElementDisabledState(this.value, '#user_roles-ids')" multiple="multiple" data-placeholder="select recipient(s)" class="form-control select-search">
                         @foreach($users as $user)
-                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                        <option @selected(in_array($user->id, old('recipients', []))) value="{{ $user->id }}">{{ $user->name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -32,14 +32,14 @@
                     <label class="control-label">Broadcast to user role group(s) instead</label>
                     <select id="user_roles-ids" name="user_roles[]" onchange="toggleElementDisabledState(this.value, '#recipients-ids');" multiple="multiple" data-placeholder="select recipient(s)" class="form-control select">
                         @foreach($user_roles as $role)
-                        @if($role->title == 'student')
-                        <option disabled value="{{ $role->title }}">{{ $role->name }}s</option>
-                        <option value="0">&xrArr; Active</option>
-                        <option value="1">&xrArr; Graduated</option>
-                        <option value="students">&xrArr; All</option>
+                        @if($role->name == config('roles.default_roles.tenant.student'))
+                        <option disabled value="{{ $role->name }}">{{ Str::plural($role->name) }}</option>
+                        <option @selected(in_array($role->name, old('user_roles', []))) value="students_active">&xrArr; Active</option>
+                        <option @selected(in_array($role->name, old('user_roles', []))) value="students_graduated">&xrArr; Graduated</option>
+                        <option @selected(in_array($role->name, old('user_roles', []))) value="students">&xrArr; All</option>
                         @continue
                         @endif
-                        <option value="{{ $role->name }}">{{ $role->name }}s</option>
+                        <option @selected(in_array($role->name, old('user_roles', []))) value="{{ $role->name }}">{{ Str::plural($role->name) }}</option>
                         @endforeach
                     </select>
                 </div>

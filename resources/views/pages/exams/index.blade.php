@@ -15,7 +15,7 @@
             {{-- Manage exam item --}}
             <li class="nav-item"><a href="#all-exams" class="{{ session('announce_exam') || $errors->any() ? 'nav-link' : 'nav-link active' }}" data-toggle="tab">Manage Exam</a></li>
             {{-- Add exam item --}}
-            <li class="nav-item"><a href="#new-exam" class="{{ $errors->any() ? 'nav-link active' : 'nav-link' }}" data-toggle="tab"><i class="material-symbols-rounded">add</i> Add Exam</a></li>
+            <li class="nav-item"><a href="#new-exam" class="{{ $errors->any() ? 'nav-link active' : 'nav-link' }}" data-toggle="tab">Add Exam</a></li>
             {{-- Announce exam item --}}
             @if (session('announce_exam'))
             <li class="nav-item"><a href="#announce-exam" class="nav-link active" data-toggle="tab"></i> Announce the Exam</a></li>
@@ -49,13 +49,13 @@
                             <td>{{ $ex->category->name }}</td>
                             <td>{{ $ex->class_type->name }}</td>
 
-                            @if (auth()->user()->hasRole('super_admin'))
+                            @if (auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
                             <td><label class="form-switch m-0"><input id="checkbox-exam-edit-{{ $ex->id }}" onchange="updateExamEditState(<?php echo $ex->id; ?>, this)" type="checkbox" @if ($ex->editable) checked @endif><i></i></label></td>
                             @else
                             <td><label class="form-switch disabled m-0"><input type="checkbox" @if ($ex->editable) checked @endif><i></i></label></td>
                             @endif
 
-                            @if(Qs::headSA(auth()->id()))
+                            @if(Qs::userIsHead(auth()->id()))
                             <td><label class="form-switch m-0"><input id="checkbox-exam-lock-{{ $ex->id }}" onchange="updateExamLockState(<?php echo $ex->id; ?>, this)" type="checkbox" @if ($ex->locked) checked @endif><i></i></label></td>
                             @else
                             <td><label class="form-switch disabled m-0"><input type="checkbox" @if ($ex->locked) checked @endif><i></i></label></td>
@@ -71,14 +71,14 @@
                                             <a href="{{ route('exams.edit', $ex->id) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
                                             {{-- Publish --}}
                                             @if (!$ex->published)
-                                            @if (auth()->user()->hasRole('super_admin'))
+                                            @if (auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
                                             <a id="{{ $ex->id }}" onclick="confirmPublish(this.id)" href="javascript:;" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> Publish</a>
                                             <form method="get" id="item-publish-{{ $ex->id }}" action="{{ route('exams.publish', $ex->id) }}" class="hidden">@csrf @method('get')</form>
                                             @endif
 
                                             @endif
                                             {{-- Delete --}}
-                                            @if (auth()->user()->hasRole('super_admin'))
+                                            @if (auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
                                             <a id="{{ $ex->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                             <form method="post" id="item-delete-{{ $ex->id }}" action="{{ route('exams.destroy', $ex->id) }}" class="hidden">
                                                 @csrf @method('delete')</form>

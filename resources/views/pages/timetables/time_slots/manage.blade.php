@@ -5,7 +5,6 @@
     </div>
 
     <div class="card-body collapse">
-        @can('view_time_slots')
         <table id="time_slots_table" class="table datatable-button-html5-columns">
             <thead>
                 <tr>
@@ -27,13 +26,13 @@
                                 <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                 <div class="dropdown-menu dropdown-menu-right">
 
-                                    @can('edit_time_slots')
+                                    @can($tenant_permissions['time_tables']['edit_time_slot'])
                                     <a href="{{ route('ts.edit', $tms->id) }}" class="dropdown-item">
                                         <i class="material-symbols-rounded">edit</i> Edit
                                     </a>
                                     @endcan
 
-                                    @can('delete_time_slots')
+                                    @can($tenant_permissions['time_tables']['delete_time_slot'])
                                     <a id="ts-delete-{{ $tms->id }}" onclick="confirmPermanentDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                         <i class="material-symbols-rounded">delete</i> Delete
                                     </a>
@@ -51,6 +50,5 @@
                 @endforeach
             </tbody>
         </table>
-        @endcan
     </div>
 </div>

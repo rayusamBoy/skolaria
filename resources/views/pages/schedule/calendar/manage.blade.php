@@ -1,4 +1,3 @@
-@can('view_events')
 <div class="{{ $selected ? 'card' : 'card card-collapsed' }}">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Events</h6>
@@ -7,14 +6,13 @@
 
     <div class="card-body">
         {{-- only users with manage_events can see tabs and actions --}}
-        @can('manage_events')
         <ul class="nav nav-tabs nav-tabs-highlight">
             <li class="nav-item">
                 <a href="#all-events" class="{{ $selected ? 'nav-link' : 'nav-link active' }}" data-toggle="tab">
                     Manage Events
                 </a>
             </li>
-            @if($selected)
+            @if($selected && auth()->user()->can($tenant_permissions['schedules']['update_event']))
             <li class="nav-item">
                 <a href="#edit-event" class="{{ $selected ? 'nav-link active' : 'nav-link' }}" data-toggle="tab">
                     Edit Event
@@ -22,7 +20,6 @@
             </li>
             @endif
         </ul>
-        @endcan
 
         <div class="tab-content">
             {{-- All Events --}}
@@ -57,13 +54,13 @@
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @can('edit_events')
+                                            @can($tenant_permissions['schedules']['edit_event'])
                                             <a href="{{ route('events.edit', $evt->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
                                             @endcan
 
-                                            @can('delete_events')
+                                            @can($tenant_permissions['schedules']['delete_event'])
                                             <a id="{{ $evt->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -82,9 +79,8 @@
                 </table>
             </div>
 
-            @if($selected)
+            @if($selected && auth()->user()->can($tenant_permissions['schedules']['update_event']))
             {{-- Edit Event --}}
-            @can('edit_events')
             <div class="tab-pane fade show active" id="edit-event">
                 <form class="ajax-update" method="post" action="{{ route('events.update', $event->id) }}">
                     @csrf
@@ -127,9 +123,7 @@
                     </div>
                 </form>
             </div>
-            @endcan
             @endif
         </div>
     </div>
 </div>
-@endcan

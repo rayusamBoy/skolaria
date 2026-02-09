@@ -22,7 +22,7 @@ $("table.float-head").on(
     "floatThead",
     function (e, isFloated, $floatContainer) {
         $("table tr.hide").toggle(!isFloated);
-    }
+    },
 );
 
 /**
@@ -77,10 +77,10 @@ $(document).ready(() => {
 
     /**
      *-------------------------------------------------------------
-     * Handle user type change on select.
+     * Handle user role change on select.
      *-------------------------------------------------------------
      */
-    $("select#user_role").on("change", function () {
+    $("select#roles").on("change", function () {
         const $fieldset = $(this).closest("fieldset");
         const $parentData = $fieldset.find("#parent-data");
         const $parentDataInputs = $("#parent-data input");
@@ -89,10 +89,27 @@ $(document).ready(() => {
         const $navigationBtns = $(".actions ul li").not(":last-child");
         // Middle vertical and horizontal aligned line that separates the steps headers.
         const $stepsLineSeparator = $(".wizard > .steps > ul > li.current");
-        // Get the class of the selected class type option
-        const optionClass = $(this).find(":selected").attr("class");
+        // Get selected options
+        let $selectedOptions = $(this).find(":selected");
 
-        if (optionClass === "parent") {
+        // Collect & parse permissions
+        let optionPermissions = $selectedOptions
+            .map(function () {
+                const perms = $(this).attr("data-permissions");
+                return perms ? JSON.parse(perms) : [];
+            })
+            .get()
+            .flat(); // merge all permissions into one array
+
+        // Check if root role
+        const optionIsRootRole =
+            $selectedOptions.is('[data-all="true"]') ||
+            $selectedOptions.is('[data-all="1"]');
+
+        if (
+            optionPermissions.some((p) => p.includes("children")) &&
+            !optionIsRootRole
+        ) {
             $lastTab.hide();
             $parentData.show("150");
             $navigationBtns.hide();
@@ -165,7 +182,7 @@ $(document).ready(() => {
                 (err) => {
                     showTooltipTitle(element, "Failed! Try copying manually");
                     console.error("Failed to copy text:", err);
-                }
+                },
             );
         } else {
             const $temp = $("<textarea>").val(text).appendTo("body").select();
@@ -287,7 +304,7 @@ $(".full-screen-handle").on("click", function (event) {
             document.documentElement.mozRequestFullScreen();
         } else if (document.documentElement.webkitRequestFullScreen) {
             document.documentElement.webkitRequestFullScreen(
-                Element.ALLOW_KEYBOARD_INPUT
+                Element.ALLOW_KEYBOARD_INPUT,
             );
         }
         $(this)
@@ -440,7 +457,7 @@ $("button.opt-all-as-graduate").on("click", function () {
  *-------------------------------------------------------------
  */
 const $doNotShowButton = $(
-    `<button type="button" class="btn btn-sm btn-info pt-0 pb-0 pr-1 pl-1 position-absolute right-0 font-size-xs do-not-show-again" style="bottom: -10px;" onclick="doNotShowAgain(this)">Do not show again</button>`
+    `<button type="button" class="btn btn-sm btn-info pt-0 pb-0 pr-1 pl-1 position-absolute right-0 font-size-xs do-not-show-again" style="bottom: -10px;" onclick="doNotShowAgain(this)">Do not show again</button>`,
 );
 $(".has-do-not-show-again-button").append($doNotShowButton);
 
@@ -449,14 +466,14 @@ const doNotShowAgain = (el) => {
     const id = $parent.attr("id");
     if (!id)
         return console.warn(
-            "Missing required unique id attribute for the element."
+            "Missing required unique id attribute for the element.",
         );
     if ($(`[id="${id}"]`).length > 1)
         return console.warn(
-            `Multiple ${id} id attributes were found. Id needs to be unique.`
+            `Multiple ${id} id attributes were found. Id needs to be unique.`,
         );
     let ids = JSON.parse(
-        Cookies.get("do_not_show_els_with_these_ids_again") || "[]"
+        Cookies.get("do_not_show_els_with_these_ids_again") || "[]",
     );
     ids.push(id);
     Cookies.set("do_not_show_els_with_these_ids_again", JSON.stringify(ids));
@@ -526,7 +543,7 @@ $("button#clear-do-not-show-again-alert-msgs").click(function () {
                     console.error(
                         "Failed to clear hidden alert IDs data.",
                         status,
-                        error
+                        error,
                     );
                 },
             });
@@ -537,7 +554,7 @@ $("button#clear-do-not-show-again-alert-msgs").click(function () {
 const updatedoNotShowAgainElsState = () => {
     $(document).ready(() => {
         const ids = JSON.parse(
-            Cookies.get("do_not_show_els_with_these_ids_again") || "[]"
+            Cookies.get("do_not_show_els_with_these_ids_again") || "[]",
         );
         ids.forEach((id) => {
             if (id) $(`#${id}`).remove();
@@ -629,7 +646,7 @@ const notificationSound = new Audio();
 const playNotificationSound = (soundName, condition = false) => {
     if (condition && $(errorSoundElement).data("allow_system_sounds") === 1) {
         notificationSound.src = `${$(errorSoundElement).data(
-            "base_url"
+            "base_url",
         )}/${soundName}`;
         notificationSound.play();
     }
@@ -700,7 +717,7 @@ $authPagesInput.on("change", function () {
 $(document).on("click", ".refresh", function (e) {
     e.preventDefault();
     $(this).html(
-        '<i class="material-symbols-rounded mt-auto mb-auto spinner">refresh</i>'
+        '<i class="material-symbols-rounded mt-auto mb-auto spinner">refresh</i>',
     );
     window.location.reload();
 });
@@ -744,7 +761,7 @@ $(document).on("click", ".refresh", function (e) {
         const events = checkEvents(
             today,
             date.getMonth() + 1,
-            date.getFullYear()
+            date.getFullYear(),
         );
         showEvents(events, months[date.getMonth()], today);
     });
@@ -780,7 +797,7 @@ $(document).on("click", ".refresh", function (e) {
                 }
                 if (events.length !== 0) $currDate.addClass("event-date");
                 $currDate.on("click", (e) =>
-                    dateClick(events, months[month], day, e)
+                    dateClick(events, months[month], day, e),
                 );
             }
             $row.append($currDate);
@@ -902,7 +919,7 @@ $(document).on("click", ".refresh", function (e) {
                     month +
                     " " +
                     day +
-                    ".</div>"
+                    ".</div>",
             );
             $card
                 .css({ "border-left": "10px solid #FF1744" })
@@ -912,28 +929,28 @@ $(document).on("click", ".refresh", function (e) {
             events.forEach((event) => {
                 const $card = $("<div class='event-card'></div>");
                 const $eventName = $(
-                    "<div class='event-name'>" + event.name + ":</div>"
+                    "<div class='event-name'>" + event.name + ":</div>",
                 );
                 const $eventDescription = $(
                     "<div class='event-description pl-1'>" +
                         event.description +
-                        ".</div>"
+                        ".</div>",
                 );
                 let $eventStatus = "";
                 switch (event.status) {
                     case "cancelled":
                         $eventStatus = $(
-                            "<div class='event-cancelled text-danger pl-1'>(Cancelled)</div>"
+                            "<div class='event-cancelled text-danger pl-1'>(Cancelled)</div>",
                         );
                         break;
                     case "active":
                         $eventStatus = $(
-                            "<div class='event-active text-orange pl-1'>(Active now)</div>"
+                            "<div class='event-active text-orange pl-1'>(Active now)</div>",
                         );
                         break;
                     case "completed":
                         $eventStatus = $(
-                            "<div class='event-completed text-success pl-1'>(Completed)</div>"
+                            "<div class='event-completed text-success pl-1'>(Completed)</div>",
                         );
                         break;
                     default:
@@ -954,7 +971,7 @@ $(document).on("click", ".refresh", function (e) {
                   (event) =>
                       event.day === day &&
                       event.month === month &&
-                      event.year === year
+                      event.year === year,
               )
             : [];
     };
@@ -1058,8 +1075,8 @@ const getNoticesData = (url) => {
             `<div class="notices-loading">${noticesLoadingSkin(
                 duplicateTimes,
                 status,
-                lastPage
-            )}</div>`
+                lastPage,
+            )}</div>`,
         );
     $.ajax({
         url,
@@ -1204,7 +1221,7 @@ function getTableColumns(tableName) {
             $where
                 .empty()
                 .append(
-                    '<option disabled selected>where</option><option value="none" selected>none (default)</option>'
+                    '<option disabled selected>where</option><option value="none" selected>none (default)</option>',
                 );
             $.each(resp, (i, data) => {
                 if (i !== "photo")
@@ -1220,7 +1237,7 @@ function getTableColumns(tableName) {
             $select
                 .empty()
                 .append(
-                    '<option disabled>select</option><option value="*" selected>all (default)</option>'
+                    '<option disabled>select</option><option value="*" selected>all (default)</option>',
                 );
             $.each(resp, (i, data) => {
                 $select.append($("<option>", { value: i, text: data }));
@@ -1254,7 +1271,7 @@ function getState(nalId, destination) {
             $state.empty();
             $.each(resp, (i, data) => {
                 $state.append(
-                    $("<option>", { value: data.id, text: data.name })
+                    $("<option>", { value: data.id, text: data.name }),
                 );
             });
         },
@@ -1316,7 +1333,7 @@ function getClassStudents(classId, destination) {
             $section.empty();
             $.each(resp, (i, data) => {
                 $section.append(
-                    $("<option>", { value: data.id, text: data.name })
+                    $("<option>", { value: data.id, text: data.name }),
                 );
             });
         },
@@ -1338,17 +1355,17 @@ function getClassSections(classId, destination) {
             $section.empty();
             $.each(resp, (i, data) => {
                 $section.append(
-                    $("<option>", { value: data.id, text: data.name })
+                    $("<option>", { value: data.id, text: data.name }),
                 );
             });
             if (destination) {
                 if (destination.includes("add_all"))
                     $section.append(
-                        '<option value="all" title="All Sections">All</option>'
+                        '<option value="all" title="All Sections">All</option>',
                     );
                 if (destination.includes("add_not_applicable"))
                     $section.prepend(
-                        '<option selected value=" ">Not Applicable</option>'
+                        '<option selected value=" ">Not Applicable</option>',
                     );
             }
         },
@@ -1373,7 +1390,7 @@ function getTeacherClassSections(classId, destination) {
             $section.empty();
             $.each(resp, (i, data) => {
                 $section.append(
-                    $("<option>", { value: data.id, text: data.name })
+                    $("<option>", { value: data.id, text: data.name }),
                 );
             });
         },
@@ -1423,7 +1440,7 @@ function getYearExams(year) {
             $exam.empty();
             $.each(resp, (i, data) => {
                 $exam.append(
-                    $("<option>", { value: data.id, text: data.name })
+                    $("<option>", { value: data.id, text: data.name }),
                 );
             });
         },
@@ -1448,12 +1465,12 @@ function getClassSubjects(classId, destination) {
             $subject.empty();
             $.each(resp, (i, data) => {
                 $subject.append(
-                    $("<option>", { value: data.id, text: data.name })
+                    $("<option>", { value: data.id, text: data.name }),
                 );
             });
             if (destination && destination.includes("add_not_applicable")) {
                 $subject.prepend(
-                    '<option selected value=" ">Not Applicable</option>'
+                    '<option selected value=" ">Not Applicable</option>',
                 );
             }
         },
@@ -1804,7 +1821,7 @@ function updateUserBlockedState(user_id, el) {
         });
     } else {
         removeItemFromSessionStorageAndFlashErrMsg(
-            "update-user-blocked-state-ok"
+            "update-user-blocked-state-ok",
         );
     }
 }
@@ -1914,7 +1931,7 @@ $(document).on(
         submitForm($(this), formType);
         const reloadDiv = $(this).data("reload");
         if (reloadDiv) reloadDivFn(reloadDiv);
-    }
+    },
 );
 
 $(document).on("click", ".download-receipt", function (ev) {
@@ -1998,7 +2015,7 @@ function submitForm($form, formType) {
 
 function setTimeCounter($btn) {
     $(
-        '<span id="time-counter" class="status-styled d-inline-block"></span>'
+        '<span id="time-counter" class="status-styled d-inline-block"></span>',
     ).insertAfter($btn);
     startTimeCounter();
 }
@@ -2009,7 +2026,7 @@ const pad = (val) => (val > 9 ? val : `0${val}`);
 
 function updateTimer() {
     $("#time-counter").html(
-        `${pad(parseInt(sec / 60, 10))}:${pad(++sec % 60)} elapsed.`
+        `${pad(parseInt(sec / 60, 10))}:${pad(++sec % 60)} elapsed.`,
     );
 }
 
@@ -2028,7 +2045,7 @@ function closeConfirmMessageDeleteModal() {
 function disableBtn($btn) {
     const btnText = $btn.data("text") ? $btn.data("text") : "Submitting...";
     $btn.prop("disabled", true).html(
-        `<i class="material-symbols-rounded mr-2 spinner">progress_activity</i>${btnText}`
+        `<i class="material-symbols-rounded mr-2 spinner">progress_activity</i>${btnText}`,
     );
 }
 
@@ -2040,11 +2057,11 @@ function displayAjaxErr(errors) {
     $("#ajax-alert")
         .show()
         .html(
-            '<div class="alert alert-danger border-0 alert-dismissible" id="ajax-msg"><button type="button" class="close" data-dismiss="alert"><span>&times;</span></button></div>'
+            '<div class="alert alert-danger border-0 alert-dismissible" id="ajax-msg"><button type="button" class="close" data-dismiss="alert"><span>&times;</span></button></div>',
         );
     $.each(errors, (k, v) => {
         $("#ajax-msg").append(
-            `<span><i class="material-symbols-rounded pb-2px">hdr_strong</i> ${v}</span><br/>`
+            `<span><i class="material-symbols-rounded pb-2px">hdr_strong</i> ${v}</span><br/>`,
         );
     });
     scrollTo("body");
@@ -2060,7 +2077,7 @@ function scrollToBottom() {
         {
             scrollTop: scrollingElement.scrollHeight,
         },
-        2000
+        2000,
     );
 }
 
@@ -2080,7 +2097,7 @@ function clearForm($form) {
 $(".print-this")
     .addClass("position-relative")
     .append(
-        '<button class="position-absolute btn btn-sm pb-1 pt-1 right-0 bottom-0 print-none this" type="button">Print</button>'
+        '<button class="position-absolute btn btn-sm pb-1 pt-1 right-0 bottom-0 print-none this" type="button">Print</button>',
     );
 $(".print-this button.this").on("click", function () {
     const $parent = $(this).closest(".print-this");
@@ -2192,7 +2209,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     },
                     scales: { x: { display: false }, y: { display: false } },
                 },
-                opts
+                opts,
             ),
         });
     }
@@ -2259,7 +2276,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     plugins: { legend: { display: false }, tooltip: {} },
                     scales: { y: { beginAtZero: true } },
                 },
-                opts
+                opts,
             ),
         });
     }
@@ -2279,7 +2296,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     });
                 },
-                { rootMargin: "200px" }
+                { rootMargin: "200px" },
             );
             obs.observe(el);
             observers.push(obs);
@@ -2291,7 +2308,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Sparklines (cards)
     lazyInit("#spark-overall-students", () =>
-        createSparkline("spark-overall-students", studentsMonthly)
+        createSparkline("spark-overall-students", studentsMonthly),
     );
 
     // Big charts
@@ -2299,18 +2316,18 @@ document.addEventListener("DOMContentLoaded", function () {
         createDoughnut(
             "chart-gender",
             ["Male", "Female"],
-            [genderCounts.male || 0, genderCounts.female || 0]
-        )
+            [genderCounts.male || 0, genderCounts.female || 0],
+        ),
     );
     lazyInit("#chart-payments", () =>
-        createLine("chart-payments", months, paymentsMonthly, "Payments")
+        createLine("chart-payments", months, paymentsMonthly, "Payments"),
     );
     lazyInit("#chart-students-per-class", () =>
         createBar(
             "chart-students-per-class",
             studentsPerClassLabels,
-            studentsPerClassCounts
-        )
+            studentsPerClassCounts,
+        ),
     );
 });
 
@@ -2332,7 +2349,7 @@ $(function () {
         const name = $opt.val();
         try {
             rolePermMap[name] = JSON.parse(
-                $opt.attr("data-permissions") || "[]"
+                $opt.attr("data-permissions") || "[]",
             );
         } catch (e) {
             rolePermMap[name] = [];

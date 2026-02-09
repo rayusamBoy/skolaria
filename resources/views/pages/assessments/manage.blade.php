@@ -44,7 +44,7 @@
         </div>
     </div>
 
-    @php $is_restricted = (!$exam->editable || $exam->locked) && auth()->user()->hasRole('super_admin'); @endphp
+    @php $is_restricted = (!$exam->editable || $exam->locked) && auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')); @endphp
 
     <div class="card-body">
         @include('pages.assessments.edit')

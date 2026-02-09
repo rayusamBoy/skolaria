@@ -17,7 +17,7 @@
                         @foreach($thread->participantsArray(auth()->id()) as $pt)
                         <span class="participant">
                             <li><a target="_blank" href="{{ route('users.show', Qs::hash($pt->id)) }}">{{ $loop->iteration }} - {{ $pt->name }}</a></li>
-                            @if(auth()->user()->hasRole('super_admin'))
+                            @if(auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
                             <a href="{{ route('messages.remove_participant', [Qs::hash($thread->id), Qs::hash($pt->id)]) }}" class="material-symbols-rounded pl-1" aria-label="remove" title="Remove {{ $pt->name }}">close</a>
                             @endif
                         </span>
@@ -26,7 +26,7 @@
                     </ul>
                 </div>
             </div>
-            @if($thread->hasDirtyParticipant($thread->id) && auth()->user()->hasRole('super_admin'))
+            @if($thread->hasDirtyParticipant($thread->id) && auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
             <div class="modal-footer">
                 <a href="{{ route('thread.activate_all_participants', Qs::hash($thread->id)) }}" type="button" class="btn">Activate all removed participants</a>
             </div>

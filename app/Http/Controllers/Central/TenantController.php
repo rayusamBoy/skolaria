@@ -7,8 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\TenantRequest;
 use App\Repositories\TenantRepo;
 use App\Repositories\UserRepo;
-use Stancl\Tenancy\Resolvers\DomainTenantResolver;
 use Illuminate\Support\Carbon;
+use Stancl\Tenancy\Resolvers\DomainTenantResolver;
 
 class TenantController extends Controller
 {
@@ -48,7 +48,7 @@ class TenantController extends Controller
 
         try {
             $tenant = $this->tenant->create($data);
-        } catch (\Error $e) {
+        } catch (\Throwable $e) {
             $cleaning_error = null;
 
             try {

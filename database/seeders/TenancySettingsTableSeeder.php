@@ -181,29 +181,13 @@ class TenancySettingsTableSeeder extends Seeder
             ),
             20 =>
             array(
-                'id' => 21,
-                'type' => 'allow_marksheet_print',
-                'description' => '0',
-                'created_at' => NULL,
-                'updated_at' => NULL,
-            ),
-            21 =>
-            array(
-                'id' => 22,
-                'type' => 'allow_assessmentsheet_print',
-                'description' => '0',
-                'created_at' => NULL,
-                'updated_at' => NULL,
-            ),
-            22 =>
-            array(
                 'id' => 23,
                 'type' => 'admin_email',
                 'description' => 'admin@example.domain',
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            23 =>
+            21 =>
             array(
                 'id' => 24,
                 'type' => 'admin_whatsapp_link',
@@ -211,7 +195,7 @@ class TenancySettingsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            24 =>
+            22 =>
             array(
                 'id' => 25,
                 'type' => 'admin_linkedin_link',
@@ -219,7 +203,7 @@ class TenancySettingsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            25 =>
+            23 =>
             array(
                 'id' => 26,
                 'type' => 'admin_facebook_link',
@@ -227,7 +211,7 @@ class TenancySettingsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            26 =>
+            24 =>
             array(
                 'id' => 27,
                 'type' => 'admin_github_link',
@@ -235,7 +219,7 @@ class TenancySettingsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            27 =>
+            25 =>
             array(
                 'id' => 28,
                 'type' => 'analytics_enabled',
@@ -243,7 +227,7 @@ class TenancySettingsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            28 =>
+            26 =>
             array(
                 'id' => 29,
                 'type' => 'google_analytic_tag_id',
@@ -251,7 +235,7 @@ class TenancySettingsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            29 =>
+            27 =>
             array(
                 'id' => 30,
                 'type' => 'google_analytic_property_id',
@@ -259,7 +243,7 @@ class TenancySettingsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            30 =>
+            28 =>
             array(
                 'id' => 31,
                 'type' => 'google_analytic_service_account_credential_file',
@@ -267,7 +251,7 @@ class TenancySettingsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            31 =>
+            29 =>
             array(
                 'id' => 32,
                 'type' => 'login_and_related_pgs_txts_and_bg_colors',
@@ -275,7 +259,7 @@ class TenancySettingsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            32 =>
+            30 =>
             array(
                 'id' => 33,
                 'type' => 'enable_email_notification',
@@ -283,7 +267,7 @@ class TenancySettingsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            33 =>
+            31 =>
             array(
                 'id' => 34,
                 'type' => 'enable_sms_notification',
@@ -291,7 +275,7 @@ class TenancySettingsTableSeeder extends Seeder
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),
-            34 =>
+            32 =>
             array(
                 'id' => 35,
                 'type' => 'enable_push_notification',

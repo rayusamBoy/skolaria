@@ -21,7 +21,7 @@
                     <li class="nav-item">
                         <a href="#basic-info" class="nav-link active" data-toggle="tab">Basic Info</a>
                     </li>
-                    @if((isset($staff_rec) && $staff_rec != null) && ($user->id == auth()->id()))
+                    @if(isset($staff_rec) && $staff_rec != null && $user->id == auth()->id())
                     <li class="nav-item">
                         <a href="#staff-info" class="nav-link" data-toggle="tab">Staff Info</a>
                     </li>
@@ -111,7 +111,7 @@
                                     <td class="font-weight-bold">Address</td>
                                     <td class="break-all">{{ $user->address }}</td>
                                 </tr>
-                                @if($user->hasRole('parent'))
+                                @if($user->hasRole(config('roles.default_roles.tenant.parent')))
                                 <tr>
                                     <td class="font-weight-bold">Children</td>
                                     <td>
@@ -131,12 +131,12 @@
                                 </tr>
                                 @endif
 
-                                @if($user->hasRole('teacher'))
+                                @if($user->hasRole(config('roles.default_roles.tenant.teacher')))
                                 <tr>
                                     <td class="font-weight-bold">My Subjects</td>
                                     <td>
                                         @foreach(Qs::findTeacherSubjectRecs($user->id) as $sub_rec)
-                                        <span> - {{ $sub_rec->subject->name ?? ' ' .' ('.$sub_rec->subject->my_class->name ?? " )" }}</span><br>
+                                        <span> - {{ $sub_rec->subject->name . " " . ("{$sub_rec->subject->my_class->name}") }}</span><br>
                                         @endforeach
                                     </td>
                                 </tr>
@@ -146,7 +146,7 @@
                     </div>
 
                     {{--Staff Info--}}
-                    @if((isset($staff_rec) && $staff_rec != null) && ($user->id == auth()->id()))
+                    @if(isset($staff_rec) && $staff_rec != null && $user->id == auth()->id())
                     <div class="tab-pane fade" id="staff-info">
                         <table class="table table-bordered">
                             <tbody>
@@ -222,7 +222,7 @@
     </div>
 </div>
 
-@if($user->hasRole('Parent'))
+@if($user->hasRole(config('roles.default_roles.tenant.parent')))
 @include('pages/modals/parent_relative')
 @endif
 

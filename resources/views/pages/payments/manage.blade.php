@@ -11,7 +11,7 @@
     </div>
 
     <div class="card-body">
-        @can('view_student_payments')
+        @can($tenant_permissions['payments']['select_class'])
         <form method="post" action="{{ route('payments.select_class') }}">
             @csrf
             <div class="row">
@@ -51,7 +51,7 @@
 @if($selected)
 <div class="card">
     <div class="card-body">
-        @can('view_student_payments')
+        @can($tenant_permissions['payments']['index'])
         <table class="table datatable-button-html5-columns">
             <thead>
                 <tr>
@@ -77,7 +77,7 @@
                                 <i class="material-symbols-rounded">lists</i>
                             </a>
                             <div class="dropdown-menu dropdown-menu-left">
-                                @can('view_student_profile')
+                                @can($tenant_permissions['students']['show'])
                                 <a href="{{ route('students.show', Qs::hash($s->id)) }}" class="dropdown-item">
                                     <i class="material-symbols-rounded">visibility</i>
                                     View Profile
@@ -85,7 +85,7 @@
                                 <hr class="m-0">
                                 @endcan
 
-                                @can('view_student_payments')
+                                @can($tenant_permissions['payments']['invoice'])
                                 <span class="dropdown-item opacity-75 disabled">Manage Payments</span>
                                 <a href="{{ route('payments.invoice', [Qs::hash($s->user_id)]) }}" class="dropdown-item">
                                     All Payments

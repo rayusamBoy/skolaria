@@ -11,7 +11,7 @@
                     <div class="header-elements">
                         <div class="list-icons">
                             <a class="text-danger list-icons-item" onclick="confirmPermanentDelete(this.id)" href="javascript:;" id="{{ $tt->id }}" title="DELETE"><i class="material-symbols-rounded">delete</i></a>
-                            <form method="post" id="item-delete-{{ $tt->id }}" action="{{ route('tt.delete', $tt->id) }}" class="hidden">@csrf @method('delete')</form>
+                            <form method="post" id="item-delete-{{ $tt->id }}" action="{{ route('timetables.delete', $tt->id) }}" class="hidden">@csrf @method('delete')</form>
                             <a class="list-icons-item" data-action="collapse"></a>
                             <a class="list-icons-item" data-action="remove"></a>
                         </div>
@@ -20,7 +20,7 @@
 
                 <div class="card-body collapse">
                     <div class="col-md-12">
-                        <form method="post" action="{{ route('tt.update', $tt->id) }}">
+                        <form method="post" action="{{ route('timetables.update', $tt->id) }}">
                             @csrf @method('PUT')
 
                             <input name="ttr_id" value="{{ $ttr->id }}" type="hidden">

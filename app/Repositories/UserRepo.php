@@ -20,7 +20,7 @@ class UserRepo
 
     public function update(int $value, array $data, $column = 'id')
     {
-        return User::where($column, $value)->update($data);
+        return $this->where([$column => $value])->update($data);
     }
 
     public function updateByIds(mixed $ids, array $data)
@@ -35,17 +35,17 @@ class UserRepo
 
     public function restore(int $id)
     {
-        return User::where('id', $id)->restore();
+        return $this->where(['id' => $id])->restore();
     }
 
     public function forceDelete(int $id)
     {
-        return User::where('id', $id)->forceDelete();
+        return $this->where(['id' => $id])->forceDelete();
     }
 
-    public function get(mixed $where)
+    public function get(array $where)
     {
-        return User::where($where)->get();
+        return $this->where($where)->get();
     }
 
     public function create(array $data)
@@ -91,6 +91,11 @@ class UserRepo
     public function getTrashed()
     {
         return User::onlyTrashed()->get();
+    }
+
+    public function where(array $where)
+    {
+        return User::where($where);
     }
 
     /********** STAFF RECORD ********/
@@ -157,13 +162,13 @@ class UserRepo
     }
 
     /********** Roles ********/
-    public function getRoles($exclude_roles = [])
+    public function getRoles($except = [])
     {
-        $roles = $exclude_roles ? Role::whereNotIn('name', $exclude_roles)->get() : Role::all();
+        $roles = Role::whereNotIn('name', $except)->get();
         return $roles;
     }
 
-    public function findByRoleName(string $role_name)
+    public function findRoleByName(string $role_name)
     {
         return Role::where('name', $role_name)->with('users')->first();
     }

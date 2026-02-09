@@ -51,7 +51,7 @@
 
                 <div class="form-group col-md-2">
                     <label for="phone" class="col-form-label font-weight-bold">Phone number: <span class="text-danger">*</span></label>
-                    <input required type="text" value="{{ $phone ?? old('phone') }}" name="phone" data-mask="+999 999 999 999" placeholder="+255 123 456 789" class="form-control">
+                    <input required type="text" value="{{ $phone ?? old('phone') }}" name="phone" placeholder="+255 123 456 789" class="form-control">
                 </div>
             </div>
 

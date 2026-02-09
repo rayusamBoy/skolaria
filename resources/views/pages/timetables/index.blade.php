@@ -12,13 +12,10 @@
 
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
-            @can('create_timetables')
             <li class="nav-item">
                 <a href="#add-tt" class="nav-link active" data-toggle="tab">Create Timetable</a>
             </li>
-            @endcan
 
-            @can('view_timetables')
             <li class="nav-item dropdown">
                 <a href="javascript:;" class="nav-link dropdown-toggle" data-toggle="dropdown">Show TimeTables</a>
                 <div class="dropdown-menu dropdown-menu-right">
@@ -27,11 +24,9 @@
                     @endforeach
                 </div>
             </li>
-            @endcan
         </ul>
 
         <div class="tab-content">
-            @can('create_timetables')
             <div class="tab-pane fade show active" id="add-tt">
                 <div class="col-md-8">
                     <form class="ajax-store" method="post" action="{{ route('ttr.store') }}">
@@ -92,9 +87,7 @@
                     </form>
                 </div>
             </div>
-            @endcan
 
-            @can('view_timetables')
             @foreach($my_classes as $mc)
             <div class="tab-pane fade" id="ttr{{ $mc->id }}">
                 <table class="table datatable-button-html5-columns">
@@ -124,28 +117,21 @@
                                         <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-right">
 
-                                            @can('view_timetables')
                                             <a href="{{ route('ttr.show', $ttr->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">visibility</i>
                                                 View
                                             </a>
-                                            @endcan
 
-                                            @can('edit_timetables')
                                             <a href="{{ route('ttr.edit', $ttr->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i>
                                                 Edit
                                             </a>
-                                            @endcan
 
-                                            @can('manage_timetables')
                                             <a href="{{ route('ttr.manage', $ttr->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">manage_search</i>
                                                 Manage
                                             </a>
-                                            @endcan
 
-                                            @can('delete_timetables')
                                             <a id="{{ $ttr->id }}" onclick="confirmPermanentDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i>
                                                 Delete
@@ -153,7 +139,6 @@
                                             <form method="post" id="item-delete-{{ $ttr->id }}" action="{{ route('ttr.destroy', $ttr->id) }}" class="hidden">
                                                 @csrf @method('delete')
                                             </form>
-                                            @endcan
 
                                         </div>
                                     </div>
@@ -165,7 +150,6 @@
                 </table>
             </div>
             @endforeach
-            @endcan
 
         </div>
     </div>

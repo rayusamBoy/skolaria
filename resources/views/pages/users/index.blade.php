@@ -93,14 +93,14 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label id="phone">Phone:</label>
-                                    <input value="{{ old('phone') }}" type="text" name="phone" id="phone" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
+                                    <input value="{{ old('phone') }}" type="text" name="phone" id="phone" class="form-control" placeholder="+255123456789">
                                 </div>
                             </div>
                             {{-- TELEPHONE --}}
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="phone2">Telephone:</label>
-                                    <input value="{{ old('phone2') }}" type="text" id="phone2" name="phone2" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
+                                    <input value="{{ old('phone2') }}" type="text" id="phone2" name="phone2" class="form-control" placeholder="+255123456789">
                                 </div>
                             </div>
                         </div>
@@ -408,7 +408,7 @@
 
             @foreach($roles as $role)
             <div class="tab-pane fade" id="ur-{{ Qs::hash($role->id) }}">
-                <span class="status-styled">{{ $role->name }}</span>
+                <span class="status-styled">{{ Str::plural($role->name) }}</span>
 
                 <table class="table datatable-button-html5-columns">
                     <thead>
@@ -434,33 +434,46 @@
                             <td>{{ $u->username }}</td>
                             <td><a href="tel:{{ $u->phone }}">{{ $u->phone }}</a></td>
                             <td><a href="mailto:{{ $u->email }}">{{ $u->email }}</a></td>
-                            @can('edit_staff_data')
                             <td>
-                                @if(isset($u->staff->first()->staff_data_edit))
+                                @if(isset($u->staff->first()->staff_data_edit) && auth()->user()->can($tenant_permissions['users']['update_staff_data_edit_state']) && !Usr::userIsHead($u->id))
                                 <label class="form-switch m-0"><input type="checkbox" id="checkbox-staff-{{ $u->id }}" onchange="updateStaffDataEdtiState({{ $u->id }},this)" @checked($u->staff->first()->staff_data_edit)><i></i></label>
                                 @else
                                 <span class="status-styled">Unavailable</span>
                                 @endif
                             </td>
-                            @endcan
-                            @can('block_user')
-                            <td><label class="form-switch m-0"><input type="checkbox" id="checkbox-user-{{ $u->id }}" onchange="updateUserBlockedState({{ $u->id }},this)" @checked($u->blocked)><i></i></label></td>
-                            @endcan
+                            <td>
+                                @if(auth()->user()->can($tenant_permissions['users']['update_user_blocked_state']) && !Usr::userIsHead($u->id))
+                                <label class="form-switch m-0"><input type="checkbox" id="checkbox-user-{{ $u->id }}" onchange="updateUserBlockedState({{ $u->id }},this)" @checked($u->blocked)><i></i></label>
+                                @else
+                                <span class="status-styled">Unavailable</span>
+                                @endif
+                            </td>
                             <td class="text-center">
+                                @php
+                                $user_can_modify_head = !Usr::userIsHead($u->id) || Usr::userIsHead();
+                                @endphp
+                                @if($user_can_modify_head)
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @can('edit_user')<a href="{{ route('users.edit', Qs::hash($u->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>@endcan
-                                            @can('view_user')<a href="{{ route('users.show', Qs::hash($u->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> View Profile</a>@endcan
-                                            @can('reset_password')<a href="javascript:;" data-href="{{ route('users.password.reset',Qs::hash($u->id)) }}" class="dropdown-item needs-reset-pass-confirmation"><i class="material-symbols-rounded">lock_reset</i> Reset Password</a>@endcan
-                                            @can('delete_user')
+                                            @if(auth()->user()->can($tenant_permissions['users']['edit']) && $user_can_modify_head)
+                                            <a href="{{ route('users.edit', Qs::hash($u->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
+                                            @endif
+                                            @if(auth()->user()->can($tenant_permissions['users']['show']) && $user_can_modify_head)
+                                            <a href="{{ route('users.show', Qs::hash($u->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> View Profile</a>
+                                            @endif
+                                            @if(auth()->user()->can($tenant_permissions['users']['reset_pass']) && $user_can_modify_head)
+                                            <a href="javascript:;" data-href="{{ route('users.password.reset', Qs::hash($u->id)) }}" class="dropdown-item needs-reset-pass-confirmation"><i class="material-symbols-rounded">lock_reset</i> Reset Password</a>
+                                            @endif
+                                            @if(auth()->user()->can($tenant_permissions['users']['destroy']) && $user_can_modify_head)
                                             <a href="javascript:;" id="{{ Qs::hash($u->id) }}" onclick="confirmDelete(this.id)" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                             <form id="item-delete-{{ Qs::hash($u->id) }}" action="{{ route('users.destroy', Qs::hash($u->id)) }}" method="post" class="hidden">@csrf @method('delete')</form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
+                                @endif
                             </td>
                         </tr>
                         @endforeach

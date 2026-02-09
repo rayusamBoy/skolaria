@@ -28,7 +28,7 @@ class UserRequest extends FormRequest
         $store = [
             'name' => 'required|string|unique:users|min:6|max:150',
             'password' => 'nullable|string|min:3|max:50',
-            'user_role' => 'required',
+            'roles' => 'required',
             'gender' => 'required|string',
             'phone' => ['sometimes', 'nullable', 'string', 'unique:users', new StartsWithProperPhoneCode],
             'phone2' => ['sometimes', 'nullable', 'string', 'unique:users', new StartsWithProperPhoneCode],
@@ -99,6 +99,7 @@ class UserRequest extends FormRequest
             'state_id' => 'state',
             'lga_id' => 'LGA',
             'phone2' => 'telephone',
+            'name' => 'full name',
             'name2' => 'close relative name',
             'phone3' => 'close relative phone',
             'phone4' => 'close relative mobile',

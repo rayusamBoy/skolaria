@@ -69,7 +69,7 @@ class MarkController extends Controller
         if (auth()->id() != $student_id && !Mk::userIsMyChild($student_id, auth()->id()))
             return redirect(route('dashboard'))->with('pop_error', __('msg.denied'));
 
-        if (Mk::examIsLocked() && !auth()->user()->hasAnyRole(['Super Admin', 'Admin'])) {
+        if (Mk::examIsLocked() && !auth()->user()->hasAnyRole([config('roles.default_roles.tenant.superadmin'), config('roles.default_roles.tenant.admin')])) {
             Session::put('marks_url', route('marks.show', [Mk::hash($student_id), $year]));
 
             if (!$this->checkPinVerified($student_id))
@@ -98,16 +98,16 @@ class MarkController extends Controller
     {
         $exams = $this->exam->getExam(['year' => $year], false);
 
-        return auth()->user()->hasAnyRole(['Super Admin', 'Admin']) ? $exams : $exams->where('published', true);
+        return auth()->user()->hasAnyRole([config('roles.default_roles.tenant.superadmin'), config('roles.default_roles.tenant.admin')]) ? $exams : $exams->where('published', true);
     }
 
     public function print_view($student_id, $exam_id, $year)
     {
         /* Prevent Other Students/Parents from viewing Result of others */
-        if (auth()->id() != $student_id && !Mk::userIsMyChild($student_id, auth()->id()) && (!Mk::marksheetPrintNotAllowed() || auth()->user()->hasRole('super_admin')))
+        if (auth()->id() != $student_id && !Mk::userIsMyChild($student_id, auth()->id()))
             return redirect(route('dashboard'))->with('pop_error', __('msg.denied'));
 
-        if (Mk::examIsLocked() && !auth()->user()->hasAnyRole(['Super Admin', 'Admin'])) {
+        if (Mk::examIsLocked() && !auth()->user()->hasAnyRole([config('roles.default_roles.tenant.superadmin'), config('roles.default_roles.tenant.admin')])) {
             Session::put('marks_url', route('marks.show', [Mk::hash($student_id), $year]));
 
             if (!$this->checkPinVerified($student_id))
@@ -203,7 +203,7 @@ class MarkController extends Controller
         $d['updated_at'] = Mk::onlyDateFormat($marks_updated_at);
         $d['subjects'] = $this->my_class->getAllSubjects();
 
-        if (auth()->user()->hasRole('teacher'))
+        if (auth()->user()->hasRole(config('roles.default_roles.tenant.teacher')))
             $d['subjects'] = $this->my_class->findSubjectByRecord(auth()->id(), $class_id);
 
         if ($section_id == null)
@@ -617,7 +617,7 @@ class MarkController extends Controller
         if ($this->exam->isLocked($exam_id))
             return Mk::jsonUpdateDenied();
 
-        $d = auth()->user()->hasAnyRole(['Super Admin', 'Admin']) ? $req->only(['t_comment', 'p_comment']) : $req->only(['t_comment']);
+        $d = auth()->user()->hasAnyRole([config('roles.default_roles.tenant.superadmin'), config('roles.default_roles.tenant.admin')]) ? $req->only(['t_comment', 'p_comment']) : $req->only(['t_comment']);
 
         $this->exam->updateRecord(['exam_id' => $exam_id], $d);
 

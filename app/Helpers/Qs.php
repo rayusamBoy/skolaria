@@ -54,16 +54,6 @@ class Qs
         return '<div class="alert alert-success alert-bordered"><button type="button" class="close" data-dismiss="alert"><span>&times;</span><span class="sr-only">Close</span></button> $msg </div>';
     }
 
-    public static function getTeamSA()
-    {
-        return ['admin', 'super_admin'];
-    }
-
-    public static function getParent()
-    {
-        return ['parent'];
-    }
-
     public static function getParentRelative($user_id)
     {
         return ParentRelative::where('user_id', $user_id)->first();
@@ -81,7 +71,7 @@ class Qs
         return self::getHashidsInstance()->encode($id);
     }
 
-    public static function decodeHash($str, $to_string = true)   
+    public static function decodeHash($str, $to_string = true)
     {
 
         $decoded = self::getHashidsInstance()->decode($str);
@@ -185,29 +175,29 @@ class Qs
 
     public static function userIsClassSectionTeacher()
     {
-        return auth()->user()->hasRole('teacher') ? Section::where("teacher_id", auth()->id())->exists() : false;
+        return auth()->user()->hasRole(config('roles.default_roles.tenant.teacher')) ? Section::where("teacher_id", auth()->id())->exists() : false;
     }
 
-    public static function userIsHead(): bool
+    /**
+     * Determine if user is head
+     * @param int $user_id Default null; if null, auth id will be used
+     * @return bool
+     */
+    public static function userIsHead(?int $user_id = null): bool
     {
-        return \in_array(auth()->user()->id, self::getHeadSAIDs());
+        $user_id = $user_id ?? auth()->id();
+        return \in_array($user_id, self::getHeadIds());
     }
 
-    // Get ids of super admins heads
-    public static function getHeadSAIDs(): array
+    // Get ids of super users
+    public static function getHeadIds(): array
     {
         return [1];
     }
 
     public static function getStaff($remove = [])
     {
-        $data = ['super_admin', 'admin', 'teacher', 'accountant', 'librarian'];
-        return $remove ? array_values(array_diff($data, $remove)) : $data;
-    }
-
-    public static function getAllUserTypes($remove = [])
-    {
-        $data = ['super_admin', 'admin', 'teacher', 'accountant', 'librarian', 'student', 'parent'];
+        $data = array_values(config('roles.staff_roles.tenant'));
         return $remove ? array_values(array_diff($data, $remove)) : $data;
     }
 
@@ -215,11 +205,6 @@ class Qs
     {
         $data = ['name', 'term', 'category_id', 'number_format', 'class_type_id', 'exam_denominator', 'exam_student_position_by_value', 'ca_student_position_by_value', 'cw_denominator', 'hw_denominator', 'tt_denominator', 'tdt_denominator'];
         return $remove ? array_values(array_diff($data, $remove)) : $data;
-    }
-
-    public static function headSA(int $user_id): bool
-    {
-        return \in_array($user_id, self::getHeadSAIDs());
     }
 
     public static function userIsMyChild($student_id, $parent_id)
@@ -243,9 +228,9 @@ class Qs
         return 'uploads/' . date('Y') . '/' . date('m') . '/' . date('d') . '/';
     }
 
-    public static function getUploadPath($user_role)
+    public static function getUploadPath($user_role_name)
     {
-        return "uploads/$user_role";
+        return "uploads/$user_role_name";
     }
 
     public static function getFileMetaData($file)

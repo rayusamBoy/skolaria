@@ -100,8 +100,8 @@
                         @endcan
 
                         @can($tenant_permissions['student_records']['list_by_class'])
-                        <li class="nav-item nav-item-submenu {{ request()->routeIs('students.list','students.edit','students.show') ? 'nav-item-expanded' : '' }}">
-                            <a href="#" class="nav-link {{ request()->routeIs('students.list','students.edit','students.show') ? 'active' : '' }}">
+                        <li class="nav-item nav-item-submenu {{ request()->routeIs('students.list','students.edit','students.show','students.list_by_class') ? 'nav-item-expanded' : '' }}">
+                            <a href="#" class="nav-link {{ request()->routeIs('students.list','students.edit','students.show','students.list_by_class') ? 'active' : '' }}">
                                 Student Information
                             </a>
                             <ul class="nav nav-group-sub">
@@ -131,7 +131,7 @@
                                 @endcan
                                 @can($tenant_permissions['promotions']['manage'])
                                 <li class="nav-item">
-                                    <a href="{{ route('students.promotion.manage') }}" class="nav-link {{ request()->routeIs('students.promotion_manage') ? 'active' : '' }}">
+                                    <a href="{{ route('students.promotion.manage') }}" class="nav-link {{ request()->routeIs('students.promotion.manage') ? 'active' : '' }}">
                                         Manage Promotions
                                     </a>
                                 </li>
@@ -384,7 +384,7 @@
 
                 {{-- Books --}}
                 @canany([...array_values($tenant_permissions['books']), ...array_values($tenant_permissions['book_requests'])])
-                <li class="nav-item nav-item-submenu {{ request()->routeIs('books.*','book_requests.*') ? 'nav-item-expanded nav-item-open' : '' }}">
+                <li class="nav-item nav-item-submenu {{ request()->routeIs('books.*', 'book_requests.*') ? 'nav-item-expanded nav-item-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="material-symbols-rounded">library_books</i>
                         <span>Books</span>

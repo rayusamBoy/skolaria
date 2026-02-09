@@ -15,9 +15,20 @@ class NonTenancyRolesTableSeeder extends Seeder
     {
         $default_guard = config('auth.defaults.guard');
 
-        \DB::table('roles')->delete();
+        Role::query()->delete();
 
-        $root_role = Role::create(['name' => 'Root', 'guard_name' => $default_guard]);
-        $root_role->givePermissionTo(Permission::all());
+        // Load roles from config
+        $rootRoles = (array) array_values(config('roles.root_roles.central', []));
+
+        // Create all default roles
+        foreach ($rootRoles as $roleName) {
+            $roleName = (string) $roleName;
+            $createdRole = Role::create([
+                'name' => $roleName,
+                'guard_name' => $default_guard,
+            ]);
+
+            $createdRole->givePermissionTo(Permission::all());
+        }
     }
 }

@@ -34,23 +34,21 @@
         <div class="tab-content">
 
             {{-- Bulk Block/Unblock --}}
-            @canany(['block_graduates','unblock_graduates'])
             <div class="card mb-3">
                 <div class="card-body text-center">
-                    @can('block_graduates')
+                    @can($tenant_permissions['student_records']['block_all_graduated'])
                     <button id="students-block-all-grad" class="btn btn-danger">
                         Block All Graduated Students
                     </button>
                     @endcan
 
-                    @can('unblock_graduates')
+                    @can($tenant_permissions['student_records']['unblock_all_graduated'])
                     <button id="students-unblock-all-grad" class="btn btn-success ml-2">
                         Unblock All Graduated Students
                     </button>
                     @endcan
                 </div>
             </div>
-            @endcanany
 
             {{-- All Graduates --}}
             <div class="tab-pane fade show active" id="all-students">
@@ -64,7 +62,7 @@
                             <th>Section</th>
                             <th>Grad Year</th>
                             <th>Remarks</th>
-                            @can('block_graduates') <th>Blocked</th> @endcan
+                            <th>Blocked</th>
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
@@ -81,14 +79,21 @@
                             <td>{{ $gs->from_session }}</td>
                             <td>{{ $gs->remarks }}</td>
 
-                            @can('block_graduates')
+                            @if(auth()->user()->canAny([$tenant_permissions['student_records']['block_all_graduated'], $tenant_permissions['student_records']['unblock_all_graduated']]))
                             <td>
                                 <label class="form-switch m-0">
                                     <input type="checkbox" id="checkbox-user-{{ $gs->student_id }}" onchange="updateUserBlockedState({{ $gs->student_id }}, this)" @checked($gs->student->blocked)>
                                     <i></i>
                                 </label>
                             </td>
-                            @endcan
+                            @else
+                            <td>
+                                <label class="form-switch m-0">
+                                    <input type="checkbox" @disabled(true) @checked($gs->student->blocked)>
+                                    <i></i>
+                                </label>
+                            </td>
+                            @endif
 
                             <td class="text-center">
                                 <div class="list-icons">
@@ -98,47 +103,30 @@
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-left">
 
-                                            @can('view_students')
                                             <a href="{{ route('students.show', Qs::hash($gs->student_id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">visibility</i> View
                                             </a>
-                                            @endcan
-
-                                            @can('edit_students')
                                             <a href="{{ route('students.edit', Qs::hash($gs->student_id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-                                            @endcan
-
-                                            @can('reset_student_password')
                                             <a href="javascript:;" data-default_pass="student" data-href="{{ route('students.password.reset', Qs::hash($gs->student_id)) }}" class="dropdown-item needs-reset-pass-confirmation">
                                                 <i class="material-symbols-rounded">lock_reset</i> Reset Password
                                             </a>
-                                            @endcan
-
-                                            @can('ungraduate_students')
                                             <a id="{{ Qs::hash($gs->student_id) }}" href="javascript:;" onclick="confirmReset(this.id)" class="dropdown-item">
                                                 <i class="material-symbols-rounded">close</i> Not Graduated
                                             </a>
                                             <form id="item-reset-{{ Qs::hash($gs->student_id) }}" action="{{ route('st.not_graduated', [Qs::hash($gs->student_id), $gs->id]) }}" method="POST" class="hidden">
                                                 @csrf @method('PUT')
                                             </form>
-                                            @endcan
-
-                                            @can('view_students')
                                             <a target="_blank" href="{{ route('marks.year_selector', Qs::hash($gs->user_id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">bottom_sheets</i> Marksheet
                                             </a>
-                                            @endcan
-
-                                            @can('delete_students')
                                             <a id="{{ Qs::hash($gs->user->id) }}" href="javascript:;" onclick="confirmDelete(this.id)" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
                                             <form id="item-delete-{{ Qs::hash($gs->user->id) }}" action="{{ route('students.destroy', Qs::hash($gs->user->id)) }}" method="POST" class="hidden">
                                                 @csrf @method('DELETE')
                                             </form>
-                                            @endcan
 
                                         </div>
                                     </div>
@@ -184,41 +172,27 @@
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-left">
 
-                                            @can('view_students')
                                             <a href="{{ route('students.show', Qs::hash($gs->student_id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">visibility</i> View
                                             </a>
-                                            @endcan
-
-                                            @can('edit_students')
                                             <a href="{{ route('students.edit', Qs::hash($gs->student_id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-                                            @endcan
-
-                                            @can('ungraduate_students')
                                             <a id="{{ Qs::hash($gs->student_id) }}" href="javascript:;" onclick="confirmReset(this.id)" class="dropdown-item">
                                                 <i class="material-symbols-rounded">close</i> Not Graduated
                                             </a>
                                             <form id="item-reset-{{ Qs::hash($gs->student_id) }}" action="{{ route('st.not_graduated', [Qs::hash($gs->student_id), $gs->id]) }}" method="POST" class="hidden">
                                                 @csrf @method('PUT')
                                             </form>
-                                            @endcan
-
-                                            @can('view_students')
                                             <a target="_blank" href="{{ route('marks.year_selector', Qs::hash($gs->user_id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">bottom_sheets</i> Marksheet
                                             </a>
-                                            @endcan
-
-                                            @can('delete_students')
                                             <a id="{{ Qs::hash($gs->student_id) }}" href="javascript:;" onclick="confirmDelete(this.id)" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
                                             <form id="item-delete-{{ Qs::hash($gs->student_id) }}" action="{{ route('students.destroy', Qs::hash($gs->student_id)) }}" method="POST" class="hidden">
                                                 @csrf @method('DELETE')
                                             </form>
-                                            @endcan
 
                                         </div>
                                     </div>
@@ -238,7 +212,7 @@
 @endsection
 
 
-@section('scripts')
+@pushOnce('scripts')
 <script>
     /* Block all graduated students */
     $('#students-block-all-grad').on('click', function() {
@@ -304,4 +278,4 @@
     }
 
 </script>
-@endsection
+@endPushOnce

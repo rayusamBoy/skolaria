@@ -197,7 +197,7 @@ class StudentRecordController extends Controller
 
         /* Prevent Other Students/Parents from viewing Profile of others */
         //  if (auth()->id() != $sr->user_id && !Usr::userIsTeamSATCL() && !Usr::userIsMyChild($sr->user_id, auth()->id()))
-        if ($sr->user->hasRole('student') && !(auth()->user()->hasRole('librarian') or auth()->user()->hasRole('accountant')))
+        if ($sr->user->hasRole(config('roles.default_roles.tenant.student')) && !(auth()->user()->hasRole(config('roles.default_roles.tenant.librarian')) or auth()->user()->hasRole(config('roles.default_roles.tenant.accountant'))))
             return redirect(route('dashboard'))->with('pop_error', __('msg.denied'));
 
         return view('pages.students.show', $data);

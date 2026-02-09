@@ -86,7 +86,7 @@
 
     <div class="col-md-6">
         <div class="card">
-            <div class="card-header header-elements-inline bg-dark">
+            <div class="card-header header-elements-inline bg-info">
                 <h6 class="font-weight-bold card-title">Use Existing Time Slots</h6>
                 {!! Qs::getPanelOptions() !!}
             </div>

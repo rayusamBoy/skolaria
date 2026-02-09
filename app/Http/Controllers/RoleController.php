@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Usr;
 use App\Repositories\PermissionRepo;
 use Illuminate\Http\Request;
-use Qs;
 
 class RoleController extends Controller
 {
@@ -41,13 +41,18 @@ class RoleController extends Controller
             $role->syncPermissions($request->permissions);
         }
 
-        return Qs::jsonStoreOk();
+        return Usr::jsonStoreOk();
     }
 
     public function edit($id)
     {
         $data['permissions'] = $this->permission->getPermissions();
         $data['role'] = $role = $this->permission->getRole(['id' => $id]);
+
+        if (\in_array($role->name, Usr::getTenancyAwareRootRoles(), true)) {
+            return redirect()->route('roles.index')->with('flash_warning', __('msg.denied'));
+        }
+
         $data['rolePermissions'] = $role->permissions->pluck('id')->toArray();
 
         return view('pages.roles.edit', $data);
@@ -66,7 +71,7 @@ class RoleController extends Controller
         ]);
 
         $role = $this->permission->getRole(['id' => $id]);
-        $role_name = ucwords($request->name);
+        $role_name = \in_array($role->name, Usr::getTenancyAwareDefaultRoles(), true) ? $role->name : ucwords($request->name);
         $role->update(['name' => $role_name]);
         $role->syncPermissions($request->permissions ?? []);
 
@@ -75,8 +80,13 @@ class RoleController extends Controller
 
     public function destroy($id)
     {
-        $this->permission->deleteRole(['id' => $id]);
+        $role = $this->permission->getRole(['id' => $id]);
+        
+        if (\in_array($role->name, Usr::getTenancyAwareDefaultRoles(), true)) {
+            return back()->with('flash_warning', __('msg.denied'));
+        }
 
+        $role->delete();
         return redirect()->back()->with('flash_success', __('msg.del_ok'));
     }
 }

@@ -397,6 +397,11 @@ class Usr extends Qs
 
     public static function getTenancyAwareRootRoles()
     {
-        return self::tenancyInitilized() ? ['Super Admin'] : ['Root'];
+        return self::tenancyInitilized() ? array_values(config('roles.root_roles.tenant')) : array_values(config('roles.root_roles.central'));
+    }
+
+    public static function getTenancyAwareDefaultRoles()
+    {
+        return self::tenancyInitilized() ? array_values(config('roles.default_roles.tenant')) : array_values(config('roles.default_roles.central'));
     }
 }

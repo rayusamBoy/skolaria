@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\Qs;
+use App\Helpers\Usr;
 use App\Http\Controllers\Controller;
 use App\Models\Thread;
 use App\Repositories\ExamRepo;
@@ -18,12 +18,14 @@ class SoftDeleteController extends Controller
 
     public function __construct(MyClassRepo $my_class, PaymentRepo $pay, UserRepo $user, ExamRepo $exm, StudentRepo $student)
     {
+        $this->permissionMap = config('permissions.names.tenant.soft_deletes');
+        parent::__construct();
         $this->my_class = $my_class;
         $this->pay = $pay;
         $this->user = $user;
         $this->exm = $exm;
         $this->student = $student;
-        $this->year = Qs::getCurrentSession();
+        $this->year = Usr::getCurrentSession();
     }
 
     public function bin()
@@ -40,11 +42,22 @@ class SoftDeleteController extends Controller
     public function empty_soft_deleted_model($model_name)
     {
         $can_soft_delete_models = ['users', 'pyaments', 'my_classes', 'exams', 'threads'];
+        $model_name = strtolower($model_name);
 
-        if (!\in_array($model_name, $can_soft_delete_models))
+        if (!\in_array($model_name, $can_soft_delete_models, true))
             return back()->with('pop_error', __('msg.denied'));
 
-        Qs::getDbFacadesTable($model_name)->whereNotNull("deleted_at")->delete();
+        if ($model_name === 'users') {
+            $soft_deleted_users_query = $this->user->where([])->onlyTrashed();
+            $soft_deleted_users = $soft_deleted_users_query->get();
+            foreach ($soft_deleted_users as $user) {
+                $this->deleteUserPhotoDirs($user->roles->pluck('name'), $user->code);
+            }
+            $soft_deleted_users_query->forceDelete();
+        } else {
+            Usr::getDbFacadesTable($model_name)->whereNotNull("deleted_at")->delete();
+        }
+
         $model_name = str_replace('_', ' ', $model_name);
 
         return redirect()->back()->with('flash_success', ucfirst($model_name) . ' ' . __('msg.force_del_ok'));
@@ -75,14 +88,21 @@ class SoftDeleteController extends Controller
 
     public function user_force_delete($id)
     {
-        // Delete user's photo from storage if exists
         $user = $this->user->findOnlyTrashed($id);
-        $path = Qs::getUploadPath($user->role) . $user->code;
-        Storage::exists($path) ? Storage::deleteDirectory($path) : false;
 
         $this->user->forceDelete($id);
+        // Delete user's photo(s) from storage if exists
+        $this->deleteUserPhotoDirs($user->roles->pluck('name'), $user->code);
 
         return redirect()->route('bin')->with('flash_success', 'User ' . __('msg.force_del_ok'));
+    }
+
+    private function deleteUserPhotoDirs($role_names, $code)
+    {
+        foreach ($role_names as $name) {
+            $path = Usr::getUploadPath(strtolower($name)) . $code;
+            Storage::exists($path) ? Storage::deleteDirectory($path) : false;
+        }
     }
 
     /** My Classes */

@@ -72,7 +72,7 @@ class MessageController extends Controller
 
         // don't show the current user in list
         $user_id = auth()->id();
-        $users = User::whereNotIn('id', $thread->participantsUserIds($user_id))->get();
+        $users = User::whereNotIn('id', $thread->participantsUserIds($user_id))->with(['roles'])->get();
         $extra_messages_to_count = $this->extra_messages_to_count;
         $unread_messages_count = $thread->userUnreadMessagesCount($user_id);
 
@@ -119,8 +119,8 @@ class MessageController extends Controller
         Validator::make($input, [
             'subject' => 'required|string|min:3|max:300',
             'message' => 'required|string|min:2|max:500',
-            'recipients' => 'required_without:user_types|array',
-            'user_types' => 'required_without:recipients|array'
+            'recipients' => 'required_without:user_roles|array',
+            'user_roles' => 'required_without:recipients|array'
         ])->validate();
 
         $thread = Thread::create([
@@ -146,14 +146,16 @@ class MessageController extends Controller
             $thread->addParticipant($input['recipients']);
         }
 
-        // Recipients - by user type(s)
-        if (Request::has('user_types')) {
-            foreach ($input['user_types'] as $type) {
+        // Recipients - by user role(s)
+        if (Request::has('user_roles')) {
+            foreach ($input['user_roles'] as $role) {
                 // If active students
-                $ids = match ($type) {
-                    0 => StudentRecord::where('grad', 0)->with('user')->get()->where('user.user_type', 'student')->pluck('user_id')->toArray(),
-                    1 => StudentRecord::where('grad', 1)->with('user')->get()->where('user.user_type', 'student')->pluck('user_id')->toArray(),
-                    default => User::whereUserType($type)->get()->pluck('id')->toArray(),
+                $ids = match ($role) {
+                    'students_active' => StudentRecord::where('grad', 0)->with('user')->get()->where('user.user_type', 'student')->pluck('user_id')->toArray(),
+                    'students_graduated' => StudentRecord::where('grad', 1)->with('user')->get()->where('user.user_type', 'student')->pluck('user_id')->toArray(),
+                    default => User::whereHas('roles', function ($query) use ($role) {
+                            $query->where('name', $role);
+                        })->get()->pluck('id')->toArray(),
                 };
 
                 $thread->addParticipant($ids);
@@ -211,7 +213,7 @@ class MessageController extends Controller
         }
 
         try {
-            $message = Message::with(['user', 'deletor'])->find($message->id);
+            $message = Message::with(['user', 'deletor', 'deletor.roles', 'user.roles'])->find($message->id);
             $users = Participant::where('thread_id', $thread->id)->with('user')->get()->where('user.id', '<>', auth()->id())->whereNotNull('user')->pluck('user');
             // Update user photo path to full asset url
             $message['user']['photo'] = Usr::getTenantAwarePhoto($message['user']['photo']);
@@ -299,7 +301,7 @@ class MessageController extends Controller
         try {
             $message->updateMessage($msg_id, ['deleted_by' => auth()->id()]);
             $message->deleteMessage($msg_id);
-            $message = Message::onlyTrashed()->with(['user', 'deletor'])->find($message->id);
+            $message = Message::onlyTrashed()->with(['user', 'deletor', 'deletor.roles', 'user.roles'])->find($message->id);
             // Update user photo path to full asset url
             $message['user']['photo'] = Usr::getTenantAwarePhoto($message['user']['photo']);
 
@@ -345,7 +347,7 @@ class MessageController extends Controller
     public function fetch_previous($thread_id, $current_first_msg_id_in_view)
     {
         $messages_string = '';
-        $messages = Message::withTrashed()->with(['user', 'deletor'])->where('thread_id', $thread_id)->where('id', '<', $current_first_msg_id_in_view)->get()->take(-$this->extra_messages_to_count);
+        $messages = Message::withTrashed()->with(['user', 'deletor', 'deletor.roles'])->where('thread_id', $thread_id)->where('id', '<', $current_first_msg_id_in_view)->get()->take(-$this->extra_messages_to_count);
 
         foreach ($messages as $message) {
             $data['message'] = $message;

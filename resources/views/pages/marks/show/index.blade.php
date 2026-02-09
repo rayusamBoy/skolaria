@@ -21,11 +21,11 @@
 
     <div class="card-body collapse">
 
-       {{--Sheet Table--}}
+        {{--Sheet Table--}}
         @include('pages.marks.show.sheet')
 
         {{--Print Button--}}
-        @if(Qs::getSetting('allow_marksheet_print') || auth()->user()->hasRole('super_admin'))
+        @if(auth()->user()->can($tenant_permissions['marks']['print_view']))
         <div class="text-center mt-3">
             <a target="_blank" href="{{ route('marks.print', [Qs::hash($student_id), $ex->id, $year]) }}" class="btn btn-secondary btn-lg">Print Marksheet <i class="material-symbols-rounded ml-2">print</i></a>
         </div>
@@ -34,10 +34,10 @@
 </div>
 
 {{-- EXAM COMMENTS   --}}
-@include('pages.marks.show.comments')
+@includeWhen(auth()->user()->can($tenant_permissions['marks']['comment_update']), 'pages.marks.show.comments')
 
 {{-- SKILL RATING --}}
-{{-- @include('pages.marks.show.skills') --}}
+@includeWhen(auth()->user()->can($tenant_permissions['marks']['skills_update']), 'pages.marks.show.skills')
 
 @endforeach
 @endforeach

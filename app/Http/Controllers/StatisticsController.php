@@ -46,7 +46,7 @@ class StatisticsController extends Controller
         $d['prev_exam_id'] = $exams->where('id', '<', $exam_id)->first()->id ?? null;
         $d['next_exam_id'] = $exams->where('id', '>', $exam_id)->first()->id ?? null;
 
-        if (auth()->user()->hasRole('parent')) {
+        if (auth()->user()->hasRole(config('roles.default_roles.tenant.parent'))) {
             $s_ids = $this->student->getStudentsRecs()->where('my_parent_id', auth()->id())->pluck('user_id');
 
             $d['exams_recs'] = $this->exam->getRecordsByIds($s_ids)->where('year', $this->year)->get();
@@ -56,7 +56,7 @@ class StatisticsController extends Controller
                 $d['last_exam'] = $last_exm = $this->exam->getById($last_exm_marks->exam_id);
                 $d['last_exm_marks'] = $marks->where('exam_id', $last_exm->id);
             }
-        } elseif (auth()->user()->hasRole('student')) {
+        } elseif (auth()->user()->hasRole(config('roles.default_roles.tenant.student'))) {
             $d['exams_recs'] = $this->exam->getRecordsByStudentId(auth()->id())->where('year', $this->year)->get();
             $d['last_exm_marks'] = $this->mark->getById(auth()->id())->where('exam_id', $last_exm->id)->get();
         } else {

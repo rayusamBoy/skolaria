@@ -12,7 +12,6 @@ use App\Repositories\MyClassRepo;
 use App\Repositories\PermissionRepo;
 use App\Repositories\UserRepo;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
@@ -21,6 +20,8 @@ class UserController extends Controller
 
     public function __construct(UserRepo $user, LocationRepo $loc, MyClassRepo $my_class, PermissionRepo $permission)
     {
+        $this->permissionMap = config('permissions.names.tenant.users');
+        parent::__construct();
         $this->user = $user;
         $this->loc = $loc;
         $this->my_class = $my_class;
@@ -31,18 +32,21 @@ class UserController extends Controller
     {
         $d['nationals'] = $this->loc->getAllNationals();
         $d['blood_groups'] = $this->user->getBloodGroups();
-        $d['roles'] = $this->permission->getRoles();
+        $except_role = config('roles.default_roles.tenant.student');
+        $except_roles = (array) Usr::userIsHead() ? [$except_role] : [$except_role, config('roles.default_roles.tenant.superadmin')];
+        $d['roles'] = $this->permission->getRoles($except_roles);
         $d['permissions'] = $this->permission->getPermissions();
 
         return view('pages.users.index', $d);
     }
 
-
     public function edit($id)
     {
         $id = Usr::decodeHash($id);
 
-        $d['roles'] = $roles = $this->permission->getRoles();
+        $except_role = config('roles.default_roles.tenant.student');
+        $except_roles = (array) Usr::userIsHead() ? [$except_role] : [$except_role, config('roles.default_roles.tenant.superadmin')];
+        $d['roles'] = $roles = $this->permission->getRoles($except_roles);
         $d['permissions'] = $this->permission->getPermissions();
         $d['user'] = $this->user->find($id);
         $d['staff_rec'] = $this->user->getStaffRecord(['user_id' => $id])->first();
@@ -56,7 +60,7 @@ class UserController extends Controller
     public function reset_pass($id)
     {
         // Redirect if Making Changes to Head of Super Admins
-        if (Usr::headSA($id) && !Usr::userIsHead())
+        if (Usr::userIsHead($id) && !Usr::userIsHead())
             return back()->with('flash_danger', __('msg.denied'));
 
         $data['password'] = Hash::make('user');
@@ -69,28 +73,20 @@ class UserController extends Controller
 
     public function store(UserRequest $req)
     {
+        $role_names = $req->roles;
         $except = ['_token', '_method'];
-        $user_role = $req->user_role;
         $data = $req->except([...Usr::getStaffRecord(), ...Usr::getParentRelativeRecord(), ...$except]);
-
-        $data['name'] = $name = ucwords(strtolower($req->name));
-        $data['user_role'] = $user_role;
-        $data['code'] = $code = strtoupper(Str::random(10));
-        $data['photo'] = Usr::createAvatar($name, $code, $user_role);
-        $data['dob'] = $req->dob;
-
-        $user_is_staff = \in_array($user_role, Usr::getStaff());
-        $user_is_teamSA = \in_array($user_role, Usr::getTeamSA());
-        $user_is_parent = \in_array($user_role, Usr::getParent());
-
+        $user_is_staff = \count(array_intersect($role_names, Usr::getStaff())) > 0;
         $emp_date = $req->emp_date ?: now();
         $staff_id = Usr::getAppCode() . '/STAFF/' . date('Y/m', strtotime($emp_date)) . '/' . mt_rand(1000, 9999);
-        $data['username'] = $uname = $user_is_teamSA ? $req->username : $staff_id;
+        $last_role_name = strtolower(last($role_names));
+        $pass = $req->password ?: $last_role_name;
 
-        // If user a parent get the work he/she does
-        $data['work'] = $user_is_parent ? $req->work : NULL;
-
-        $pass = $req->password ?: $user_role;
+        $data['name'] = $name = ucwords(strtolower($req->name));
+        $data['code'] = $code = strtoupper(Str::random(10));
+        $data['dob'] = $req->dob;
+        $data['username'] = $uname = $user_is_staff ? $staff_id : $req->username;
+        $data['work'] = $req->work ?? null;
         $data['password'] = Hash::make($pass);
         $data['message_media_heading_color'] = Usr::getUserMediaHeadingColor($name); // Use a unique text color based on the name
 
@@ -98,17 +94,23 @@ class UserController extends Controller
             $photo = $req->file('photo');
             $f = Usr::getFileMetaData($photo);
             $f['name'] = 'photo.' . $f['ext'];
-            $f['path'] = $data['photo'] = Usr::getUploadPath($user_role) . $data['code'] . '/' . $f['name'];
+            $f['path'] = $data['photo'] = Usr::getUploadPath($last_role_name) . $data['code'] . '/' . $f['name'];
             $photo->storeAs($f['path']);
+        } else {
+            $data['photo'] = Usr::createAvatar($name, $code, $last_role_name);
         }
 
-        /* Ensure that both username and Email are not blank*/
+        /* Ensure that both username and Email are not blank */
         if (!$uname && !$req->email)
             return Usr::json(__('msg.user_invalid'), FALSE);
 
         $user = $this->user->create($data); // Create User
+        $user->syncRoles($role_names);
 
-        /* CREATE STAFF RECORD */
+        if ($req->has('permissions') AND $req->filled('permissions')) {
+            $user->syncPermissions($req->permissions);
+        }
+
         if ($user_is_staff) {
             $d2 = $req->only(Usr::getStaffRecord());
             $d2['user_id'] = $user->id;
@@ -118,8 +120,7 @@ class UserController extends Controller
             $this->user->createStaffRecord($d2);
         }
 
-        /* CREATE PARENT RELATIVE RECORD */
-        if ($user_is_parent) {
+        if ($user->hasRole(config('roles.default_roles.tenant.parent'))) {
             $d3 = $req->only(Usr::getParentRelativeRecord(['name2']));
             $d3['user_id'] = $user->id;
             // Use name2 from the request (removed above) as name
@@ -129,32 +130,36 @@ class UserController extends Controller
             $this->user->createParentRelativeRecord($d3);
         }
 
-        return Usr::jsonStoreOk();
+        return Usr::json(__('msg.store_ok') . " Default password: $last_role_name");
     }
 
     public function update(UserRequest $req, $id)
     {
         $id = (int) Usr::decodeHash($id);
 
-        // Redirect if Making Changes to Head of Super Admins
-        if (Usr::headSA($id) && !Usr::headSA(auth()->id()))
-            return Usr::json(__('msg.denied'), FALSE);
-        elseif (Usr::headSA(auth()->id()) && !Usr::userIsHead())
-            return Usr::json(__('msg.denied'), FALSE);
+        // Redirect if Making Changes to Head
+        if (Usr::userIsHead($id) && !Usr::userIsHead(auth()->id()))
+            return Usr::json(__('msg.denied'), false);
+        elseif (Usr::userIsHead(auth()->id()) && !Usr::userIsHead())
+            return Usr::json(__('msg.denied'), false);
 
         $user = $this->user->find($id);
+        $user->syncRoles($req->roles);
+        if ($req->has('permissions') AND $req->filled('permissions')) {
+            $user->syncPermissions($req->permissions);
+        }
 
-        $user_role = $user->role;
-        $user_was_staff = \in_array($user->role, Usr::getStaff());
-        $user_is_staff = \in_array($user_role, Usr::getStaff());
-        $user_is_parent = $user->hasRole('parent');
+        $role_names = $req->roles;
+        $last_role_name = strtolower(last($role_names));
 
-        $except = [...Usr::getStaffRecord(), ...Usr::getParentRelativeRecord(), '_token', '_method', 'user_roles'];
+        $user_was_staff = \count(array_intersect($user->roles->pluck('name')->toArray(), Usr::getStaff())) > 0;
+        $user_is_staff = \count(array_intersect($role_names, Usr::getStaff())) > 0;
+        $user_is_parent = $user->hasRole(config('roles.default_roles.tenant.parent'));
+
+        $except = [...Usr::getStaffRecord(), ...Usr::getParentRelativeRecord(), '_token', '_method', 'roles'];
         $data = $req->except($except);
-        $user->syncRoles($req->user_roles);
 
         $data['name'] = $name = ucwords(strtolower($req->name));
-        $data['user_role'] = $user_role;
         $data['work'] = $user_is_parent ? $req->work : NULL;
         $data['message_media_heading_color'] = Usr::getUserMediaHeadingColor($name); // Use a unique text color based on the name
 
@@ -162,13 +167,12 @@ class UserController extends Controller
             $photo = $req->file('photo');
             $f = Usr::getFileMetaData($photo);
             $f['name'] = 'photo.' . $f['ext'];
-            $f['path'] = $data['photo'] = Usr::getUploadPath($user_role) . $user->code . '/' . $f['name'];
+            $f['path'] = $data['photo'] = Usr::getUploadPath($last_role_name) . $user->code . '/' . $f['name'];
             $photo->storeAs($f['path']);
         }
 
-        $this->user->update($id, $data);   /* UPDATE USER RECORD */
+        $this->user->update($id, $data);
 
-        /* UPDATE OR CREATE NEW STAFF RECORD */
         if ($user_was_staff) {
             if ($user_is_staff) {
                 $d2 = $req->only(Usr::getStaffRecord());
@@ -184,7 +188,6 @@ class UserController extends Controller
             $this->user->updateStaffRecord(['user_id' => $id], $d2);
         }
 
-        /* UPDATE PARENT RELATIVE RECORD */
         if ($user_is_parent) {
             $d3 = $req->only(Usr::getParentRelativeRecord(['user_id', 'name2']));
             $d3['name'] = ucwords(strtolower($req->name2));
@@ -201,14 +204,11 @@ class UserController extends Controller
         if (!$user_id)
             return back();
 
-        $data['user'] = $this->user->find($user_id);
+        $data['user'] = $user = $this->user->find($user_id);
 
-        /* Prevent other Users from viewing Profile of others */
-        //  if (auth()->id() != $user_id && !Usr::userIsTeamSA() && !Usr::userIsMyChild(auth()->id(), $user_id))
-        //        return redirect(route('dashboard'))->with('pop_error', __('msg.denied'));
-
-        // if (Usr::userIsTeamSATCL())
-        //     $data['staff_rec'] = $this->user->getStaffRecord(['user_id' => $user_id])->first() ?: null;
+        $user_is_staff = \count(array_diff($user->roles->pluck('name')->toArray(), Usr::getStaff())) > 0;
+        if ($user_is_staff)
+            $data['staff_rec'] = $this->user->getStaffRecord(['user_id' => $user_id])->first() ?: null;
 
         return view('pages.users.show', $data);
     }
@@ -218,16 +218,14 @@ class UserController extends Controller
         $id = Usr::decodeHash($id);
 
         // Redirect if Making Changes to Heads
-        if (Usr::headSA($id))
+        if (Usr::userIsHead($id))
             return back()->with('pop_error', __('msg.denied'));
 
         $user = $this->user->find($id);
 
-        if ($user->hasRole('Teacher') && $this->userTeachesSubject($user))
+        if ($user->hasRole(config('roles.default_roles.tenant.teacher')) && $this->userTeachesSubject($user))
             return back()->with('pop_error', __('msg.del_teacher'));
 
-        $path = Usr::getUploadPath($user->role) . $user->code;
-        Storage::exists($path) ? Storage::deleteDirectory($path) : true;
         $this->user->delete($user->id);
 
         return back()->with('flash_success', __('msg.del_ok'));

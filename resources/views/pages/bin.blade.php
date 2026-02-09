@@ -141,7 +141,7 @@
                             <th>Photo</th>
                             <th>Name</th>
                             <th>Username</th>
-                            <th>User type</th>
+                            <th>Role</th>
                             <th>Contact</th>
                             <th>Deleted At</th>
                             <th class="text-center">Action</th>
@@ -156,12 +156,12 @@
                             </td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->username }}</td>
-                            <td>{{ $user->role }}</td>
-                            @if($user->hasRole('student'))
+                            <td>{{ $user->roles->pluck('name')->join(' ,') }}</td>
+                            @if($user->hasRole(config('roles.default_roles.tenant.student')))
                             @php $s_recs = Usr::getStudentRecordByUserId($user->id,['my_class','section']) @endphp
                             <td class="text-center">{{ $s_recs->first()->my_class->name }} - {{ $s_recs->first()->section->name }}</td>
                             @else
-                            <td>{{ $user->phone ?? $user->email ?? '-' }}</td>
+                            <td>{{ $user->email ?? $user->phone ?? $user->phone2 ?? '-' }}</td>
                             @endif
                             <td>{{ Qs::onlyDateFormat($user->deleted_at) }}</td>
                             <td class="text-center">

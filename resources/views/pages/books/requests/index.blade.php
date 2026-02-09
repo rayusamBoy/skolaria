@@ -12,13 +12,10 @@
 
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
-            @can('create_book_requests')
             <li class="nav-item">
                 <a href="#new-request" class="nav-link active" data-toggle="tab">Add a Request</a>
             </li>
-            @endcan
 
-            @can('view_book_requests')
             @if($requests->isNotEmpty())
             <li class="nav-item dropdown">
                 <a href="javascript:;" class="nav-link dropdown-toggle" data-toggle="dropdown">Manage Requests</a>
@@ -31,11 +28,9 @@
                 </div>
             </li>
             @endif
-            @endcan
         </ul>
 
         <div class="tab-content">
-            @can('create_book_requests')
             <div class="tab-pane fade show active" id="new-request">
                 <form method="post" enctype="multipart/form-data" class="ajax-store" action="{{ route('book_requests.store') }}" data-fouc>
                     @csrf
@@ -89,9 +84,7 @@
                     </div>
                 </form>
             </div>
-            @endcan
 
-            @can('view_book_requests')
             @foreach($requests->groupBy('book.id') as $group)
             <div class="tab-pane fade" id="grp-{{ $group->first()->book->id }}">
                 <table class="table datatable-button-html5-columns w-100">
@@ -133,13 +126,10 @@
                                         <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
 
-                                            @can('edit_book_requests')
                                             <a href="{{ route('book_requests.edit', Qs::hash($book_req->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-                                            @endcan
 
-                                            @can('delete_book_requests')
                                             <a id="br-delete-{{ Qs::hash($book_req->id) }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -147,7 +137,6 @@
                                                 @csrf
                                                 @method('delete')
                                             </form>
-                                            @endcan
 
                                         </div>
                                     </div>
@@ -159,7 +148,6 @@
                 </table>
             </div>
             @endforeach
-            @endcan
 
         </div>
     </div>

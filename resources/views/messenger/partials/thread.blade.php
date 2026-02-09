@@ -1,4 +1,4 @@
-@if($thread->hasParticipant(Auth::id()) || auth()->user()->hasRole('super_admin'))
+@if($thread->hasParticipant(Auth::id()) || auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
 @php $unread = $thread->userUnreadMessagesCount(Auth::id()) @endphp
 <div class="{{ $unread == 0 ? 'card card-collapsed' : 'card' }}">
     <div class="card-header header-elements-inline">
@@ -8,7 +8,9 @@
         </h6>
         {!! Qs::getPanelOptions() !!}
     </div>
-    <?php $class = $thread->isUnread(Auth::id()) ? 'alert-info' : ''; ?>
+    @php
+    $class = $thread->isUnread(Auth::id()) ? 'alert-info' : '';
+    @endphp
 
     <div class="media alert {{ $class }} border-none">
         <div class="row w-100">

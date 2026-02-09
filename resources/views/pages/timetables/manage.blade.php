@@ -15,8 +15,8 @@
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
             <li class="nav-item"><a href="#manage-ts" class="nav-link active" data-toggle="tab">Manage Time Slots</a></li>
-            <li class="nav-item"><a href="#add-sub" class="nav-link {{ auth()->user()->can('manage_time_slots') ? '' : 'active' }}" data-toggle="tab">Add Subject</a></li>
-            <li class="nav-item"><a href="#edit-subs" class="nav-link {{ auth()->user()->can('manage_time_slots') || auth()->user()->can('add_timetable_subject') ? '' : 'active' }}" data-toggle="tab">Edit Subjects</a></li>
+            <li class="nav-item"><a href="#add-sub" class="nav-link" data-toggle="tab">Add Subject</a></li>
+            <li class="nav-item"><a href="#edit-subs" class="nav-link" data-toggle="tab">Edit Subjects</a></li>
             <li class="nav-item"><a target="_blank" href="{{ route('ttr.show', $ttr->id) }}" class="nav-link">View TimeTable</a></li>
         </ul>
 
@@ -24,9 +24,9 @@
             {{-- Add Time Slots --}}
             @include('pages.timetables.time_slots.index')
             {{-- Add Subject --}}
-            @include('pages.timetables.subjects.add')
+            @includeWhen(auth()->user()->can($tenant_permissions['time_tables']['store']), 'pages.timetables.subjects.add')
             {{-- Edit Subject --}}
-            @include('pages.timetables.subjects.edit')
+            @includeWhen(auth()->user()->can($tenant_permissions['time_tables']['update']), 'pages.timetables.subjects.edit')
         </div>
     </div>
 </div>

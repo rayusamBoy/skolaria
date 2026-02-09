@@ -34,9 +34,9 @@ class PermissionRepo
     }
 
     /*********** Role ***************/
-    public function getRoles()
+    public function getRoles(array $except = [])
     {
-        return Role::with('permissions')->orderBy('name')->get();
+        return Role::with('permissions')->whereNotIn('name', $except)->orderBy('name')->get();
     }
 
     public function createRole(array $attributes)

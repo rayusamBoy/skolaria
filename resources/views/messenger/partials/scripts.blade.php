@@ -5,7 +5,8 @@
      *-------------------------------------------------------------
      */
     const authId = {{ auth()->id() }};
-    const authUserRole = "{{ auth()->user()->role }}";
+    const authUserRoles = JSON.parse('@json(auth()->user()->roles->pluck("name"))');
+    const superAdminRoleName = "{{ config('roles.default_roles.tenant.superadmin') }}";
     const $textarea = $('#message');
     const $sendBtn = $('#send-message-btn');
     const $typingStatus = $('#user-is-typing');
@@ -114,7 +115,7 @@
                 <img src="${message.user.photo}" alt="${message.user.name}" class="rounded-circle f-left">
             `);
             $listItem.append($userPhoto);
-            if (authUserRole === 'super_admin' && message.deleted_at === null) {
+            if (authUserRoles.includes(superAdminRoleName) && message.deleted_at === null) {
                 const $deleteBtn = $(`
                     <button data-toggle="popover" data-placement="right" data-html="true" class="material-symbols-rounded position-absolute right-neg-25 text-info-400 opacity-75 opacity-100-on-hover border-0 outline-0 action-btn"
                         data-content="
@@ -129,11 +130,11 @@
                 $listItem.append($deleteBtn);
             }
         }
-  
+        
         // Message box and heading
         const senderName = message.user.id == authId
             ? "Me"
-            : `${message.user.name} (${message.user.role})`;
+            : `${message.user.name} (${message.user.roles.map(r => r.name).join(", ")})`;
         const $messageBox = $(`<div class="${message.user.id == authId ? 'right' : 'left'}"></div>`);
         const $messageContent = $(`
             <span class="media-body break-all">
@@ -150,7 +151,7 @@
             let deletionNotice = "";
             if (message.deleted_by == authId) {
                 deletionNotice = `<p class="text-muted"><i class="material-symbols-rounded font-size-sm pb-lg-1">block</i> You deleted this message.</p>`;
-            } else if (message.deletor.role === 'Super Admin' && message.user_id != message.deleted_by) {
+            } else if (authUserRoles.includes(superAdminRoleName) && message.user_id != message.deleted_by) {
                 deletionNotice = `<p class="text-muted"><i class="material-symbols-rounded font-size-sm pb-lg-1">block</i> This message was deleted by super admin ${message.deletor.name}.</p>`;
             } else {
                 deletionNotice = `<p class="text-muted"><i class="material-symbols-rounded font-size-sm pb-lg-1">block</i> This message was deleted.</p>`;

@@ -11,17 +11,17 @@ class NoticeRepo
 
     public function all()
     {
-        return auth()->user()->hasRole('super_admin') ? Notice::all() : Notice::all()->where("from_id", "!=", Auth::id());
+        return auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')) ? Notice::all() : Notice::all()->where("from_id", "!=", Auth::id());
     }
 
     public function allOrOnlyMine()
     {
-        return auth()->user()->hasRole('super_admin') ? Notice::all() : Notice::all()->where("from_id", Auth::id());
+        return auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')) ? Notice::all() : Notice::all()->where("from_id", Auth::id());
     }
 
     public function allExceptAuth()
     {
-        return auth()->user()->hasRole('super_admin') ? Notice::with('user')->get() : Notice::with('user')->get()->where("from_id", "!=", Auth::id());
+        return auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')) ? Notice::with('user')->get() : Notice::with('user')->get()->where("from_id", "!=", Auth::id());
     }
 
     public function getIds()

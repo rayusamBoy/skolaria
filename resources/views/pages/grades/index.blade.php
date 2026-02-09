@@ -12,16 +12,16 @@
 
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
-            @can('view_grades')
+            @can($tenant_permissions['grades']['index'])
             <li class="nav-item"><a href="#all-grades" class="nav-link active" data-toggle="tab">Manage Grades</a></li>
             @endcan
-            @can('create_grades')
-            <li class="nav-item"><a href="#new-grade" class="nav-link" data-toggle="tab"><i class="material-symbols-rounded">add</i> Add Grade</a></li>
+            @can($tenant_permissions['grades']['store'])
+            <li class="nav-item"><a href="#new-grade" class="nav-link" data-toggle="tab">Add Grade</a></li>
             @endcan
         </ul>
 
         <div class="tab-content">
-            @can('view_grades')
+            @can($tenant_permissions['grades']['index'])
             <div class="tab-pane fade show active" id="all-grades">
                 <table class="table datatable-button-html5-columns">
                     <thead>
@@ -52,10 +52,10 @@
                                         <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
 
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @can('edit_grades')
+                                            @can($tenant_permissions['grades']['edit'])
                                             <a href="{{ route('grades.edit', $gr->id) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
                                             @endcan
-                                            @can('delete_grades')
+                                            @can($tenant_permissions['grades']['destroy'])
                                             <a id="{{ $gr->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                             <form method="post" id="item-delete-{{ $gr->id }}" action="{{ route('grades.destroy', $gr->id) }}" class="hidden">@csrf @method('delete')</form>
                                             @endcan
@@ -70,7 +70,7 @@
             </div>
             @endcan
 
-            @can('create_grades')
+            @can($tenant_permissions['grades']['index'])
             <div class="tab-pane fade" id="new-grade">
                 <div class="row">
                     <div class="col-md-12">

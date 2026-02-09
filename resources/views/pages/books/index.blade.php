@@ -15,7 +15,7 @@
             <li class="nav-item">
                 <a href="#new-book" class="nav-link active" data-toggle="tab">Add a Book</a>
             </li>
-  
+
             @if($books->isNotEmpty())
             <li class="nav-item dropdown">
                 <a href="javascript:;" class="nav-link dropdown-toggle" data-toggle="dropdown">Manage Books</a>
@@ -123,7 +123,7 @@
                     </div>
                 </form>
             </div>
-         
+
             @foreach($books->groupBy('my_class.id') as $group)
             <div class="tab-pane fade" id="grp-{{ $group->first()->my_class->id }}">
                 <table class="table datatable-button-html5-columns w-100">

@@ -54,7 +54,7 @@
                         <tr>
                             <th>#</th>
                             <th>Name</th>
-                            <th>Permissions</th>
+                            <th># Permissions</th>
                             <th>Created</th>
                             <th>Updated</th>
                             <th class="text-center">Action</th>
@@ -68,9 +68,10 @@
                             @endphp
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $role->name }}</td>
-                            <td>{{ in_array($role->name, Usr::getTenancyAwareRootRoles()) ? 'All' : $permissions->join(', ') }}</td>
+                            <td>{{ in_array($role->name, Usr::getTenancyAwareRootRoles(), true) ? $permissions->count() . " (All)" : $permissions->count() }}</td>
                             <td>{{ $role->created_at->diffForHumans() }}</td>
                             <td>{{ $role->updated_at->diffForHumans() }}</td>
+                            @if(!\in_array($role->name, Usr::getTenancyAwareRootRoles(), true))
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
@@ -78,16 +79,19 @@
                                         <div class="dropdown-menu dropdown-menu-left">
                                             <a href="{{ route('roles.edit', $role->id) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
 
+                                            @if(!\in_array($role->name, Usr::getTenancyAwareDefaultRoles(), true))
                                             <a href="javascript:;" id="{{ $role->id }}" class="dropdown-item text-danger" onclick="confirmDelete(this.id)">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
                                             <form method="POST" action="{{ route('roles.destroy', $role->id) }}" id="item-delete-{{ $role->id }}" class="d-none">
                                                 @csrf @method('DELETE')
                                             </form>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>

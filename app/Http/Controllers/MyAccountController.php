@@ -63,7 +63,7 @@ class MyAccountController extends Controller
         $this->user->update($user->id, $d);
         $staff_data_edit = $this->user->whereStaffRecord(['user_id' => $user->id])->first()->staff_data_edit;
 
-        if ($staff_data_edit == true || auth()->user()->hasRole('Itguy')) {
+        if ($staff_data_edit == true || auth()->user()->hasRole(config('roles.default_roles.central.root'))) {
             $d2 = $req->only(Qs::getStaffRecord());
             $d2['subjects_studied'] = json_encode(explode(",", $d2['subjects_studied']));
             $this->user->updateStaffRecord(['user_id' => $user->id], $d2);

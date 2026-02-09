@@ -22,16 +22,6 @@ class Mk extends Qs
         return (int) self::getSetting('lock_exam') === 1;
     }
 
-    public static function marksheetPrintNotAllowed()
-    {
-        return (int) self::getSetting('allow_marksheet_print') === 1;
-    }
-
-    public static function assessmentsheetPrintNotAllowed()
-    {
-        return (int) self::getSetting('allow_assessmentsheet_print') === 1;
-    }
-
     public static function getRemarks()
     {
         return ['Average', 'Credit', 'Distinction', 'Excellent', 'Satisfactory', 'Subsidiary', 'Fail', 'Fair', 'Good', 'Pass', 'Poor', 'Very Good', 'Very Poor'];
@@ -112,7 +102,7 @@ class Mk extends Qs
                     foreach ($grades as $grd) {
                         $r = $p->get()->where('grade_id', $grd->id);
 
-                        $collection .= '<td class="w-1pcnt unstyled text-center">' . '<strong>' . $grd->name . '</strong>' . ': ' . \sprintf("%02d", $grd_cnt = $r->count()) . '</td>';
+                        $collection .= "<td class=\"w-1pcnt unstyled text-center\"><strong>{$grd->name}</strong>: " . \sprintf("%02d", $grd_cnt = $r->count()) . '</td>';
                         // GPA = sum of (grade_count times grade_credit for all grades) divide by sum of all grade_count only. 
                         $all_grd_count += $grd_cnt;
 
@@ -164,7 +154,7 @@ class Mk extends Qs
                     foreach ($grades as $grd) {
                         $r = $p->get()->where('grade_id', $grd->id);
 
-                        $collection .= '<td class="w-1pcnt unstyled text-center">' . '<strong>' . $grd->name . '</strong>' . ': ' . \sprintf("%02d", $grd_cnt = $r->count()) . '</td>';
+                        $collection .= "<td class='w-1pcnt unstyled text-center'><strong>{$grd->name}</strong>: " . \sprintf("%02d", $grd_cnt = $r->count()) . '</td>';
 
                         $all_grd_count += $grd_cnt;
 
@@ -261,10 +251,10 @@ class Mk extends Qs
             return null;
 
         $ends = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
-        if ((($number % 100) >= 11) && (($number % 100) <= 13))
+        if ($number % 100 >= 11 && $number % 100 <= 13)
             return "$number<sup>th</sup>";
         else
-            return $number . '<sup>' . $ends[$number % 10] . '</sup>';
+            return "$number<sup>" . $ends[$number % 10] . '</sup>';
     }
 
     /*Get Subject Total Per Term*/
@@ -317,7 +307,7 @@ class Mk extends Qs
         return $mark->filter(fn($mk) => $mk->tca + $mk->exm > 0)->count();
     }
 
-    /*Get Exam Avg Per Term*/
+    /* Get Exam Avg Per Term */
     public static function getTermAverage($st_id, $term, $year)
     {
         $exam = self::getExamByTerm($term, $year);
@@ -552,7 +542,7 @@ class Mk extends Qs
 
     public static function getSubjects($class_id)
     {
-        if (auth()->user()->hasRole('teacher'))
+        if (auth()->user()->hasRole(config('roles.default_roles.tenant.teacher')))
             return SubjectRecord::where('teacher_id', auth()->id())->rightJoin(Subject::getTable(), function ($rightjoin) {
                 $rightjoin->on(SubjectRecord::getTable() . '.subject_id', '=', Subject::getTable() . '.id');
             })->select('*')->where(Subject::getTable() . '.my_class_id', '=', $class_id)->distinct()->get();

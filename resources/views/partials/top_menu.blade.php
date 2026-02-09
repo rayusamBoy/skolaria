@@ -12,13 +12,13 @@
         </span>
 
         @if(Usr::tenancyInitilized())
-        @can('view_messages')
+        @can(auth()->user()->can($tenant_permissions['messages']['index']))
         <a class="navbar-toggler text-default" title="Messages" href="{{ route('messages.index') }}">
             @include('messenger.unread-count')
         </a>
         @endcan
         @else
-        @can('view_tickets')
+        @can(auth()->user()->can($tenant_permissions['tickets']['index']))
         <div class="navbar-toggler">
             @include('pages.central.support.tickets.badge')
         </div>
@@ -78,7 +78,7 @@
                 <div class="dropdown-menu dropdown-menu-right">
 
                     {{-- Profile --}}
-                    <a href="{{ auth()->user()->hasRole('Student')
+                    <a href="{{ auth()->user()->hasRole(config('roles.default_roles.tenant.student'))
                                   ? route('students.show',  Qs::hash(Qs::findStudentRecord(auth()->id())->id))
                                   : route(Usr::tenancyInitilized() ? 'users.show' : 'central_users.show', Qs::hash(auth()->id())) }}" class="dropdown-item {{ request()->routeIs('students.show', 'users.show', 'central_users.show') ? 'active' : '' }}">
                         <i class="material-symbols-rounded">person</i>
@@ -88,12 +88,12 @@
                     @unless(Usr::tenancyInitilized())
                     <div class="dropdown-divider"></div>
 
-                    @can('view_system_log')
+                    @if(array_intersect(auth()->user()->roles()->pluck('name')->toArray(), array_values(config('roles.root_roles.central'))) > 0)
                     <a href="/log-viewer" class="dropdown-item">
                         <i class="material-symbols-rounded">description</i>
                         View System Log
                     </a>
-                    @endcan
+                    @endif
 
                     @canany(array_values($central_permissions['artisan_commands']))
                     <a href="{{ route('artisan_commands.index') }}" class="dropdown-item {{ request()->routeIs('artisan_commands.index') ? 'active' : '' }}">

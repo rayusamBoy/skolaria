@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Helpers\Qs;
+use App\Helpers\Usr;
 use App\Listeners\TenantEventSubscriber;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -32,16 +32,16 @@ class AppServiceProvider extends ServiceProvider
     {
         require base_path('routes/tenant/channels.php');
 
-        Route::bind('id', Qs::decodeHash(...));
+        Route::bind('id', Usr::decodeHash(...));
         RateLimiter::for('api', fn(Request $request) => Limit::perMinute(60)->by($request->user()?->id ?: $request->ip()));
-        LogViewer::auth(fn($request) => $request?->user()?->hasRole('Itguy'));
+        LogViewer::auth(fn($request) => $request?->user()?->hasAnyRole(array_values(config('roles.root_roles.central'))));
         Event::subscribe(TenantEventSubscriber::class);
         Paginator::useBootstrapFour();
         View::share('central_permissions', config('permissions.names.central'));
         View::share('tenant_permissions', config('permissions.names.tenant'));
 
-        // Implicitly grant "Super Admin, Root" role all permissions
+        // Implicitly grant root roles all permissions
         // This works in the app that uses gate-related functions like auth()->user->can() and @can()
-        Gate::before(fn($user, $ability) => $user->hasRole('Super Admin') || $user->hasRole('Root') ? true : null);
+        Gate::before(fn($user, $ability) => \in_array($user->getRoleNames(), Usr::getTenancyAwareRootRoles()) ? true : null);
     }
 }

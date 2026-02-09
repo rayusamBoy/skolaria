@@ -48,7 +48,7 @@
                             <label for="subject_id" class="col-form-label font-weight-bold">Subject:</label>
                             <select required id="subject_id" name="subject_id" data-placeholder="Select Class First" class="form-control select-search">
                                 @if($selected)
-                                @if(auth()->user()->hasRole('teacher'))
+                                @if(auth()->user()->hasRole(config('roles.default_roles.tenant.teacher')))
                                 @foreach($subjects->where('subject.my_class_id', $my_class_id) as $s)
                                 <option @selected($subject_id==$s->subject->id) value="{{ $s->subject->id }}">{{ $s->subject->name }}</option>
                                 @endforeach

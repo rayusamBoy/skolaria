@@ -63,7 +63,7 @@
                     </div>
                 </div>
                 @endcan
-                @elseif(auth()->user()->can($central_permissions['tickets']['index']))
+                @elseif(auth()->user()->can($central_permissions['tickets']['index_central']))
                 <div class="breadcrumb-elements-item d-none d-md-block">
                     @include('pages.central.support.tickets.badge')
                 </div>

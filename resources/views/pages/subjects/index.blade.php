@@ -12,7 +12,7 @@
 
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
-            @can('create_subject')
+            @can($tenant_permissions['subjects']['store'])
             <li class="nav-item"><a href="#new-subject" class="nav-link active" data-toggle="tab">Add Subject</a></li>
             @endcan
             <li class="nav-item dropdown">
@@ -26,7 +26,7 @@
         </ul>
 
         <div class="tab-content">
-            @can('create_subject')
+            @can($tenant_permissions['subjects']['store'])
             <div class="tab-pane show active fade" id="new-subject">
                 <div class="row">
                     <div class="col-md-12">
@@ -179,12 +179,12 @@
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @can('edit_subject')
+                                            @can($tenant_permissions['subjects']['edit_record'])
                                             <a href="{{ route('subjects.edit_record', $rec->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
                                             @endcan
-                                            @can('delete_subject')
+                                            @can($tenant_permissions['subjects']['delete_record'])
                                             <a id="{{ $s->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>

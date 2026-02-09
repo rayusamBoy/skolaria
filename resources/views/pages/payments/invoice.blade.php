@@ -119,18 +119,18 @@
 
                                         <div class="dropdown-menu dropdown-menu-left">
                                             {{--Reset Payment--}}
-                                            @can('reset_payments')
+                                            @can($tenant_permissions['payments']['reset_record'])
                                             <a id="{{ Qs::hash($cl->id) }}" onclick="confirmResetTwice(this.id)" href="javascript:;" class="dropdown-item"><i class="material-symbols-rounded">restart_alt</i> Reset Payment</a>
                                             <form method="post" id="item-reset-{{ Qs::hash($cl->id) }}" action="{{ route('payments.reset_record', Qs::hash($cl->id)) }}" class="hidden">@csrf @method('delete')</form>
                                             @endcan
                                             {{--Receipt--}}
-                                            @can('print_receippt')
+                                            @can($tenant_permissions['payments']['receipts'])
                                             <a target="_blank" href="{{ route('payments.receipts', Qs::hash($cl->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">print</i> Print Receipt</a>
                                             @endif
                                             {{--PDF Receipt--}}
-                                            {{-- @can('download_receipt') --}}
-                                            {{-- <a  href="{{ route('payments.pdf_receipts', Qs::hash($uc->id)) }}" class="dropdown-item download-receipt"><i class="material-symbols-rounded">download</i> Download Receipt</a>--}}
-                                            {{-- @endcan --}}
+                                            @can($tenant_permissions['payments']['pdf_receipts'])
+                                            <a  href="{{ route('payments.pdf_receipts', Qs::hash($uc->id)) }}" class="dropdown-item download-receipt"><i class="material-symbols-rounded">download</i> Download Receipt</a>
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>

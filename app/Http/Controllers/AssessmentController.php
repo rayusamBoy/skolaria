@@ -84,7 +84,7 @@ class AssessmentController extends Controller
         $d['my_classes'] = $this->my_class->all();
         $d['sections'] = $this->my_class->getAllSections();
 
-        $d['subjects'] = auth()->user()->hasRole('teacher')
+        $d['subjects'] = auth()->user()->hasRole(config('roles.default_roles.tenant.teacher'))
             ? $this->my_class->findSubjectByRecord(auth()->id(), $class_id)->pluck('subject')
             : $this->my_class->getSubject(['my_class_id' => $class_id])->get();
 
@@ -285,7 +285,7 @@ class AssessmentController extends Controller
 
     public function update(Request $req, $exam_id, $class_id, $subject_id, $section_id = null)
     {
-        if ($this->exam->isLocked($exam_id) && !Mk::headSA(auth()->id()))
+        if ($this->exam->isLocked($exam_id) && !Mk::userIsHead(auth()->id()))
             return Mk::jsonUpdateDenied();
 
         $exam = $this->exam->find($exam_id);
@@ -458,10 +458,6 @@ class AssessmentController extends Controller
 
     public function print_detailed($student_id, $exam_id, $year)
     {
-        /* Prevent assessment print if super admin did not allow it - this applies to all users except super admin */
-        if (!Mk::getSetting('allow_assessmentsheet_print') && !auth()->user()->hasRole('super_admin'))
-            return redirect()->back()->with('pop_error', __('msg.denied'));
-
         /* Prevent Other Students/Parents from viewing Result of others */
         if (auth()->id() != $student_id && !Mk::userIsMyChild($student_id, auth()->id()))
             return redirect(route('dashboard'))->with('pop_error', __('msg.denied'));

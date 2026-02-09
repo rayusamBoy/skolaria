@@ -217,26 +217,6 @@
                         </div>
                     </div>
 
-                    {{-- Allow Print --}}
-                    <div class="form-group row">
-                        <div class="col-12">
-                            <label class="col-form-label font-weight-semibold">Allow Print</label>
-                            <div class="form-group text-center row">
-                                @foreach(['marksheet','assessmentsheet'] as $sheet)
-                                <div class="col-6">
-                                    <label for="allow_{{ $sheet }}_print" class="col-form-label font-weight-semibold text-capitalize float-left">
-                                        {{ $sheet }}
-                                    </label>
-                                    <select id="allow_{{ $sheet }}_print" name="allow_{{ $sheet }}_print" class="form-control select">
-                                        <option value="1" @selected($settings->firstWhere('type',"allow_{$sheet}_print")->description == 1)>Yes</option>
-                                        <option value="0" @selected($settings->firstWhere('type',"allow_{$sheet}_print")->description == 0)>No</option>
-                                    </select>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-
                     @if(session()->has('show_login_and_related_pgs_preview'))
                     @php
                     $preview_route = Usr::tenancyInitilized() ? route('settings.preview_login_form') : route('settings_non_tenancy.preview_login_form');

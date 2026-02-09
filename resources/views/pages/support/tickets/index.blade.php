@@ -4,7 +4,6 @@
 
 @section('content')
 
-@can('create_ticket')
 <div class="card card-collapsed card-ticket">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Open a Ticket</h6>
@@ -105,7 +104,6 @@
         </form>
     </div>
 </div>
-@endcan
 
 <div class="card">
     <div class="card-header header-elements-inline">
@@ -140,13 +138,13 @@
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @can('reply_ticket')
+                                            @can($tenant_permissions['tickets']['reply'])
                                             <a href="{{ route('tickets.reply', Qs::hash($ticket->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">reply</i> Reply
                                             </a>
                                             @endcan
 
-                                            @can('archive_ticket')
+                                            @can($tenant_permissions['tickets']['archive_ticket'])
                                             <a id="{{ $ticket->id }}" onclick="confirmArchive(this.id)" href="javascript:;" class="dropdown-item text-warning">
                                                 <i class="material-symbols-rounded">archive</i> Archive
                                             </a>
@@ -167,8 +165,7 @@
     </div>
 </div>
 
-@can('view_archived_tickets')
-@if ($archived_tickets->isNotEmpty())
+@if ($archived_tickets->isNotEmpty() && auth()->user()->can($tenant_permissions['tickets']['unarchive_ticket']))
 <div class="card card-collapsed">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Archived Tickets</h6>
@@ -202,14 +199,12 @@
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @can('unarchive_ticket')
                                             <a id="{{ $ticket->id }}" onclick="$('form#item-unarchive-'+this.id).submit()" href="javascript:;" class="dropdown-item text-warning">
                                                 <i class="material-symbols-rounded">unarchive</i> Unarchive
                                             </a>
                                             <form class="d-none" method="post" id="item-unarchive-{{ $ticket->id }}" action="{{ route('tickets.unarchive', $ticket->id) }}">
                                                 @method('patch') @csrf
                                             </form>
-                                            @endcan
                                         </div>
                                     </div>
                                 </div>
@@ -223,12 +218,11 @@
     </div>
 </div>
 @endif
-@endcan
 
 @include('pages.modals.simplemde_markdown_guide')
 
 @endsection
 
-@section('scripts')
+@pushOnce('scripts')
 @include('partials.js.tickets')
-@endsection
+@endPushOnce

@@ -32,16 +32,16 @@
         <div class="tab-content">
 
             {{-- Block / Unblock All --}}
-            @canany(['block_students','unblock_students'])
+            @canany([$tenant_permissions['student_records']['block_all_class'], $tenant_permissions['student_records']['unblock_all_class']])
             <div class="card mb-3">
                 <div class="card-body text-center">
-                    @can('block_students')
+                    @can($tenant_permissions['student_records']['block_all_class'])
                     <button id="students-block-all-active" value="{{ $my_class->id }}" class="btn btn-danger">
                         Block All {{ $my_class->name }} Students
                     </button>
                     @endcan
 
-                    @can('unblock_students')
+                    @can($tenant_permissions['student_records']['unblock_all_class'])
                     <button id="students-unblock-all-active" value="{{ $my_class->id }}" class="btn btn-success ml-2">
                         Unblock All {{ $my_class->name }} Students
                     </button>
@@ -61,7 +61,7 @@
                             <th>ADM No</th>
                             <th>Section</th>
                             <th>Parent</th>
-                            @can('block_students') <th>Blocked</th> @endcan
+                            <th>Blocked</th>
                             <th class="text-center">Action</th>
                         </tr>
                     </thead>
@@ -83,14 +83,21 @@
                                 @else - @endif
                             </td>
 
-                            @can('block_students')
+                            @if(auth()->user()->can([$tenant_permissions['student_records']['block_all_class'], $tenant_permissions['student_records']['unblock_all_class']]))
                             <td>
                                 <label class="form-switch m-0">
                                     <input id="checkbox-user-{{ $s->user->id }}" onchange="updateUserBlockedState({{ $s->user->id }}, this)" type="checkbox" @checked($s->user->blocked)>
                                     <i></i>
                                 </label>
                             </td>
-                            @endcan
+                            @else
+                            <td>
+                                <label class="form-switch m-0">
+                                    <input type="checkbox" @disabled(true) @checked($s->user->blocked)>
+                                    <i></i>
+                                </label>
+                            </td>
+                            @endif
 
                             <td class="text-center">
                                 <div class="list-icons">
@@ -98,28 +105,18 @@
                                         <a href="javascript:;" data-toggle="dropdown" class="material-symbols-rounded">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
 
-                                            @can('view_students')
                                             <a href="{{ route('students.show', Qs::hash($s->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">visibility</i>
                                                 View Profile
                                             </a>
-                                            @endcan
-
-                                            @can('edit_students')
                                             <a href="{{ route('students.edit', Qs::hash($s->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i>
                                                 Edit
                                             </a>
-                                            @endcan
-
-                                            @can('reset_student_password')
                                             <a href="javascript:;" data-default_pass="student" data-href="{{ route('students.password.reset', Qs::hash($s->user->id)) }}" class="dropdown-item needs-reset-pass-confirmation">
                                                 <i class="material-symbols-rounded">lock_reset</i>
                                                 Reset Password
                                             </a>
-                                            @endcan
-
-                                            @can('view_students')
                                             <a target="_blank" href="{{ route('marks.year_selector', Qs::hash($s->user->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">bottom_sheets</i>
                                                 Marksheet
@@ -128,9 +125,6 @@
                                                 <i class="material-symbols-rounded">two_pager</i>
                                                 Assessmentsheet
                                             </a>
-                                            @endcan
-
-                                            @can('delete_students')
                                             <a id="{{ Qs::hash($s->user->id) }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i>
                                                 Delete
@@ -138,7 +132,6 @@
                                             <form method="post" id="item-delete-{{ Qs::hash($s->user->id) }}" action="{{ route('students.destroy', Qs::hash($s->user->id)) }}" class="hidden">
                                                 @csrf @method('delete')
                                             </form>
-                                            @endcan
 
                                         </div>
                                     </div>
@@ -164,7 +157,7 @@
                             <th>Name</th>
                             <th>ADM No</th>
                             <th>Parent</th>
-                            @can('block_students') <th>Blocked</th> @endcan
+                            <th>Blocked</th>
                             <th class="text-center">Action</th>
                         </tr>
                     </thead>
@@ -185,14 +178,14 @@
                                 @else - @endif
                             </td>
 
-                            @can('block_students')
+                            @canany($tenant_permissions['student_records']['block_all_class'], $tenant_permissions['student_records']['unblock_all_class'])
                             <td>
                                 <label class="form-switch m-0">
                                     <input id="checkbox-user-{{ $sr->user->id }}" onchange="updateUserBlockedState({{ $sr->user->id }}, this)" type="checkbox" @checked($sr->user->blocked)>
                                     <i></i>
                                 </label>
                             </td>
-                            @endcan
+                            @endcanany
 
                             <td class="text-center">
                                 <div class="list-icons">
@@ -200,28 +193,18 @@
                                         <a href="javascript:;" data-toggle="dropdown" class="material-symbols-rounded">lists</a>
                                         <div class="dropdown-menu dropdown-menu-right">
 
-                                            @can('view_students')
                                             <a href="{{ route('students.show', Qs::hash($sr->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">visibility</i>
                                                 View Info
                                             </a>
-                                            @endcan
-
-                                            @can('edit_students')
                                             <a href="{{ route('students.edit', Qs::hash($sr->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i>
                                                 Edit
                                             </a>
-                                            @endcan
-
-                                            @can('view_students')
                                             <a href="javascript:;" class="dropdown-item">
                                                 <i class="material-symbols-rounded">bottom_sheets</i>
                                                 Marksheet
                                             </a>
-                                            @endcan
-
-                                            @can('delete_students')
                                             <a id="{{ Qs::hash($sr->user->id) }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i>
                                                 Delete
@@ -229,7 +212,6 @@
                                             <form method="post" id="item-delete-{{ Qs::hash($sr->user->id) }}" action="{{ route('students.destroy', Qs::hash($sr->user->id)) }}" class="hidden">
                                                 @csrf @method('delete')
                                             </form>
-                                            @endcan
 
                                         </div>
                                     </div>
@@ -246,52 +228,55 @@
     </div>
 </div>
 
+@endsection
 
-@section('scripts')
+@pushOnce('scripts')
 <script>
-  // Block all / Unblock all JS…
-  $('#students-block-all-active').on('click', function() {
-    let cid = $(this).val();
-    confirmRequest(cid, 'block');
-    return false;
-  });
-  $('#students-unblock-all-active').on('click', function() {
-    let cid = $(this).val();
-    confirmRequest(cid, 'unblock');
-    return false;
-  });
-
-  function confirmRequest(class_id, type) {
-    const text = type === 'block'
-        ? 'This will block selected students from accessing the system'
-        : 'This will allow selected students to access the system';
-    Swal.fire({
-        title: 'Are you sure?',
-        text,
-        showCancelButton: true,
-        reverseButtons: true,
-        cancelButtonText: 'No, cancel'
-    }).then((res) => {
-        if (res.isConfirmed) ajaxProcessRequest(class_id, type);
+    // Block all / Unblock all JS…
+    $('#students-block-all-active').on('click', function() {
+        let cid = $(this).val();
+        confirmRequest(cid, 'block');
+        return false;
     });
-  }
-
-  function ajaxProcessRequest(class_id, type) {
-    let url = type==='block'
-        ? "{{ route('students.block_all_class') }}"
-        : "{{ route('students.unblock_all_class') }}";
-    $.post(url, {
-        class_id,
-        _token: $('meta[name="csrf-token"]').attr('content')
-    }, resp => {
-        if (type === 'block')
-            $("label.form-switch input").attr("checked", "checked");
-        else
-            $("label.form-switch input").removeAttr("checked");
-        flash({ msg: resp.msg, type:'success' });
+    $('#students-unblock-all-active').on('click', function() {
+        let cid = $(this).val();
+        confirmRequest(cid, 'unblock');
+        return false;
     });
-  }
+
+    function confirmRequest(class_id, type) {
+        const text = type === 'block' ?
+            'This will block selected students from accessing the system' :
+            'This will allow selected students to access the system';
+        Swal.fire({
+            title: 'Are you sure?'
+            , text
+            , showCancelButton: true
+            , reverseButtons: true
+            , cancelButtonText: 'No, cancel'
+        }).then((res) => {
+            if (res.isConfirmed) ajaxProcessRequest(class_id, type);
+        });
+    }
+
+    function ajaxProcessRequest(class_id, type) {
+        let url = type === 'block' ?
+            "{{ route('students.block_all_class') }}" :
+            "{{ route('students.unblock_all_class') }}";
+        $.post(url, {
+            class_id
+            , _token: $('meta[name="csrf-token"]').attr('content')
+        }, resp => {
+            if (type === 'block')
+                $("label.form-switch input").attr("checked", "checked");
+            else
+                $("label.form-switch input").removeAttr("checked");
+            flash({
+                msg: resp.msg
+                , type: 'success'
+            });
+        });
+    }
+
 </script>
-@endsection
-
-@endsection
+@endPushOnce

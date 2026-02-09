@@ -159,7 +159,7 @@
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->username }}</td>
                             <td>{{ ucwords(str_replace('_', ' ',$user->role)) }}</td>
-                            @if($user->hasRole('student'))
+                            @if($user->hasRole(config('roles.default_roles.tenant.student')))
                             @php $s_recs = Usr::getStudentRecordByUserId($user->id, ['my_class', 'section']) @endphp
                             <td class="text-center" colspan="2">{{ $s_recs->first()->my_class->name . ' - ' . $s_recs->first()->section->name }}</td>
 

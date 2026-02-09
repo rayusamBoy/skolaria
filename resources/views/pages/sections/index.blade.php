@@ -4,7 +4,6 @@
 
 @section('content')
 
-@can('view_sections')
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Class Sections</h6>
@@ -14,14 +13,14 @@
     <div class="card-body">
         {{-- only users who can create sections see the Create tab --}}
         <ul class="nav nav-tabs nav-tabs-highlight">
-            @can('create_sections')
+            @can($tenant_permissions['sections']['store'])
             <li class="nav-item">
                 <a href="#new-section" class="nav-link active" data-toggle="tab">
                     Create New Section
                 </a>
             </li>
             @endcan
-            @can('view_sections')
+            @can($tenant_permissions['sections']['index'])
             <li class="nav-item dropdown">
                 <a href="javascript:;" class="nav-link dropdown-toggle" data-toggle="dropdown">
                     Manage Sections
@@ -39,7 +38,7 @@
 
         <div class="tab-content">
             {{-- Create New Section --}}
-            @can('create_sections')
+            @can($tenant_permissions['sections']['store'])
             <div class="tab-pane fade show active" id="new-section">
                 <div class="row">
                     <div class="col-md-6">
@@ -136,13 +135,13 @@
                                             lists
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @can('edit_sections')
+                                            @can($tenant_permissions['sections']['edit'])
                                             <a href="{{ route('sections.edit', $s->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
                                             @endcan
 
-                                            @can('delete_sections')
+                                            @can($tenant_permissions['sections']['destroy'])
                                             <a id="{{ $s->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -164,6 +163,5 @@
         </div>
     </div>
 </div>
-@endcan
 
 @endsection

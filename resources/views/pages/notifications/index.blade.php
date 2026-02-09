@@ -22,7 +22,7 @@
     </div>
 
     <div class="card-body">
-        @can('update_notification_settings')
+        @can($tenant_permissions['notifications']['update_is_notifiable'])
         <form method="post" action="{{ route('notifications.update_is_notifiable') }}">
             @csrf @method('put')
             <div class="form-group row">
@@ -125,7 +125,7 @@
                                     </a>
                                     @endif
 
-                                    @can('delete_notifications')
+                                    @can($tenant_permissions['notifications']['destroy'])
                                     <a id="{{ $notification->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                         <i class="material-symbols-rounded">delete</i> Delete
                                     </a>
@@ -142,7 +142,7 @@
             </tbody>
         </table>
 
-        @can('mark_all_notifications')
+        @can($tenant_permissions['notifications']['mark_all_read'])
         @if(auth()->user()->unreadNotifications->isNotEmpty())
         <a href="javascript:;" id="mark_all_read" class="btn btn-warning float-right mt-3" onclick="confirmOperation(this.id)">
             Mark all Read<i class="material-symbols-rounded ml-1 pb-2px">done_all</i>

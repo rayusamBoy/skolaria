@@ -74,7 +74,7 @@ class ExamRepo
 
     public function all()
     {
-        return (auth()->user()->hasRole('Super Admin')) ? Exam::orderByDesc('created_at')->orderBy('year', 'desc')->with(['category', 'class_type'])->get() : $this->onlyPublished();
+        return (auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin'))) ? Exam::orderByDesc('created_at')->orderBy('year', 'desc')->with(['category', 'class_type'])->get() : $this->onlyPublished();
     }
 
     public function getById(int $id, $only_published = true)

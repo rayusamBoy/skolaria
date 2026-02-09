@@ -12,23 +12,23 @@
 
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
-            @can('view_dorms')
+            @can($tenant_permissions['dorms']['index'])
             <li class="nav-item">
                 <a href="#all-dorms" class="nav-link active" data-toggle="tab">Manage Dorms</a>
             </li>
             @endcan
 
-            @can('create_dorms')
+            @can($tenant_permissions['dorms']['store'])
             <li class="nav-item">
                 <a href="#new-dorm" class="nav-link" data-toggle="tab">
-                    <i class="material-symbols-rounded">add</i> Create New Dorm
+                    Create New Dorm
                 </a>
             </li>
             @endcan
         </ul>
 
         <div class="tab-content">
-            @can('view_dorms')
+            @can($tenant_permissions['dorms']['index'])
             <div class="tab-pane fade show active" id="all-dorms">
                 <table class="table datatable-button-html5-columns">
                     <thead>
@@ -51,13 +51,13 @@
                                         <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
 
-                                            @can('edit_dorms')
+                                            @can($tenant_permissions['dorms']['edit'])
                                             <a href="{{ route('dorms.edit', $d->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
                                             @endcan
 
-                                            @can('delete_dorms')
+                                            @can($tenant_permissions['dorms']['destroy'])
                                             <a id="dorm-delete-{{ $d->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -78,7 +78,7 @@
             </div>
             @endcan
 
-            @can('create_dorms')
+            @can($tenant_permissions['dorms']['store'])
             <div class="tab-pane fade" id="new-dorm">
                 <div class="row">
                     <div class="col-md-6">

@@ -76,7 +76,7 @@
 
 <span>
     {{-- CHARTS TO BE DISPLAYED FOR STUDENTS AND PARENTS --}}
-    @if (auth()->user()->hasRole('parent') OR auth()->user()->hasRole('student'))
+    @if (auth()->user()->hasRole(config('roles.default_roles.tenant.parent')) OR auth()->user()->hasRole(config('roles.default_roles.tenant.student')))
 
     {{-- Exam performances Chart --}}
     @foreach($exams_recs->groupBy('student_id') as $exam_recs)

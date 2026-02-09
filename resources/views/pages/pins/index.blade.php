@@ -4,7 +4,6 @@
 
 @section('content')
 
-@can('view_pins')
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Exam Pins</h6>
@@ -13,22 +12,17 @@
 
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
-            @can('view_valid_pins')
             <li class="nav-item">
                 <a href="#valid-pins" class="nav-link active" data-toggle="tab">Valid Pins</a>
             </li>
-            @endcan
-
-            @can('view_used_pins')
+   
             <li class="nav-item">
                 <a href="#used-pins" class="nav-link" data-toggle="tab">Used Pins</a>
             </li>
-            @endcan
         </ul>
 
         <div class="tab-content">
 
-            @can('view_valid_pins')
             <div class="tab-pane fade show active" id="valid-pins">
                 <div class="row">
                     <div class="col-md-12">
@@ -47,9 +41,7 @@
                 </div>
                 @endforeach
             </div>
-            @endcan
 
-            @can('view_used_pins')
             <div class="tab-pane fade" id="used-pins">
                 <div class="row">
                     <div class="col-md-12">
@@ -82,7 +74,7 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $up->code }}</td>
                                     <td>
-                                        <a href="{{ $up->user->hasRole('student')
+                                        <a href="{{ $up->user->hasRole(config('roles.default_roles.tenant.student'))
                                                 ? route('students.show', Qs::hash(Qs::getSRByUserID($up->user->id)->id))
                                                 : route('users.show', Qs::hash($up->user->id)) }}">
                                             {{ $up->user->name }}
@@ -102,7 +94,7 @@
                         </table>
                     </div>
 
-                    @can('delete_pins')
+                    @can($tenant_permissions['pins']['destroy'])
                     @if($used_pins->isNotEmpty())
                     <div class="col-md-12">
                         <a id="used-pins" onclick="confirmDelete(this.id)" href="javascript:;" class="btn btn-danger btn-sm ml-2 float-right">
@@ -116,11 +108,9 @@
                     @endcan
                 </div>
             </div>
-            @endcan
 
         </div>
     </div>
 </div>
-@endcan
 
 @endsection
