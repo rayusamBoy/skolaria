@@ -312,7 +312,7 @@
 
 @endsection
 
-@section('scripts')
+@pushOnce('scripts')
 <script>
     // Data injected from the controller
     const months = @json($chart_months ?? []);
@@ -323,4 +323,4 @@
     const studentsPerClassCounts = @json($students_per_class_counts ?? []);
 
 </script>
-@endsection
+@endPushOnce

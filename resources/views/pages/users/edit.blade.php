@@ -174,7 +174,7 @@
                 </div>
 
                 @php $p_relative = Qs::getParentRelative($user->id) @endphp
-                <div class="{{ $user->hasRole('parent') ? '' : 'display-none' }}" id="parent-data">
+                <div id="parent-data">
                     <div class="row">
                         {{-- CLOSE RELATIVE NAME --}}
                         <div class="col-md-6">
@@ -379,13 +379,14 @@
     </div>
 </div>
 
-@if($user->hasRole('parent'))
+@endsection
+
+@push('scripts')
+@if($user->hasRole(config('roles.default_roles.tenant.parent')))
 <script>
     $(document).ready(function() {
-        // Hide steps wizard previous and next buttons
-        $(".wizard>.actions>ul>li:not(last-child)").hide();
-        // Show submit button
-        $(".wizard>.actions>ul>li:last-child").show();
+        // Trigger element change so that the listener can user role change.
+        $("select#roles").trigger('change');
     })
 
 </script>
@@ -397,5 +398,4 @@
 
 </script>
 @endif
-
-@endsection
+@endpush

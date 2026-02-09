@@ -208,7 +208,7 @@
 
 @endsection
 
-@section('scripts')
+@pushOnce('scripts')
 <script>
     $(document).ready(function() {
         // Append a new category row
@@ -271,4 +271,4 @@
     });
 
 </script>
-@endsection
+@endPushOnce

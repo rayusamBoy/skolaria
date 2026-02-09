@@ -78,7 +78,7 @@
 
 @endsection
 
-@section('scripts')
+@pushOnce('scripts')
 
 <script>
     /* Single Reset */
@@ -123,4 +123,4 @@
 
 </script>
 
-@endsection
+@endPushOnce

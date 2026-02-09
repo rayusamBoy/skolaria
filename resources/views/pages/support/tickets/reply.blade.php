@@ -161,6 +161,6 @@
 
 @endsection
 
-@section('scripts')
+@pushOnce('scripts')
 @include('partials.js.tickets')
-@endsection
+@endPushOnce

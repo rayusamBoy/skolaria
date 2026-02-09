@@ -50,7 +50,7 @@
                         </div>
                     </div>
 
-                    @if (auth()->user()->hasRole('super_admin'))
+                    @if (auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
                     <button id="{{ $thread->id }}" type="button" onclick="confirmDelete(this.id)" class="btn btn-danger position-absolute left-neg-4 bottom-0"><i class="material-symbols-rounded">delete</i> Delete Thread</button>
                     <form method="post" id="item-delete-{{ $thread->id }}" action="{{ route('messages.destroy', $thread->id) }}" class="hidden">@csrf @method('delete')</form>
                     @endif
@@ -62,6 +62,6 @@
 
 @endsection
 
-@section('scripts')
+@pushOnce('scripts')
 @include('messenger.partials.scripts')
-@endsection
+@endPushOnce
