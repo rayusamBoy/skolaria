@@ -283,7 +283,7 @@ Breadcrumbs::for('assessments.manage', function (BreadcrumbTrail $trail, $exam, 
     $trail->push('Select Continous Assessments', route('assessments.selector', [$exam, $section, $subject, $class]));
 });
 
-Breadcrumbs::for('assessments.progressive', function (BreadcrumbTrail $trail, $exam, $class, $sec_id) {
+Breadcrumbs::for('assessments.progressive', function (BreadcrumbTrail $trail, $exam = null, $class = null, $sec_id = null) {
     $trail->parent('dashboard');
     $trail->push('Progressive Sheet', route('assessments.progressive', [$exam, $sec_id, $class]));
 });
