@@ -21,7 +21,7 @@
                     <div class="col-md-5">
                         <div class="form-group">
                             <label for="roles">Select Role(s): <span class="text-danger">*</span></label>
-                            <select class="form-control select" multiple="multiple" placeholder="Select Role(s)" name="user_roles[]" id="roles">
+                            <select class="form-control select" multiple="multiple" placeholder="Select Role(s)" name="roles[]" id="roles">
                                 @foreach ($roles as $role)
                                 <option @selected($user->hasRole($role->name)) data-permissions='@json($role->permissions->pluck("name"))' data-all="{{ in_array($role->name, Usr::getTenancyAwareRootRoles()) }}" value="{{ $role->name }}">{{ $role->name }}</option>
                                 @endforeach
@@ -68,14 +68,14 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="phone">Phone:</label>
-                            <input id="phone" value="{{ $user->phone }}" type="text" name="phone" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
+                            <input id="phone" value="{{ $user->phone }}" type="text" name="phone" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
                     {{-- TELEPHONE --}}
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="phone2">Telephone:</label>
-                            <input id="phone2" value="{{ $user->phone2 }}" type="text" name="phone2" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
+                            <input id="phone2" value="{{ $user->phone2 }}" type="text" name="phone2" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
                     {{-- BLOOD GROUP --}}

@@ -11,7 +11,6 @@ use App\Repositories\MyClassRepo;
 use App\Repositories\PermissionRepo;
 use App\Repositories\UserRepo;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
@@ -30,7 +29,6 @@ class UserController extends Controller
 
     public function index()
     {
-        $d['users'] = $this->user->getUsersByRoleNames(['Root']);
         $d['nationals'] = $this->loc->getAllNationals();
         $d['blood_groups'] = $this->user->getBloodGroups();
         $d['roles'] = $this->permission->getRoles();
@@ -43,7 +41,9 @@ class UserController extends Controller
     {
         $id = Usr::decodeHash($id);
 
-        $d['roles'] = $roles = $this->permission->getRoles();
+        $except_role = config('roles.default_roles.tenant.student');
+        $except_roles = (array) Usr::userIsHead() ? [$except_role] : [$except_role, config('roles.default_roles.tenant.superadmin')];
+        $d['roles'] = $roles = $this->permission->getRoles($except_roles);
         $d['permissions'] = $this->permission->getPermissions();
         $d['user'] = $this->user->find($id);
         $d['staff_rec'] = $this->user->getStaffRecord(['user_id' => $id])->first();
@@ -56,6 +56,12 @@ class UserController extends Controller
 
     public function reset_pass($id)
     {
+        $id = Usr::decodeHash($id);
+
+        // Redirect if Making Changes to Head
+        if (Usr::userIsHead($id) && !Usr::userIsHead())
+            return back()->with('flash_danger', __('msg.denied'));
+
         $data['password'] = Hash::make('user');
         $data['password_updated_at'] = NULL;
         $this->user->update($id, $data);
@@ -65,21 +71,18 @@ class UserController extends Controller
 
     public function store(UserRequest $req)
     {
-        $user_role = $req->user_role;
+        $role_names = $req->roles;
         $except = ['_token', '_method'];
         $data = $req->except([...Usr::getStaffRecord(), ...Usr::getParentRelativeRecord(), ...$except]);
-
-        $data['name'] = $name = ucwords(strtolower($req->name));
-        $data['user_role'] = $user_role;
-        $data['code'] = $code = strtoupper(Str::random(10));
-        $data['photo'] = "storage/" . Usr::createAvatar($name, $code, $user_role);
-        $data['dob'] = $req->dob;
-
         $emp_date = $req->emp_date ?? now();
         $staff_id = Usr::getAppCode() . '/STAFF/' . date('Y/m', strtotime($emp_date)) . '/' . mt_rand(1000, 9999);
-        $data['username'] = $uname = $req->username ?? $staff_id;
+        $last_role_name = strtolower(last($role_names));
+        $pass = $req->password ?: $last_role_name;
 
-        $pass = $req->password ?: $user_role;
+        $data['name'] = $name = ucwords(strtolower($req->name));
+        $data['code'] = $code = strtoupper(Str::random(10));
+        $data['dob'] = $req->dob;
+        $data['username'] = $uname = $req->username ?? $staff_id;
         $data['password'] = Hash::make($pass);
         $data['message_media_heading_color'] = Usr::getUserMediaHeadingColor($name); // Use a unique text color based on the name
 
@@ -87,15 +90,22 @@ class UserController extends Controller
             $photo = $req->file('photo');
             $f = Usr::getFileMetaData($photo);
             $f['name'] = 'photo.' . $f['ext'];
-            $f['path'] = $photo->storeAs(Usr::getUploadPath($user_role) . $data['code'], $f['name']);
+            $f['path'] = $photo->storeAs(Usr::getUploadPath($last_role_name) . $data['code'], $f['name']);
             $data['photo'] = 'storage/' . $f['path'];
+        } else {
+            $data['photo'] = "storage/" . Usr::createAvatar($name, $code, $last_role_name);
         }
 
-        /* Ensure that both username and Email are not blank*/
+        /* Ensure that both username and Email are not blank */
         if (!$uname && !$req->email)
             return Usr::json(__('msg.user_invalid'), FALSE);
 
         $user = $this->user->create($data); // Create User
+        $user->syncRoles($role_names);
+
+        if ($req->has('permissions') AND $req->filled('permissions')) {
+            $user->syncPermissions($req->permissions);
+        }
 
         /* Create staff record */
         $d2 = $req->only(Usr::getStaffRecord());
@@ -111,9 +121,16 @@ class UserController extends Controller
     public function update(UserRequest $req, $id)
     {
         $id = (int) Usr::decodeHash($id);
+
+        // Redirect if Making Changes to Head
+        if (Usr::userIsHead($id) && !Usr::userIsHead())
+            return Usr::json(__('msg.denied'), false);
+
         $user = $this->user->find($id);
-        $except = [...Usr::getStaffRecord(), '_token', '_method', 'user_roles'];
+        $except = [...Usr::getStaffRecord(), '_token', '_method', 'roles'];
         $data = $req->except($except);
+        $role_names = $req->roles;
+        $last_role_name = strtolower(last($role_names));
 
         $data['name'] = $name = ucwords(strtolower($req->name));
         $data['message_media_heading_color'] = Usr::getUserMediaHeadingColor($name); // Use a unique text color based on the name
@@ -122,12 +139,15 @@ class UserController extends Controller
             $photo = $req->file('photo');
             $f = Usr::getFileMetaData($photo);
             $f['name'] = 'photo.' . $f['ext'];
-            $f['path'] = $photo->storeAs(Usr::getUploadPath('test') . $user->code, $f['name']);
+            $f['path'] = $photo->storeAs(Usr::getUploadPath($last_role_name) . $user->code, $f['name']);
             $data['photo'] = 'storage/' . $f['path'];
         }
 
         $this->user->update($id, $data);   /* Update user record */
-        $user->syncRoles($req->user_roles);
+        $user->syncRoles($req->roles);
+        if ($req->has('permissions') AND $req->filled('permissions')) {
+            $user->syncPermissions($req->permissions);
+        }
 
         /* Update staff record */
         $d2 = $req->only(Usr::getStaffRecord());
@@ -145,11 +165,6 @@ class UserController extends Controller
             return back();
 
         $data['user'] = $this->user->find($user_id);
-
-        /* Prevent other Users from viewing Profile of others */
-        // if (auth()->id() != $user_id && !Usr::userIsHead())
-        // return back()->with('pop_error', __('msg.denied'));
-
         $data['staff_rec'] = $this->user->getStaffRecord(where: ['user_id' => $user_id])->first() ?: null;
 
         return view('pages.central.users.show', $data);
@@ -159,11 +174,10 @@ class UserController extends Controller
     {
         $id = Usr::decodeHash($id);
         $user = $this->user->find($id);
-        $path = Usr::getUploadPath($user->user_type) . $user->code;
-
-        Storage::exists($path) ? Storage::deleteDirectory($path) : true;
 
         $this->user->forceDelete($user->id);
+        // Delete user's photo(s) from storage if exists
+        Usr::deleteUserPhotoDirs($user->roles->pluck('name'), $user->code);
 
         return back()->with('flash_success', __('msg.del_ok'));
     }

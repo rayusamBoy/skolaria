@@ -59,7 +59,9 @@ class UserController extends Controller
 
     public function reset_pass($id)
     {
-        // Redirect if Making Changes to Head of Super Admins
+        $id = Usr::decodeHash($id);
+
+        // Redirect if Making Changes to Head
         if (Usr::userIsHead($id) && !Usr::userIsHead())
             return back()->with('flash_danger', __('msg.denied'));
 
@@ -138,17 +140,10 @@ class UserController extends Controller
         $id = (int) Usr::decodeHash($id);
 
         // Redirect if Making Changes to Head
-        if (Usr::userIsHead($id) && !Usr::userIsHead(auth()->id()))
-            return Usr::json(__('msg.denied'), false);
-        elseif (Usr::userIsHead(auth()->id()) && !Usr::userIsHead())
+        if (Usr::userIsHead($id) && !Usr::userIsHead())
             return Usr::json(__('msg.denied'), false);
 
         $user = $this->user->find($id);
-        $user->syncRoles($req->roles);
-        if ($req->has('permissions') AND $req->filled('permissions')) {
-            $user->syncPermissions($req->permissions);
-        }
-
         $role_names = $req->roles;
         $last_role_name = strtolower(last($role_names));
 
@@ -172,6 +167,10 @@ class UserController extends Controller
         }
 
         $this->user->update($id, $data);
+        $user->syncRoles($req->roles);
+        if ($req->has('permissions') AND $req->filled('permissions')) {
+            $user->syncPermissions($req->permissions);
+        }
 
         if ($user_was_staff) {
             if ($user_is_staff) {

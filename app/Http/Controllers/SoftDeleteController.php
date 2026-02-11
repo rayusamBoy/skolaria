@@ -10,7 +10,6 @@ use App\Repositories\MyClassRepo;
 use App\Repositories\PaymentRepo;
 use App\Repositories\StudentRepo;
 use App\Repositories\UserRepo;
-use Illuminate\Support\Facades\Storage;
 
 class SoftDeleteController extends Controller
 {
@@ -51,7 +50,7 @@ class SoftDeleteController extends Controller
             $soft_deleted_users_query = $this->user->where([])->onlyTrashed();
             $soft_deleted_users = $soft_deleted_users_query->get();
             foreach ($soft_deleted_users as $user) {
-                $this->deleteUserPhotoDirs($user->roles->pluck('name'), $user->code);
+                Usr::deleteUserPhotoDirs($user->roles->pluck('name'), $user->code);
             }
             $soft_deleted_users_query->forceDelete();
         } else {
@@ -92,17 +91,9 @@ class SoftDeleteController extends Controller
 
         $this->user->forceDelete($id);
         // Delete user's photo(s) from storage if exists
-        $this->deleteUserPhotoDirs($user->roles->pluck('name'), $user->code);
+        Usr::deleteUserPhotoDirs($user->roles->pluck('name'), $user->code);
 
         return redirect()->route('bin')->with('flash_success', 'User ' . __('msg.force_del_ok'));
-    }
-
-    private function deleteUserPhotoDirs($role_names, $code)
-    {
-        foreach ($role_names as $name) {
-            $path = Usr::getUploadPath(strtolower($name)) . $code;
-            Storage::exists($path) ? Storage::deleteDirectory($path) : false;
-        }
     }
 
     /** My Classes */

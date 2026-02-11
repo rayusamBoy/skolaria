@@ -26,7 +26,7 @@
         <div class="tab-content">
 
             <div class="tab-pane fade show active" id="new-user">
-                <form method="post" enctype="multipart/form-data" class="wizard-form steps-validation ajax-store" action="{{ route('users.store') }}" data-fouc>
+                <form method="post" enctype="multipart/form-data" class="wizard-form steps-validation ajax-store" action="{{ route('central_users.store') }}" data-fouc>
                     @csrf
 
                     {{-- PERSONAL DATA --}}
@@ -93,14 +93,14 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="phone">Phone:</label>
-                                    <input value="{{ old('phone') }}" type="text" name="phone" id="phone" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
+                                    <input value="{{ old('phone') }}" type="text" name="phone" id="phone" class="form-control" placeholder="+255123456789">
                                 </div>
                             </div>
                             {{-- TELEPHONE --}}
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="phone2">Telephone:</label>
-                                    <input value="{{ old('phone2') }}" type="text" name="phone2" id="phone2" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
+                                    <input value="{{ old('phone2') }}" type="text" name="phone2" id="phone2" class="form-control" placeholder="+255123456789">
                                 </div>
                             </div>
                         </div>

@@ -12,6 +12,7 @@ use App\Models\Ticket;
 use App\Repositories\UserRepo;
 use App\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class Usr extends Qs
 {
@@ -403,5 +404,13 @@ class Usr extends Qs
     public static function getTenancyAwareDefaultRoles()
     {
         return self::tenancyInitilized() ? array_values(config('roles.default_roles.tenant')) : array_values(config('roles.default_roles.central'));
+    }
+
+    public static function deleteUserPhotoDirs(collection|array $role_names, string $code)
+    {
+        foreach ($role_names as $name) {
+            $path = self::getUploadPath(strtolower($name)) . $code;
+            Storage::exists($path) ? Storage::deleteDirectory($path) : false;
+        }
     }
 }
