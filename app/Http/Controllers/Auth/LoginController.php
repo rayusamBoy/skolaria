@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Events\UserLoggedIn;
 use App\Helpers\Usr;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\CookieController;
+use App\Services\CookieService;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -34,16 +34,16 @@ class LoginController extends Controller implements HasMiddleware
      */
     protected $redirectTo = '/';
 
-    protected $cookie;
+    protected $cookieService;
 
     /**
      * Create a new controller instance.
      *
      * @return void$field
      */
-    public function __construct(CookieController $cookie)
+    public function __construct(CookieService $cookieService)
     {
-        $this->cookie = $cookie;
+        $this->cookieService = $cookieService;
     }
 
     /**
@@ -56,15 +56,15 @@ class LoginController extends Controller implements HasMiddleware
         $account_status = tenant('account_status');
 
         // If account not active ie., blocked, susupended etc., abort as forbidden.
-        if (in_array($account_status, Usr::getAccountStatuses(['Active']))) {
+        if (\in_array($account_status, Usr::getAccountStatuses(['Active']))) {
             $message = 'ACCOUNT ' . strtoupper($account_status);
             session()->flash('tenant_account_not_active', $message);
             abort(403, $message);
         }
 
         // If the user was logged out due to session expire
-        if (!$this->cookie->has('has_logged_out'))
-            if ($this->cookie->has('was_logged_in') && $this->cookie->get('was_logged_in') == true)
+        if (!$this->cookieService->has('has_logged_out'))
+            if ($this->cookieService->has('was_logged_in') && $this->cookieService->get('was_logged_in') == true)
                 session()->flash('session_expired', __('msg.session_expired'));
 
         return view('auth.login');
@@ -103,9 +103,9 @@ class LoginController extends Controller implements HasMiddleware
     protected function loggedOut(Request $request)
     {
         // Set cookie - has logged out
-        $this->cookie->setForever('has_logged_out', true);
+        $this->cookieService->setForever('has_logged_out', true);
         // Delete was logged in
-        $this->cookie->delete('was_logged_in');
+        $this->cookieService->delete('was_logged_in');
     }
 
     /**
@@ -126,7 +126,7 @@ class LoginController extends Controller implements HasMiddleware
         // Store User's login in DB.
         event(new UserLoggedIn($user));
 
-        $this->cookie->delete('has_logged_out');
-        $this->cookie->setForever('was_logged_in', true);
+        $this->cookieService->delete('has_logged_out');
+        $this->cookieService->setForever('was_logged_in', true);
     }
 }

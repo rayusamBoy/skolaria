@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware\Custom;
 
-use App\Http\Controllers\CookieController;
+use App\Services\CookieService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as IlluminateResponse;
@@ -10,6 +10,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class HandleCookie
 {
+    protected $cookieService;
+    public function __construct(CookieService $cookieService)
+    {
+        $this->cookieService = $cookieService;
+    }
+
     /**
      * Handle an incoming request.
      *
@@ -17,7 +23,7 @@ class HandleCookie
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $cookie = CookieController::setForever('do_not_show_els_with_these_ids_again', auth()->user()?->hidden_alert_ids ?? "", httpOnly: false);
+        $cookie = $this->cookieService->setForever('do_not_show_els_with_these_ids_again', auth()->user()?->hidden_alert_ids ?? "", httpOnly: false);
         $response = $next($request);
 
         // Check if the response is an instance of Illuminate\Http\Response (HTTP responses)
