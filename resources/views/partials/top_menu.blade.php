@@ -1,6 +1,6 @@
 <div class="navbar navbar-expand-md">
     <div class="mt-2 mr-md-5">
-        <a href="{{ route('dashboard') }}" class="d-inline-block">
+        <a class="d-inline-block">
             <h4 class="text-bold d-none d-md-block">{{ Qs::getSystemName() }}</h4>
             <h4 class="text-bold d-block d-md-none">{{ Qs::getStringAbbreviation() }}</h4>
         </a>
