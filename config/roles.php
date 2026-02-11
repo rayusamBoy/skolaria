@@ -2,12 +2,12 @@
 
 /*
 |--------------------------------------------------------------------------
-| Roles Configuration
+| Roles configuration
 |--------------------------------------------------------------------------
 | This file contains the configuration for roles in both tenant and central contexts.
-| All roles defined here have specific key-value pairs where the key is the role identifier
+| All roles defined here are key-value pairs: the key is the role identifier
 | and the value is the human-readable name of the role.
-| Please do not modify the keys of the roles as they are used internally by the system.
+| Please do not modify the role keys, as they are used internally by the system.
 | Only the values (names) can be changed to suit your application's needs.
 */
 
@@ -18,7 +18,6 @@ return [
     | Tenant and Central root roles
     |--------------------------------------------------------------------------
     | Roles defined here have all permissions by default.
-    | They cannot be deleted or modified.
     */
     'root_roles' => [
         'central' => [
@@ -33,9 +32,8 @@ return [
     |--------------------------------------------------------------------------
     | Tenant and Central default roles
     |--------------------------------------------------------------------------
-    | Roles defined here are created during the initial setup of the application.
-    | These roles names can not be modified or deleted, but their permissions can be changed (except for root roles).
-    | They do not have all permissions by default.
+    | These roles are created during the initial setup of the application.
+    | They do not have all permissions by default (except for root roles).
     */
     'default_roles' => [
         'central' => [
@@ -53,12 +51,11 @@ return [
     ],
 
     /*
-     |--------------------------------------------------------------------------
-     | Staff roles
-     |--------------------------------------------------------------------------
-     | Here you may define the roles that are considered staff members.
-     | 
-     */
+    |--------------------------------------------------------------------------
+    | Staff roles
+    |--------------------------------------------------------------------------
+    | Define the roles that are considered staff members here.
+    */
     'staff_roles' => [
         'central' => [
             'root' => 'Root',
