@@ -380,22 +380,39 @@
                             <td>{{ $u->username }}</td>
                             <td><a href="tel: {{ $u->phone }}">{{ $u->phone }}</a></td>
                             <td><a href="mailto: {{ $u->email }}">{{ $u->email }}</a></td>
-
-                            <td><label class="form-switch m-0"><input id="checkbox-user-{{ $u->id }}" onchange="updateUserBlockedState({{ $u->id }}, this)" type="checkbox" @checked($u->blocked)><i></i></label></td>
+                            <td>
+                                @if(isset($u->staff->first()->staff_data_edit) && auth()->user()->can($central_permissions['central_users']['update_user_blocked_state']) && !Usr::userIsHead($u->id))
+                                <label class="form-switch m-0"><input id="checkbox-user-{{ $u->id }}" onchange="updateUserBlockedState({{ $u->id }}, this)" type="checkbox" @checked($u->blocked)><i></i></label>
+                                @else
+                                <span class="status-styled">Unavailable</span>
+                                @endif
+                            </td>
                             <td class="text-center">
+                                @php
+                                $user_can_modify_head = !Usr::userIsHead($u->id) || Usr::userIsHead();
+                                @endphp
+                                @if($user_can_modify_head)
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
-
                                         <div class="dropdown-menu dropdown-menu-left">
+                                            @if(auth()->user()->can($central_permissions['central_users']['edit']) && $user_can_modify_head)
                                             <a href="{{ route('central_users.edit', Qs::hash($u->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
+                                            @endif
+                                            @if(auth()->user()->can($central_permissions['central_users']['show']) && $user_can_modify_head)
                                             <a href="{{ route('central_users.show', Qs::hash($u->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> View Profile</a>
+                                            @endif
+                                            @if(auth()->user()->can($central_permissions['central_users']['reset_pass']) && $user_can_modify_head)
                                             <a href="javascript:;" data-href="{{ route('central_users.password.reset',Qs::hash($u->id)) }}" class="dropdown-item needs-reset-pass-confirmation"><i class="material-symbols-rounded">lock_reset</i> Reset Password</a>
+                                            @endif
+                                            @if(auth()->user()->can($central_permissions['central_users']['destroy']) && $user_can_modify_head) 
                                             <a href="javascript:;" id="{{ Qs::hash($u->id) }}" onclick="confirmDelete(this.id)" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                             <form id="item-delete-{{ Qs::hash($u->id) }}" action="{{ route('central_users.destroy', Qs::hash($u->id)) }}" method="post" class="hidden">@csrf @method('delete')</form>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
+                                @endif
                             </td>
                         </tr>
                         @endforeach
