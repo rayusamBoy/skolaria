@@ -63,7 +63,7 @@ class UserController extends Controller
             return back()->with('flash_danger', __('msg.denied'));
 
         $data['password'] = Hash::make('user');
-        $data['password_updated_at'] = NULL;
+        $data['password_updated_at'] = null;
         $this->user->update($id, $data);
 
         return back()->with('flash_success', __('msg.pu_reset'));
@@ -111,7 +111,7 @@ class UserController extends Controller
         $d2 = $req->only(Usr::getStaffRecord());
         $d2['user_id'] = $user->id;
         $d2['code'] = $staff_id;
-        $d2['subjects_studied'] = isset($d2['subjects_studied']) ? json_encode(explode(",", $d2['subjects_studied'])) : NULL;
+        $d2['subjects_studied'] = isset($d2['subjects_studied']) ? json_encode(explode(",", $d2['subjects_studied'])) : null;
 
         $this->user->createStaffRecord($d2);
 
@@ -152,7 +152,7 @@ class UserController extends Controller
         /* Update staff record */
         $d2 = $req->only(Usr::getStaffRecord());
         $d2['code'] = $user->code;
-        $d2['subjects_studied'] = isset($d2['subjects_studied']) ? json_encode(explode(",", $d2['subjects_studied'])) : NULL;
+        $d2['subjects_studied'] = isset($d2['subjects_studied']) ? json_encode(explode(",", $d2['subjects_studied'])) : null;
         $this->user->updateStaffRecord(['user_id' => $id], $d2);
 
         return Usr::jsonUpdateOk();
