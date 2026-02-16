@@ -76,7 +76,7 @@
                                 @endif
 
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="identity" value="{{ old('identity') }}" placeholder="Login ID or Email" autocomplete="identity">
+                                    <input type="text" class="form-control" name="identity" value="{{ old('identity') }}" placeholder="Username or Email" autocomplete="identity">
                                 </div>
 
                                 <div class="form-group">
