@@ -85,7 +85,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
         // middleware captures OTP and runs authenticate
         Route::post('authenticate', [AccountSecurityController::class, 'authenticate'])->name('two_factor.authenticate')->middleware(['2fa', 'throttle:5,1']);
         Route::post('update/code', [AccountSecurityController::class, 'update_secret_codes'])->name('two_factor.update_secret_codes')->middleware('2fa');
-        Route::patch('{user?}/code/null', [AccountSecurityController::class, 'null_secret_code'])->name('two_factor.null_secret_code')->middleware('2fa');
+        Route::patch('code/null/{user?}', [AccountSecurityController::class, 'null_secret_code'])->name('two_factor.null_secret_code')->middleware('2fa');
         Route::delete('logout/other-browser-sessions', [AccountSecurityController::class, 'logout_other_browser_sessions'])->name('account_security.logout_other_browser_sessions');
     });
 

@@ -86,7 +86,7 @@ class AccountSecurityController extends Controller
     public function update_secret_codes(Request $request)
     {
         $data = $request->only('twofa_secret_code');
-        // Get recovery codes from session that were put in the 'index' method above.
+        // Get recovery codes from session.
         $data['twofa_recovery_codes'] = $twofarc = session()->get('twofa_recovery_codes');
 
         // If the recovery codes missed in any way (ie., they are not in the session). Redirect back to the index page for re-processing or re-trying.

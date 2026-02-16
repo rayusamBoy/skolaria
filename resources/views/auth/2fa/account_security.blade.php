@@ -24,7 +24,7 @@
                 <span>
                     With 2-Step Verification, also called two-factor authentication, you can add an extra layer of security to your account in case your password is stolen. After you set up 2-Step Verification, you can sign in to your account with:
                     <strong>Your password</strong> and <strong>Your phone</strong>.
-                    <strong class="text-danger">
+                    <strong class="text-warning">
                         You must first download the Authenticator application from
                         <a target="_blank" href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US&pli=1">Play store</a>
                         or
@@ -63,7 +63,7 @@
 
                                 @if($google2FAIsActive)
                                 <a id="google-2fa" onclick="confirmOperation(this.id)" href="javascript:;" class="btn btn-danger"> Deactivate</a>
-                                <form method="post" id="item-confirm-operation-google-2fa" action="{{ route('2fa.null_secret_code') }}" class="hidden">@csrf @method('patch')</form>
+                                <form method="post" id="item-confirm-operation-google-2fa" action="{{ route('two_factor.null_secret_code') }}" class="hidden">@csrf @method('patch')</form>
                                 @endif
 
                             </div>
@@ -170,7 +170,7 @@
                             <td class="text-center">
                                 {{--Deactivate--}}
                                 <a id="{{ $user->id }}" onclick="confirmOperation(this.id)" href="javascript:;" class="btn btn-danger"> Deactivate</a>
-                                <form method="post" id="item-confirm-operation-{{ $user->id }}" action="{{ route('2fa.null_secret_code', $user->id) }}" class="hidden">@csrf @method('patch')</form>
+                                <form method="post" id="item-confirm-operation-{{ $user->id }}" action="{{ route('two_factor.null_secret_code', $user->id) }}" class="hidden">@csrf @method('patch')</form>
                             </td>
                         </tr>
                         @endforeach
@@ -237,7 +237,7 @@
                             @endif
                         </ul>
                     </div>
-                  
+
                     <div class="col-md-5">
                         @php
                         $login_history = auth()->user()->loginHistory()->first();

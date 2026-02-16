@@ -55,7 +55,7 @@ class LoginController extends Controller implements HasMiddleware
     {
         $account_status = tenant('account_status');
 
-        // If account not active ie., blocked, susupended etc., abort as forbidden.
+        // If account not active ie., blocked, suspended etc., abort as forbidden.
         if (\in_array($account_status, Usr::getAccountStatuses(['Active']))) {
             $message = 'ACCOUNT ' . strtoupper($account_status);
             session()->flash('tenant_account_not_active', $message);
@@ -117,7 +117,7 @@ class LoginController extends Controller implements HasMiddleware
      */
     protected function authenticated(Request $request, $user)
     {
-        $user = auth()->user();
+        $user ??= auth()->user();
         if ($user->blocked) {
             Auth::logout();
             return redirect()->route('login')->with('access_denied', __('msg.restricted') . ' ACCOUNT BLOCKED.');
