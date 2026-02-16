@@ -67,8 +67,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
     ];
 
-    public const GENDER_MALE = 'Male';
-    public const GENDER_FEMALE = 'Female';
+    public const string GENDER_MALE = 'Male';
+    public const string GENDER_FEMALE = 'Female';
 
     /**
      * The attributes that should be hidden for arrays.
