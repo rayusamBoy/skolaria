@@ -56,7 +56,7 @@
                                     @csrf
                                     <input type="hidden" name="twofa_secret_code" value="{{ $twofa_secret_code }}">
                                     <div class="mt-2">
-                                        <button type="submit" class="btn btn-primary">Complete Set up</button>
+                                        <button type="submit" class="btn btn-primary">Complete Setup</button>
                                     </div>
                                 </form>
                                 @endif
@@ -155,7 +155,7 @@
                         @foreach($users_with_2fa_enabled as $user)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ str_starts_with($user->photo, "global_assets") ? asset($user->photo) : tenant_asset($user->photo) }}" alt="photo"></td>
+                            <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenantAwarePhoto($user->photo) }}" alt="photo"></td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->username }}</td>
                             <td>{{ ucwords(str_replace('_', ' ',$user->role)) }}</td>
@@ -168,7 +168,7 @@
                             <td>{{ $user->email ?? '-' }}</td>
                             @endif
                             <td class="text-center">
-                                {{--Deactivate--}}
+                                {{-- Deactivate --}}
                                 <a id="{{ $user->id }}" onclick="confirmOperation(this.id)" href="javascript:;" class="btn btn-danger"> Deactivate</a>
                                 <form method="post" id="item-confirm-operation-{{ $user->id }}" action="{{ route('two_factor.null_secret_code', $user->id) }}" class="hidden">@csrf @method('patch')</form>
                             </td>
@@ -222,19 +222,18 @@
                             <br />
                             @endforeach
 
-                            @if ($browser_sessions->isNotEmpty())
                             <form method="post" action="{{ route('account_security.logout_other_browser_sessions') }}">
                                 @csrf
                                 @method('DELETE')
 
                                 <div class="form-group row">
                                     <div class="col-6">
-                                        <input class="form-control form-control-sm" name="password" placeholder="Enter password" type="password" />
+                                        <input @disabled($browser_sessions->count()
+                                        <= 1) class="form-control form-control-sm" name="password" placeholder="Enter password" type="password" />
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-s btn-primary mt-1">Logout Other Sessions</button>
+                                <button @disabled($browser_sessions->count() <= 1) type="submit" class="btn btn-sm btn-primary mt-1">Logout Other Sessions</button>
                             </form>
-                            @endif
                         </ul>
                     </div>
 

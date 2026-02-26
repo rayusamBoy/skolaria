@@ -1,7 +1,7 @@
 <script>
     /**
      *-------------------------------------------------------------
-     * Useful js variables
+     * Global pop timer for all pop notifications
      *-------------------------------------------------------------
      */
     const pop_timer = {{ session('pop_timer') ?? 20000 }};
@@ -24,52 +24,31 @@
 
     /**
      *-------------------------------------------------------------
-     * Notifications
+     * Pop and flash messages from session
      *-------------------------------------------------------------
      */
-    @if (session('pop_error'))
-    pop({msg: '{{ session("pop_error") }}', type: 'error'});
-    @endif
+    @foreach (['pop_error', 'pop_warning', 'pop_success'] as $type){
+      @if (session($type))
+        pop({ msg: '{{ session($type) }}', type: '{{ str_replace("pop_", "", $type) }}' @if($type == 'pop_success'), title: 'GREAT!' @endif });
+      @endif
+    }
+    @endforeach
 
-    @if (session('pop_warning'))
-    pop({msg: '{{ session("pop_warning") }}', type: 'warning'});
-    @endif
+    @foreach (['pop_error_confirm', 'pop_warning_confirm', 'pop_success_confirm'] as $type)
+      @if (session($type))
+        popConfirm({ msg: '{{ session($type) }}', type: '{{ str_replace("pop_", "", str_replace("_confirm", "", $type)) }}' @if(str_contains($type, 'success')), title: 'GREAT!' @endif });
+      @endif
+    @endforeach
 
-    @if (session('pop_success'))
-    pop({msg: '{{ session("pop_success") }}', type: 'success', title: 'GREAT!'});
-    @endif
-
-    @if (session('pop_error_confirm'))
-    popConfirm({msg: '{{ session("pop_error_confirm") }}', type: 'error'});
-    @endif
-
-    @if (session('pop_warning_confirm'))
-    popConfirm({msg: '{{ session("pop_warning_confirm") }}', type: 'warning'});
-    @endif
-
-    @if (session('pop_success_confirm'))
-    popConfirm({msg: '{{ session("pop_success_confirm") }}', type: 'success', title: 'GREAT!'});
-    @endif
-
-    @if (session('flash_info'))
-      flash({msg: '{{ session("flash_info") }}', type: 'info'});
-    @endif
-
-    @if (session('flash_success'))
-      flash({msg: '{{ session("flash_success") }}', type: 'success'});
-    @endif
-
-    @if (session('flash_warning'))
-      flash({msg: '{{ session("flash_warning") }}', type: 'warning'});
-    @endif
-
-    @if (session('flash_error') || session('flash_danger'))
-      flash({msg: '{{ session("flash_error") ?: session("flash_danger") }}', type: 'error'});
-    @endif
+    @foreach (['flash_info', 'flash_success', 'flash_warning', 'flash_error', 'flash_danger'] as $type)
+      @if (session($type))
+        flash({ msg: '{{ session($type) }}', type: '{{ str_replace("flash_", "", str_replace("flash_danger", "error", $type)) }}' });
+      @endif
+    @endforeach
     
     /**
      *-------------------------------------------------------------
-     * Useful js URLs
+     * Global URLs for AJAX calls
      *-------------------------------------------------------------
      */
     const set_notice_as_viewed_url = '{{ route("notices.set_viewed") }}';
