@@ -2335,7 +2335,7 @@ $(function () {
     const $roles = $("#roles");
     const $perms = $("#permissions");
 
-    const usingSelect2 = !!$perms.data("select2");
+    const usingSelect2 = !!$perms.hasClass("select");
 
     // All permission names (from Blade)
     const allPerms = new Set(window.ALL_PERMISSIONS || []);
