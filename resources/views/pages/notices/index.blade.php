@@ -12,20 +12,20 @@
 
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
-            @can($tenant_permissions['notices']['store'])
+            @can($tenant_permissions['notices']['store']['permission'])
             <li class="nav-item">
                 <a href="#add-notice" class="{{ in_array(Route::currentRouteName(), ['notices.edit']) ? 'nav-link' : 'nav-link active' }}" data-toggle="tab">Create a Notice</a>
             </li>
             @endcan
 
-            @can($tenant_permissions['notices']['index'])
+            @can($tenant_permissions['notices']['index']['permission'])
             <li class="{{ $notices->isEmpty() ? 'nav-item dropdown cursor-not-allowed' : 'nav-item dropdown' }}">
                 <a href="#manage-notice" class="{{ $notices->isEmpty() ? 'nav-link pointer-events-none' : 'nav-link' }}" data-toggle="tab">Manage Notices</a>
             </li>
             @endcan
 
             @if($edit)
-            @can($tenant_permissions['notices']['edit'])
+            @can($tenant_permissions['notices']['edit']['permission'])
             <li class="nav-item">
                 <a href="#edit-notice" class="{{ $edit ? 'nav-link active show' : 'nav-link' }}" data-toggle="tab">Edit Notice</a>
             </li>
@@ -35,7 +35,7 @@
 
         <div class="tab-content">
             {{-- Add Notice --}}
-            @can($tenant_permissions['notices']['store'])
+            @can($tenant_permissions['notices']['store']['permission'])
             <div class="{{ in_array(Route::currentRouteName(), ['notices.edit']) ? 'tab-pane fade' : 'tab-pane fade show active' }}" id="add-notice">
                 <form class="ajax-store" method="post" action="{{ route('notices.store') }}">
                     @csrf
@@ -63,7 +63,7 @@
             @endcan
 
             {{-- Manage Notices --}}
-            @can($tenant_permissions['notices']['index'])
+            @can($tenant_permissions['notices']['index']['permission'])
             <div class="tab-pane fade" id="manage-notice">
                 <table class="table table-sm datatable-button-html5-columns">
                     <thead>
@@ -71,7 +71,7 @@
                             <th>S/N</th>
                             <th>Title</th>
                             <th>Body</th>
-                            @can($tenant_permissions['users']['show'])
+                            @can($tenant_permissions['users']['show']['permission'])
                             @if(auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
                             <th>By</th>
                             @endif
@@ -87,7 +87,7 @@
                             <td>{{ $loop->iteration }}</td>
                             <td class="break-all break-spaces">{{ $ntc->title }}</td>
                             <td class="break-all break-spaces wmin-300">{{ $ntc->body }}</td>
-                            @can($tenant_permissions['users']['show'])
+                            @can($tenant_permissions['users']['show']['permission   '])
                             @if(auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
                             <td>
                                 @php $user_id = $ntc->user->id @endphp
@@ -111,13 +111,13 @@
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
 
                                         <div class="dropdown-menu dropdown-menu-right">
-                                            @can($tenant_permissions['edit']['index'])
+                                            @can($tenant_permissions['notices']['edit']['permission'])
                                             <a href="{{ route('notices.edit', Qs::hash($ntc->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
                                             @endcan
 
-                                            @can($tenant_permissions['notices']['destroy'])
+                                            @can($tenant_permissions['notices']['destroy']['permission'])
                                             <a id="{{ $ntc->id }}" onclick="confirmPermanentDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -139,7 +139,7 @@
 
             {{-- Edit Notice --}}
             @if($edit)
-            @can($tenant_permissions['notices']['edit'])
+            @can($tenant_permissions['notices']['edit']['permission'])
             <div class="{{ in_array(Route::currentRouteName(), ['notices.edit']) ? 'tab-pane fade show active' : 'tab-pane fade' }}" id="edit-notice">
                 {{-- Alert if super_admin editing another’s notice --}}
                 @if(Auth::id() != $notice->from_id && auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))

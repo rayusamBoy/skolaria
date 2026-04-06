@@ -79,12 +79,12 @@ class StudentPaymentPaid extends Notification implements ShouldQueue
         $currency_unit = Pay::getCurrencyUnit();
         $data = [
             'title' => $this->subject,
-            'body' => "Amount paid was: {$this->receipt->amt_paid} $currency_unit with a remaining balance of: {$this->receipt->balance} $currency_unit. For the academic year: {$this->receipt->year}.",
+            'body' => "Amount paid was: {$this->receipt->amt_paid} ($currency_unit) with a remaining balance of: {$this->receipt->balance} ($currency_unit). For the academic year: {$this->receipt->year}.",
             'icon' => Pay::getAppIcon(),
             'type' => 'notifications',
             'url' => $this->url,
             'url_title' => "view receipt",
-            'created_at' => $this->receipt->created_at
+            'created_at' => $this->receipt->created_at->toISOString(),
         ];
 
         return (new FcmMessage())

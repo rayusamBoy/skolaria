@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Repositories\StudentRepo;
 
-class MyController extends Controller
+class ChildrenController extends Controller
 {
     protected $student;
     public function __construct(StudentRepo $student)
     {
+        $this->permissionMap = config('permissions.names.tenant.childrens');
+        parent::__construct();
         $this->student = $student;
     }
 

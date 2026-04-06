@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\Qs;
 use App\Helpers\Usr;
 use App\Http\Requests\UserChangePass;
-use App\Http\Requests\UserUpdate;
+use App\Http\Requests\UserProfileUpdate;
 use App\Repositories\UserRepo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -29,7 +29,7 @@ class MyAccountController extends Controller
         return view('pages.my_account', $d);
     }
 
-    public function update_profile(UserUpdate $req)
+    public function update_profile(UserProfileUpdate $req)
     {
         $user = auth()->user();
 
@@ -60,12 +60,11 @@ class MyAccountController extends Controller
         if ($user->email !== $d['email'])
             $d['email_verified_at'] = NULL;
 
-        $this->user->update($user->id, $d);
+        $user->update($d);
         $staff_data_edit = $this->user->whereStaffRecord(['user_id' => $user->id])->first()->staff_data_edit;
 
-        if ($staff_data_edit == true || auth()->user()->hasRole(config('roles.default_roles.central.root'))) {
+        if ($staff_data_edit == true || $user->hasRole(config('roles.default_roles.central.root'))) {
             $d2 = $req->only(Qs::getStaffRecord());
-            $d2['subjects_studied'] = json_encode(explode(",", $d2['subjects_studied']));
             $this->user->updateStaffRecord(['user_id' => $user->id], $d2);
         }
 
@@ -74,15 +73,15 @@ class MyAccountController extends Controller
 
     public function change_pass(UserChangePass $req)
     {
-        $user_id = auth()->id();
-        $my_pass = auth()->user()->password;
+        $user = auth()->user();
+        $current_pass = $user->password;
         $old_pass = $req->current_password;
         $new_pass = $req->new_password;
 
-        if (password_verify($old_pass, $my_pass)) {
+        if (password_verify($old_pass, $current_pass)) {
             $data['password'] = Hash::make($new_pass);
             $data['password_updated_at'] = Carbon::now();
-            $this->user->update($user_id, $data);
+            $user->update($data);
 
             return back()->with('flash_success', __('msg.p_changed'));
         }
@@ -90,32 +89,37 @@ class MyAccountController extends Controller
         return back()->with('flash_danger', __('msg.p_reset_fail'));
     }
 
-    public function other(Request $req)
+    public function update_preferences(Request $request)
     {
-        $keys = ['sidebar_minimized', 'show_charts', 'allow_system_sounds'];
-        $this->user->update(auth()->id(), $req->only($keys));
+        $user = auth()->user();
+
+        $user->update([
+            'preferences' => [
+                'always_minimize_sidebar' => $request->boolean('always_minimize_sidebar'),
+                'allow_system_sounds' => $request->boolean('allow_system_sounds'),
+                'active_system_skin' => $request->active_system_skin,
+            ],
+        ]);
 
         return back()->with('flash_success', __('msg.update_ok'));
     }
 
     public function update_hidden_alerts(Request $request)
     {
-        $user_id = auth()->id();
-        $hidden_alert_ids = $request->input('hidden_alert_ids');
+        $user = auth()->user();
 
-        // Save as JSON in database
-        $data = ['hidden_alert_ids' => json_encode($hidden_alert_ids)];
-        $this->user->update($user_id, $data);
+        $data = ['hidden_alert_ids' => $request->input('hidden_alert_ids')];
+        $user->update($data);
 
         return Qs::jsonUpdateOk();
     }
 
-    public function clear_hidden_alerts(Request $request)
+    public function clear_hidden_alerts()
     {
-        $user_id = auth()->id();
+        $user = auth()->user();
 
-        $data = ['hidden_alert_ids' => json_encode([])];
-        $this->user->update($user_id, $data);
+        $data = ['hidden_alert_ids' => []];
+        $user->update($data);
 
         return Qs::jsonUpdateOk();
     }

@@ -24,6 +24,8 @@ class MarkController extends Controller
 
     public function __construct(MyClassRepo $my_class, ExamRepo $exam, StudentRepo $student, MarkRepo $mark, AssessmentRepo $assessment)
     {
+        $this->permissionMap = config('permissions.names.tenant.marks');
+        parent::__construct();
         $this->exam = $exam;
         $this->mark = $mark;
         $this->student = $student;
@@ -35,7 +37,6 @@ class MarkController extends Controller
     public function index()
     {
         $d['exams'] = $this->exam->getExam(['year' => $this->year]);
-        $d['my_classes'] = $this->my_class->all();
         $d['sections'] = $this->my_class->getAllSections();
         $d['subjects'] = $this->my_class->getAllSubjects();
         $d['selected'] = false;
@@ -94,7 +95,7 @@ class MarkController extends Controller
         return view('pages.marks.show.index', $d);
     }
 
-    public function getExams($year)
+    private function getExams($year)
     {
         $exams = $this->exam->getExam(['year' => $year], false);
 
@@ -154,7 +155,7 @@ class MarkController extends Controller
         $sub_recs = $this->my_class->getSubjectRecord(['subject_id' => $req->subject_id])->where('subject.my_class_id', $req->my_class_id);
 
         if ($req->section_id == null && $sub_recs->whereNull('section_id')->whereNotNull('students_ids')->isNotEmpty())
-            $students = $this->student->getRecordByUserIDs(unserialize($sub_recs->value('students_ids')))->get();
+            $students = $this->student->getRecordByUserIDs($sub_recs->value('students_ids'))->get();
         elseif ($req->section_id == null && $sub_recs->whereNull('section_id')->whereNull('students_ids')->isNotEmpty() || $req->section_id != null && $sub_recs->whereNotNull('students_ids')->isNotEmpty())
             return back()->with('pop_error', __('msg.rnf'));
         else
@@ -195,7 +196,6 @@ class MarkController extends Controller
         $d['m'] = $d['marks']->first();
         $d['exams'] = $this->exam->getExam(['year' => $this->year]);
         $d['exam'] = $this->exam->getById($exam_id, false);
-        $d['my_classes'] = $this->my_class->all();
         $d['sections'] = $this->my_class->getAllSections();
         $d['selected'] = true;
         $d['class_type'] = $this->my_class->findTypeByClass($class_id);
@@ -224,7 +224,7 @@ class MarkController extends Controller
                 $students_ids = $this->my_class->getSubjectRecord(['subject_id' => $subject_id, 'section_id' => null])->value('students_ids');
                 $p = ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'subject_id' => $subject_id, 'year' => $this->year];
                 $wh = ['my_class_id' => $class_id, 'exam_id' => $exam_id, 'year' => $this->year];
-                $marks = $this->exam->getMarkByIds(unserialize($students_ids))->where($p)->get();
+                $marks = $this->exam->getMarkByIds($students_ids)->where($p)->get();
                 break;
             default:
                 $p = ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'section_id' => $section_id, 'subject_id' => $subject_id, 'year' => $this->year];
@@ -308,8 +308,8 @@ class MarkController extends Controller
                 $grade_points[] = $marks2->where('student_id', $st_id)->where('subject_id', $sub->id)->where('subject.core', 1)->first()->grade->credit ?? null;
             }
 
-            $d3['points'] = $total_points = $this->mark->getExtractedSumOf($points, 0, $subjects_considered);
-            $d3['gpa'] = $this->mark->getExtractedSumOf($grade_points, 0, $subjects_considered) / $subjects_considered;
+            $d3['points'] = $total_points = $this->mark->getExtractedSumOf($points, $subjects_considered);
+            $d3['gpa'] = $this->mark->getExtractedSumOf($grade_points, $subjects_considered) / $subjects_considered;
             $d3['division_id'] = Mk::getDivision($total_points, $class_type_id)->id ?? null;
 
             $d3_collection[] = $d3;
@@ -337,7 +337,6 @@ class MarkController extends Controller
     public function batch()
     {
         $d['exams'] = $this->exam->getExam(['year' => $this->year]);
-        $d['my_classes'] = $this->my_class->all();
         $d['selected'] = false;
 
         return view('pages.marks.batch.index', $d);
@@ -355,7 +354,7 @@ class MarkController extends Controller
         if ($exam->class_type_id != $class_type_id)
             return back()->with('flash_error', __('msg.invalid_exam_and_class'));
 
-        if (!$this->my_class->getSubject(['my_class_id' => $class->id])->exists())
+        if (!$this->my_class->whereSubject(['my_class_id' => $class->id])->exists())
             return back()->with('flash_error', __('msg.assign_subjects_to_class'));
 
         $d = ['exam_id' => $exam->id, 'my_class_id' => $class->id, 'year' => $this->year];
@@ -373,11 +372,9 @@ class MarkController extends Controller
             foreach ($p->where('section_id', $sec->id)->all() as $st_rec) {
 
                 foreach ($subjects_with_recs as $sub) {
-                    $students_ids = $this->my_class->whereSubjectRecord(['subject_id' => $sub->id])->where('students_ids', '!=', null)->value('students_ids');
+                    $students_ids = $this->my_class->whereSubjectRecord(['subject_id' => $sub->id])->whereNotNull('students_ids')->value('students_ids');
 
                     if ($students_ids != null) {
-                        $students_ids = unserialize($students_ids);
-
                         array_walk($students_ids, function (&$arr) { // note the reference (&)
                             $arr = \intval($arr); // Convert each array value to integer
                         });
@@ -462,7 +459,7 @@ class MarkController extends Controller
         $exam_id = $req->exam_id;
         $class_id = $req->my_class_id;
         $d = $d3 = $all_st_ids = $section_ids = [];
-        $class_subjects = $this->my_class->getSubject(['my_class_id' => $class_id])->get();
+        $class_subjects = $this->my_class->whereSubject(['my_class_id' => $class_id])->get();
         $class_sections = $this->my_class->getSections(['my_class_id' => $class_id]);
         $class_type = $this->my_class->findTypeByClass($class_id);
         $exam = $this->exam->find($exam_id);
@@ -546,8 +543,8 @@ class MarkController extends Controller
                     $grade_points[] = $marks2->where('student_id', $st_id)->where('subject_id', $sub->id)->where('subject.core', 1)->first()->grade->credit ?? null;
                 }
 
-                $d3['points'] = $total_points = $this->mark->getExtractedSumOf($points, 0, $subjects_considered);
-                $grade_points_sum_extracted = $this->mark->getExtractedSumOf($grade_points, 0, $subjects_considered);
+                $d3['points'] = $total_points = $this->mark->getExtractedSumOf($points, $subjects_considered);
+                $grade_points_sum_extracted = $this->mark->getExtractedSumOf($grade_points, $subjects_considered);
                 $d3['gpa'] = $grade_points_sum_extracted == null ? null : $grade_points_sum_extracted / $subjects_considered;
                 $d3['division_id'] = Mk::getDivision($total_points, $class_type_id)->id ?? null;
 
@@ -642,7 +639,6 @@ class MarkController extends Controller
         if (!$this->exam->examsExists())
             return $this->noExamsRecord();
 
-        $d['my_classes'] = $this->my_class->all();
         $d['selected'] = false;
 
         if ($class_id && $section_id) {
@@ -679,7 +675,6 @@ class MarkController extends Controller
     {
         set_time_limit(300); // Extend excecution time from normal 1 minute to 5 minutes
 
-        $d['my_classes'] = $this->my_class->all();
         $d['years'] = $this->exam->getYears();
         $d['selected'] = false;
         $d['year'] = $year;

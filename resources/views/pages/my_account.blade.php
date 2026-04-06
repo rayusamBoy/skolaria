@@ -39,10 +39,10 @@ $errors_has_password_error = str_contains($errors->first() ?? '', 'password');
                 </a>
             </li>
 
-            {{-- Other Settings Tab --}}
+            {{-- Preferences Settings Tab --}}
             <li class="nav-item">
-                <a href="#other" class="nav-link" data-toggle="tab">
-                    Other
+                <a href="#preferences" class="nav-link" data-toggle="tab">
+                    Preferences
                 </a>
             </li>
         </ul>
@@ -203,37 +203,45 @@ $errors_has_password_error = str_contains($errors->first() ?? '', 'password');
                 </form>
             </div>
 
-            {{-- Other Settings Pane --}}
-            <div id="other" class="tab-pane fade">
-                <form method="post" action="{{ route('my_account.other') }}">
+            {{-- Preferences Settings Pane --}}
+            <div id="preferences" class="tab-pane fade">
+                <form method="post" action="{{ route('my_account.update_preferences') }}">
                     @csrf @method('put')
                     <div class="row">
                         <div class="col-md-4 d-none d-md-block">
-                            <div class="form-group row">
-                                <label for="sidebar_minimized" class="col-lg-8 col-form-label font-weight-semibold">Minimize Sidebar <span class="text-danger">*</span></label>
-                                <div class="col-lg-4">
-                                    <select id="sidebar_minimized" name="sidebar_minimized" class="form-control select">
-                                        <option value="1" @selected(auth()->user()->sidebar_minimized==1)>Yes</option>
-                                        <option value="0" @selected(auth()->user()->sidebar_minimized==0)>No</option>
-                                    </select>
-                                </div>
+                            <div class="form-group">
+                                <label for="always_minimize_sidebar" class="col-form-label font-weight-semibold">Always Minimize Sidebar <span class="text-danger">*</span></label>
+                                <select id="always_minimize_sidebar" name="always_minimize_sidebar" class="form-control select">
+                                    <option value="1" @selected($user_preferences['always_minimize_sidebar']==1)>Yes</option>
+                                    <option value="0" @selected($user_preferences['always_minimize_sidebar']==0)>No</option>
+                                </select>
                             </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <div class="form-group row">
-                                <label for="allow_system_sounds" class="col-lg-9 col-form-label font-weight-semibold">Allow System Sounds <span class="text-danger">*</span></label>
-                                <div class="col-lg-3">
-                                    <select id="allow_system_sounds" name="allow_system_sounds" class="form-control select">
-                                        <option value="1" @selected(auth()->user()->allow_system_sounds==1)>Yes</option>
-                                        <option value="0" @selected(auth()->user()->allow_system_sounds==0)>No</option>
-                                    </select>
-                                </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="allow_system_sounds" class="col-form-label font-weight-semibold">Allow System Sounds <span class="text-danger">*</span></label>
+                                <select id="allow_system_sounds" name="allow_system_sounds" class="form-control select">
+                                    <option value="1" @selected($user_preferences['allow_system_sounds']==1)>Yes</option>
+                                    <option value="0" @selected($user_preferences['allow_system_sounds']==0)>No</option>
+                                </select>
                             </div>
                         </div>
 
-                        <div class="col-md-2">
-                            <div class="text-right">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="active_system_skin" class="col-form-label font-weight-semibold">System Skin <span class="text-danger">*</span></label>
+                                <select id="active_system_skin" name="active_system_skin" class="form-control select">
+                                    @foreach (Usr::getAvailableAppSkins() as $skin => $description)
+                                    <option value="{{ $skin }}" @selected($user_preferences['active_system_skin']==$skin) title="{{ $description }}">{{ ucfirst($skin) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="text-right float-right">
                                 <button type="submit" class="btn btn-danger">Submit form <i class="material-symbols-rounded ml-2">send</i></button>
                             </div>
                         </div>

@@ -119,15 +119,13 @@ class UserRequest extends FormRequest
     {
         $input = $this->all();
 
-        $data_masked_attributes = ['primary_id', 'secondary_id'];
+        $data_masked_attributes = ['primary_id', 'secondary_id', 'phone', 'phone2'];
         foreach ($data_masked_attributes as $attribute) {
             if (isset($input[$attribute])) {
-                $input[$attribute] = rtrim($input[$attribute], "_");
+                $input[$attribute] = rtrim($input[$attribute], " \n\r\t\v\x00\_");
+                $string_contains_only_plus = preg_match('/^\++$/', $input[$attribute]);
+                $input[$attribute] = $string_contains_only_plus ? null : $input[$attribute];
             }
-        }
-
-        if ($this->method() === 'PUT') {
-            $this->user = Usr::decodeHash($this->user ?? $this->central_user);
         }
 
         $this->getInputSource()->replace($input);

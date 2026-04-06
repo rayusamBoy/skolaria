@@ -335,7 +335,7 @@ class ExamRepo
 
     public function updateMarkDBFacades(int $id, array $data)
     {
-        return DB::table($this->marks_table)->find($id, 'id')->update($data);
+        return DB::table($this->marks_table)->where('id', $id)->update($data);
     }
 
     public function getStudentExamYears($student_id)

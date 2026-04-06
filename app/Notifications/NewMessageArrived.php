@@ -7,7 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Fcm\FcmMessage;
 
-class MessageSent extends Notification
+class NewMessageArrived extends Notification
 {
     use Queueable;
 
@@ -28,7 +28,7 @@ class MessageSent extends Notification
     public function via(object $notifiable): array
     {
         $channels = Qs::getActiveNotificationChannels($notifiable, false, false, true);
-        return $channels; 
+        return $channels;
     }
 
     public function toFcm(): FcmMessage
@@ -41,7 +41,7 @@ class MessageSent extends Notification
             'type' => 'messages',
             'url' => $url,
             'url_title' => "view message",
-            'created_at' => $this->message->created_at
+            'created_at' => $this->message->created_at->toISOString(),
         ];
 
         return (new FcmMessage())

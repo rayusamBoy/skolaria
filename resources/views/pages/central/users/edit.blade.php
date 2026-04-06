@@ -309,7 +309,7 @@
                         <div class="form-group">
                             <label for="subjects_studied">Subjects Studied <span class="text-info">(comma (,) separated)</span>: </label>
                             <div>
-                                <textarea name="subjects_studied" class="form-control" placeholder="ie., Subject one, Subject two, ...">{{ implode(",", json_decode($staff_rec->subjects_studied ?? "") ?? []) }}</textarea>
+                                <textarea name="subjects_studied" class="form-control" placeholder="ie., Subject one, Subject two, ...">{{ $staff_rec->subjects_studied ?? '' }}</textarea>
                             </div>
                         </div>
                     </div>

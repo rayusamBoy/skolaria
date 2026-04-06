@@ -1,0 +1,64 @@
+@extends('layouts.master')
+
+@section('page_title', "Edit Subject - {$sub->name} (" . $sub->my_class->name . ')')
+
+@section('content')
+
+<div class="card">
+    <div class="card-header header-elements-inline">
+        <h6 class="card-title">Edit Subject - {{ $sub->name }}</h6>
+        {!! Qs::getPanelOptions() !!}
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <form class="ajax-update" method="post" action="{{ route('subjects.update', $sub->id) }}">
+                    @csrf @method('PUT')
+
+                    <div class="form-group row">
+                        <label for="my_class_id" class="col-lg-3 col-form-label font-weight-semibold">Class</label>
+                        <div class="col-lg-9">
+                            <input type="text" class="form-control" disabled value="{{ $sub->my_class->name ?? 'Not Applicable' }}">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-lg-3 col-form-label font-weight-semibold">Name</label>
+                        <div class="col-lg-9">
+                            <input type="text" class="form-control" name="name" value="{{ $sub->name }}">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-lg-3 col-form-label font-weight-semibold">Short Name</label>
+                        <div class="col-lg-9">
+                            <input name="slug" value="{{ $sub->slug }}" type="text" class="form-control" placeholder="Short Name">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="core" class="col-lg-3 col-form-label font-weight-semibold">Core Subject</label>
+                        <div class="col-lg-2">
+                            <select class="form-control select" name="core" id="core">
+                                <option @selected($sub->core == 1) value="1">Yes</option>
+                                <option @selected($sub->core == 0) value="0">No</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-7 m-lg-auto">
+                            <span class="font-weight-bold font-italic text-info-800">{{ __('msg.core_subject') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-primary">Submit form <i class="material-symbols-rounded ml-2">send</i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{--subject Edit Ends--}}
+
+@endsection

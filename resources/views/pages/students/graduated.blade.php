@@ -36,13 +36,13 @@
             {{-- Bulk Block/Unblock --}}
             <div class="card mb-3">
                 <div class="card-body text-center">
-                    @can($tenant_permissions['student_records']['block_all_graduated'])
+                    @can($tenant_permissions['student_records']['block_all_graduated']['permission'])
                     <button id="students-block-all-grad" class="btn btn-danger">
                         Block All Graduated Students
                     </button>
                     @endcan
 
-                    @can($tenant_permissions['student_records']['unblock_all_graduated'])
+                    @can($tenant_permissions['student_records']['unblock_all_graduated']['permission'])
                     <button id="students-unblock-all-grad" class="btn btn-success ml-2">
                         Unblock All Graduated Students
                     </button>
@@ -79,7 +79,7 @@
                             <td>{{ $gs->from_session }}</td>
                             <td>{{ $gs->remarks }}</td>
 
-                            @if(auth()->user()->canAny([$tenant_permissions['student_records']['block_all_graduated'], $tenant_permissions['student_records']['unblock_all_graduated']]))
+                            @if(auth()->user()->canAny([$tenant_permissions['student_records']['block_all_graduated']['permission'], $tenant_permissions['student_records']['unblock_all_graduated']['permission']]))
                             <td>
                                 <label class="form-switch m-0">
                                     <input type="checkbox" id="checkbox-user-{{ $gs->student_id }}" onchange="updateUserBlockedState({{ $gs->student_id }}, this)" @checked($gs->student->blocked)>

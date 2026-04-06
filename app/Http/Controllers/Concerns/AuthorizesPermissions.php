@@ -1,6 +1,8 @@
 <?php
+
 namespace App\Http\Controllers\Concerns;
 
+use Illuminate\Support\Facades\Gate;
 use ReflectionMethod;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -8,7 +10,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  * Supports:
  * - route-level permission via route action ['permission' => '...']
  * - PHP 8 attribute: #[\App\Auth\Attributes\Permission('users.create')]
- * - explicit $permissionMap['methodName'] = 'users.create'
+ * - explicit $permissionMap['methodName'] = 'users.create' OR ['permission' => 'users.create', ...]
  * - wildcard map entries: 'create_*' => 'users.create'
  * - permissionPrefix auto-mapping: protected $permissionPrefix = 'users';
  */
@@ -19,15 +21,9 @@ trait AuthorizesPermissions
      * protected array $permissionMap = [ 'index' => 'users.view', 'create_*' => 'users.create' ];
      * protected string $permissionPrefix = 'users';
      */
-
     public function bootPermissionMap(): void
     {
-        if (property_exists($this, 'permissionMap') && \is_array($this->permissionMap)) {
-            $this->enforceResolvedPermission();
-        } else {
-            // still attempt prefix-based auto-mapping if prefix set
-            $this->enforceResolvedPermission();
-        }
+        $this->enforceResolvedPermission();
     }
 
     protected function getCurrentAction(): ?string
@@ -51,8 +47,9 @@ trait AuthorizesPermissions
 
         // permission may be string or array
         if (\is_array($permission)) {
-            if (!$this->userHasAny($permission))
+            if (!$this->userHasAny($permission)) {
                 $this->forbidden();
+            }
             return;
         }
 
@@ -68,17 +65,20 @@ trait AuthorizesPermissions
      * 3. exact match in $permissionMap
      * 4. wildcard matches in $permissionMap (fnmatch)
      * 5. auto map with $permissionPrefix (e.g. 'users' + '.' + normalizedAction)
+     *
+     * @return string|array|null
      */
     protected function resolvePermissionForAction(string $action)
     {
         $route = request()->route();
         $actionArr = $route ? $route->getAction() : [];
+
         // 1) Route action explicit
         if (!empty($actionArr) && \array_key_exists('permission', $actionArr) && $actionArr['permission']) {
-            return $actionArr['permission'];
+            return $actionArr['permission']; // can be string or array
         }
 
-        // 2) PHP 8 attribute on method (optional)
+        // 2) PHP 8 attribute on method
         if (class_exists(ReflectionMethod::class)) {
             try {
                 $ref = new ReflectionMethod($this, $action);
@@ -88,43 +88,47 @@ trait AuthorizesPermissions
                     return $instance->value ?? null;
                 }
             } catch (\ReflectionException $e) {
-                // method not found via reflection - skip
+                // method not found – skip
             }
         }
 
+        // Helper to extract permission string from possible array value
+        $extractPermissionString = function ($perm) {
+            if (\is_array($perm) && isset($perm['permission'])) {
+                return $perm['permission'];
+            }
+            return $perm;
+        };
+
         // 3) explicit exact mapping
-        if (property_exists($this, 'permissionMap') && \is_array($this->permissionMap) && \array_key_exists($action, $this->permissionMap)) {
-            return $this->permissionMap[$action];
+        if (property_exists($this, 'permissionMap') && \is_array($this->permissionMap)) {
+            if (\array_key_exists($action, $this->permissionMap)) {
+                $mapped = $this->permissionMap[$action];
+                return $extractPermissionString($mapped);
+            }
         }
 
-        // 4) wildcard/pattern mapping (use fnmatch)
+        // 4) wildcard/pattern mapping
         if (property_exists($this, 'permissionMap') && \is_array($this->permissionMap)) {
             foreach ($this->permissionMap as $pattern => $perm) {
-                // skip exact keys (already checked)
-                if ($pattern === $action)
+                if ($pattern === $action) {
                     continue;
-
-                // support '*' wildcard patterns like 'create_*' or '*_bulk'
-                // fnmatch is not available on Windows by default - fall back to regex
+                }
                 $matches = false;
                 if (function_exists('fnmatch')) {
                     $matches = @fnmatch($pattern, $action);
                 } else {
-                    // convert wildcard to regex
                     $regex = '/^' . str_replace('\*', '.*', preg_quote($pattern, '/')) . '$/i';
                     $matches = (bool) preg_match($regex, $action);
                 }
-
                 if ($matches) {
-                    return $perm;
+                    return $extractPermissionString($perm);
                 }
             }
         }
 
         // 5) auto-map using $permissionPrefix
         if (property_exists($this, 'permissionPrefix') && $this->permissionPrefix) {
-            // normalize action such as create_user -> create
-            // common map: index -> view, create/store -> create, edit/update -> update, destroy -> delete
             $normalized = $this->normalizeActionNameForPermission($action);
             if ($normalized) {
                 return "{$this->permissionPrefix}.{$normalized}";
@@ -135,15 +139,7 @@ trait AuthorizesPermissions
     }
 
     /**
-     * A small normalization helper:
-     * create_user => create
-     * store_user => create
-     * edit_user => update
-     * update_user => update
-     * index => view
-     * show => view
-     * destroy => delete
-     * custom -> return null
+     * Normalize controller action names to permission verbs.
      */
     protected function normalizeActionNameForPermission(string $action): ?string
     {
@@ -157,39 +153,48 @@ trait AuthorizesPermissions
             'destroy' => 'delete',
         ];
 
-        // exact match first
-        if (isset($map[$action]))
+        if (isset($map[$action])) {
             return $map[$action];
+        }
 
-        // try splitting by underscore and taking first segment
         if (str_contains($action, '_')) {
             $parts = explode('_', $action);
             $first = $parts[0];
-            if (isset($map[$first]))
+            if (isset($map[$first])) {
                 return $map[$first];
+            }
         }
 
         return null;
     }
 
+    /**
+     * Check if the current user has a given permission (via Gate).
+     */
     protected function userHas(string $permission): bool
     {
-        $user = auth()->user();
-        return $user && method_exists($user, 'hasPermissionTo') && $user->hasPermissionTo($permission);
+        return Gate::allows($permission);
     }
 
+    /**
+     * Check if the current user has any of the given permissions (via Gate).
+     */
     protected function userHasAny(array $permissions): bool
     {
-        $user = auth()->user();
-        return $user && method_exists($user, 'hasAnyPermission') && $user->hasAnyPermission($permissions);
+        return Gate::any($permissions);
     }
 
+    /**
+     * Throw a 403 HTTP exception.
+     */
     protected function forbidden(): void
     {
         throw new HttpException(403);
     }
 
-    // convenience for per-method checks after model binding
+    /**
+     * Convenience method to require a permission, optionally on a model.
+     */
     protected function requirePermission(string $permission, $model = null): void
     {
         if ($model !== null) {
@@ -197,10 +202,14 @@ trait AuthorizesPermissions
             return;
         }
 
-        if (!$this->userHas($permission))
+        if (!$this->userHas($permission)) {
             $this->forbidden();
+        }
     }
 
+    /**
+     * Check if the user can do something (returns boolean, does not throw).
+     */
     protected function canDo(string $permission, $model = null): bool
     {
         if ($model !== null) {

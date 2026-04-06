@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], function () {
+Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
     // Require 2FA for the routes below
     Route::group(['middleware' => '2fa'], function () {
         /*************** Central namespace (central admin) ***************/
@@ -57,7 +57,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
             /************* Logs ************/
             Route::prefix('logs')->group(function () {
                 Route::get('/', [CentralLogController::class, 'index'])->name('central_logs.index');
-                Route::get('login-history/reset/{user}', [CentralLogController::class, 'reset_login_hist'])->name('logs.login_history_reset');
+                Route::get('login-history/reset/{user}', [CentralLogController::class, 'reset_login_hist'])->name('logs.login_history_reset')->middleware('decodeRouteParams');
                 Route::post('delete-activity/{log}', [CentralLogController::class, 'delete_activity'])->name('logs.activity_log_delete');
             });
 
@@ -73,26 +73,24 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
 
         /*************** Users (central admin) *****************/
         Route::prefix('central-users')->group(function () {
-            Route::get('password/reset/{user}', [CentralUserController::class, 'reset_pass'])->name('central_users.password.reset');
-            Route::post('update/staff-data/edit-state', [CentralUserController::class, 'update_staff_data_edit_state'])->name('central_users.update_staff_data_edit_state');
-            Route::post('update/blocked-state', [CentralUserController::class, 'update_user_blocked_state'])->name('central_users.update_user_blocked_state');
+            Route::get('password/reset/{user}', [CentralUserController::class, 'reset_password'])->name('central_users.password.reset')->middleware('decodeRouteParams');
+            Route::post('update/blocked-state', [CentralUserController::class, 'toggle_user_block'])->name('central_users.toggle_user_block');
         });
 
         /*************** Tenants ***************/
         Route::prefix('tenants')->group(function () {
-            Route::post('run-command/{command}/{tenant}', [CentralArtisanCommandsController::class, 'run_command'])->name('tenants.run_command');
+            Route::post('run-command/{command}/{tenant}', [CentralArtisanCommandsController::class, 'run_command'])->name('tenants.run_command')->middleware('decodeRouteParams');
         });
 
         /*************** Controller's resources **************/
-        Route::resource('central_users', CentralUserController::class);
-        Route::resource('tenants', CentralTenantController::class);
+        Route::resource('central_users', CentralUserController::class)->middleware('decodeRouteParams');
+        Route::resource('tenants', CentralTenantController::class)->middleware('decodeRouteParams');
 
         /*************** Tickets (central support actions) **************/
         Route::prefix('tickets')->group(function () {
             Route::get('index', [TicketController::class, 'index_central'])->name('tickets.index_central');
             Route::post('properties/update', [TicketController::class, 'update_properties'])->name('tickets.update_properties');
 
-            // lock & unlock are state changes: use POST/PATCH
             Route::post('lock/{ticket}', [TicketController::class, 'lock_ticket'])->name('tickets.lock');
             Route::post('unlock/{ticket}', [TicketController::class, 'unlock_ticket'])->name('tickets.unlock');
 

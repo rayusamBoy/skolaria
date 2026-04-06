@@ -25,14 +25,14 @@
                             <div class="dropdown">
                                 <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                 <div class="dropdown-menu dropdown-menu-right">
-
-                                    @can($tenant_permissions['time_tables']['edit_time_slot'])
+                                    {{-- Edit --}}
+                                    @can($tenant_permissions['time_tables']['edit_time_slot']['permission'])
                                     <a href="{{ route('ts.edit', $tms->id) }}" class="dropdown-item">
                                         <i class="material-symbols-rounded">edit</i> Edit
                                     </a>
                                     @endcan
-
-                                    @can($tenant_permissions['time_tables']['delete_time_slot'])
+                                    {{-- Delete --}}
+                                    @can($tenant_permissions['time_tables']['delete_time_slot']['permission'])
                                     <a id="ts-delete-{{ $tms->id }}" onclick="confirmPermanentDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                         <i class="material-symbols-rounded">delete</i> Delete
                                     </a>
@@ -41,7 +41,6 @@
                                         @method('delete')
                                     </form>
                                     @endcan
-
                                 </div>
                             </div>
                         </div>

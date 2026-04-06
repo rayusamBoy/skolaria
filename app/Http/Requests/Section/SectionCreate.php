@@ -29,7 +29,7 @@ class SectionCreate extends FormRequest
 
     public function attributes()
     {
-        return  [
+        return [
             'my_class_id' => 'Class',
             'teacher_id' => 'Teacher',
         ];
@@ -39,7 +39,7 @@ class SectionCreate extends FormRequest
     {
         $input = $this->all();
 
-        $input['teacher_id'] = $input['teacher_id'] ? Qs::decodeHash($input['teacher_id']) : NULL;
+        $input['teacher_id'] = $input['teacher_id'] ? Qs::decodeHash($input['teacher_id']) : null;
 
         $this->getInputSource()->replace($input);
 

@@ -4,6 +4,10 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 
+/**
+ * This command ensures that the SQLite database file exists before running migrations or seeders.
+ * It is especially useful in CI environments where the database file may not be present by default.
+ */
 class EnsureSqliteDatabase extends Command
 {
     /**
@@ -33,7 +37,7 @@ class EnsureSqliteDatabase extends Command
             $this->info("Database file permissions updated at: $path");
             return 0;
         }
-        
+
         $this->info("Database file already exists at: $path");
         return 0;
     }

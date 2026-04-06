@@ -12,11 +12,14 @@
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
             <li class="nav-item"><a href="#manage-roles" class="nav-link active" data-toggle="tab">Manage Roles</a></li>
+            @can($tenant_permissions['roles']['store']['permission'])
             <li class="nav-item"><a href="#create-role" class="nav-link" data-toggle="tab">Create Role</a></li>
+            @endcan
         </ul>
 
         <div class="tab-content">
             {{-- Create Role Tab --}}
+            @can($tenant_permissions['roles']['store']['permission'])
             <div class="tab-pane fade" id="create-role">
                 <form method="POST" action="{{ route('roles.store') }}" class="ajax-store">
                     @csrf
@@ -30,14 +33,47 @@
                         </div>
                     </div>
 
+                    {{-- Grouped permissions --}}
                     <div class="form-group row">
-                        <label class="col-lg-3 col-form-label font-weight-semibold" for="permissions">Assign Permissions <span class="text-danger">*</span></label>
+                        <label class="col-lg-3 col-form-label font-weight-semibold">Assign Permissions <span class="text-danger">*</span></label>
                         <div class="col-lg-9">
-                            <select name="permissions[]" id="permissions" class="form-control select" multiple data-placeholder="Select permissions">
-                                @foreach ($permissions as $permission)
-                                <option value="{{ $permission->name }}">{{ $permission->name }}</option>
+                            <div class="accordion" id="permissionsAccordion">
+                                @foreach($groupedPermissions as $group => $perms)
+                                <div class="card mb-2">
+                                    <div class="card-header p-0" id="heading-{{ Str::slug($group) }}">
+                                        <h2 class="mb-0">
+                                            <button class="btn btn-link btn-block text-left d-flex justify-content-between align-items-center" type="button" data-toggle="collapse" data-target="#collapse-{{ Str::slug($group) }}" aria-expanded="true" aria-controls="collapse-{{ Str::slug($group) }}">
+                                                <span class="font-weight-bold">{{ ucfirst(str_replace('_', ' ', $group)) }}</span>
+                                                <span class="badge badge-primary badge-pill">{{ count($perms) }}</span>
+                                            </button>
+                                        </h2>
+                                    </div>
+                                    <div id="collapse-{{ Str::slug($group) }}" class="collapse show" aria-labelledby="heading-{{ Str::slug($group) }}" data-parent="#permissionsAccordion">
+                                        <div class="card-body">
+                                            <div class="mb-2">
+                                                <a href="javascript:void(0)" class="btn btn-sm btn-outline-secondary select-all-group" data-group="{{ Str::slug($group) }}">Select All</a>
+                                                <a href="javascript:void(0)" class="btn btn-sm btn-outline-secondary deselect-all-group" data-group="{{ Str::slug($group) }}">Deselect All</a>
+                                            </div>
+                                            <div class="row">
+                                                @foreach($perms as $perm)
+                                                <div class="col-md-6 col-lg-4 mb-2">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input type="checkbox" name="permissions[]" value="{{ $perm->name }}" class="custom-control-input" id="perm-{{ $perm->id }}" data-group="{{ Str::slug($group) }}">
+                                                        <label class="custom-control-label" for="perm-{{ $perm->id }}">
+                                                            {{ $perm->label ?? $perm->name }}
+                                                            @if($perm->description)
+                                                            <i class="material-symbols-rounded text-muted cursor-help" data-toggle="tooltip" title="{{ $perm->description }}">help</i>
+                                                            @endif
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 @endforeach
-                            </select>
+                            </div>
                         </div>
                     </div>
 
@@ -46,6 +82,7 @@
                     </div>
                 </form>
             </div>
+            @endcan
 
             {{-- Manage Roles Tab --}}
             <div class="tab-pane fade show active" id="manage-roles">
@@ -77,9 +114,12 @@
                                     <div class="dropdown">
                                         <a href="#" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
+                                            {{-- Edit --}}
+                                            @can($tenant_permissions['roles']['edit']['permission'])
                                             <a href="{{ route('roles.edit', $role->id) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
-
-                                            @if(!\in_array($role->name, Usr::getTenancyAwareDefaultRoles(), true))
+                                            @endcan
+                                            {{-- Delete --}}
+                                            @if(!\in_array($role->name, Usr::getTenancyAwareDefaultRoles(), true) && auth()->user()->can($tenant_permissions['roles']['delete']['permission']))
                                             <a href="javascript:;" id="{{ $role->id }}" class="dropdown-item text-danger" onclick="confirmDelete(this.id)">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>

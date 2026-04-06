@@ -70,7 +70,7 @@
             </div>
         </div>
     </div>
- 
+
     <!-- Total Administrators -->
     <div class="card card-body bg-danger-600 has-bg-image">
         <div class="media">
@@ -100,8 +100,7 @@
             <div class="media-body ml-2">
                 <div class="row">
                     <div class="col-12 text-left">
-                        {{ $staff_breakdown['teachers'] }}
-                        <br>
+                        <h3 class="mb-0 counter">{{ $staff_breakdown['teachers'] }}</h3>
                         <span class="text-capitalize font-size-xs">Total Teachers</span>
                     </div>
                 </div>
@@ -118,13 +117,11 @@
             <div class="media-body ml-2">
                 <div class="row">
                     <div class="col-6 text-left">
-                        {{ $staff_breakdown['accountants'] }}
-                        <br>
+                        <h3 class="mb-0 counter">{{ $staff_breakdown['accountants'] }}</h3>
                         <span class="text-capitalize font-size-xs">Total Accountants</span>
                     </div>
                     <div class="col-6 text-left">
-                        {{ $staff_breakdown['librarians'] }}
-                        <br>
+                        <h3 class="mb-0 counter">{{ $staff_breakdown['librarians'] }}</h3>
                         <span class="text-capitalize font-size-xs">Total Librarians</span>
                     </div>
                 </div>
@@ -134,7 +131,7 @@
             </div>
         </div>
     </div>
- 
+
     <!-- Assessments Declared -->
     <div class="card card-body bg-success-400 has-bg-image">
         <div class="media">
@@ -180,7 +177,7 @@
             </div>
         </div>
     </div>
-  
+
     <!-- Total Classes -->
     <div class="card card-body bg-orange-400 has-bg-image">
         <div class="media">
@@ -206,7 +203,7 @@
             </div>
         </div>
     </div>
-  
+
     <!-- Total Payments Done -->
     <div class="card card-body bg-pink-400 has-bg-image">
         <div class="media">

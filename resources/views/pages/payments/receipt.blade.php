@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <head>
-    <title>Receipt_{{ $pr->ref_no . '_' . $sr->user->name }}</title>
+    <title>Receipt_{{ "{$pr->ref_no}_" . $sr->user->name }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/receipt.css') }}" />
 
     @laravelPWA
@@ -26,7 +26,7 @@
 
             {{--Background Logo--}}
             <div style="position: relative;  text-align: center; ">
-                <img src="{{ tenant_asset($settings->firstWhere('type', 'logo')->description) }}" style="max-width: 500px; max-height:600px; margin-top: 60px; position: absolute; opacity: 0.05; margin-left: auto; margin-right: auto; left: 0; right: 0;" />
+                <img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'logo')) }}" style="max-width: 500px; max-height:600px; margin-top: 60px; position: absolute; opacity: 0.05; margin-left: auto; margin-right: auto; left: 0; right: 0;" />
             </div>
 
             {{--Receipt No --}}
@@ -48,7 +48,7 @@
 
             {{--Photo--}}
             <div style="margin: 15px;">
-                <img style="width: 100px; height: 100px; float: left;" src="{{ Usr::getTenantAwarePhoto($sr->user->photo) }}" alt="...">
+                <img style="width: 100px; height: 100px; float: left;" src="{{ Usr::getTenancyAwarePhoto($sr->user->photo) }}" alt="...">
             </div>
 
             {{-- Headers --}}
@@ -100,8 +100,8 @@
                 <thead>
                     <tr>
                         <td class="bold">Date</td>
-                        <td class="bold">Amount Paid {{ Pay::getCurrencyUnit() }}</td>
-                        <td class="bold">Balance {{ Pay::getCurrencyUnit() }}</td>
+                        <td class="bold">Amount Paid ({{ Pay::getCurrencyUnit() }})</td>
+                        <td class="bold">Balance ({{ Pay::getCurrencyUnit() }})</td>
                     </tr>
                 </thead>
                 <tbody>
@@ -131,7 +131,7 @@
             <hr>
 
             <div>
-                <small class="user float-left"><em>Retrieved by: {{ auth()->user()->name }} ({{ str_replace("_", " ", auth()->user()->role) }})</em></small>
+                <small class="user float-left"><em>Retrieved by: {{ auth()->user()->name }} ({{ auth()->user()->roles->pluck('name')->join(', ') }})</em></small>
                 <small class="float-right"><em>Printed on: {{ date('D\, j F\, Y \a\t H:i:s') }}</em></small>
             </div>
         </div>

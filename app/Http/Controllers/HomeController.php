@@ -100,7 +100,7 @@ class HomeController extends Controller
         // Staff / user breakdown
         $staff_breakdown = $this->buildStaffBreakdown();
 
-        $parents = $this->user->getUsersByRoleNames(['Parent']);
+        $parents = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.parent')]);
         $active_students = $student_recs->where('grad', 0);
         $grad_students = $student_recs->where('grad', 1);
 
@@ -126,7 +126,9 @@ class HomeController extends Controller
         }
 
         // Put together $d (view data)
-        $d = [...$d, 'unviewed_notices' => $un_paginated,
+        $d = [
+            ...$d,
+            'unviewed_notices' => $un_paginated,
             'viewed_notices' => $vn_paginated,
 
             'subjects' => $this->class->getUniqueSubjectsNames(),
@@ -158,7 +160,8 @@ class HomeController extends Controller
             'grad_students_male_count' => $grad_students->where('user.gender', User::GENDER_MALE)->count(),
             'grad_students_female_count' => $grad_students->where('user.gender', User::GENDER_FEMALE)->count(),
             'students_per_class_labels' => $class_labels,
-            'students_per_class_counts' => $class_counts];
+            'students_per_class_counts' => $class_counts
+        ];
 
         $view = Usr::tenancyInitilized() ? 'pages.dashboard' : 'pages.central.dashboard';
         return view($view, $d);
@@ -255,14 +258,14 @@ class HomeController extends Controller
      */
     private function buildStaffBreakdown(): array
     {
-        $admins = $this->user->getUsersByRoleNames(['Super Admin', 'Admin']);
+        $admins = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.superadmin'), config('roles.default_roles.tenant.admin')]);
         return [
             'admins_count' => $admins->count(),
             'admins_male_count' => $admins->where('gender', User::GENDER_MALE)->count(),
             'admins_female_count' => $admins->where('gender', User::GENDER_FEMALE)->count(),
-            'teachers' => $this->user->getUsersByRoleNames(['Teacher'])->count(),
-            'accountants' => $this->user->getUsersByRoleNames(['Accountant'])->count(),
-            'librarians' => $this->user->getUsersByRoleNames(['Librarian'])->count(),
+            'teachers' => $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.teacher')])->count(),
+            'accountants' => $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.accountant')])->count(),
+            'librarians' => $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.librarian')])->count(),
         ];
     }
 

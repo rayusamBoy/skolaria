@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\Qs;
+use App\Helpers\Usr;
 use App\Http\Controllers\Controller;
 use App\Notifications\NotificationMarkedAsRead;
 use App\Repositories\UserRepo;
@@ -23,9 +23,9 @@ class NotificationController extends Controller
      */
     public function index()
     {
-        $channels = Qs::getActiveNotificationChannels(auth()->user(), false, true, true, true);
+        $channels = Usr::getActiveNotificationChannels(auth()->user(), false, true, true, true);
 
-        $data['notification_status'] = Qs::is_serialized(auth()->user()->is_notifiable) ? unserialize(auth()->user()->is_notifiable)['status'] : 0;
+        $data['is_notifiable'] = auth()->user()->is_notifiable['status'] ?? Usr::getDefaultIsNotifiableUserColumnValues()['status'];
         $data['email_channel_on'] = \in_array('mail', $channels);
         $data['sms_channel_on'] = \in_array('vonage', $channels);
         $data['push_channel_on'] = \in_array(FcmChannel::class, $channels);
@@ -34,17 +34,22 @@ class NotificationController extends Controller
     }
 
     /**
-     * Enable/Disable user notifications.
+     * Update user notifications status & channels
      */
     public function update_is_notifiable(Request $request)
     {
-        $value['status'] = $request->status;
-        $value['on_email_channel'] = $request->on_email_channel;
-        $value['on_sms_channel'] = $request->on_sms_channel;
-        $value['on_push_channel'] = $request->on_push_channel;
-        $data = ['is_notifiable' => serialize($value)];
+        $user = auth()->user();
 
-        $this->user->update(auth()->id(), $data);
+        $data = [
+            'is_notifiable' => [
+                'status' => $request->boolean('status'),
+                'on_email_channel' => $request->boolean('on_email_channel'),
+                'on_sms_channel' => $request->boolean('on_sms_channel'),
+                'on_push_channel' => $request->boolean('on_push_channel'),
+            ],
+        ];
+
+        $user->update($data);
 
         return back()->with('flash_success', __('msg.update_ok'));
     }
@@ -92,36 +97,40 @@ class NotificationController extends Controller
      */
     public function update_firebase_device_token(Request $request)
     {
-        if ($request->method() === "DELETE") {
-            $token[] = $request->token;
-            $this->delete_device_token($token);
-            return Qs::jsonUpdateOk();
+        $user = auth()->user();
+
+        // DELETE request; remove token
+        if ($request->isMethod('delete')) {
+            $this->delete_device_token([$request->token]);
+            return Usr::jsonUpdateOk();
         }
 
-        // Get token or tokens (in case the user uses multiple devices) from the DB 
-        $current_tokens = auth()->user()->firebase_device_token === null ? [] : unserialize(auth()->user()->firebase_device_token);
         $incoming_token = $request->token;
+        $current_tokens = $user->firebase_device_tokens ?? [];
 
-        if ($current_tokens === null or !\in_array($incoming_token, $current_tokens)) {
-            $current_tokens[] = $incoming_token; // Add a new one or the only one
+        if (!\in_array($incoming_token, $current_tokens, true)) {
+            $current_tokens[] = $incoming_token;
 
-            $data = ['firebase_device_token' => serialize($current_tokens)];
-            $this->user->update(auth()->id(), $data);
+            $user->update([
+                'firebase_device_tokens' => $current_tokens,
+            ]);
         }
 
-        return Qs::jsonUpdateOk();
+        return Usr::jsonUpdateOk();
     }
 
     /**
      * Delete the user's web push subscription/device token.
      */
-    public function delete_device_token(array $token)
+    public function delete_device_token(array $tokensToRemove)
     {
-        $current_tokens = unserialize(auth()->user()->firebase_device_token);
-        $new_tokens = array_diff($current_tokens, $token);
+        $user = auth()->user();
 
-        $data = ['firebase_device_token' => serialize($new_tokens)];
+        $currentTokens = $user->firebase_device_tokens ?? [];
+        $newTokens = array_values(array_diff($currentTokens, $tokensToRemove));
 
-        return $this->user->update(auth()->id(), $data);
+        return $user->update([
+            'firebase_device_tokens' => $newTokens,
+        ]);
     }
 }

@@ -2,12 +2,12 @@
     <li class="position-relative {{ $message->user->id == Auth::id() ? 'float-right' : 'float-left' }}">
         @if ($message->user->id != Auth::id())
         <!-- Display user photo on the left followed by the message box -->
-        <img src="{{ Usr::getTenantAwarePhoto($message->user->photo) }}" alt="{{ $message->user->name }}" class="rounded-circle f-left">
+        <img src="{{ Usr::getTenancyAwarePhoto($message->user->photo) }}" alt="{{ $message->user->name }}" class="rounded-circle f-left">
 
         <!-- Absolute positioned elements -->
         @if (auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')) && $message->deleted_at == NULL)
         <!-- If is super admin; allow the user to delete other users' messages -->
-        <button data-toggle="popover" data-placement="right" data-html="true" class="material-symbols-rounded position-absolute right-neg-25 text-info-400 opacity-75 opacity-100-on-hover bg-transparent border-0 outline-0" data-content='
+        <button data-toggle="popover" data-placement="right" data-html="true" class="material-symbols-rounded position-absolute right-neg-25 text-info-400 opacity-75 opacity-100-on-hover border-0 outline-0 action-btn" data-content='
             <div class="d-flex justify-center">
                 <button type="button" data-text="Deleting..." id="{{ $message->id }}" onclick="prepareDeleteUserMessageForm(this.id)" data-toggle="modal" data-target="#confirm-message-delete" class="btn btn-sm p-0 pr-1 pl-1 m-auto text-danger w-100 text-left bg-transparent"><span class="text-danger">Delete</span></button>
             </div>
@@ -36,7 +36,7 @@
                 @endif
                 @else
                 {{-- If the message is not deleted --}}
-                {{ $message->body }}
+                {!! Qs::parsedown($message->body) !!}
                 <br>
                 <span class="text-muted float-right">
                     <small><i>{{ date('d M Y, h:m:s a', strtotime($message->created_at)) }}</i></small>
@@ -48,7 +48,7 @@
         @if ($message->user->id == Auth::id())
         @if ($message->deleted_at == null)
         <!-- Allow user to delete own message -->
-        <button data-toggle="popover" data-placement="left" data-html="true" class="material-symbols-rounded position-absolute left-neg-25 text-info-400 opacity-75 opacity-100-on-hover border-0 outline-0 action-btn" data-content='
+        <button data-toggle="popover" data-placement="left" data-html="true" class="material-symbols-rounded position-absolute left-neg-p5rem text-info-400 opacity-75 opacity-100-on-hover border-0 outline-0 action-btn" data-content='
             <div class="d-flex justify-center">
                 <button type="button" data-text="Deleting..." id="{{ $message->id }}" onclick="prepareDeleteUserMessageForm(this.id)" data-toggle="modal" data-target="#confirm-message-delete" class="btn btn-sm p-0 pr-1 pl-1 m-auto text-danger w-100 text-left bg-transparent"><span class="text-danger">Delete</span></button>
             </div>
@@ -59,7 +59,7 @@
 
         <!-- Display the message box first followed by the user photo -->
         <span>
-            <img src="{{ Usr::getTenantAwarePhoto($message->user->photo) }}" alt="{{ $message->user->name }}" class="rounded-circle f-right">
+            <img src="{{ Usr::getTenancyAwarePhoto($message->user->photo) }}" alt="{{ $message->user->name }}" class="rounded-circle f-right">
         </span>
         @endif
     </li>

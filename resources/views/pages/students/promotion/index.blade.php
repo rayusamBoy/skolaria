@@ -20,7 +20,7 @@
     </div>
 </div>
 
-@can($tenant_permissions['promotions']['promote'])
+@can($tenant_permissions['promotions']['promote']['permission'])
 @if($selected)
 @php
 $fromClass = $my_classes->firstWhere('id', $fc);

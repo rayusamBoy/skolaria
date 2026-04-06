@@ -9,45 +9,74 @@
             <div class="modal-body pt-0 pb-0">
                 <div class="card contact m-0 border-0 bg-transparent">
                     <div class="card-body p-0">
-                        <h4 class="card-title"></h4>
                         <div class="card-text">
-                            <h4 class="text-lightslategray"><strong>{{ "Hey there, Salaam, welcome." }}</strong></h4>
+                            <h4><strong>{{ "Welcome!" }}</strong></h4>
+                            <p>{{ "Need assistance? Reach out through any of the channels below." }}</p>
 
-                            <ul>
-                                <h5 class="text-lightslategray">{{ "The Contacts." }}</h5>
-                                <li class="pb-1"><a href="{{ $settings->firstWhere('type', 'admin_whatsapp_link')->description }}" target="_blank"><i class="material-symbols-rounded pb-2px">hdr_strong</i> <span class="align-middle">WhatsApp</span></a></li>
-                                <li class="pb-1 break-all"><a href="mailto: {{ $settings->firstWhere('type', 'admin_email')->description }}"><i class="material-symbols-rounded pb-2px">hdr_strong</i> {{ $settings->firstWhere('type', 'admin_email')->description }}</a></li>
+                            <h5 class="mt-3">{{ "Contact options" }}</h5>
+                            <ul class="list-unstyled">
+                                @php
+                                $whatsapp = $settings->firstWhere('type', 'admin_whatsapp_link')->description ?? null;
+                                $email = $settings->firstWhere('type', 'admin_email')->description ?? null;
+                                $fb = $settings->firstWhere('type', 'admin_facebook_link')->description ?? null;
+                                $x = $settings->firstWhere('type', 'admin_x_link')->description ?? null;
+                                $github = $settings->firstWhere('type', 'admin_github_link')->description ?? null;
+                                @endphp
+
+                                @if($whatsapp)
+                                <li class="pb-2">
+                                    <a href="{{ $whatsapp }}" target="_blank" rel="noopener noreferrer">
+                                        <i class="material-symbols-rounded align-middle me-1">chat</i>
+                                        <span class="align-middle">WhatsApp</span>
+                                    </a>
+                                </li>
+                                @endif
+
+                                @if($email)
+                                <li class="pb-2">
+                                    <a href="mailto:{{ $email }}">
+                                        <i class="material-symbols-rounded align-middle me-1">mail</i>
+                                        <span class="align-middle">{{ $email }}</span>
+                                    </a>
+                                </li>
+                                @endif
+
+                                @if($fb || $x || $github)
+                                <h5 class="text-lightslategray mt-2">{{ "Social media" }}</h5>
+                                @if($fb)
+                                <li class="pb-2">
+                                    <a href="{{ $fb }}" target="_blank" rel="noopener noreferrer">
+                                        <i class="material-symbols-rounded align-middle me-1">share</i>
+                                        <span class="align-middle">Facebook</span>
+                                    </a>
+                                </li>
+                                @endif
+                                @if($x)
+                                <li class="pb-2">
+                                    <a href="{{ $x }}" target="_blank" rel="noopener noreferrer">
+                                        <i class="material-symbols-rounded align-middle me-1">work</i>
+                                        <span class="align-middle">X</span>
+                                    </a>
+                                </li>
+                                @endif
+                                @if($github)
+                                <li class="pb-2">
+                                    <a href="{{ $github }}" target="_blank" rel="noopener noreferrer">
+                                        <i class="material-symbols-rounded align-middle me-1">code</i>
+                                        <span class="align-middle">GitHub</span>
+                                    </a>
+                                </li>
+                                @endif
+                                @endif
                             </ul>
-
-                            @php
-                            $admin_fb_link = $settings->firstWhere('type', 'admin_facebook_link')->description;
-                            $admin_linkedin_link = $settings->firstWhere('type', 'admin_linkedin_link')->description;
-                            $admin_github_link = $settings->firstWhere('type', 'admin_github_link')->description;
-                            @endphp
-
-                            @if($admin_fb_link !== null || $admin_linkedin_link !== null || $admin_github_link !== null)
-                           <h5 class="text-lightslategray">{{ "Orrr, let's get connected." }}</h5>
-
-                            <ul>
-                                @if($admin_fb_link !== null)
-                                <li class="pb-1"><a href="{{ $admin_fb_link }}" target="_blank"><i class="material-symbols-rounded pb-2px">hdr_strong</i> <span class="align-middle">Facebook</span></a></li>
-                                @endif
-                                @if($admin_linkedin_link !== null)
-                                <li class="pb-1"><a href="{{ $admin_linkedin_link }}" target="_blank"><i class="material-symbols-rounded pb-2px">hdr_strong</i> <span class="align-middle">LinkedIn</span></a></li>
-                                @endif
-                                @if($admin_github_link !== null)
-                                <li><a href="{{ $admin_github_link }}" target="_blank"><i class="material-symbols-rounded pb-2px">hdr_strong</i> <span class="align-middle">Github</span></a></li>
-                                @endif
-                            </ul>
-                            @endif
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card-footer">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span class="text-lightslategray" aria-hidden="true">Close</span>
+            <div class="card-footer text-center">
+                <button type="button text-inherit" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">Close</span>
                 </button>
             </div>
         </div>

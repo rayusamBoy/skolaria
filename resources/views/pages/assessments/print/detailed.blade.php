@@ -13,7 +13,7 @@
             {{-- Logo N School Details--}}
             <table width="100%">
                 <tr>
-                    <td><img src="{{ tenant_asset($settings->firstWhere('type', 'logo')->description) }}" style="max-height : 100px;"></td>
+                    <td><img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'logo')) }}" style="max-height : 100px;"></td>
 
                     <td style="text-align: center; ">
                         <strong><span style="color: #1b0c80; font-size: 25px;">{{ strtoupper(Qs::getSetting('system_name')) }}</span></strong><br />
@@ -31,7 +31,7 @@
 
             {{--Background Logo--}}
             <div style="position: relative;  text-align: center;">
-                <img src="{{ tenant_asset($settings->firstWhere('type', 'logo')->description) }}" style="max-width: 500px; max-height:600px; margin-top: 60px; position:absolute; opacity: 0.1; margin-left: auto;margin-right: auto; left: 0; right: 0;" />
+                <img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'logo')) }}" style="max-width: 500px; max-height:600px; margin-top: 60px; position:absolute; opacity: 0.1; margin-left: auto;margin-right: auto; left: 0; right: 0;" />
             </div>
 
             {{-- SHEET BEGINS HERE--}}

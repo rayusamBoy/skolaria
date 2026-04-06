@@ -36,12 +36,12 @@
                                 <div class="form-group row mb-0">
                                     <div class="col-md-8 offset-md-4">
                                         <button type="submit" class="btn btn-primary btn-sm"> Submit</button>
-                                        <a type="button" href="{{ route('2fa.show') }}" class="btn btn-secondary btn-sm"> Return Back</a>
+                                        <a type="button" href="{{ route('two_factor.show') }}" class="btn btn-secondary btn-sm"> Return Back</a>
                                         <button type="button" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="btn btn-danger btn-sm"> Cancel</button>
                                     </div>
                                 </div>
                             </form>
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                 @csrf
                             </form>
                         </div>

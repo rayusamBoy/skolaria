@@ -11,7 +11,7 @@
     </div>
 
     <div class="card-body">
-        @can($tenant_permissions['payments']['select_class'])
+        @can($tenant_permissions['payments']['select_class']['permission'])
         <form method="post" action="{{ route('payments.select_class') }}">
             @csrf
             <div class="row">
@@ -51,7 +51,6 @@
 @if($selected)
 <div class="card">
     <div class="card-body">
-        @can($tenant_permissions['payments']['index'])
         <table class="table datatable-button-html5-columns">
             <thead>
                 <tr>
@@ -67,7 +66,7 @@
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>
-                        <img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenantAwarePhoto($s->user->photo) }}" alt="photo">
+                        <img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhoto($s->user->photo) }}" alt="photo">
                     </td>
                     <td>{{ $s->user->name }}</td>
                     <td>{{ $s->adm_no }}</td>
@@ -77,19 +76,16 @@
                                 <i class="material-symbols-rounded">lists</i>
                             </a>
                             <div class="dropdown-menu dropdown-menu-left">
-                                @can($tenant_permissions['students']['show'])
+                                @can($tenant_permissions['student_records']['show']['permission'])
                                 <a href="{{ route('students.show', Qs::hash($s->id)) }}" class="dropdown-item">
-                                    <i class="material-symbols-rounded">visibility</i>
-                                    View Profile
+                                    <i class="material-symbols-rounded">visibility</i>View Profile
                                 </a>
                                 <hr class="m-0">
                                 @endcan
 
-                                @can($tenant_permissions['payments']['invoice'])
+                                @can($tenant_permissions['payments']['invoice']['permission'])
                                 <span class="dropdown-item opacity-75 disabled">Manage Payments</span>
-                                <a href="{{ route('payments.invoice', [Qs::hash($s->user_id)]) }}" class="dropdown-item">
-                                    All Payments
-                                </a>
+                                <a href="{{ route('payments.invoice', [Qs::hash($s->user_id)]) }}" class="dropdown-item">All Payments</a>
                                 @foreach(Pay::getYears($s->user_id) as $py)
                                 @if($py)
                                 <a href="{{ route('payments.invoice', [Qs::hash($s->user_id), $py]) }}" class="dropdown-item">
@@ -105,9 +101,6 @@
                 @endforeach
             </tbody>
         </table>
-        @else
-        <p class="text-center text-muted">You do not have permission to view these students.</p>
-        @endcan
     </div>
 </div>
 @endif

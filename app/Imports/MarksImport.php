@@ -31,10 +31,9 @@ class MarksImport implements ToCollection, WithHeadingRow, WithValidation
 
             foreach ($subjects as $sub) {
                 // Get students ids. For the subject with only specific students who study it 
-                $students_ids = SubjectRecord::where(['subject_id' => $sub->id])->where('students_ids', '!=', NULL)->value('students_ids');
+                $students_ids = SubjectRecord::where(['subject_id' => $sub->id])->whereNotNull('students_ids')->value('students_ids');
 
-                if ($students_ids != NULL) {
-                    $students_ids = unserialize($students_ids); // Get students ids
+                if ($students_ids != null) {
                     if (\in_array($sid, $students_ids)) {
                         // If the subject record has students ids, and current student id is in there, update
                         $this->updateMark($row, $sid, $sec_id, $sub->id, $sub->name);

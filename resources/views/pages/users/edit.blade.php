@@ -174,7 +174,7 @@
                 </div>
 
                 @php $p_relative = Qs::getParentRelative($user->id) @endphp
-                <div id="parent-data">
+                <div id="parent-data" @class($user->hasRole(config('roles.default_roles.tenant.parent')) ? '' : 'display-none')>
                     <div class="row">
                         {{-- CLOSE RELATIVE NAME --}}
                         <div class="col-md-6">
@@ -369,7 +369,7 @@
                         <div class="form-group">
                             <label for="subjects_studied">Subjects Studied <span class="text-info">(comma (,) separated)</span>: </label>
                             <div>
-                                <textarea name="subjects_studied" id="subjects_studied" class="form-control" placeholder="ie., Subject one, Subject two, ...">{{ implode(",", json_decode($staff_rec->subjects_studied ?? "") ?? []) }}</textarea>
+                                <textarea name="subjects_studied" id="subjects_studied" class="form-control" placeholder="ie., Subject one, Subject two, ...">{{ $staff_rec->subjects_studied ?? '' }}</textarea>
                             </div>
                         </div>
                     </div>

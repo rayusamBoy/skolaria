@@ -153,21 +153,21 @@ class MyClassRepo
 
     public function findSubject(int $id)
     {
-        return Subject::whereId($id);
+        return Subject::find($id);
     }
 
     public function findSubjectByClass(int $class_id, string $order_by = 'name')
     {
-        return $this->getSubject(['my_class_id' => $class_id])->orderBy($order_by)->get();
+        return $this->whereSubject(['my_class_id' => $class_id])->orderBy($order_by)->get();
     }
 
     public function findSubjectsByTeacher(int $user_id)
     {
         $subject_ids = $this->whereSubjectRecord(['teacher_id' => $user_id])->get()->pluck('subject_id');
-        return Subject::whereId('id', $subject_ids)->get();
+        return Subject::whereIn('id', $subject_ids)->get();
     }
 
-    public function getSubject(array $where)
+    public function whereSubject(array $where)
     {
         return Subject::where($where);
     }

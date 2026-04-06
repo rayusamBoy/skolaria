@@ -35,7 +35,7 @@
                                             <label for="markdown-editor">Message <span class="text-danger">*</span></label>
                                             <div class="form-group row">
                                                 <div class="col-12">
-                                                    <textarea placeholder="Message" name="message" id="markdown-editor" data-autosave-unique-id="operator-ticket-{{ auth()->id() . $ticket->id }}"></textarea>
+                                                    <div id="message-ticket-editor"></div>
                                                 </div>
                                             </div>
                                             <div class="form-group row float-right">
@@ -140,10 +140,4 @@
     </div>
 </div>
 
-@include('pages.modals.simplemde_markdown_guide')
-
 @endsection
-
-@pushOnce('scripts')
-@include('partials.js.tickets')
-@endPushOnce

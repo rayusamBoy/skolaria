@@ -52,8 +52,8 @@ class QueryBuilderController extends Controller
             $req["input"] = strip_tags(trim($req->input));
             $req["input_two"] = strip_tags(trim($req->input_two));
 
-            $d["select"] = $select = Qs::getSelectedTableCols($select_var, $from); // Get the actual table columns
-            $d["placeholder"] = $placeholder = Qs::getPresentableTableCols($select_var, $from);
+            $d["select"] = $select = Qs::getSelectedTableCols($from, $select_var); // Get the actual table columns
+            $d["placeholder"] = $placeholder = Qs::getPresentableTableCols($from, $select_var);
 
             // If table column name not found in the list - deny
             if ($select == NULL)

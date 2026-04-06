@@ -13,16 +13,8 @@
     <div class="card-body">
         {{-- only users who can create sections see the Create tab --}}
         <ul class="nav nav-tabs nav-tabs-highlight">
-            @can($tenant_permissions['sections']['store'])
-            <li class="nav-item">
-                <a href="#new-section" class="nav-link active" data-toggle="tab">
-                    Create New Section
-                </a>
-            </li>
-            @endcan
-            @can($tenant_permissions['sections']['index'])
             <li class="nav-item dropdown">
-                <a href="javascript:;" class="nav-link dropdown-toggle" data-toggle="dropdown">
+                <a href="javascript:;" class="nav-link active dropdown-toggle" data-toggle="dropdown">
                     Manage Sections
                 </a>
                 <div class="dropdown-menu dropdown-menu-right">
@@ -33,13 +25,17 @@
                     @endforeach
                 </div>
             </li>
+            @can($tenant_permissions['sections']['store']['permission'])
+            <li class="nav-item">
+                <a href="#new-section" class="nav-link" data-toggle="tab">Create New Section</a>
+            </li>
             @endcan
         </ul>
 
         <div class="tab-content">
             {{-- Create New Section --}}
-            @can($tenant_permissions['sections']['store'])
-            <div class="tab-pane fade show active" id="new-section">
+            @can($tenant_permissions['sections']['store']['permission'])
+            <div class="tab-pane fade" id="new-section">
                 <div class="row">
                     <div class="col-md-6">
                         <form class="ajax-store" method="post" action="{{ route('sections.store') }}">
@@ -97,7 +93,7 @@
 
             {{-- Manage existing Sections --}}
             @foreach($my_classes as $d)
-            <div class="tab-pane fade{{ request()->is("#c{$d->id}") ? ' show active' : '' }}" id="c{{ $d->id }}">
+            <div class="tab-pane fade show" id="c{{ $d->id }}">
                 <table class="table datatable-button-html5-columns">
                     <thead>
                         <tr>
@@ -131,22 +127,22 @@
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
-                                        <a class="material-symbols-rounded" href="#" data-toggle="dropdown">
-                                            lists
-                                        </a>
+                                        <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @can($tenant_permissions['sections']['edit'])
+                                            {{-- Edit --}}
+                                            @can($tenant_permissions['sections']['edit']['permission'])
                                             <a href="{{ route('sections.edit', $s->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
                                             @endcan
-
-                                            @can($tenant_permissions['sections']['destroy'])
+                                            {{-- Delete --}}
+                                            @can($tenant_permissions['sections']['destroy']['permission'])
                                             <a id="{{ $s->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
                                             <form method="post" id="item-delete-{{ $s->id }}" action="{{ route('sections.destroy', $s->id) }}" class="d-none">
-                                                @csrf @method('delete')
+                                                @csrf
+                                                @method('delete')
                                             </form>
                                             @endcan
                                         </div>

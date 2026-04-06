@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 namespace App\Events;
-use App\Events\Contracts\CustomTenantEvent;
+use Stancl\Tenancy\Events\Contracts\TenantEvent;
 
-class TenantIDCardsThemeDirDeleted extends CustomTenantEvent
+class TenantIDCardsThemeDirDeleted extends TenantEvent
 {
     //
 }

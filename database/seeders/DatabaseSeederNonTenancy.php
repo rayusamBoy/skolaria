@@ -22,7 +22,6 @@ class DatabaseSeederNonTenancy extends Seeder
         // Not tenancy specific seeders
         $this->call(NonTenancySettingsTableSeeder::class);
         $this->call(NonTenancyPermissionsTableSeeder::class);
-        $this->call(NonTenancyRolesTableSeeder::class);
         $this->call(NonTenancyUsersTableSeeder::class);
         $this->call(NonTenancyStaffRecordsTableSeeder::class);
     }

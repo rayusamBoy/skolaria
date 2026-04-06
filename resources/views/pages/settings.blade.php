@@ -20,9 +20,7 @@
                 <div class="col-md-6 border-right-blue-400">
                     {{-- School Name --}}
                     <div class="form-group row">
-                        <label for="system_name" class="col-lg-3 col-form-label font-weight-semibold">
-                            Name of School <span class="text-danger">*</span>
-                        </label>
+                        <label for="system_name" class="col-lg-3 col-form-label font-weight-semibold">Name of School <span class="text-danger">*</span></label>
                         <div class="col-lg-9">
                             <input id="system_name" name="system_name" required type="text" class="form-control" value="{{ $settings->firstWhere('type', 'system_name')->description }}" placeholder="Name of School">
                         </div>
@@ -30,9 +28,7 @@
 
                     {{-- Current Session --}}
                     <div class="form-group row">
-                        <label for="current_session" class="col-lg-3 col-form-label font-weight-semibold">
-                            Current Session <span class="text-danger">*</span>
-                        </label>
+                        <label for="current_session" class="col-lg-3 col-form-label font-weight-semibold">Current Session <span class="text-danger">*</span></label>
                         <div class="col-lg-9">
                             <select id="current_session" name="current_session" required class="select-search form-control" data-placeholder="Choose...">
                                 <option value=""></option>
@@ -45,9 +41,7 @@
 
                     {{-- School Acronym --}}
                     <div class="form-group row">
-                        <label for="system_title" class="col-lg-3 col-form-label font-weight-semibold">
-                            School Acronym
-                        </label>
+                        <label for="system_title" class="col-lg-3 col-form-label font-weight-semibold">School Acronym</label>
                         <div class="col-lg-9">
                             <input id="system_title" name="system_title" type="text" class="form-control" value="{{ $settings->firstWhere('type','system_title')->description }}" placeholder="School Acronym">
                         </div>
@@ -63,9 +57,7 @@
 
                     {{-- School Email --}}
                     <div class="form-group row">
-                        <label for="system_email" class="col-lg-3 col-form-label font-weight-semibold">
-                            School Email
-                        </label>
+                        <label for="system_email" class="col-lg-3 col-form-label font-weight-semibold">School Email</label>
                         <div class="col-lg-9">
                             <input id="system_email" name="system_email" type="email" class="form-control" value="{{ $settings->firstWhere('type','system_email')->description }}" placeholder="School Email">
                         </div>
@@ -73,9 +65,7 @@
 
                     {{-- Address --}}
                     <div class="form-group row">
-                        <label for="address" class="col-lg-3 col-form-label font-weight-semibold">
-                            School Address <span class="text-danger">*</span>
-                        </label>
+                        <label for="address" class="col-lg-3 col-form-label font-weight-semibold">School Address <span class="text-danger">*</span></label>
                         <div class="col-lg-9">
                             <input id="address" name="address" required type="text" class="form-control" value="{{ $settings->firstWhere('type','address')->description }}" placeholder="School Address">
                         </div>
@@ -83,9 +73,7 @@
 
                     {{-- Term Ends --}}
                     <div class="form-group row">
-                        <label for="term_ends" class="col-lg-3 col-form-label font-weight-semibold">
-                            This Term Ends
-                        </label>
+                        <label for="term_ends" class="col-lg-3 col-form-label font-weight-semibold">This Term Ends</label>
                         <div class="col-lg-6">
                             <input id="term_ends" name="term_ends" type="text" class="form-control date-pick" value="{{ $settings->firstWhere('type','term_ends')->description }}" placeholder="MM/DD/YYYY">
                         </div>
@@ -96,9 +84,7 @@
 
                     {{-- Next Term Begins --}}
                     <div class="form-group row">
-                        <label for="term_begins" class="col-lg-3 col-form-label font-weight-semibold">
-                            Next Term Begins
-                        </label>
+                        <label for="term_begins" class="col-lg-3 col-form-label font-weight-semibold">Next Term Begins</label>
                         <div class="col-lg-6">
                             <input id="term_begins" name="term_begins" type="text" class="form-control date-pick" value="{{ $settings->firstWhere('type','term_begins')->description }}" placeholder="MM/DD/YYYY">
                         </div>
@@ -109,9 +95,7 @@
 
                     {{-- Lock Exam --}}
                     <div class="form-group row">
-                        <label for="lock_exam" class="col-lg-3 col-form-label font-weight-semibold">
-                            Lock Exam
-                        </label>
+                        <label for="lock_exam" class="col-lg-3 col-form-label font-weight-semibold">Lock Exam</label>
                         <div class="col-lg-2">
                             <select id="lock_exam" name="lock_exam" class="form-control select">
                                 <option value="1" @selected($settings->firstWhere('type','lock_exam')->description == 1)>Yes</option>
@@ -126,15 +110,11 @@
                     {{-- Enable Notifications --}}
                     <div class="form-group row">
                         <div class="col-12">
-                            <label class="col-form-label font-weight-semibold">
-                                Enable Notifications
-                            </label>
+                            <label class="col-form-label font-weight-semibold">Enable Notifications</label>
                             <div class="form-group row text-center">
                                 @foreach(['email','push','sms'] as $channel)
                                 <div class="col-4">
-                                    <label for="{{ $channel }}_channel" class="col-form-label font-weight-semibold text-capitalize float-left">
-                                        {{ $channel }}
-                                    </label>
+                                    <label for="{{ $channel }}_channel" class="col-form-label font-weight-semibold text-capitalize float-left">{{ $channel }}</label>
                                     <select id="{{ $channel }}_channel" name="enable_{{ $channel }}_notification" class="form-control select">
                                         <option value="1" @selected($settings->firstWhere('type',"enable_{$channel}_notification")->description == 1)>On</option>
                                         <option value="0" @selected($settings->firstWhere('type',"enable_{$channel}_notification")->description == 0)>Off</option>
@@ -152,9 +132,7 @@
                         <h6 class="font-weight-semibold">Next Term Fees ({{ Pay::getCurrencyUnit() }})</h6>
                         @foreach($class_types as $ct)
                         <div class="form-group row">
-                            <label for="next_term_fees_{{ strtolower($ct->code) }}" class="col-lg-3 col-form-label font-weight-semibold">
-                                {{ $ct->name }}
-                            </label>
+                            <label for="next_term_fees_{{ strtolower($ct->code) }}" class="col-lg-3 col-form-label font-weight-semibold">{{ $ct->name }}</label>
                             <div class="col-lg-9">
                                 <input id="next_term_fees_{{ strtolower($ct->code) }}" name="next_term_fees_{{ strtolower($ct->code) }}" type="text" class="form-control" value="{{ $settings->firstWhere('type', 'next_term_fees_' . strtolower($ct->code))->description }}" placeholder="{{ $ct->name }}">
                             </div>
@@ -170,33 +148,24 @@
                             <div class="form-group text-center">
                                 <label for="logo" class="col-form-label font-weight-semibold">Change Logo:</label>
                                 <div class="mb-3">
-                                    <img style="width:100px;height:100px" src="{{ tenant_asset($settings->firstWhere('type', 'logo')->description) }}">
+                                    <img style="width:100px;height:100px" src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'logo')) }}">
                                 </div>
                                 <input id="logo" name="logo" type="file" accept="image/*" class="file-input" data-show-caption="false" data-show-upload="false" data-fouc>
                             </div>
                         </div>
-
                         {{-- Login Background --}}
-                        @php
-                        $bg = $settings->firstWhere('type', 'login_and_related_pages_bg');
-                        $bg_desc = $bg->description;
-                        $bg_url = $bg_desc === null ? asset(NonTenancySettingsTableSeeder::getLoginAndRelatedPagesBgDescription()) : tenant_asset($bg_desc);
-                        $bg_url = $bg_url . "?" . strtotime($bg->updated_at);
-                        @endphp
-
                         <div class="col-lg-6">
                             <div class="form-group text-center">
                                 <label for="login-and-related-pgs-bg-input" class="col-form-label font-weight-semibold">
                                     Change Login Page Background:
                                 </label>
                                 <div class="mb-3">
-                                    <img id="login-and-related-pgs-bg" style="width: 100px; height: 100px" src="{{ $bg_url }}">
+                                    <img id="login-and-related-pgs-bg" style="width: 100px; height: 100px" src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'login_and_related_pages_bg')) }}">
                                 </div>
                                 <input id="login-and-related-pgs-bg-input" name="login_and_related_pages_bg" type="file" accept="image/*" class="file-input" data-show-caption="false" data-show-upload="false" data-fouc>
                             </div>
                         </div>
                     </div>
-
                     {{-- Texts & BG Colors --}}
                     <div class="form-group row">
                         <label for="texts_and_bg_colors" class="col-lg-4 col-form-label font-weight-semibold">Texts and background colors</label>
@@ -234,17 +203,13 @@
                 <div class="col-md-6">
                     <h6 class="font-weight-semibold">Admin Contacts</h6>
                     <div class="form-group row">
-                        <label for="admin_email" class="col-lg-3 col-form-label font-weight-semibold">
-                            Admin Email <span class="text-danger">*</span>
-                        </label>
+                        <label for="admin_email" class="col-lg-3 col-form-label font-weight-semibold">Admin Email <span class="text-danger">*</span></label>
                         <div class="col-lg-9">
                             <input id="admin_email" name="admin_email" required type="email" class="form-control" value="{{ $settings->firstWhere('type','admin_email')->description }}" placeholder="Email">
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="admin_whatsapp_link" class="col-lg-3 col-form-label font-weight-semibold">
-                            WhatsApp Link
-                        </label>
+                        <label for="admin_whatsapp_link" class="col-lg-3 col-form-label font-weight-semibold">WhatsApp Link</label>
                         <div class="col-lg-9">
                             <input id="admin_whatsapp_link" name="admin_whatsapp_link" type="text" class="form-control" value="{{ $settings->firstWhere('type','admin_whatsapp_link')->description }}" placeholder="https://wa.me/255123456789">
                         </div>
@@ -252,27 +217,21 @@
                 </div>
                 <div class="col-md-6">
                     <div class="form-group row">
-                        <label for="admin_facebook_link" class="col-lg-3 col-form-label font-weight-semibold">
-                            Facebook Link
-                        </label>
+                        <label for="admin_facebook_link" class="col-lg-3 col-form-label font-weight-semibold">Facebook Link</label>
                         <div class="col-lg-9">
                             <input id="admin_facebook_link" name="admin_facebook_link" type="text" class="form-control" value="{{ $settings->firstWhere('type','admin_facebook_link')->description }}" placeholder="https://www.facebook.com/username">
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="admin_github_link" class="col-lg-3 col-form-label font-weight-semibold">
-                            Github Link
-                        </label>
+                        <label for="admin_github_link" class="col-lg-3 col-form-label font-weight-semibold">Github Link</label>
                         <div class="col-lg-9">
                             <input id="admin_github_link" name="admin_github_link" type="text" class="form-control" value="{{ $settings->firstWhere('type','admin_github_link')->description }}" placeholder="https://github.com/username">
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="admin_linkedin_link" class="col-lg-3 col-form-label font-weight-semibold">
-                            LinkedIn Link
-                        </label>
+                        <label for="admin_x_link" class="col-lg-3 col-form-label font-weight-semibold">X (formerly Twitter) Link</label>
                         <div class="col-lg-9">
-                            <input id="admin_linkedin_link" name="admin_linkedin_link" type="text" class="form-control" value="{{ $settings->firstWhere('type','admin_linkedin_link')->description }}" placeholder="https://www.linkedin.com/in/username">
+                            <input id="admin_x_link" name="admin_x_link" type="text" class="form-control" value="{{ $settings->firstWhere('type','admin_x_link')->description }}" placeholder="https://www.linkedin.com/in/username">
                         </div>
                     </div>
                 </div>

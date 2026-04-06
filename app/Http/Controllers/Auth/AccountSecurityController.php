@@ -62,12 +62,13 @@ class AccountSecurityController extends Controller
     public function account_recovery(Request $request)
     {
         if ($request->method() === 'POST') {
+            $user = auth()->user();
             $recovery_code = $request->recovery_codes;
 
             if (\in_array($recovery_code, json_decode(auth()->user()->twofa_recovery_codes))) {
                 $data['twofa_secret_code'] = null;
                 $data['twofa_recovery_codes'] = null;
-                $this->user->update(auth()->id(), $data);
+                $user->update($data);
             } else
                 throw ValidationException::withMessages([
                     'recovery_codes' => 'Invalid recovery codes.'

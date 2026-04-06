@@ -4,23 +4,8 @@
 
 @push('css')
 <style>
-    .media-body .col-6 {
-        text-align: end;
-        margin-bottom: 0;
-        margin: auto;
-        padding: 0;
-    }
-
     div img {
         max-width: 7em;
-    }
-
-    table {
-        font-size: inherit;
-    }
-
-    .info span {
-        color: brown;
     }
 
     .card:not(:first-child) .card-body {
@@ -37,6 +22,7 @@
     <img src="{{ asset('global_assets/icons/bin-empty-2.gif') }}" alt="Bin empty gif"></img>
     <h6 class="text-muted mt-2">The bin is empty.</h6>
 </div>
+
 @else
 
 <div class="alert alert-warning border-0 alert-dismissible has-do-not-show-again-button" id="bin-info">
@@ -87,20 +73,23 @@
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
                                             {{-- Restore --}}
+                                            @can($tenant_permissions['soft_deletes']['restore']['permission'])
                                             <a id="{{ $p->id }}" onclick="$('form#pay-restore-'+this.id).submit();" href="javascript:;" class="dropdown-item">
                                                 <i class="material-symbols-rounded">undo</i> Restore
                                             </a>
                                             <form class="d-none" method="post" id="pay-restore-{{ $p->id }}" action="{{ route('payments.restore', $p->id) }}">
                                                 @csrf
                                             </form>
-
+                                            @endcan
                                             {{-- Delete --}}
+                                            @can($tenant_permissions['soft_deletes']['payment_force_delete']['permission'])
                                             <a id="{{ $p->id }}" onclick="confirmForceDelete(this.id, 'payment')" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
                                             <form class="d-none" method="post" id="payment-force-delete-{{ $p->id }}" action="{{ route('payments.force_delete', $p->id) }}">
                                                 @csrf
                                             </form>
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>
@@ -111,15 +100,6 @@
                 </table>
             </div>
         </div>
-    </div>
-
-    <div class="card-footer p-1">
-        <button id="payments" type="button" onclick="confirmPermanentDeleteTwice(this.id)" class="btn btn-danger btn-sm float-right">
-            <i class="material-symbols-rounded">delete</i> Empty Payments
-        </button>
-        <form method="post" id="item-delete-payments" action="{{ route('model.empty_soft_deleted', 'payments') }}" class="hidden">
-            @csrf @method('delete')
-        </form>
     </div>
 </div>
 @endif
@@ -170,20 +150,23 @@
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
                                             {{-- Restore --}}
+                                            @can($tenant_permissions['soft_deletes']['user_restore']['permission'])
                                             <a id="{{ $user->id }}" onclick="$('form#user-restore-'+this.id).submit();" href="javascript:;" class="dropdown-item">
                                                 <i class="material-symbols-rounded">undo</i> Restore
                                             </a>
                                             <form class="d-none" method="post" id="user-restore-{{ $user->id }}" action="{{ route('user.restore',$user->id) }}">
                                                 @csrf
                                             </form>
-
+                                            @endcan
                                             {{-- Delete --}}
+                                            @can($tenant_permissions['soft_deletes']['user_force_delete']['permission'])
                                             <a id="{{ $user->id }}" onclick="confirmForceDelete(this.id,'user')" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
                                             <form class="d-none" method="post" id="user-force-delete-{{ $user->id }}" action="{{ route('user.force_delete',$user->id) }}">
                                                 @csrf
                                             </form>
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>
@@ -194,15 +177,6 @@
                 </table>
             </div>
         </div>
-    </div>
-
-    <div class="card-footer p-1">
-        <button id="users" type="button" onclick="confirmPermanentDeleteTwice(this.id)" class="btn btn-danger btn-sm float-right">
-            <i class="material-symbols-rounded">delete</i> Empty Users
-        </button>
-        <form method="post" id="item-delete-users" action="{{ route('model.empty_soft_deleted','users') }}" class="hidden">
-            @csrf @method('delete')
-        </form>
     </div>
 </div>
 @endif
@@ -239,20 +213,23 @@
                                     <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                     <div class="dropdown-menu dropdown-menu-left">
                                         {{-- Restore --}}
+                                        @can($tenant_permissions['soft_deletes']['my_class_restore']['permission'])
                                         <a id="{{ $c->id }}" onclick="$('form#my_class-restore-'+this.id).submit();" href="javascript:;" class="dropdown-item">
                                             <i class="material-symbols-rounded">undo</i> Restore
                                         </a>
                                         <form class="d-none" method="post" id="my_class-restore-{{ $c->id }}" action="{{ route('my_class.restore',$c->id) }}">
                                             @csrf
                                         </form>
-
+                                        @endcan
                                         {{-- Delete --}}
+                                        @can($tenant_permissions['soft_deletes']['my_class_force_delete']['permission'])
                                         <a id="{{ $c->id }}" onclick="confirmForceDelete(this.id,'my_class')" href="javascript:;" class="dropdown-item text-danger">
                                             <i class="material-symbols-rounded">delete</i> Delete
                                         </a>
                                         <form class="d-none" method="post" id="my_class-force-delete-{{ $c->id }}" action="{{ route('my_class.force_delete',$c->id) }}">
                                             @csrf
                                         </form>
+                                        @endcan
                                     </div>
                                 </div>
                             </div>
@@ -262,15 +239,6 @@
                 </tbody>
             </table>
         </div>
-    </div>
-
-    <div class="card-footer p-1">
-        <button id="my_classes" type="button" onclick="confirmPermanentDeleteTwice(this.id)" class="btn btn-danger btn-sm float-right">
-            <i class="material-symbols-rounded">delete</i> Empty Classes
-        </button>
-        <form method="post" id="item-delete-my_classes" action="{{ route('model.empty_soft_deleted','my_classes') }}" class="hidden">
-            @csrf @method('delete')
-        </form>
     </div>
 </div>
 @endif
@@ -311,20 +279,23 @@
                                     <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                     <div class="dropdown-menu dropdown-menu-left">
                                         {{-- Restore --}}
+                                        @can($tenant_permissions['soft_deletes']['exam_restore']['permission'])
                                         <a id="{{ $ex->id }}" onclick="$('form#exam-restore-'+this.id).submit();" href="javascript:;" class="dropdown-item">
                                             <i class="material-symbols-rounded">undo</i> Restore
                                         </a>
                                         <form class="d-none" method="post" id="exam-restore-{{ $ex->id }}" action="{{ route('exam.restore',$ex->id) }}">
                                             @csrf
                                         </form>
-
+                                        @endcan
                                         {{-- Delete --}}
+                                        @can($tenant_permissions['soft_deletes']['exam_force_delete']['permission'])
                                         <a id="{{ $ex->id }}" onclick="confirmForceDelete(this.id,'exam')" href="javascript:;" class="dropdown-item text-danger">
                                             <i class="material-symbols-rounded">delete</i> Delete
                                         </a>
                                         <form class="d-none" method="post" id="exam-force-delete-{{ $ex->id }}" action="{{ route('exam.force_delete',$ex->id) }}">
                                             @csrf
                                         </form>
+                                        @endcan
                                     </div>
                                 </div>
                             </div>
@@ -334,15 +305,6 @@
                 </tbody>
             </table>
         </div>
-    </div>
-    
-    <div class="card-footer p-1">
-        <button id="exams" type="button" onclick="confirmPermanentDeleteTwice(this.id)" class="btn btn-danger btn-sm float-right">
-            <i class="material-symbols-rounded">delete</i> Empty Exams
-        </button>
-        <form method="post" id="item-delete-exams" action="{{ route('model.empty_soft_deleted','exams') }}" class="hidden">
-            @csrf @method('delete')
-        </form>
     </div>
 </div>
 @endif
@@ -390,20 +352,23 @@
                                     <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
                                     <div class="dropdown-menu dropdown-menu-left">
                                         {{-- Restore --}}
+                                        @can($tenant_permissions['soft_deletes']['thread_restore']['permission'])
                                         <a id="{{ $thread->id }}" onclick="$('form#thread-restore-'+this.id).submit();" href="javascript:;" class="dropdown-item">
                                             <i class="material-symbols-rounded">undo</i> Restore
                                         </a>
                                         <form class="d-none" method="post" id="thread-restore-{{ $thread->id }}" action="{{ route('thread.restore',$thread->id) }}">
                                             @csrf
                                         </form>
-
+                                        @endcan
                                         {{-- Delete --}}
+                                        @can($tenant_permissions['soft_deletes']['thread_force_delete']['permission'])
                                         <a id="{{ $thread->id }}" onclick="confirmForceDelete(this.id,'thread')" href="javascript:;" class="dropdown-item text-danger">
                                             <i class="material-symbols-rounded">delete</i> Delete
                                         </a>
                                         <form class="d-none" method="post" id="thread-force-delete-{{ $thread->id }}" action="{{ route('thread.force_delete',$thread->id) }}">
                                             @csrf
                                         </form>
+                                        @endcan
                                     </div>
                                 </div>
                             </div>
@@ -414,14 +379,31 @@
             </table>
         </div>
     </div>
+</div>
+@endif
 
-    <div class="card-footer p-1">
-        <button id="threads" type="button" onclick="confirmPermanentDeleteTwice(this.id)" class="btn btn-danger btn-sm float-right">
-            <i class="material-symbols-rounded">delete</i> Empty Threads
-        </button>
-        <form method="post" id="item-delete-threads" action="{{ route('model.empty_soft_deleted','threads') }}" class="hidden">
-            @csrf @method('delete')
-        </form>
+@if(auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
+@php
+$model_names_to_remove = [];
+if($payments->isEmpty()) $model_names_to_remove[] = 'payments';
+if($users->isEmpty()) $model_names_to_remove[] = 'users';
+if($my_classes->isEmpty()) $model_names_to_remove[] = 'my_classes';
+if($exams->isEmpty()) $model_names_to_remove[] = 'exams';
+if($threads->isEmpty()) $model_names_to_remove[] = 'threads';
+@endphp
+<div class="card">
+    <div class="card-body d-flex flex-wrap">
+        <label class="w-100 font-weight-bold">Empty Bin</label>
+        @foreach(Usr::getCanSoftDeleteModelNames($model_names_to_remove) as $model_name)
+        <div class="pr-2">
+            <button id="{{ $model_name }}" type="button" onclick="confirmPermanentDeleteTwice(this.id)" class="btn btn-danger btn-sm">
+                <i class="material-symbols-rounded">delete</i> Empty {{ ucfirst($model_name) }}
+            </button>
+            <form method="post" id="item-delete-{{ $model_name }}" action="{{ route('model.empty_soft_deleted', $model_name) }}" class="hidden">
+                @csrf @method('delete')
+            </form>
+        </div>
+        @endforeach
     </div>
 </div>
 @endif

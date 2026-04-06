@@ -20,12 +20,20 @@ class TenancyRolesTableSeeder extends Seeder
         $rootRoles = (array) array_values(config('roles.root_roles.tenant', []));
         $defaultRoles = (array) array_values(config('roles.default_roles.tenant', []));
 
-        // Clean existing roles (safe delete)
+        // Remove root roles from default roles – they are not seeded here
+        $rolesToSeed = array_diff($defaultRoles, $rootRoles);
+
+        if (empty($rolesToSeed)) {
+            $this->command->info('No non‑root roles to seed.');
+            return;
+        }
+
+        // Clean existing roles (safe delete – all roles will be recreated)
         Role::query()->delete();
 
-        // Create all default roles (these will include any root roles too if present in default list)
+        // Create only non‑root roles
         $createdRoles = [];
-        foreach ($defaultRoles as $roleName) {
+        foreach ($rolesToSeed as $roleName) {
             $roleName = (string) $roleName;
             $createdRoles[$roleName] = Role::create([
                 'name' => $roleName,
@@ -33,158 +41,171 @@ class TenancyRolesTableSeeder extends Seeder
             ]);
         }
 
-        // Grant all permissions to root roles
-        $allPermModels = Permission::all();
-        foreach ($rootRoles as $rootName) {
-            $role = null;
-            // case-insensitive match
-            foreach ($createdRoles as $rName => $rObj) {
-                if (mb_strtolower($rName) === mb_strtolower($rootName)) {
-                    $role = $rObj;
-                    break;
-                }
-            }
-            if ($role) {
-                $role->givePermissionTo($allPermModels);
-            }
-        }
-
         // Fetch all permission names present in this tenant DB
         $allPermissions = Permission::all()->pluck('name')->toArray();
 
         /**
-         * Role -> list of regex patterns to match permission names.
-         * Patterns are evaluated against the permission string; first match wins.
-         *
-         * NOTE: these keys are canonical role names used to choose which patterns to apply.
-         * If your config contains slightly different spellings (e.g. "Libararian") the seeder
-         * will match roles case-insensitively below.
+         * Role -> array with 'patterns' and optional 'exclude'.
+         * Patterns are regexes to match permission names.
+         * Exclude can be an array of regexes (or exact strings) to remove permissions.
          */
-        $rolePatterns = [
-            // Admin: broad tenant-level administration
+        $roleDefinitions = [
+            // Admin: broad tenant-level administration (but not root)
             config('roles.default_roles.tenant.admin') => [
-                '/.*/', // everything in the tenant permissions table
+                'patterns' => ['/.*/'],
+                'exclude' => [
+                    '/restore/i',
+                    '/force[_-]?delete/i',
+                    '/empty[_-]?soft[_-]?deleted/i',
+                    '/(bin|recycle|soft_deletes?)/i',
+                    '/super[_-]?admin/i',
+                    '/^central_/i',
+                ],
             ],
 
             // Teacher: exams, assessments, grades, marks, subjects, schedules, timetables, messages, student records, sections, divisions
             config('roles.default_roles.tenant.teacher') => [
-                '/^exams?\\./',
-                '/^assessments?\\./',
-                '/^grades?\\./',
-                '/^marks?\\./',
-                '/^subjects?\\./',
-                '/^schedules?\\./',
-                '/^time_tables?\\./',
-                '/^messages?\\./',
-                '/^student_records?\\./',
-                '/^sections?\\./',
-                '/^divisions?\\./',
-                '/^noticeboards?\\./',
-                '/^notices?\\./',
-                '/^reports?\\./',
+                'patterns' => [
+                    '/^exams?\\./',
+                    '/^assessments?\\./',
+                    '/^grades?\\./',
+                    '/^marks?\\./',
+                    '/^subjects?\\./',
+                    '/^schedules?\\./',
+                    '/^time_tables?\\./',
+                    '/^messages?\\./',
+                    '/^student_records?\\./',
+                    '/^sections?\\./',
+                    '/^divisions?\\./',
+                    '/^noticeboards?\\./',
+                    '/^notices?\\./',
+                    '/^reports?\\./',
+                ],
+                'exclude' => [
+                    '/^messages\\.user_delete/',
+                ],
             ],
 
             // Parent: primarily view-related permissions for their children's data, payments (view/pay), messages
             config('roles.default_roles.tenant.parent') => [
-                '/^student_records?\\./',
-                '/^payments?\\./',
-                '/^messages?\\./',
-                '/^books?\\./',
-                '/^book_requests?\\./',
-                '/^statistics?\\./',
-                '/^reports?\\./',
-                '/^marks?\\./',
-                '/^schedules?\\./',
-                '/^mies?\\./',
+                'patterns' => [
+                    '/^student_records?\\./',
+                    '/^payments?\\./',
+                    '/^messages?\\./',
+                    '/^books?\\./',
+                    '/^book_requests?\\./',
+                    '/^statistics?\\./',
+                    '/^reports?\\./',
+                    '/^marks?\\./',
+                    '/^schedules?\\./',
+                    '/^childrens?\\./',
+                ],
+                'exclude' => [
+                    '/^messages\\.delete/',
+                    '/^student_records\\.(delete|update)/',
+                ],
             ],
 
-            // Student: view-only for own records, exams, marks, attendance-like info (if present), messaging and library
+            // Student: view-only for own records, exams, marks, attendance-like info, messaging and library
             config('roles.default_roles.tenant.student') => [
-                '/^student_records?\\./',
-                '/^exams?\\./',
-                '/^marks?\\./',
-                '/^subjects?\\./',
-                '/^messages?\\./',
-                '/^books?\\./',
-                '/^book_requests?\\./',
-                '/^time_tables?\\./',
-                '/^schedules?\\./',
+                'patterns' => [
+                    '/^student_records?\\./',
+                    '/^exams?\\./',
+                    '/^marks?\\./',
+                    '/^subjects?\\./',
+                    '/^messages?\\./',
+                    '/^books?\\./',
+                    '/^book_requests?\\./',
+                    '/^time_tables?\\./',
+                    '/^schedules?\\./',
+                ],
+                'exclude' => [
+                    '/^messages\\.(delete|update)/',
+                    '/^student_records\\.(delete|update|create|store)/',
+                ],
             ],
 
             // Librarian: manage books and book requests
             config('roles.default_roles.tenant.librarian') => [
-                '/^books?\\./',
-                '/^book_requests?\\./',
-                '/^messages?\\./',
-                '/^schedules?\\./',
+                'patterns' => [
+                    '/^books?\\./',
+                    '/^book_requests?\\./',
+                    '/^messages?\\./',
+                    '/^schedules?\\./',
+                ],
+                'exclude' => [
+                    '/^messages\\.delete/',
+                ],
             ],
 
-            // Accountant: financial actions - payments, fees-like, reports, transactions if present
+            // Accountant: financial actions - payments, fees-like, reports, transactions
             config('roles.default_roles.tenant.accountant') => [
-                '/^student_records?\\./',
-                '/^payments?\\./',
-                '/^fees?\\./',
-                '/^transactions?\\./',
-                '/^reports?\\./',
-                '/^statistics?\\./',
-                '/^schedules?\\./',
+                'patterns' => [
+                    '/^student_records?\\./',
+                    '/^payments?\\./',
+                    '/^fees?\\./',
+                    '/^transactions?\\./',
+                    '/^reports?\\./',
+                    '/^statistics?\\./',
+                    '/^schedules?\\./',
+                ],
+                'exclude' => [
+                    '/^student_records\\.(delete|update|create|store)/',
+                ],
             ],
         ];
 
-        // sensitive regexes to keep out of Admin (and other protected roles if desired)
-        $sensitiveRegexes = [
-            '/restore/i',
-            '/force[_-]?delete/i',
-            '/empty[_-]?soft[_-]?deleted/i',
-            '/(bin|recycle|soft_deletes?)/i',
-            '/super[_-]?admin/i',
-            '/^central_/i',
-        ];
-
-        $filterSensitive = fn(array $perms) => array_values(array_filter($perms, function ($p) use ($sensitiveRegexes) {
-            foreach ($sensitiveRegexes as $rx) {
-                if (preg_match($rx, $p)) {
-                    return false; // exclude this permission
-                }
-            }
-            return true;
-        }));
-
-        // Helper: collect permission names matching any of the regex patterns
-        $collectMatching = function (array $patterns) use ($allPermissions) {
+        // Helper: collect permission names matching any of the patterns, then exclude those matching exclude patterns
+        $collectMatching = function (array $patterns, array $excludePatterns = []) use ($allPermissions) {
             $matches = [];
             foreach ($allPermissions as $perm) {
+                $matched = false;
                 foreach ($patterns as $pat) {
-                    // treat patterns as regular expressions
                     try {
                         if (preg_match($pat, $perm)) {
-                            $matches[] = $perm;
+                            $matched = true;
                             break;
                         }
                     } catch (\Throwable $e) {
-                        // if pattern invalid, skip it
                         continue;
                     }
                 }
-            }
+                if (!$matched) {
+                    continue;
+                }
 
+                // Check exclusions
+                $excluded = false;
+                foreach ($excludePatterns as $exPat) {
+                    try {
+                        if (preg_match($exPat, $perm)) {
+                            $excluded = true;
+                            break;
+                        }
+                    } catch (\Throwable $e) {
+                        continue;
+                    }
+                }
+                if (!$excluded) {
+                    $matches[] = $perm;
+                }
+            }
             return array_values(array_unique($matches));
         };
 
-        // Build a lowercase name -> Role instance map for robust matching (handles case differences / small typos)
+        // Build a lowercase name -> Role instance map for robust matching
         $rolesMap = [];
         foreach ($createdRoles as $rName => $rObj) {
             $rolesMap[mb_strtolower($rName)] = $rObj;
         }
 
-        // Assign permissions for each pattern-defined role based on patterns
-        foreach ($rolePatterns as $patternRoleName => $patterns) {
-            // Find a matching created role by case-insensitive name
-            $key = mb_strtolower($patternRoleName);
+        // Assign permissions for each defined role
+        foreach ($roleDefinitions as $roleName => $def) {
+            $key = mb_strtolower($roleName);
             $role = $rolesMap[$key] ?? null;
 
             if (!$role) {
-                // try fuzzy match: look for roles whose lowercase contains the pattern role name (e.g. "libararian" vs "librarian")
+                // fuzzy match for slight spelling differences
                 foreach ($rolesMap as $lowerName => $r) {
                     if (Str::contains($lowerName, $key) || Str::contains($key, $lowerName)) {
                         $role = $r;
@@ -194,23 +215,18 @@ class TenancyRolesTableSeeder extends Seeder
             }
 
             if (!$role) {
-                // If still not found, skip silently (role not configured for this tenant)
+                continue; // role not seeded (e.g., it was a root role)
+            }
+
+            $patterns = $def['patterns'] ?? [];
+            $exclude = $def['exclude'] ?? [];
+
+            if (empty($patterns)) {
                 continue;
             }
 
-            // Skip root roles because they already have all permissions
-            if (\in_array($role->name, $rootRoles, true)) {
-                continue;
-            }
+            $permsForRole = $collectMatching($patterns, $exclude);
 
-            $permsForRole = $collectMatching($patterns);
-
-            // Apply sensitive filter for Admin role (if this role maps to Admin)
-            if (mb_strtolower($patternRoleName) === mb_strtolower(config('roles.default_roles.tenant.admin'))) {
-                $permsForRole = $filterSensitive($permsForRole);
-            }
-
-            // Dry-run / print preview if seeding via artisan
             if (property_exists($this, 'command') && $this->command) {
                 $this->command->info("Role: {$role->name} will get " . \count($permsForRole) . " permissions:");
                 foreach ($permsForRole as $p) {
@@ -222,5 +238,7 @@ class TenancyRolesTableSeeder extends Seeder
                 $role->givePermissionTo($permsForRole);
             }
         }
+
+        $this->command->info('Non‑root roles seeded successfully.');
     }
 }

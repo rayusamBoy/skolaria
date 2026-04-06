@@ -15,6 +15,8 @@ class AnalyticController extends Controller
     protected $setting;
     public function __construct(SettingRepo $setting)
     {
+        $this->permissionMap = config('permissions.names.tenant.analytics');
+        parent::__construct();
         $this->setting = $setting;
     }
 
@@ -71,7 +73,7 @@ class AnalyticController extends Controller
                 $d['topOses'] = Analytics::fetchTopOperatingSystems($period);
             } catch (\Exception $e) {
                 unset($d['google_analytics_setup_ok']); // Analytics not OK anymore
-                return view('pages.analytics', $d)->withErrors([$e->getMessage()]);
+                return view('pages.analytics', $d)->with('pop_error', [$e->getMessage()]);
             }
         }
 

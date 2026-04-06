@@ -13,7 +13,7 @@
     <div class="card-body">
         <div class="row">
             <div class="col-md-8">
-                <form class="ajax-update" method="post" action="{{ route('subjects.update_record', $sub_rec->id) }}">
+                <form class="ajax-update" method="post" action="{{ route('subject_records.update', $sub_rec->id) }}">
                     @csrf @method('PUT')
 
                     <input type="hidden" name="subject_id" value="{{ $sub_rec->subject_id }}">
@@ -21,50 +21,53 @@
                     <div class="form-group row">
                         <label for="my_class_id" class="col-lg-3 col-form-label font-weight-semibold">Class</label>
                         <div class="col-lg-9">
-                            <input type="text" class="form-control" disabled value="{{ $sub_rec->subject->my_class->name ?? 'Not Applicable' }}">
+                            <input type="text" class="form-control" disabled value="{{ $sub_rec->subject->my_class->name }}">
                         </div>
                     </div>
 
                     <div class="form-group row">
-                        <label for="section_id" class="col-lg-3 col-form-label font-weight-semibold">Section:</label>
+                        <label for="section_id" class="col-lg-3 col-form-label font-weight-semibold">Section</label>
                         <div class="col-lg-9">
-                            <input type="text" class="form-control" disabled value="{{ $sub_rec->section->name ?? 'Not Applicable' }}">
-                        </div>
-                    </div>
-
-                    @if($sub_rec->section_id == null && $sub_rec->students_ids != null)
-                    <div class="form-group row">
-                        <label for="students-ids" class="col-lg-3 col-form-label font-weight-semibold">Select:</label>
-                        <div class="col-lg-9">
-                            <select id="students-ids" name="students_ids[]" multiple="multiple" data-placeholder="Select" class="form-control select">
-                                @foreach(Usr::getClassStudents($sub_rec->subject->my_class->id) as $st)
-                                <option @selected(isset($sub_rec->students_ids) && isset($st->user->id) && in_array($st->user->id, unserialize($sub_rec->students_ids))) value="{{ $st->id }}">{{ $st->user->name }}</option>
+                            <select id="section_id" data-placeholder="Not Apllicable" name="section_id" class="form-control select">
+                                <option @selected($sub_rec->section_id == null) value="">Not Applicable</option>
+                                @foreach($my_class_sections as $section)
+                                <option @selected($section->id == $sub_rec->section_id) value="{{ $section->id }}">{{ $section->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
-                    @endif
 
                     <div class="form-group row">
-                        <label class="col-lg-3 col-form-label font-weight-semibold">Name</label>
+                        <label for="students-ids" class="col-lg-3 col-form-label font-weight-semibold">Select Student(s)</label>
                         <div class="col-lg-9">
-                            <input type="text" disabled class="form-control" name="name" value="{{ $sub_rec->subject->name }}">
+                            <select id="students-ids" name="students_ids[]" multiple="multiple" data-placeholder="Select" class="form-control select" onchange="updateSectionDisableState()">
+                                @foreach(Usr::getClassStudents($sub_rec->subject->my_class_id) as $st)
+                                <option @selected($sub_rec->students_ids != null && isset($st->user->id) && in_array($st->user->id, $sub_rec->students_ids)) value="{{ $st->user->id }}">{{ $st->user->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-lg-3 col-form-label font-weight-semibold">Subject Name</label>
+                        <div class="col-lg-9">
+                            <input type="text" disabled class="form-control" value="{{ $sub_rec->subject->name }}">
                         </div>
                     </div>
 
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label font-weight-semibold">Short Name</label>
                         <div class="col-lg-9">
-                            <input name="slug" value="{{ $sub_rec->subject->slug }}" type="text" class="form-control" placeholder="Short Name">
+                            <input name="slug" disabled value="{{ $sub_rec->subject->slug }}" type="text" class="form-control" placeholder="Short Name">
                         </div>
                     </div>
 
                     <div class="form-group row">
                         <label for="core" class="col-lg-3 col-form-label font-weight-semibold">Core Subject</label>
                         <div class="col-lg-2">
-                            <select class="form-control select" name="core" id="core">
-                                <option @selected($sub_rec->subject->core == 1) value="1">Yes</option>
-                                <option @selected($sub_rec->subject->core == 0) value="0">No</option>
+                            <select disabled class="form-control select" name="core" id="core">
+                                <option @selected($sub_rec->subject->core == 1)>Yes</option>
+                                <option @selected($sub_rec->subject->core == 0)>No</option>
                             </select>
                         </div>
                         <div class="col-lg-7 m-lg-auto">
@@ -73,7 +76,7 @@
                     </div>
 
                     <div class="form-group row">
-                        <label for="teacher_id" class="col-lg-3 col-form-label font-weight-semibold">Teacher</label>
+                        <label for="teacher_id" class="col-lg-3 col-form-label font-weight-semibold">Teacher <span class="text-danger">*</span></label>
                         <div class="col-lg-9">
                             <select data-placeholder="Select Teacher" class="form-control select-search" name="teacher_id" id="teacher_id">
                                 <option value=""></option>

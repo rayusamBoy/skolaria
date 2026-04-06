@@ -1,5 +1,5 @@
 <!-- Modal -->
-@php $students = Usr::getStudentRecordByUserIds(unserialize($rec->students_ids)) @endphp
+@php $students = Usr::getStudentRecordByUserIds($rec->students_ids) @endphp
 <div class="modal fade" id="subjects-assigned-students-{{ $rec->id }}" tabindex="-1" aria-labelledby="students-assigned-heading-{{ $rec->id }}" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">

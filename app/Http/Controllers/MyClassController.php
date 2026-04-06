@@ -15,13 +15,14 @@ class MyClassController extends Controller
 
     public function __construct(MyClassRepo $my_class, UserRepo $user)
     {
+        $this->permissionMap = config('permissions.names.tenant.my_classes');
+        parent::__construct();
         $this->my_class = $my_class;
         $this->user = $user;
     }
 
     public function index()
     {
-        $d['my_classes'] = $this->my_class->all();
         $d['class_types'] = $this->my_class->getTypes();
 
         return view('pages.classes.index', $d);

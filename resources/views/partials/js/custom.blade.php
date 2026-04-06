@@ -51,7 +51,7 @@
      * Global URLs for AJAX calls
      *-------------------------------------------------------------
      */
-    const set_notice_as_viewed_url = '{{ route("notices.set_viewed") }}';
+    const set_notice_as_viewed_url = '{{ route("notices.mark_as_viewed") }}';
     const firebase_url = "{{ route('notifications.firebase.update_device_token') }}";
     const event_create_url = "{{ route('schedule.events.create') }}";
     const update_hidden_alerts_url = "{{ route('my_account.update_hidden_alerts') }}";
@@ -68,7 +68,7 @@
     const get_class_subjects_url = "{{ route('ajax.get_class_subjects', [':id']) }}";
     const update_exam_lock_state_url = "{{ route('exams.update_lock_state') }}";
     const update_exam_edit_state_url = "{{ route('exams.update_edit_state') }}";
-    const update_staff_data_edit_state_url = "{{ Usr::tenancyInitilized() ? route('users.update_staff_data_edit_state') : route('central_users.update_staff_data_edit_state') }}";
-    const update_user_blocked_state_url = "{{ Usr::tenancyInitilized() ? route('users.update_user_blocked_state') : route('central_users.update_user_blocked_state') }}";
+    const toggle_staff_data_editing_url = "{{ route('users.toggle_staff_data_editing') }}";
+    const toggle_user_block_url = "{{ Usr::tenancyInitilized() ? route('users.toggle_user_block') : route('central_users.toggle_user_block') }}";
 
 </script>

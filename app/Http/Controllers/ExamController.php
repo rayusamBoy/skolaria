@@ -21,6 +21,8 @@ class ExamController extends Controller
     protected $exam, $year, $assessment, $my_class;
     public function __construct(ExamRepo $exam, AssessmentRepo $assessment, MyClassRepo $my_class)
     {
+        $this->permissionMap = config('permissions.names.tenant.exams');
+        parent::__construct();
         $this->exam = $exam;
         $this->assessment = $assessment;
         $this->year = Mk::getSetting('current_session');
@@ -32,7 +34,6 @@ class ExamController extends Controller
         $d['exams'] = $this->exam->all();
         $d['exams_cat'] = $this->exam->getCategories();
         $d['class_types'] = $this->exam->getClassTypes();
-        $d['my_classes'] = $this->my_class->all();
 
         return view('pages.exams.index', $d);
     }
@@ -85,9 +86,8 @@ class ExamController extends Controller
 
     public function edit($id)
     {
-        $d['ex'] = $ex = $this->exam->getById($id, false);
+        $d['ex'] = $this->exam->getById($id, false);
         $d['exams_cat'] = $this->exam->getCategories();
-        $d['my_classes'] = $this->my_class->get(["class_type_id" => $ex->class_type_id]);
 
         return view('pages.exams.edit', $d);
     }

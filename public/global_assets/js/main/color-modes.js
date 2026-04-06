@@ -31,10 +31,10 @@ const updateJSCharts = (themeInput) => {
     if (typeof Chart !== "undefined") {
         Chart.helpers.each(Chart.instances, (instance) => {
             const yAxisTitle = instance.canvas.getAttribute(
-                "data-y_axis_title_text"
+                "data-y_axis_title_text",
             );
             const xAxisTitle = instance.canvas.getAttribute(
-                "data-x_axis_title_text"
+                "data-x_axis_title_text",
             );
 
             if (instance?.options?.scales?.x?.title) {
@@ -95,19 +95,33 @@ const updateJSCharts = (themeInput) => {
     }
 };
 
+// Get the resolved theme
+const getResolvedTheme = (theme) => {
+    return theme === "auto"
+        ? window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light"
+        : theme;
+};
+
 // Apply the theme to the root element
 const setTheme = (theme) => {
-    const resolvedTheme =
-        theme === "auto"
-            ? window.matchMedia("(prefers-color-scheme: dark)").matches
-                ? "dark"
-                : "light"
-            : theme;
+    let resolvedTheme = getResolvedTheme(theme);
+    resolvedTheme = document.documentElement.hasAttribute("force-dark-theme")
+        ? colorThemes[2]
+        : resolvedTheme;
     document.documentElement.setAttribute("data-theme", resolvedTheme);
+};
+
+const setSystemSkin = () => {
+    const skin = JSON.parse(Cookies.get("active_system_skin"));
+    document.documentElement.setAttribute("data-skin", skin);
 };
 
 // Set the initial theme
 setTheme(getPreferredTheme());
+// Set the system skin
+setSystemSkin();
 
 // Update toggle elements to reflect the next theme state
 const showActiveTheme = (theme) => {
@@ -123,11 +137,22 @@ const showActiveTheme = (theme) => {
                 nextTheme === "auto"
                     ? "mode_standby"
                     : nextTheme === "light"
-                    ? "light_mode"
-                    : "dark_mode";
+                      ? "light_mode"
+                      : "dark_mode";
             navLink.setAttribute("title", `Switch to ${nextTheme} mode`);
         }
     });
+};
+
+// Get the overType editor theme based on the current color scheme
+const getOvertypeTheme = () => {
+    const theme = getResolvedTheme(getPreferredTheme());
+    return theme === "dark" ? "cave" : "solar";
+};
+
+// Set the overtype editor theme based on the current color scheme
+const setOvertypeTheme = () => {
+    if (typeof overType !== "undefined") overType.setTheme(getOvertypeTheme());
 };
 
 // Listen for system color scheme changes
@@ -137,6 +162,7 @@ window
         const storedTheme = getStoredTheme();
         if (!["light", "dark"].includes(storedTheme)) {
             setTheme(getPreferredTheme());
+            setOvertypeTheme();
         }
     });
 
@@ -149,6 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const theme = event.currentTarget.dataset.theme;
             setStoredTheme(theme);
             setTheme(theme);
+            setOvertypeTheme();
             updateJSCharts(theme);
             showActiveTheme(theme);
         });

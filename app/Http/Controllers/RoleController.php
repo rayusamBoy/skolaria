@@ -11,12 +11,17 @@ class RoleController extends Controller
     protected $permission;
     public function __construct(PermissionRepo $permission)
     {
+        $this->permissionMap = config('permissions.names.tenant.roles');
+        parent::__construct();
         $this->permission = $permission;
     }
 
     public function index()
     {
         $data['permissions'] = $this->permission->getPermissions();
+        $data['groupedPermissions'] = $data['permissions']->groupBy(function ($perm) {
+            return explode('.', $perm->name)[0];
+        });
         $data['roles'] = $this->permission->getRoles();
 
         return view('pages.roles.index', $data);
@@ -81,7 +86,7 @@ class RoleController extends Controller
     public function destroy($id)
     {
         $role = $this->permission->getRole(['id' => $id]);
-        
+
         if (\in_array($role->name, Usr::getTenancyAwareDefaultRoles(), true)) {
             return back()->with('flash_warning', __('msg.denied'));
         }

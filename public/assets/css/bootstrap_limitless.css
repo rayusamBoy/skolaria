@@ -8,125 +8,6 @@
  *
  * ---------------------------------------------------------------------------- */
 
-:root {
-    color-scheme: light;
-    --primary-color: black;
-    --secondary-color: #777;
-    --tertiary-color: initial;
-    --default-color: #333;
-    --element-disabled-color: initial;
-    --element-state-color: rgba(51, 51, 51, 0.75);
-    --element-state-border-color: #b1b1b1;
-    --code-bg-color: #fafafa;
-    --primary-bg-color: #efefef;
-    --secondary-bg-color: #fff;
-    --secondary-bg-color-inverse: #171717;
-    --tertiary-bg-color: #f5f5f5;
-    --primary-border-color: #ddd;
-    --secondary-border-color: #ddd;
-    --tertiary-border-color: rgba(0, 0, 0, 0.15);
-    --border-color: #fff;
-    --navbar-component-border-color: rgba(0, 0, 0, 0.125);
-    --navbar-toggler-element-state-color: #333;
-    --navbar-border-bottom-color: rgba(0, 0, 0, 0.125);
-    --navbar-bg-color: #ffffff;
-    --navbar-color: rgba(51, 51, 51, 0.85);
-    --navbar-nav-bg-color: rgba(0, 0, 0, 0.04);
-    --tooltip-bg-color: #fff;
-    --tooltip-color: black;
-    --tooltip-border-color: rgba(0, 0, 0, 0.125);
-    --bg-color: #fff;
-    --main-bg-color: initial;
-    --secondary-main-bg-color: #fff;
-    --anker-element-color: #2196f3;
-    --page-header-bg-color: #fff;
-    --sidebar-bg-color: #fff;
-    --nav-tabs-bg-color: initial;
-    --offline-alert-color: #853a23;
-    --offline-alert-bg-color: #ffe8e1;
-    --body-bg-color: #f5f5f5;
-    --header-elements-bg-color: #cfcfcf;
-    --form-switch-bg: whitesmoke;
-    --skeleton-bg-color-at-0: hsl(200, 20%, 70%);
-    --skeleton-bg-color-at-100: hsl(200, 20%, 95%);
-    --codemirror-bg-color: #d9d9d9;
-    --codemirror-selected-bg-color: #d7d4f0;
-    --codemirror-selectedtext-bg-color: transparent;
-    --codemirror-editor-toolbar-border-color: #bbb;
-    --codemirror-preview-bg-color: #fafafa;
-    --editor-preview-bg-color: initial;
-    --swal2-bg-color: #fff;
-    --datatable-header-border-color: #ddd;
-    --cat-bg-color: initial;
-    --messages-left-div-color: #e8f6f6;
-    --messages-right-div-color: #f4f6f8;
-    --element-hover-bg-color: #dddddd;
-    --sidebar-item-active-bg-color: lightblue;
-    --nav-link-active-bg-color: #ececec;
-    --app-cover-bg-color: rgb(35 39 53);
-    --participant-bg-color: rgb(235, 235, 240);
-}
-
-[data-theme="dark"]:root {
-    color-scheme: dark;
-    --primary-color: #dadce0;
-    --secondary-color: darkgray;
-    --tertiary-color: lightgray;
-    --default-color: #dadce0;
-    --element-disabled-color: #999;
-    --element-state-color: #878787;
-    --element-state-border-color: #575757;
-    --code-bg-color: transparent;
-    --primary-bg-color: #1c1c1c;
-    --secondary-bg-color: #171717;
-    --secondary-bg-color-inverse: #fff;
-    --tertiary-bg-color: #292929;
-    --primary-border-color: #232323;
-    --secondary-border-color: #222222;
-    --tertiary-border-color: #333333;
-    --border-color: #1c1c1c;
-    --navbar-component-border-color: rgba(255, 255, 255, 0.1);
-    --navbar-toggler-element-state-color: #fff;
-    --navbar-border-bottom-color: #333333;
-    --navbar-bg-color: #171717;
-    --navbar-color: rgba(255, 255, 255, 0.9);
-    --navbar-nav-bg-color: rgba(0, 0, 0, 0.15);
-    --tooltip-bg-color: #303030;
-    --tooltip-color: lightgray;
-    --tooltip-border-color: #303030;
-    --bg-color: #1e1e1e;
-    --main-bg-color: #181818;
-    --secondary-main-bg-color: #333333;
-    --anker-element-color: initial;
-    --page-header-bg-color: #161616;
-    --sidebar-bg-color: #171717;
-    --nav-tabs-bg-color: #1e272c;
-    --offline-alert-color: #ffda6a;
-    --offline-alert-bg-color: #332701;
-    --body-bg-color: #121212;
-    --header-elements-bg-color: #151515;
-    --header-elements-border-color: #303030;
-    --form-switch-bg: #292929;
-    --skeleton-bg-color-at-0: hsl(200deg 11.54% 21.98%);
-    --skeleton-bg-color-at-100: hsl(200deg 31.07% 13.9%);
-    --codemirror-bg-color: #2b2b2b;
-    --codemirror-selected-bg-color: #2b2b2b;
-    --codemirror-selectedtext-bg-color: #2b2b2b;
-    --codemirror-editor-toolbar-border-color: #333333;
-    --codemirror-preview-bg-color: #1a1a1a;
-    --editor-preview-bg-color: #1a1a1a;
-    --swal2-bg-color: #373737;
-    --datatable-header-border-color: #282828;
-    --cat-bg-color: rgb(56 56 56);
-    --messages-left-div-color: #1e1d1d;
-    --messages-right-div-color: #1b1f23;
-    --element-hover-bg-color: rgb(59 65 64);
-    --sidebar-item-active-bg-color: #26a69a;
-    --nav-link-active-bg-color: rgba(255, 255, 255, 0.1);
-    --app-cover-bg-color: #141414;
-    --participant-bg-color: #313131;
-}
-
 body {
     position: relative;
 }
@@ -151,8 +32,8 @@ pre {
     -moz-tab-size: 4;
     -o-tab-size: 4;
     tab-size: 4;
-    border: 1px solid var(--tertiary-border-color);
-    color: var(--primary-color);
+    border: 1px solid var(--border-muted);
+    color: var(--text-primary);
     padding: 1.25rem 0;
     margin-bottom: 0;
     -webkit-hyphens: none;
@@ -328,7 +209,7 @@ a.text-white:focus {
 }
 
 .text-default {
-    color: var(--default-color);
+    color: var(--text-body);
 }
 
 a.text-default:not(.btn) {
@@ -343,7 +224,7 @@ a.text-default:not(.btn) {
 
 a.text-default:hover,
 a.text-default:focus {
-    color: var(--element-state-color);
+    color: var(--text-state);
 }
 
 .blockquote-bordered {
@@ -496,11 +377,11 @@ a.text-default:focus {
 
 code {
     padding: 0.2rem 0.4rem;
-    background-color: var(--code-bg-color);
+    background-color: var(--bg-code);
 }
 
 code span {
-    color: var(--default-color) !important;
+    color: var(--text-body) !important;
 }
 
 pre {
@@ -557,7 +438,7 @@ pre {
 .table th,
 .table td {
     transition: background-color ease-in-out 0.15s;
-    color: var(--secondary-color);
+    color: var(--text-secondary);
 }
 
 @media screen and (prefers-reduced-motion: reduce) {
@@ -821,11 +702,11 @@ pre {
 }
 
 .table thead .termed-test-data input {
-    background-color: var(--primary-bg-color);
+    background-color: var(--bg-primary);
 }
 
 .data-table tr td > input:hover {
-    border: 1px solid var(--element-state-color);
+    border: 1px solid var(--text-state);
 }
 
 .data-table input[readonly="readonly"] {
@@ -835,7 +716,7 @@ pre {
 
 table.data-table {
     width: 100%;
-    background: var(--secondary-bg-color);
+    background: var(--bg-secondary);
 }
 
 /* End */
@@ -892,7 +773,7 @@ tfoot .table-border-double th {
 .table-bordered,
 .table-bordered td,
 .table-bordered th {
-    border: 1px solid var(--primary-border-color);
+    border: 1px solid var(--border-primary);
 }
 
 .card > .table:first-child caption + thead tr:first-child th,
@@ -1166,7 +1047,7 @@ tfoot .table-border-double th {
 div[class*="table-responsive"] + .card-body,
 .navbar + div[class*="table-responsive"],
 .navbar + .table {
-    border-top: 1px solid var(--secondary-border-color);
+    border-top: 1px solid var(--border-secondary);
 }
 
 .table tbody:first-child tr:first-child th,
@@ -1178,17 +1059,17 @@ div[class*="table-responsive"] > .table tbody:first-child tr:first-child td {
 
 .table td,
 .table th {
-    border-top: 1px solid var(--secondary-border-color);
+    border-top: 1px solid var(--border-secondary);
 }
 
 .table thead th {
     vertical-align: middle;
-    border-bottom: 1px solid var(--secondary-border-color);
+    border-bottom: 1px solid var(--border-secondary);
 }
 
 .card-footer + [class*="table-responsive"],
 .card-footer + .table {
-    border-top: 1px solid var(--secondary-border-color);
+    border-top: 1px solid var(--border-secondary);
 }
 
 /* ------------------------------------------------------------------------------
@@ -1203,7 +1084,7 @@ legend {
     padding-top: 0.625rem;
     padding-bottom: 0.625rem;
     margin-bottom: 1.25rem;
-    border-bottom: 1px solid var(--secondary-border-color);
+    border-bottom: 1px solid var(--border-secondary);
     font-size: 0.8125rem;
 }
 
@@ -1235,7 +1116,7 @@ select[size] option + option {
 .form-control:disabled,
 .select2-container--disabled .select2-selection--single:not([class*="bg-"]),
 .form-control[readonly] {
-    background: var(--tertiary-bg-color);
+    background: var(--bg-tertiary);
 }
 
 .form-control[class*="bg-"]:not(.bg-white):not(.bg-light):not(
@@ -1286,19 +1167,19 @@ select[size] option + option {
 .select2-selection--multiple:not([class*="bg-"]),
 table.assessments td input,
 table.marks td input {
-    border: 1px solid var(--tertiary-border-color);
-    background-color: var(--secondary-bg-color);
-    color: var(--secondary-color);
+    border: 1px solid var(--border-muted);
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
 }
 
 .data-table tr td > input,
 .data-table tr td > input,
 .termed-test-data input {
-    border: 1px solid var(--tertiary-border-color);
+    border: 1px solid var(--border-muted);
 }
 
 .form-control:not(.border-1):not(.border-2):not(.border-3):focus {
-    border-color: var(--element-state-border-color) !important;
+    border-color: var(--border-state) !important;
 }
 
 .form-group .form-group:last-child {
@@ -1349,7 +1230,7 @@ table.marks td input {
 
 .col-form-label,
 .form-check-label {
-    color: var(--primary-color);
+    color: var(--text-primary);
 }
 
 .form-check:not(.form-check-inline) {
@@ -1365,7 +1246,7 @@ table.marks td input {
 }
 
 .form-check.disabled {
-    color: var(--element-disabled-color);
+    color: var(--text-disabled);
 }
 
 .form-check.disabled .form-check-label {
@@ -1636,7 +1517,7 @@ input[class*="bg-"]:not(.bg-light):not(.bg-white):not(.bg-transparent)
 
 .btn-float > span,
 a:not([href]):not([tabindex]) {
-    color: var(--primary-color);
+    color: var(--text-primary);
 }
 
 .btn.border-2 {
@@ -1778,8 +1659,8 @@ a:not([href]):not([tabindex]) {
 }
 
 .dropdown-item.active {
-    color: #fff !important;
-    background-color: #2196f3;
+    background-color: var(--border-muted);
+    color: var(--text-body) !important;
 }
 
 .dropdown-item.active .badge:not(.badge-mark) {
@@ -1862,7 +1743,7 @@ a:not([href]):not([tabindex]) {
 
 .dropdown-divider,
 hr {
-    border-top: 1px solid var(--tertiary-border-color);
+    border-top: 1px solid var(--border-muted);
 }
 
 .dropdown-item.form-check {
@@ -1999,19 +1880,19 @@ hr {
 .navbar-nav .dropdown-menu,
 .dropdown-menu,
 .select2-dropdown {
-    background-color: var(--secondary-bg-color);
-    border: 1px solid var(--tertiary-border-color);
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-muted);
 }
 
 .dt-button-collection {
-    background-color: var(--primary-bg-color);
+    background-color: var(--bg-primary);
 }
 
 .nav-tabs .dropdown-item,
 .navbar-nav .dropdown-item,
 .dropdown-menu .dropdown-item,
 .select2-results__option {
-    color: var(--tertiary-color);
+    color: var(--text-secondary);
 }
 
 .dropdown-item:focus,
@@ -2027,13 +1908,13 @@ hr {
 .datepicker tfoot tr th:hover,
 .datepicker table tr td span.focused,
 .datepicker table tr td span:hover {
-    background-color: var(--element-hover-bg-color) !important;
-    color: var(--tertiary-color) !important;
+    background-color: var(--bg-hover) !important;
+    color: var(--text-muted) !important;
 }
 
 .dropdown-item.disabled:focus,
 .dropdown-item.disabled:hover {
-    background-color: var(--code-bg-color);
+    background-color: var(--bg-code);
 }
 
 .dropright .dropdown-toggle::after {
@@ -2327,7 +2208,7 @@ hr {
 .nav-tabs .nav-link {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    color: var(--secondary-color);
+    color: var(--text-secondary);
 }
 
 .nav-tabs .nav-link:not(.active):hover,
@@ -2582,26 +2463,24 @@ hr {
 }
 
 .card .nav-tabs {
-    border-bottom: 1px solid var(--tertiary-border-color);
+    border-bottom: 1px solid var(--border-muted);
 }
 
 .modal .nav-tabs {
-    border-bottom: 1px solid var(--element-state-border-color);
+    border-bottom: 1px solid var(--border-state);
 }
 
 .nav-tabs .nav-link.active {
-    color: var(--primary-text-color);
+    color: var(--text-primary);
     background-color: transparent;
-    border-color: var(--element-state-border-color)
-        var(--element-state-border-color) var(--bg-color);
+    border-color: var(--border-state) var(--border-state) var(--bg-default);
 }
 
 .nav-tabs .nav-item.show .nav-link,
 .card .nav-tabs .nav-link.active {
-    color: var(--primary-text-color);
+    color: var(--text-primary);
     background-color: transparent;
-    border-color: var(--tertiary-border-color) var(--tertiary-border-color)
-        var(--secondary-bg-color);
+    border-color: var(--border-muted) var(--border-muted) var(--bg-secondary);
 }
 
 .nav-pills {
@@ -2732,9 +2611,9 @@ hr {
     border-bottom: 1px solid transparent;
     -ms-flex-align: stretch;
     align-items: stretch;
-    color: var(--navbar-color);
-    background-color: var(--navbar-bg-color);
-    border-bottom-color: var(--navbar-border-bottom-color);
+    color: var(--navbar-text);
+    background-color: var(--navbar-bg);
+    border-bottom-color: var(--border-muted);
 }
 
 .page-content ~ .navbar:not(.navbar-component):last-of-type,
@@ -2743,7 +2622,7 @@ hr {
 }
 
 .navbar-component {
-    border: 1px solid var(--navbar-component-border-color);
+    border: 1px solid var(--border-muted);
     margin-bottom: 1.25rem;
 }
 
@@ -2769,7 +2648,7 @@ hr {
 }
 
 .navbar-nav-link {
-    color: var(--navbar-color);
+    color: var(--navbar-text);
     position: relative;
     display: block;
     cursor: pointer;
@@ -2817,7 +2696,7 @@ hr {
 }
 
 .navbar-nav-highlight .navbar-nav-link.active:before {
-    background-color: var(--secondary-bg-color-inverse);
+    background-color: var(--bg-inverse);
 }
 
 .navbar-collapse {
@@ -2852,7 +2731,7 @@ hr {
 .navbar-toggler:hover,
 .navbar-toggler:focus,
 .navbar-toggler[aria-expanded="true"] {
-    color: var(--navbar-toggler-element-state-color);
+    color: var(--navbar-toggler-color);
 }
 
 @media (max-width: 575.98px) {
@@ -2893,7 +2772,7 @@ hr {
     }
 
     .navbar-expand-sm .navbar-collapse {
-        border-top: 1px solid var(--secondary-border-color);
+        border-top: 1px solid var(--border-secondary);
     }
 
     .navbar-expand-sm .navbar-nav > .nav-item > .dropdown-menu {
@@ -2996,7 +2875,7 @@ hr {
     }
 
     .navbar-expand-md .navbar-collapse {
-        border-top: 1px solid var(--secondary-border-color);
+        border-top: 1px solid var(--border-secondary);
     }
 
     .navbar-expand-md .navbar-nav > .nav-item > .dropdown-menu {
@@ -3103,7 +2982,7 @@ hr {
     }
 
     .navbar-expand-lg .navbar-collapse {
-        border-top: 1px solid var(--secondary-border-color);
+        border-top: 1px solid var(--border-secondary);
     }
 
     .navbar-expand-lg .navbar-nav > .nav-item > .dropdown-menu {
@@ -3206,7 +3085,7 @@ hr {
     }
 
     .navbar-expand-xl .navbar-collapse {
-        border-top: 1px solid var(--secondary-border-color);
+        border-top: 1px solid var(--border-secondary);
     }
 
     .navbar-expand-xl .navbar-nav > .nav-item > .dropdown-menu {
@@ -3308,7 +3187,7 @@ hr {
 }
 
 .navbar-expand .navbar-collapse {
-    border-top: 1px solid var(--secondary-border-color);
+    border-top: 1px solid var(--border-secondary);
 }
 
 .navbar-expand .navbar-nav > .nav-item > .dropdown-menu {
@@ -3374,41 +3253,41 @@ hr {
 .content + .navbar,
 .page-content + .navbar,
 .fixed-bottom > .navbar:first-child {
-    border-top-color: var(--navbar-border-bottom-color);
+    border-top-color: var(--border-muted);
 }
 
 .navbar-nav .nav-link:hover,
 .navbar-nav .nav-link:focus {
-    color: var(--default-color);
+    color: var(--text-body);
 }
 
 .navbar-nav .nav-link.disabled {
-    color: var(--element-disabled-color);
+    color: var(--text-disabled);
 }
 
 .navbar-nav .show > .nav-link,
 .navbar-nav .active > .nav-link,
 .navbar-nav .nav-link.show,
 .navbar-nav .nav-link.active {
-    color: var(--default-color);
+    color: var(--text-body);
 }
 
 .navbar-nav-link:hover,
 .navbar-nav-link:focus {
-    color: var(--default-color);
-    background-color: var(--navbar-nav-bg-color);
+    color: var(--text-body) !important;
+    background-color: var(--bg-hover) !important;
 }
 
 .show > .navbar-nav-link,
 .active > .navbar-nav-link,
 .navbar-nav-link.show,
 .navbar-nav-link.active {
-    color: var(--default-color);
-    background-color: var(--navbar-nav-bg-color);
+    color: var(--text-body);
+    background-color: var(--navbar-nav-bg);
 }
 
 .navbar-text a {
-    color: var(--anker-element-color);
+    color: var(--link-color);
 }
 
 .navbar-text a:hover,
@@ -3681,7 +3560,7 @@ hr {
     margin-right: 1.25rem;
     border-top: 1px solid transparent;
     border-bottom: 1px solid transparent;
-    border-bottom-color: var(--navbar-component-border-color);
+    border-bottom-color: var(--border-muted);
 }
 
 .navbar-header .navbar-brand {
@@ -3732,7 +3611,7 @@ hr {
 
 .card-title {
     position: relative;
-    color: var(--primary-color);
+    color: var(--text-primary);
 }
 
 .card-header .card-title {
@@ -3786,7 +3665,7 @@ hr {
 }
 
 .card-body {
-    color: var(--primary-color);
+    color: var(--text-primary);
 }
 
 .card-img-actions {
@@ -3986,10 +3865,10 @@ a.breadcrumb-elements-item:focus,
     position: relative;
     padding-left: 1.25rem;
     padding-right: 1.25rem;
-    border-top: 1px solid var(--tertiary-border-color);
-    border-bottom: 1px solid var(--tertiary-border-color);
-    background-color: var(--code-bg-color);
-    color: var(--default-color);
+    border-top: 1px solid var(--border-muted);
+    border-bottom: 1px solid var(--border-muted);
+    background-color: var(--bg-code);
+    color: var(--text-body);
 }
 
 .breadcrumb-line:not(.breadcrumb-line-component):first-child {
@@ -4006,7 +3885,7 @@ a.breadcrumb-elements-item:focus,
 }
 
 .page-header.breadcrumb-line-component {
-    border-color: var(--secondary-border-color);
+    border-color: var(--border-secondary);
 }
 
 .breadcrumb-line-dark {
@@ -4074,6 +3953,9 @@ a.breadcrumb-elements-item:focus,
 
 .page-link:hover {
     opacity: 1 !important;
+    background: var(--bg-secondary);
+    border-color: var(--border-state) !important;
+    color: inherit !important;
 }
 
 @media screen and (prefers-reduced-motion: reduce) {
@@ -4182,12 +4064,12 @@ a.breadcrumb-elements-item:focus,
 
 .badge {
     padding: 0.3em 0.6em !important;
-    border: 1px solid var(--navbar-border-bottom-color);
+    border: 1px solid var(--border-muted);
 }
 
 .badge:not(.badge-default) {
     background: none;
-    border: 1px solid var(--tertiary-border-color);
+    border: 1px solid var(--border-muted);
 }
 
 .badge.dropdown-toggle:after {
@@ -4896,6 +4778,7 @@ a.badge[class*="bg-"]:not(.bg-transparent):not(.bg-white):not(.bg-light):focus,
     transition:
         color ease-in-out 0.15s,
         opacity ease-in-out 0.15s;
+    color: var(--text-muted);
 }
 
 @media screen and (prefers-reduced-motion: reduce) {
@@ -4906,8 +4789,8 @@ a.badge[class*="bg-"]:not(.bg-transparent):not(.bg-white):not(.bg-light):focus,
 
 .close:hover,
 .close:focus {
+    color: initial !important;
     outline: 0;
-    opacity: 1;
 }
 
 /* ------------------------------------------------------------------------------
@@ -4958,8 +4841,8 @@ a.badge[class*="bg-"]:not(.bg-transparent):not(.bg-white):not(.bg-light):focus,
 
 .modal-content,
 .swal2-container.swal2-center > .swal2-popup {
-    background-color: var(--bg-color);
-    color: var(--tertiary-color);
+    background-color: var(--bg-default);
+    color: var(--text-muted);
 }
 
 .modal-backdrop.show {
@@ -4991,29 +4874,29 @@ a.badge[class*="bg-"]:not(.bg-transparent):not(.bg-white):not(.bg-light):focus,
 }
 
 .tooltip-inner {
-    color: var(--tooltip-color);
-    background-color: var(--tooltip-bg-color);
-    border: 1px solid var(--tooltip-border-color);
+    color: var(--tooltip-text);
+    background-color: var(--tooltip-bg);
+    border: 1px solid var(--tooltip-border);
 }
 
 .bs-tooltip-top .arrow::before,
 .bs-tooltip-auto[x-placement^="top"] .arrow::before {
-    border-top-color: var(--tooltip-border-color);
+    border-top-color: var(--tooltip-border);
 }
 
 .bs-tooltip-right .arrow::before,
 .bs-tooltip-auto[x-placement^="right"] .arrow::before {
-    border-right-color: var(--tooltip-border-color);
+    border-right-color: var(--tooltip-border);
 }
 
 .bs-tooltip-bottom .arrow::before,
 .bs-tooltip-auto[x-placement^="bottom"] .arrow::before {
-    border-bottom-color: var(--tooltip-border-color);
+    border-bottom-color: var(--tooltip-border);
 }
 
 .bs-tooltip-left .arrow::before,
 .bs-tooltip-auto[x-placement^="left"] .arrow::before {
-    border-left-color: var(--tooltip-border-color);
+    border-left-color: var(--tooltip-border);
 }
 
 /* ------------------------------------------------------------------------------
@@ -5037,28 +4920,28 @@ a.badge[class*="bg-"]:not(.bg-transparent):not(.bg-white):not(.bg-light):focus,
 }
 
 .popover {
-    background-color: var(--tooltip-bg-color);
+    background-color: var(--tooltip-bg);
 }
 
 .bs-popover-auto[x-placement^="left"] .arrow::after,
 .bs-popover-left .arrow::after {
-    border-left-color: var(--tooltip-bg-color);
+    border-left-color: var(--tooltip-bg);
 }
 
 .bs-popover-auto[x-placement^="right"] .arrow::after,
 .bs-popover-right .arrow::after {
     left: 1px;
-    border-right-color: var(--tooltip-bg-color);
+    border-right-color: var(--tooltip-bg);
 }
 
 .bs-popover-auto[x-placement^="bottom"] .arrow::after,
 .bs-popover-bottom .arrow::after {
-    border-bottom-color: var(--tooltip-bg-color);
+    border-bottom-color: var(--tooltip-bg);
 }
 
 .bs-popover-auto[x-placement^="top"] .arrow::after,
 .bs-popover-top .arrow::after {
-    border-top-color: var(--tooltip-bg-color);
+    border-top-color: var(--tooltip-bg);
 }
 
 .bs-popover-top[class*="bg-"]:not(.bg-white):not(.bg-light) .arrow,

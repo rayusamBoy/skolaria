@@ -2,15 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Helpers\Usr;
 use Illuminate\Database\Seeder;
 
 class NonTenancySettingsTableSeeder extends Seeder
 {
-    public static function getLoginAndRelatedPagesBgDescription()
-    {
-        return 'storage/uploads/login_and_related_pages_bg.png';
-    }
-
     /**
      * Auto generated seed file
      *
@@ -91,7 +87,7 @@ class NonTenancySettingsTableSeeder extends Seeder
                 array(
                     'id' => 9,
                     'type' => 'login_and_related_pages_bg',
-                    'description' => self::getLoginAndRelatedPagesBgDescription(),
+                    'description' => Usr::getLoginAndRelatedPagesBgDescription(),
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
@@ -114,7 +110,7 @@ class NonTenancySettingsTableSeeder extends Seeder
             11 =>
                 array(
                     'id' => 12,
-                    'type' => 'admin_linkedin_link',
+                    'type' => 'admin_x_link',
                     'description' => NULL,
                     'created_at' => NULL,
                     'updated_at' => NULL,

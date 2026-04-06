@@ -6,6 +6,7 @@ use App\Helpers\Qs;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Book\BookCreate;
 use App\Http\Requests\Book\BookUpdate;
+use App\Models\Book;
 use App\Repositories\BookRepo;
 use App\Repositories\MyClassRepo;
 
@@ -15,6 +16,8 @@ class BookController extends Controller
 
     public function __construct(BookRepo $book, MyClassRepo $my_class)
     {
+        $this->permissionMap = config('permissions.names.tenant.books');
+        parent::__construct();
         $this->book = $book;
         $this->my_class = $my_class;
     }
@@ -25,7 +28,6 @@ class BookController extends Controller
     public function index()
     {
         $d["books"] = $this->book->getAll();
-        $d["my_classes"] = $this->my_class->all();
 
         return view('pages.books.index', $d);
     }
@@ -44,11 +46,9 @@ class BookController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($book_id)
+    public function edit($book)
     {
-        $book_id = Qs::decodeHash($book_id);
-        $d["book"] = $this->book->find($book_id);
-        $d["my_classes"] = $this->my_class->all();
+        $d["book"] = $this->book->find($book);
 
         return view("pages.books.edit", $d);
     }
@@ -67,10 +67,9 @@ class BookController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($book_id)
+    public function destroy($book)
     {
-        $book_id = Qs::decodeHash($book_id);
-        $this->book->find($book_id)->delete();
+        $this->book->find($book)->delete();
 
         return Qs::deleteOk('books.index');
     }

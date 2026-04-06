@@ -27,7 +27,7 @@
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>
-                        <img class="rounded-circle" style="height:40px; width:40px;" src="{{ Usr::getTenantAwarePhoto($s->user->photo) }}" alt="photo">
+                        <img class="rounded-circle" style="height:40px; width:40px;" src="{{ Usr::getTenancyAwarePhoto($s->user->photo) }}" alt="photo">
                     </td>
                     <td>{{ $s->user->name }}</td>
                     <td>{{ $s->adm_no }}</td>
@@ -39,34 +39,38 @@
                                 <div class="{{ $students->count() > 3 
                                         ? 'dropdown-menu dropdown-menu-left' 
                                         : 'dropdown-menu dropdown-menu-left dropdown-menu-position-static-md-desc' }}">
-
+                                    {{-- View Profile --}}
+                                    @can($tenant_permissions['student_records']['show']['permission'])
                                     <a href="{{ route('students.show', Qs::hash($s->id)) }}" class="dropdown-item">
                                         <i class="material-symbols-rounded">visibility</i> View Profile
                                     </a>
-
+                                    @endcan
+                                    {{-- Marksheet --}}
+                                    @can($tenant_permissions['marks']['year_selector']['permission'])
                                     <a target="_self" href="{{ route('marks.year_selector', Qs::hash($s->user->id)) }}" class="dropdown-item">
                                         <i class="material-symbols-rounded">bottom_sheets</i> Marksheet
                                     </a>
-
+                                    @endcan
+                                    {{-- Assessmentsheet --}}
+                                    @can($tenant_permissions['assessments']['year_selector']['permission'])
                                     <a target="_self" href="{{ route('assessments.year_selector', Qs::hash($s->user->id)) }}" class="dropdown-item">
                                         <i class="material-symbols-rounded">two_pager</i> Assessment Sheet
                                     </a>
-
+                                    @endcan
+                                    {{-- Payments --}}
+                                    @can($tenant_permissions['payments']['status']['permission'])
                                     <div class="dropdown-divider"></div>
 
                                     <ul class="list-circle mb-0 pl-3">
                                         <li>
-                                            <a href="{{ route('payments.status', [Qs::hash($s->user_id)]) }}" class="dropdown-item pl-2">
-                                                All Payments
-                                            </a>
+                                            <a href="{{ route('payments.status', [Qs::hash($s->user_id)]) }}" class="dropdown-item pl-2">All Payments</a>
                                         </li>
 
                                         <li>
-                                            <a href="{{ route('payments.status', [Qs::hash($s->user_id), Qs::getCurrentSession()]) }}" class="dropdown-item pl-2">
-                                                This Session's Payments
-                                            </a>
+                                            <a href="{{ route('payments.status', [Qs::hash($s->user_id), Qs::getCurrentSession()]) }}" class="dropdown-item pl-2">This Session's Payments</a>
                                         </li>
                                     </ul>
+                                    @endcan
                                 </div>
                             </div>
                         </div>

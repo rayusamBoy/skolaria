@@ -12,23 +12,18 @@
 
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
-            @can($tenant_permissions['dorms']['index'])
             <li class="nav-item">
                 <a href="#all-dorms" class="nav-link active" data-toggle="tab">Manage Dorms</a>
             </li>
-            @endcan
 
-            @can($tenant_permissions['dorms']['store'])
+            @can($tenant_permissions['dorms']['store']['permission'])
             <li class="nav-item">
-                <a href="#new-dorm" class="nav-link" data-toggle="tab">
-                    Create New Dorm
-                </a>
+                <a href="#new-dorm" class="nav-link" data-toggle="tab">Create New Dorm</a>
             </li>
             @endcan
         </ul>
 
         <div class="tab-content">
-            @can($tenant_permissions['dorms']['index'])
             <div class="tab-pane fade show active" id="all-dorms">
                 <table class="table datatable-button-html5-columns">
                     <thead>
@@ -50,14 +45,13 @@
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-
-                                            @can($tenant_permissions['dorms']['edit'])
+                                            @can($tenant_permissions['dorms']['edit']['permission'])
                                             <a href="{{ route('dorms.edit', $d->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
                                             @endcan
 
-                                            @can($tenant_permissions['dorms']['destroy'])
+                                            @can($tenant_permissions['dorms']['destroy']['permission'])
                                             <a id="dorm-delete-{{ $d->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -66,7 +60,6 @@
                                                 @method('delete')
                                             </form>
                                             @endcan
-
                                         </div>
                                     </div>
                                 </div>
@@ -76,27 +69,22 @@
                     </tbody>
                 </table>
             </div>
-            @endcan
 
-            @can($tenant_permissions['dorms']['store'])
+            @can($tenant_permissions['dorms']['store']['permission'])
             <div class="tab-pane fade" id="new-dorm">
                 <div class="row">
                     <div class="col-md-6">
                         <form class="ajax-store" method="post" action="{{ route('dorms.store') }}">
                             @csrf
                             <div class="form-group row">
-                                <label class="col-lg-3 col-form-label font-weight-semibold">
-                                    Name <span class="text-danger">*</span>
-                                </label>
+                                <label class="col-lg-3 col-form-label font-weight-semibold">Name <span class="text-danger">*</span></label>
                                 <div class="col-lg-9">
                                     <input name="name" value="{{ old('name') }}" required type="text" class="form-control" placeholder="Name of Dormitory">
                                 </div>
                             </div>
 
                             <div class="form-group row">
-                                <label class="col-lg-3 col-form-label font-weight-semibold">
-                                    Description
-                                </label>
+                                <label class="col-lg-3 col-form-label font-weight-semibold">Description</label>
                                 <div class="col-lg-9">
                                     <input name="description" value="{{ old('description') }}" type="text" class="form-control" placeholder="Description of Dormitory">
                                 </div>

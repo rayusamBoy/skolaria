@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedInteger('subject_id')->nullable();
             $table->unsignedInteger('section_id')->nullable()->index();
             $table->unsignedBigInteger('teacher_id')->nullable()->index();
-            $table->longText('students_ids')->nullable();
+            $table->json('students_ids')->nullable();
             $table->timestamps();
 
             $table->unique(['subject_id', 'section_id', 'teacher_id'], 'subject_id');

@@ -157,7 +157,7 @@ class MarkRepo
         return ($searched == false) ? null : ($searched + 1);
     }
 
-    public function getExtractedSumOf($weight, $offset = 0, $length)
+    public function getExtractedSumOf($weight, $length, $offset = 0)
     {
         sort($weight); // Sort points
         $weight = array_filter($weight);

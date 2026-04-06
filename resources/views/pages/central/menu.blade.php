@@ -17,7 +17,7 @@
 </li>
 
 {{-- Manage Users --}}
-@canany(array_values($central_permissions['central_users']))
+@canany(array_column($central_permissions['central_users'], 'permission'))
 <li class="nav-item">
     <a href="{{ route('central_users.index') }}" class="nav-link {{ request()->routeIs('central_users.*') ? 'active' : '' }}">
         <i class="material-symbols-rounded">group</i>
@@ -27,7 +27,7 @@
 @endcanany
 
 {{-- Manage Tenants --}}
-@canany(array_values($central_permissions['tenants']))
+@canany(array_column($central_permissions['tenants'], 'permission'))
 <li class="nav-item">
     <a href="{{ route('tenants.index') }}" class="nav-link {{ request()->routeIs('tenants.*') ? 'active' : '' }}">
         <i class="material-symbols-rounded">manage_accounts</i>
@@ -37,7 +37,7 @@
 @endcanany
 
 {{-- Manage Settings --}}
-@canany([...array_values($central_permissions['settings_non_tenancy']), ...array_values($central_permissions['roles'])])
+@canany([...array_column($central_permissions['settings_non_tenancy'], 'permission'), ...array_column($central_permissions['roles'], 'permission')])
 <li class="nav-item nav-item-submenu {{ request()->routeIs('settings_non_tenancy.*', 'permissions.*', 'roles.*') ? 'nav-item-expanded nav-item-open' : '' }}">
     <a href="javascript:;" class="nav-link">
         <i class="material-symbols-rounded">settings</i>
@@ -46,7 +46,7 @@
 
     <ul class="nav nav-group-sub" data-submenu-title="Settings">
         {{-- App --}}
-        @can($central_permissions['settings_non_tenancy']['index'])
+        @can($central_permissions['settings_non_tenancy']['index']['permission'])
         <li class="nav-item">
             <a href="{{ route('settings_non_tenancy.index') }}" class="nav-link {{ request()->routeIs('settings_non_tenancy.index') ? 'active' : '' }}">
                 App
@@ -55,7 +55,7 @@
         @endcan
 
         {{-- Roles --}}
-        @can($central_permissions['roles']['index'])
+        @can($central_permissions['roles']['index']['permission'])
         <li class="nav-item">
             <a href="{{ route('roles.index') }}" class="nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}">
                 Roles
@@ -67,7 +67,7 @@
 @endcanany
 
 {{-- Support --}}
-@canany(array_values($central_permissions['tickets']))
+@canany(array_column($central_permissions['tickets'], 'permission'))
 <li class="nav-item nav-item-submenu {{ request()->routeIs('tickets.index_central') ? 'nav-item-expanded nav-item-open' : '' }}">
     <a href="javascript:;" class="nav-link">
         <i class="material-symbols-rounded">support</i>

@@ -23,6 +23,8 @@ class PaymentController extends Controller
 
     public function __construct(MyClassRepo $my_class, PaymentRepo $pay, StudentRepo $student)
     {
+        $this->permissionMap = config('permissions.names.tenant.payments');
+        parent::__construct();
         $this->my_class = $my_class;
         $this->pay = $pay;
         $this->year = Qs::getCurrentSession();
@@ -45,7 +47,6 @@ class PaymentController extends Controller
             return Qs::goWithDanger('payments.index');
 
         $d['selected'] = true;
-        $d['my_classes'] = $this->my_class->all();
         $d['years'] = $this->pay->getPaymentYears();
         $d['year'] = $year;
 
@@ -59,9 +60,7 @@ class PaymentController extends Controller
 
     public function create()
     {
-        $d['my_classes'] = $this->my_class->all();
-
-        return view('pages.payments.create', $d);
+        return view('pages.payments.create');
     }
 
     public function invoice($st_id, $year = null)
@@ -122,34 +121,6 @@ class PaymentController extends Controller
         return view('pages.payments.receipt', $d);
     }
 
-    public function pdf_receipts($pr_id)
-    {
-        if (!$pr_id)
-            return Qs::goWithDanger();
-
-        try {
-            $d['pr'] = $pr = $this->pay->getRecord(['id' => $pr_id])->with('receipt')->first();
-        } catch (ModelNotFoundException $ex) {
-            return back()->with('flash_danger', __('msg.rnf'));
-        }
-
-        $d['receipts'] = $pr->receipt;
-        $d['payment'] = $pr->payment;
-        $d['sr'] = $this->student->getRecord(['user_id' => $pr->student_id])->first();
-        $d['settings'] = Qs::getSettings();
-
-        $pdf_name = "Receipt_{$pr->ref_no}";
-        $dompdfhtml = view('pages.payments.receipt', $d)->render();
-        $options = [
-            'chroot' => public_path(),
-        ];
-
-        $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($dompdfhtml);
-        $dompdf->render();
-        $dompdf->stream($pdf_name);
-    }
-
     public function pay_now(Request $req, $pr_id)
     {
         Validator::make($req->toArray(), [
@@ -183,7 +154,6 @@ class PaymentController extends Controller
 
     public function manage($class_id = null)
     {
-        $d['my_classes'] = $this->my_class->all();
         $d['selected'] = false;
 
         if ($class_id) {

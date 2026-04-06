@@ -13,10 +13,13 @@
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
             <li class="nav-item"><a href="#manage-tenants" class="nav-link active" data-toggle="tab">Manage Tenants</a></li>
+            @can($central_permissions['tenants']['store']['permission'])
             <li class="nav-item"><a href="#new-tenant" class="nav-link" data-toggle="tab">Create Tenant</a></li>
+            @endcan
         </ul>
 
         <div class="tab-content">
+            @can($central_permissions['tenants']['store']['permission'])
             <div class="tab-pane fade" id="new-tenant">
                 <form class="page-block" method="post" action="{{ route('tenants.store') }}">
                     @csrf
@@ -75,6 +78,7 @@
                     </div>
                 </form>
             </div>
+            @endcan
 
             <div class="tab-pane fade show active" id="manage-tenants">
                 <table class="table datatable-button-html5-columns ">
@@ -107,18 +111,26 @@
 
                                         <div class="dropdown-menu dropdown-menu-left">
                                             {{-- Edit --}}
+                                            @can($central_permissions['tenants']['edit']['permission'])
                                             <a href="{{ route('tenants.edit', Qs::hash($tenant->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
+                                            @endcan
                                             {{-- View Profile --}}
+                                            @can($central_permissions['tenants']['show']['permission'])
                                             <a href="{{ route('tenants.show', Qs::hash($tenant->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> View Profile</a>
+                                            @endcan
                                             {{-- Delete --}}
+                                            @can($central_permissions['tenants']['destroy']['permission'])
                                             <a id="tenant-delete-{{ Qs::hash($tenant->id) }}" onclick="confirmPermanentDeleteTwice(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                             <form method="post" id="item-delete-tenant-delete-{{ Qs::hash($tenant->id) }}" action="{{ route('tenants.destroy', Qs::hash($tenant->id)) }}" class="hidden page-block">@csrf @method('delete')</form>
+                                            @endcan
                                             {{-- Tenants Migrate Fresh --}}
+                                            @can($central_permissions['tenants']['run_command']['permission'])
                                             <a id="tenant-migrate-fresh-{{ Qs::hash($tenant->id) }}" onclick="confirmOperationTwice(this.id)" href="javascript:;" class="dropdown-item text-warning"><i class="material-symbols-rounded">swap_horiz</i> Migrate Fresh</a>
                                             <form method="post" id="item-confirm-operation-tenant-migrate-fresh-{{ Qs::hash($tenant->id) }}" action="{{ route('tenants.run_command', [1, Qs::hash($tenant->id)]) }}" class="hidden page-block">@csrf @method('post')</form>
                                             {{-- Tenants Seed --}}
                                             <a id="tenant-seed-{{ Qs::hash($tenant->id) }}" onclick="confirmOperationTwice(this.id)" href="javascript:;" class="dropdown-item text-warning"><i class="material-symbols-rounded">filter_vintage</i> Seed</a>
                                             <form method="post" id="item-confirm-operation-tenant-seed-{{ Qs::hash($tenant->id) }}" action="{{ route('tenants.run_command', [2, Qs::hash($tenant->id)]) }}" class="hidden page-block">@csrf @method('post')</form>
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>

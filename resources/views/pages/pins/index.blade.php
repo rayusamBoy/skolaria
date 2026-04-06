@@ -94,7 +94,7 @@
                         </table>
                     </div>
 
-                    @can($tenant_permissions['pins']['destroy'])
+                    @can($tenant_permissions['pins']['destroy']['permission'])
                     @if($used_pins->isNotEmpty())
                     <div class="col-md-12">
                         <a id="used-pins" onclick="confirmDelete(this.id)" href="javascript:;" class="btn btn-danger btn-sm ml-2 float-right">

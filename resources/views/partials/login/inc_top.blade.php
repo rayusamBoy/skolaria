@@ -1,11 +1,8 @@
-{{-- Fonts --}}
-<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap" rel="stylesheet">
-
 <!-- Global stylesheets -->
-{{-- <link href="{{ asset('global_assets/css/icons/icomoon/styles-min.css') }}" rel="stylesheet" type="text/css"> --}}
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet" />
 {{-- <link href="{{ asset('global_assets/css/icons/material/icons.css') }}" rel="stylesheet" type="text/css"> --}}
 <link href="{{ asset('assets/css/bootstrap-min.css') }}" rel="stylesheet" type="text/css">
+<link href="{{ asset('assets/css/skins-min.css') }}" rel="stylesheet" type="text/css">
 <link href="{{ asset('assets/css/bootstrap_limitless-min.css') }}" rel="stylesheet" type="text/css">
 <link href="{{ asset('assets/css/layout-min.css') }}" rel="stylesheet" type="text/css">
 <link href="{{ asset('assets/css/components-min.css') }}" rel="stylesheet" type="text/css">
@@ -19,16 +16,19 @@
 <script src="{{ asset('assets/js/app-min.js') }} "></script>
 <script src="{{ asset('global_assets/js/plugins/forms/styling/uniform.min.js') }} "></script>
 <script src="{{ asset('global_assets/js/plugins/scrollers/jquery.marquee.min.js') }}"></script>
+<script src="{{ asset('global_assets/js/plugins/extensions/js-cookie.js') }}"></script>
 <script src="{{ asset('global_assets/js/main/color-modes.js') }}"></script>
 
 @php
-    use Database\Seeders\NonTenancySettingsTableSeeder;
-    $color = (isset($colors) && $colors !== null) ? '$texts_color !important' : 'white !important';
-    $bg_color = (isset($colors) && $colors !== null) ? $bg_color : 'rgb(35 39 53)';
-    $bg = $settings->firstWhere('type', 'login_and_related_pages_bg');
-    $bg_desc = $bg->description;
-    $bg_url = $bg_desc === null ? asset(NonTenancySettingsTableSeeder::getLoginAndRelatedPagesBgDescription()) : (Usr::tenancyInitilized() ? tenant_asset($bg_desc) : asset($bg_desc));
-    $bg_url = $bg_url . "?" . strtotime($bg->updated_at);
+    $colors = $settings->firstWhere('type', 'login_and_related_pgs_txts_and_bg_colors')->description;
+    $texts_color = 'var(--navbar-text)';
+    $bg_color = 'var(--navbar-bg)';
+    if ($colors !== null) {
+        $colors_exploaded = explode(Qs::getDelimiter(), $colors);
+        $texts_color = $colors_exploaded[0];
+        $bg_color = $colors_exploaded[1];
+    }
+    $bg_url = Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'login_and_related_pages_bg'));
 @endphp
 
 <style>
@@ -53,7 +53,7 @@
     }
 
     .text-color-custom {
-        color: {{ $color }};
+        color: {{ $texts_color }} !important;
     }
 
     .navbar {

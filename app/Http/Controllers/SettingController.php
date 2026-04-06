@@ -16,6 +16,8 @@ class SettingController extends Controller
 
     public function __construct(SettingRepo $setting, MyClassRepo $my_class)
     {
+        $this->permissionMap = config('permissions.names.tenant.sections');
+        parent::__construct();
         $this->setting = $setting;
         $this->my_class = $my_class;
     }

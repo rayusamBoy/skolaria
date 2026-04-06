@@ -15,15 +15,16 @@ class SectionController extends Controller
 
     public function __construct(MyClassRepo $my_class, UserRepo $user)
     {
+        $this->permissionMap = config('permissions.names.tenant.sections');
+        parent::__construct();
         $this->my_class = $my_class;
         $this->user = $user;
     }
 
     public function index()
     {
-        $d['my_classes'] = $this->my_class->all();
         $d['sections'] = $this->my_class->getAllSections();
-        $d['teachers'] = $this->user->getUsersByRoleNames(['Teacher', 'Admin', 'Super Admin']);
+        $d['teachers'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.teacher')]);
 
         return view('pages.sections.index', $d);
     }
@@ -39,7 +40,7 @@ class SectionController extends Controller
     public function edit($id)
     {
         $d['s'] = $s = $this->my_class->findSection($id);
-        $d['teachers'] = $this->user->getUsersByRoleNames(['Teacher', 'Admin', 'Super Admin']);
+        $d['teachers'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.teacher')]);
 
         return $s === null ? Qs::goWithDanger('sections.index') : view('pages.sections.edit', $d);
     }

@@ -43,9 +43,6 @@ class NonTenancyUsersTableSeeder extends Seeder
             'email_verified_at' => NULL,
             'password' => Hash::make('root'),
             'remember_token' => NULL,
-            'sidebar_minimized' => 0,
-            'allow_system_sounds' => 0,
-            'show_charts' => 1,
             'password_updated_at' => NULL,
             'twofa_secret_code' => NULL,
             'twofa_recovery_codes' => NULL,
@@ -55,6 +52,6 @@ class NonTenancyUsersTableSeeder extends Seeder
             'deleted_at' => NULL,
         ]);
 
-        $root_user->assignRole('Root');
+        $root_user->assignRole(config('roles.root_roles.central.root'));
     }
 }

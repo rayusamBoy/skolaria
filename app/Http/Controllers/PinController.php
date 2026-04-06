@@ -18,6 +18,8 @@ class PinController extends Controller
 
     public function __construct(PinRepo $pin, UserRepo $user)
     {
+        $this->permissionMap = config('permissions.names.tenant.pins');
+        parent::__construct();
         $this->pin = $pin;
         $this->user = $user;
     }
@@ -41,8 +43,8 @@ class PinController extends Controller
 
     public function enter_pin($student_id)
     {
-       // if (Qs::userIsTeamSA())
-           // return redirect(route('dashboard'));
+        if (auth()->user()->hasAnyRole([config('roles.root_roles.tenant.superadmin'), config('roles.default_roles.tenant.admin')]))
+            return redirect(route('dashboard'));
 
         if ($this->checkPinVerified($student_id))
             return Session::has('marks_url') ? redirect(Session::get('marks_url')) : (Session::has('assessments_url') ? redirect(Session::get('assessments_url')) : redirect()->route('dashboard'));

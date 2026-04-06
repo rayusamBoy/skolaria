@@ -16,11 +16,11 @@
                 <a href="#all-classes" class="nav-link active" data-toggle="tab">Manage Classes</a>
             </li>
 
+            @can($tenant_permissions['my_classes']['store']['permission'])
             <li class="nav-item">
-                <a href="#new-class" class="nav-link" data-toggle="tab">
-                    Create New Class
-                </a>
+                <a href="#new-class" class="nav-link" data-toggle="tab">Create New Class</a>
             </li>
+            @endcan
         </ul>
 
         <div class="tab-content">
@@ -45,10 +45,13 @@
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
+                                            @can($tenant_permissions['my_classes']['edit']['permission'])
                                             <a href="{{ route('classes.edit', $c->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
+                                            @endcan
 
+                                            @can($tenant_permissions['my_classes']['destroy']['permission'])
                                             <a id="class-delete-{{ $c->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -56,6 +59,7 @@
                                                 @csrf
                                                 @method('delete')
                                             </form>
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>
@@ -66,6 +70,7 @@
                 </table>
             </div>
 
+            @can($tenant_permissions['my_classes']['store']['permission'])
             <div class="tab-pane fade" id="new-class">
                 <div class="row mb-3">
                     <div class="col-md-12">
@@ -84,18 +89,14 @@
                         <form class="ajax-store" method="post" action="{{ route('classes.store') }}">
                             @csrf
                             <div class="form-group row">
-                                <label class="col-lg-3 col-form-label font-weight-semibold">
-                                    Name <span class="text-danger">*</span>
-                                </label>
+                                <label class="col-lg-3 col-form-label font-weight-semibold">Name <span class="text-danger">*</span></label>
                                 <div class="col-lg-9">
                                     <input name="name" value="{{ old('name') }}" required type="text" class="form-control" placeholder="Name of Class">
                                 </div>
                             </div>
 
                             <div class="form-group row">
-                                <label for="class_type_id" class="col-lg-3 col-form-label font-weight-semibold">
-                                    Class Type
-                                </label>
+                                <label for="class_type_id" class="col-lg-3 col-form-label font-weight-semibold">Class Type</label>
                                 <div class="col-lg-9">
                                     <select required data-placeholder="Select Class Type" class="form-control select" name="class_type_id" id="class_type_id">
                                         @foreach($class_types as $ct)
@@ -116,6 +117,7 @@
                     </div>
                 </div>
             </div>
+            @endcan
         </div>
     </div>
 </div>

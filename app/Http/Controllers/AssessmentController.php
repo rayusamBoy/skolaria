@@ -18,6 +18,8 @@ class AssessmentController extends Controller
     protected $exam, $year, $assessment, $my_class, $student, $mark;
     public function __construct(ExamRepo $exam, AssessmentRepo $assessment, MyClassRepo $my_class, StudentRepo $student, MarkRepo $mark)
     {
+        $this->permissionMap = config('permissions.names.tenant.assessments');
+        parent::__construct();
         $this->exam = $exam;
         $this->assessment = $assessment;
         $this->my_class = $my_class;
@@ -37,7 +39,6 @@ class AssessmentController extends Controller
     public function index()
     {
         $d['assessments'] = $this->assessment->get();
-        $d['my_classes'] = $this->my_class->all();
         $d['subjects'] = $this->my_class->getAllSubjects();
         $d['selected'] = false;
 
@@ -54,7 +55,7 @@ class AssessmentController extends Controller
         if ($sub_recs == null)
             return back()->with('pop_error', __('msg.rnf'));
         elseif ($req->section_id == null && $sub_recs->students_ids != null)
-            $students = $this->student->getRecordByUserIDs(unserialize($sub_recs->students_ids))->get();
+            $students = $this->student->getRecordByUserIDs($sub_recs->students_ids)->get();
         else
             $students = $this->student->getRecord($d)->get();
 
@@ -81,12 +82,11 @@ class AssessmentController extends Controller
         $d['m'] = $d['asmnt_records']->first();
         $d['assessments'] = $this->assessment->get();
         $d['exam'] = $this->exam->getById($exam_id, false);
-        $d['my_classes'] = $this->my_class->all();
         $d['sections'] = $this->my_class->getAllSections();
 
         $d['subjects'] = auth()->user()->hasRole(config('roles.default_roles.tenant.teacher'))
             ? $this->my_class->findSubjectByRecord(auth()->id(), $class_id)->pluck('subject')
-            : $this->my_class->getSubject(['my_class_id' => $class_id])->get();
+            : $this->my_class->whereSubject(['my_class_id' => $class_id])->get();
 
         $d['selected'] = true;
         $d['class_type'] = $this->my_class->findTypeByClass($class_id);
@@ -103,7 +103,6 @@ class AssessmentController extends Controller
         if (!$assessments_exists)
             return $this->noAssessmentRecaord();
 
-        $d['my_classes'] = $this->my_class->all();
         $d['selected'] = false;
 
         if ($class_id && $section_id) {
@@ -248,27 +247,39 @@ class AssessmentController extends Controller
         return redirect()->route('assessments.show', [$student_id, $req->year]);
     }
 
-    public function show($student_id, $year)
+    private function authorizeAssessmentAccess($student_id, $year)
     {
         /* Prevent Other Students/Parents from viewing Result of others */
-        if (auth()->id() != $student_id && !Mk::userIsMyChild($student_id, auth()->id()))
+        if (auth()->id() != $student_id && !Mk::userIsMyChild($student_id, auth()->id())) {
             return redirect(route('dashboard'))->with('pop_error', __('msg.denied'));
-
-        if (Mk::examIsLocked() && !auth()->user()->hasAnyRole(['Super Admin', 'Admin'])) {
-            Session::put('assessments_url', route('assessments.show', [Mk::hash($student_id), $year]));
-
-            if (!$this->checkPinVerified($student_id))
-                return redirect()->route('pins.enter', Mk::hash($student_id));
         }
 
-        if (!$this->verifyStudentExamYear($student_id, $year))
+        if (Mk::examIsLocked() && !auth()->user()->hasAnyRole([config('roles.root_roles.tenant.superadmin'), config('roles.default_roles.tenant.admin')])) {
+            Session::put('assessments_url', route('assessments.show', [Mk::hash($student_id), $year]));
+
+            if (!$this->checkPinVerified($student_id)) {
+                return redirect()->route('pins.enter', Mk::hash($student_id));
+            }
+        }
+
+        if (!$this->verifyStudentExamYear($student_id, $year)) {
             return $this->noStudentRecord();
+        }
+    }
+
+    public function show($student_id, $year)
+    {
+        $this->authorizeAssessmentAccess($student_id, $year);
 
         $wh = ['student_id' => $student_id, 'year' => $year];
         $d['assessments_records'] = $asrs = $this->assessment->getRecords($wh);
+
+        if ($asrs->isEmpty())
+            return back()->with('flash_danger', __('msg.srnf'));
+
         $d['assessments'] = $this->assessment->get()->where('exam.year', $year)->whereIn('exam.category_id', Mk::getSummativeExamCategoryIds())->whereIn('exam.class_type_id', $asrs->pluck('my_class.class_type_id')->unique('my_class.class_type_id')->toArray());
         $d['sr'] = $this->student->getRecord(['user_id' => $student_id])->first() ?? $this->student->getRecord2(['user_id' => $student_id])->first();
-        $d['my_class'] = $mc = $this->my_class->getMC(['id' => $asrs->first()->my_class_id])->first();
+        $d['my_class'] = $mc = $this->my_class->getMC(['id' => $asrs->value('my_class_id')])->first();
         $d['class_type'] = $this->my_class->findTypeByClass($mc->id);
         $d['subjects'] = $this->my_class->findSubjectByClass($mc->id);
         $d['year'] = $year;
@@ -291,7 +302,7 @@ class AssessmentController extends Controller
         $exam = $this->exam->find($exam_id);
 
         /** Deny Updating Records, if Exam Edit is disabled, and user is not team Super Adnim */
-        if (Mk::isDisabled($exam->editable) && !auth()->user()->hasAnyRole(['Super Admin', 'Admin']))
+        if (Mk::isDisabled($exam->editable) && !auth()->user()->hasAnyRole([config('roles.root_roles.tenant.superadmin'), config('roles.default_roles.tenant.admin')]))
             return Mk::jsonUpdateDenied();
 
         $p = $section_id == null
@@ -413,7 +424,7 @@ class AssessmentController extends Controller
         return Mk::jsonUpdateOk();
     }
 
-    public function print_assessments($exam_id, $class_id, $subject_id, $year, $section_id = null)
+    public function print($exam_id, $class_id, $subject_id, $year, $section_id = null)
     {
         switch ($section_id) {
             case null:
@@ -458,19 +469,7 @@ class AssessmentController extends Controller
 
     public function print_detailed($student_id, $exam_id, $year)
     {
-        /* Prevent Other Students/Parents from viewing Result of others */
-        if (auth()->id() != $student_id && !Mk::userIsMyChild($student_id, auth()->id()))
-            return redirect(route('dashboard'))->with('pop_error', __('msg.denied'));
-
-        if (Mk::examIsLocked() && !auth()->user()->hasAnyRole(['Super Admin', 'Admin'])) {
-            Session::put('assessments_url', route('assessments.show', [Mk::hash($student_id), $year]));
-
-            if (!$this->checkPinVerified($student_id))
-                return redirect()->route('pins.enter', Mk::hash($student_id));
-        }
-
-        if (!$this->verifyStudentExamYear($student_id, $year))
-            return $this->noStudentRecord();
+        $this->authorizeAssessmentAccess($student_id, $year);
 
         $wh = ['student_id' => $student_id, 'exam_id' => $exam_id, 'year' => $year];
         $d['assessments_records'] = $asrs = $this->assessment->getRecords($wh);
@@ -497,19 +496,7 @@ class AssessmentController extends Controller
 
     public function print_minimal($student_id, $exam_id, $year)
     {
-        /* Prevent Other Students/Parents from viewing Result of others */
-        if (auth()->id() != $student_id && !Mk::userIsMyChild($student_id, auth()->id()))
-            return redirect(route('dashboard'))->with('pop_error', __('msg.denied'));
-
-        if (Mk::examIsLocked() && !auth()->user()->hasAnyRole(['Super Admin', 'Admin'])) {
-            Session::put('assessments_url', route('assessments.show', [Mk::hash($student_id), $year]));
-
-            if (!$this->checkPinVerified($student_id))
-                return redirect()->route('pins.enter', Mk::hash($student_id));
-        }
-
-        if (!$this->verifyStudentExamYear($student_id, $year))
-            return $this->noStudentRecord();
+        $this->authorizeAssessmentAccess($student_id, $exam_id);
 
         $wh = ['student_id' => $student_id, 'exam_id' => $exam_id, 'year' => $year];
         $d['assessments_records'] = $asrs = $this->assessment->getRecords($wh);
@@ -555,7 +542,7 @@ class AssessmentController extends Controller
 
     public function comment_update(Request $req, $as_id)
     {
-        $d = auth()->user()->hasAnyRole(['Super Admin', 'Admin']) ? $req->only(['t_comment', 'p_comment']) : $req->only(['t_comment']);
+        $d = auth()->user()->hasAnyRole([config('roles.root_roles.tenant.superadmin'), config('roles.default_roles.tenant.admin')]) ? $req->only(['t_comment', 'p_comment']) : $req->only(['t_comment']);
 
         $this->assessment->updateRecord(['id' => $as_id], $d);
 

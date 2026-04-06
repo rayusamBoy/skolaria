@@ -4,9 +4,9 @@
 
 @section('content')
 
-<div class="card">
+<div class="card card-collapsed">
     <div class="card-header header-elements-inline">
-        <h6 class="card-title">Manage Notifications</h6>
+        <h6 class="card-title">Manage Preferences</h6>
         {!! Qs::getPanelOptions() !!}
     </div>
 
@@ -22,7 +22,7 @@
     </div>
 
     <div class="card-body">
-        @can($tenant_permissions['notifications']['update_is_notifiable'])
+        @can($tenant_permissions['notifications']['update_is_notifiable']['permission'])
         <form method="post" action="{{ route('notifications.update_is_notifiable') }}">
             @csrf @method('put')
             <div class="form-group row">
@@ -30,8 +30,8 @@
                     <label for="email_channel" class="col-form-label font-weight-semibold">Email notification</label>
                     <div class="text-center">
                         <select class="form-control select" name="on_email_channel" id="email_channel">
-                            <option @selected($email_channel_on==1) value="1">On</option>
-                            <option @selected($email_channel_on==0) value="0">Off</option>
+                            <option @selected($email_channel_on==true) value="true">On</option>
+                            <option @selected($email_channel_on==false) value="false">Off</option>
                         </select>
                     </div>
                 </div>
@@ -39,8 +39,8 @@
                     <label for="push_channel" class="col-form-label font-weight-semibold">Push notification</label>
                     <div class="text-center">
                         <select class="form-control select" name="on_push_channel" id="push_channel">
-                            <option @selected($push_channel_on==1) value="1">On</option>
-                            <option @selected($push_channel_on==0) value="0">Off</option>
+                            <option @selected($push_channel_on==true) value="true">On</option>
+                            <option @selected($push_channel_on==false) value="false">Off</option>
                         </select>
                     </div>
                 </div>
@@ -48,8 +48,8 @@
                     <label for="sms_channel" class="col-form-label font-weight-semibold">SMS notification</label>
                     <div class="text-center">
                         <select class="form-control select" name="on_sms_channel" id="sms_channel">
-                            <option @selected($sms_channel_on==1) value="1">On</option>
-                            <option @selected($sms_channel_on==0) value="0">Off</option>
+                            <option @selected($sms_channel_on==true) value="true">On</option>
+                            <option @selected($sms_channel_on==false) value="false">Off</option>
                         </select>
                     </div>
                 </div>
@@ -57,8 +57,8 @@
                     <label for="status" class="col-form-label font-weight-semibold">Allow Notifications</label>
                     <div>
                         <select class="form-control select" name="status" id="status">
-                            <option @selected($notification_status==1) value="1">Yes</option>
-                            <option @selected($notification_status==0) value="0">No</option>
+                            <option @selected($is_notifiable==true) value="true">Yes</option>
+                            <option @selected($is_notifiable==false) value="false">No</option>
                         </select>
                     </div>
                 </div>
@@ -78,7 +78,7 @@
             <div class="col-12">
                 <div id="token-div" class="display-none">
                     <div class="alert alert-info border-0"><span id="token-info"></span></div>
-                    <button id="delete-token-button" class="btn btn-warning btn-sm float-right ml-1 d-none">
+                    <button id="delete-token-button" class="btn btn-warning btn-sm float-right ml-true d-none">
                         Delete Token
                     </button>
                 </div>
@@ -89,9 +89,16 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <hr>
+<div class="card">
+    <div class="card-header header-elements-inline">
+        <h6 class="card-title">Manage Notifications</h6>
+        {!! Qs::getPanelOptions() !!}
+    </div>
 
+    <div class="card-body">
         <table class="table datatable-button-html5-tab">
             <thead>
                 <tr>
@@ -125,7 +132,7 @@
                                     </a>
                                     @endif
 
-                                    @can($tenant_permissions['notifications']['destroy'])
+                                    @can($tenant_permissions['notifications']['destroy']['permission'])
                                     <a id="{{ $notification->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                         <i class="material-symbols-rounded">delete</i> Delete
                                     </a>
@@ -142,7 +149,7 @@
             </tbody>
         </table>
 
-        @can($tenant_permissions['notifications']['mark_all_read'])
+        @can($tenant_permissions['notifications']['mark_all_read']['permission'])
         @if(auth()->user()->unreadNotifications->isNotEmpty())
         <a href="javascript:;" id="mark_all_read" class="btn btn-warning float-right mt-3" onclick="confirmOperation(this.id)">
             Mark all Read<i class="material-symbols-rounded ml-1 pb-2px">done_all</i>

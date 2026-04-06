@@ -123,6 +123,6 @@
 
     {{-- Print Button --}}
     <div class="text-center mt-2">
-        <a target="_blank" href="{{ route('assessments.print_assessments', [$exam_id, $my_class_id, $subject_id, $year, $section_id ?? null]) }}" class="btn btn-sm btn-danger"><i class="material-symbols-rounded mr-2">print</i> Print Assessment Records</a>
+        <a target="_blank" href="{{ route('assessments.print', [$exam_id, $my_class_id, $subject_id, $year, $section_id ?? null]) }}" class="btn btn-sm btn-danger"><i class="material-symbols-rounded mr-2">print</i> Print Assessment Records</a>
     </div>
 </form>

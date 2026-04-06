@@ -37,16 +37,14 @@ class UserController extends Controller
         return view('pages.central.users.index', $d);
     }
 
-    public function edit($id)
+    public function edit($central_user)
     {
-        $id = Usr::decodeHash($id);
-
         $except_role = config('roles.default_roles.tenant.student');
         $except_roles = (array) Usr::userIsHead() ? [$except_role] : [$except_role, config('roles.default_roles.tenant.superadmin')];
         $d['roles'] = $roles = $this->permission->getRoles($except_roles);
         $d['permissions'] = $this->permission->getPermissions();
-        $d['user'] = $this->user->find($id);
-        $d['staff_rec'] = $this->user->getStaffRecord(['user_id' => $id])->first();
+        $d['user'] = $this->user->find($central_user);
+        $d['staff_rec'] = $this->user->getStaffRecord(['user_id' => $central_user])->first();
         $d['users'] = $this->user->getUsersByRoleNames($roles->pluck('name')->toArray());
         $d['blood_groups'] = $this->user->getBloodGroups();
         $d['nationals'] = $this->loc->getAllNationals();
@@ -54,17 +52,15 @@ class UserController extends Controller
         return view('pages.central.users.edit', $d);
     }
 
-    public function reset_pass($id)
+    public function reset_password($user_id)
     {
-        $id = Usr::decodeHash($id);
-
         // Redirect if Making Changes to Head
-        if (Usr::userIsHead($id) && !Usr::userIsHead())
+        if (Usr::userIsHead($user_id) && !Usr::userIsHead())
             return back()->with('flash_danger', __('msg.denied'));
 
         $data['password'] = Hash::make('user');
         $data['password_updated_at'] = null;
-        $this->user->update($id, $data);
+        $this->user->update($user_id, $data);
 
         return back()->with('flash_success', __('msg.pu_reset'));
     }
@@ -111,22 +107,19 @@ class UserController extends Controller
         $d2 = $req->only(Usr::getStaffRecord());
         $d2['user_id'] = $user->id;
         $d2['code'] = $staff_id;
-        $d2['subjects_studied'] = isset($d2['subjects_studied']) ? json_encode(explode(",", $d2['subjects_studied'])) : null;
 
         $this->user->createStaffRecord($d2);
 
         return Usr::jsonStoreOk();
     }
 
-    public function update(UserRequest $req, $id)
+    public function update(UserRequest $req, $user_id)
     {
-        $id = (int) Usr::decodeHash($id);
-
         // Redirect if Making Changes to Head
-        if (Usr::userIsHead($id) && !Usr::userIsHead())
+        if (Usr::userIsHead($user_id) && !Usr::userIsHead())
             return Usr::json(__('msg.denied'), false);
 
-        $user = $this->user->find($id);
+        $user = $this->user->find($user_id);
         $except = [...Usr::getStaffRecord(), '_token', '_method', 'roles'];
         $data = $req->except($except);
         $role_names = $req->roles;
@@ -143,7 +136,7 @@ class UserController extends Controller
             $data['photo'] = 'storage/' . $f['path'];
         }
 
-        $this->user->update($id, $data);   /* Update user record */
+        $user->update($data);   /* Update user record */
         $user->syncRoles($req->roles);
         if ($req->has('permissions') AND $req->filled('permissions')) {
             $user->syncPermissions($req->permissions);
@@ -152,15 +145,13 @@ class UserController extends Controller
         /* Update staff record */
         $d2 = $req->only(Usr::getStaffRecord());
         $d2['code'] = $user->code;
-        $d2['subjects_studied'] = isset($d2['subjects_studied']) ? json_encode(explode(",", $d2['subjects_studied'])) : null;
-        $this->user->updateStaffRecord(['user_id' => $id], $d2);
+        $this->user->updateStaffRecord(['user_id' => $user->id], $d2);
 
         return Usr::jsonUpdateOk();
     }
 
     public function show($user_id)
     {
-        $user_id = Usr::decodeHash($user_id);
         if (!$user_id)
             return back();
 
@@ -170,10 +161,9 @@ class UserController extends Controller
         return view('pages.central.users.show', $data);
     }
 
-    public function destroy($id)
+    public function destroy($user_id)
     {
-        $id = Usr::decodeHash($id);
-        $user = $this->user->find($id);
+        $user = $this->user->find($$user_id);
 
         $this->user->forceDelete($user->id);
         // Delete user's photo(s) from storage if exists
@@ -182,7 +172,7 @@ class UserController extends Controller
         return back()->with('flash_success', __('msg.del_ok'));
     }
 
-    public function update_user_blocked_state(UserBlockedState $req)
+    public function toggle_user_block(UserBlockedState $req)
     {
         $user_id = $req->id;
         $data = $req->only("blocked");

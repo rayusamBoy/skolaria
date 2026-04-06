@@ -128,11 +128,11 @@
                             <input id="admin_github_link" name="admin_github_link" value="{{ $settings->firstWhere('type' , 'admin_github_link')->description }}" type="text" class="form-control" placeholder="Eg., https://github.com/username">
                         </div>
                     </div>
-                    {{-- Admin linkedIn link --}}
+                    {{-- Admin X link --}}
                     <div class="form-group row">
-                        <label class="col-lg-3 col-form-label font-weight-semibold" for="admin_linkedin_link">LinkedIn Link</label>
+                        <label class="col-lg-3 col-form-label font-weight-semibold" for="admin_x_link">X (formerly Twitter) Link</label>
                         <div class="col-lg-9">
-                            <input id="admin_linkedin_link" name="admin_linkedin_link" value="{{ $settings->firstWhere('type' , 'admin_linkedin_link')->description }}" type="text" class="form-control" placeholder="Eg., https://www.linkedin.com/in/username">
+                            <input id="admin_x_link" name="admin_x_link" value="{{ $settings->firstWhere('type' , 'admin_x_link')->description }}" type="text" class="form-control" placeholder="Eg., https://www.linkedin.com/in/username">
                         </div>
                     </div>
                 </div>

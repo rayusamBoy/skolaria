@@ -2,172 +2,166 @@
 
 namespace App\Listeners;
 
-use App\Events\TenantDeletingIDCardsThemeDir;
-use App\Events\TenantDeletingStorageDir;
-use App\Events\TenantIDCardsThemeDirDeleted;
-use App\Events\TenantStorageDirDeleted;
-use App\Notifications\SendTenantEvent;
-use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Facades\Notification;
-use Stancl\Tenancy\Events\CreatingDatabase;
-use Stancl\Tenancy\Events\CreatingDomain;
-use Stancl\Tenancy\Events\CreatingTenant;
-use Stancl\Tenancy\Events\DatabaseCreated;
-use Stancl\Tenancy\Events\DatabaseDeleted;
-use Stancl\Tenancy\Events\DatabaseMigrated;
-use Stancl\Tenancy\Events\DatabaseSeeded;
-use Stancl\Tenancy\Events\DeletingDomain;
-use Stancl\Tenancy\Events\DeletingTenant;
-use Stancl\Tenancy\Events\DomainCreated;
-use Stancl\Tenancy\Events\DomainDeleted;
-use Stancl\Tenancy\Events\MigratingDatabase;
-use Stancl\Tenancy\Events\SeedingDatabase;
-use Stancl\Tenancy\Events\TenantCreated;
-use Stancl\Tenancy\Events\TenantDeleted;
+use Illuminate\Events\Dispatcher;
+use App\Notifications\TenantEventCompleted;
 
 class TenantEventSubscriber
 {
     /**
-     * Register the listeners for the subscriber.
-     *
-     * @return array<string, string>
+     * Event → Notification mapping
+     */
+    private function map(): array
+    {
+        $map = [
+            // Tenant
+            \Stancl\Tenancy\Events\CreatingTenant::class => [
+                'title' => 'Tenant creation started',
+                'msg' => 'Creating tenant "%s"...',
+                'tenant' => fn($e) => $e->tenant->name,
+            ],
+            \Stancl\Tenancy\Events\TenantCreated::class => [
+                'title' => 'Tenant created',
+                'msg' => 'Tenant "%s" created successfully.',
+                'tenant' => fn($e) => $e->tenant->name,
+            ],
+            \Stancl\Tenancy\Events\DeletingTenant::class => [
+                'title' => 'Tenant deletion started',
+                'msg' => 'Deleting tenant "%s"...',
+                'tenant' => fn($e) => $e->tenant->name,
+            ],
+            \Stancl\Tenancy\Events\TenantDeleted::class => [
+                'title' => 'Tenant deleted',
+                'msg' => 'Tenant "%s" deleted successfully.',
+                'tenant' => fn($e) => $e->tenant->name,
+            ],
+
+            // Domain
+            \Stancl\Tenancy\Events\CreatingDomain::class => [
+                'title' => 'Domain creation started',
+                'msg' => 'Creating domain "%s" for tenant "%s"...',
+                'params' => fn($e) => [$e->domain->domain, $e->domain->tenant->name],
+            ],
+            \Stancl\Tenancy\Events\DomainCreated::class => [
+                'title' => 'Domain created',
+                'msg' => 'Domain "%s" added to tenant "%s".',
+                'params' => fn($e) => [$e->domain->domain, $e->domain->tenant->name],
+            ],
+            \Stancl\Tenancy\Events\DeletingDomain::class => [
+                'title' => 'Domain deletion started',
+                'msg' => 'Deleting domain "%s" for tenant "%s"...',
+                'params' => fn($e) => [$e->domain->domain, $e->domain->tenant->name],
+            ],
+            \Stancl\Tenancy\Events\DomainDeleted::class => [
+                'title' => 'Domain deleted',
+                'msg' => 'Domain "%s" removed from tenant "%s".',
+                'params' => fn($e) => [$e->domain->domain, $e->domain->tenant->name],
+            ],
+
+            // Database
+            \Stancl\Tenancy\Events\CreatingDatabase::class => [
+                'title' => 'Database creation started',
+                'msg' => 'Creating database "%s" for tenant "%s"...',
+                'params' => fn($e) => [$e->tenant->tenancy_db_name, $e->tenant->name],
+            ],
+            \Stancl\Tenancy\Events\DatabaseCreated::class => [
+                'title' => 'Database created',
+                'msg' => 'Database "%s" created for tenant "%s".',
+                'params' => fn($e) => [$e->tenant->tenancy_db_name, $e->tenant->name],
+            ],
+            \Stancl\Tenancy\Events\MigratingDatabase::class => [
+                'title' => 'Database migration started',
+                'msg' => 'Migrating database "%s" for tenant "%s"...',
+                'params' => fn($e) => [$e->tenant->tenancy_db_name, $e->tenant->name],
+            ],
+            \Stancl\Tenancy\Events\DatabaseMigrated::class => [
+                'title' => 'Database migrated',
+                'msg' => 'Database "%s" migrated successfully.',
+                'params' => fn($e) => [$e->tenant->tenancy_db_name],
+            ],
+            \Stancl\Tenancy\Events\SeedingDatabase::class => [
+                'title' => 'Database seeding started',
+                'msg' => 'Seeding database "%s"...',
+                'params' => fn($e) => [$e->tenant->tenancy_db_name],
+            ],
+            \Stancl\Tenancy\Events\DatabaseSeeded::class => [
+                'title' => 'Database seeded',
+                'msg' => 'Database "%s" seeded successfully.',
+                'params' => fn($e) => [$e->tenant->tenancy_db_name],
+            ],
+            \Stancl\Tenancy\Events\DatabaseDeleted::class => [
+                'title' => 'Database deleted',
+                'msg' => 'Database "%s" deleted for tenant "%s".',
+                'params' => fn($e) => [$e->tenant->tenancy_db_name, $e->tenant->name],
+            ],
+
+            // Storage
+            \App\Events\TenantDeletingStorageDir::class => [
+                'title' => 'Storage cleanup started',
+                'msg' => 'Removing storage for tenant "%s"...',
+                'tenant' => fn($e) => $e->tenant->name,
+            ],
+            \App\Events\TenantStorageDirDeleted::class => [
+                'title' => 'Storage cleaned',
+                'msg' => 'Storage removed for tenant "%s".',
+                'tenant' => fn($e) => $e->tenant->name,
+            ],
+
+            // Theme
+            \App\Events\TenantDeletingIDCardsThemeDir::class => [
+                'title' => 'Theme directory cleanup started',
+                'msg' => 'Removing ID card theme directory for tenant "%s"...',
+                'tenant' => fn($e) => $e->tenant->name,
+            ],
+            \App\Events\TenantIDCardsThemeDirDeleted::class => [
+                'title' => 'Theme directory removed',
+                'msg' => 'ID card theme directory removed for tenant "%s".',
+                'tenant' => fn($e) => $e->tenant->name,
+            ],
+        ];
+
+        return $map;
+    }
+
+    /**
+     * Register the handle method for the subscriber class.
      */
     public function subscribe(Dispatcher $events): array
     {
-        return [
-            TenantDeletingIDCardsThemeDir::class => 'handleDeletingThemeDir',
-            TenantDeletingStorageDir::class => 'handleDeletingStorageDir',
-            TenantIDCardsThemeDirDeleted::class => 'handleThemeDirDeleted',
-            TenantStorageDirDeleted::class => 'handleStorageDirDeleted',
-            CreatingTenant::class => 'handleCreatingTenant',
-            TenantCreated::class => 'handleTenantCreated',
-            DeletingTenant::class => 'handleDeletingTenant',
-            TenantDeleted::class => 'handleTenantDeleted',
-            CreatingDomain::class => 'handleCreatingDomain',
-            DomainCreated::class => 'handleDomainCreated',
-            DeletingDomain::class => 'handleDeletingDomain',
-            DomainDeleted::class => 'handleDomainDeleted',
-            CreatingDatabase::class => 'handleCreatingDB',
-            DatabaseCreated::class => 'handleDBCreated',
-            MigratingDatabase::class => 'handleDBMigration',
-            DatabaseMigrated::class => 'handleDBMigrated',
-            SeedingDatabase::class => 'handleSeedingDB',
-            DatabaseSeeded::class => 'handleDBSeeded',
-            DatabaseDeleted::class => 'handleDBDeleted',
-        ];
+        return collect($this->map())
+            ->mapWithKeys(fn($_, $event) => [$event => 'handle'])
+            ->toArray();
     }
 
-    public function handleDeletingThemeDir(TenantDeletingIDCardsThemeDir $event): void
+    /**
+     * Handle the event and send a notification.
+     */
+    public function handle(object $event): void
     {
-        $event->data = ['msg' => 'Deleting tenant ID Cards theme dir...', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
+        if (app()->runningInConsole())
+            return;
+        
+        $config = $this->map()[\get_class($event)] ?? null;
 
-    public function handleDeletingStorageDir(TenantDeletingStorageDir $event): void
-    {
-        $event->data = ['msg' => 'Deleting tenant storage dir...', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
+        if (!$config) {
+            return;
+        }
 
-    public function handleThemeDirDeleted(TenantIDCardsThemeDirDeleted $event): void
-    {
-        $event->data = ['msg' => 'Tenant ID Cards theme deleted.', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
+        // Resolve parameters
+        if (isset($config['params'])) {
+            $params = $config['params']($event);
+        } elseif (isset($config['tenant'])) {
+            $params = [$config['tenant']($event)];
+        } else {
+            $params = [];
+        }
 
-    public function handleStorageDirDeleted(TenantStorageDirDeleted $event): void
-    {
-        $event->data = ['msg' => 'Tenant storage dir deleted.', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
+        $message = vsprintf($config['msg'], $params);
 
-    public function handleCreatingTenant(CreatingTenant $event): void
-    {
-        $event->data = ['msg' => 'Creating tenant...', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
-
-    public function handleTenantCreated(TenantCreated $event): void
-    {
-        $event->data = ['msg' => 'Tenant created.', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
-
-    public function handleDeletingTenant(DeletingTenant $event): void
-    {
-        $event->data = ['msg' => 'Deleting tenant...', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
-
-    public function handleTenantDeleted(TenantDeleted $event): void
-    {
-        $event->data = ['msg' => 'Tenant deleted.', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
-
-    public function handleDBDeleted(DatabaseDeleted $event): void
-    {
-        $event->data = ['msg' => 'Tenant database deleted.', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
-
-    public function handleCreatingDomain(CreatingDomain $event): void
-    {
-        $event->data = ['msg' => 'Creating tenant domain...', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
-
-    public function handleDomainCreated(DomainCreated $event): void
-    {
-        $event->data = ['msg' => 'Tenant domain created.', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
-
-    public function handleDeletingDomain(DeletingDomain $event): void
-    {
-        $event->data = ['msg' => 'Deleting tenant domain...', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
-
-    public function handleDomainDeleted(DomainDeleted $event): void
-    {
-        $event->data = ['msg' => 'Tenant domain deleted.', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
-
-    public function handleCreatingDB(CreatingDatabase $event): void
-    {
-        $event->data = ['msg' => 'Creating tenant database...', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
-
-    public function handleDBMigration(MigratingDatabase $event): void
-    {
-        $event->data = ['msg' => 'Migrating tenant database...', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
-
-    public function handleDBMigrated(DatabaseMigrated $event): void
-    {
-        $event->data = ['msg' => 'Tenant database migrated.', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
-
-    public function handleSeedingDB(SeedingDatabase $event): void
-    {
-        $event->data = ['msg' => 'Seeding tenant database...', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
-
-    public function handleDBSeeded(DatabaseSeeded $event): void
-    {
-        $event->data = ['msg' => 'Tenant database seeded.', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
-    }
-
-    public function handleDBCreated(DatabaseCreated $event): void
-    {
-        $event->data = ['msg' => 'Tenant database created.', 'url' => route('tenants.index')];
-        Notification::sendNow(auth()->user() ?? [], new SendTenantEvent($event));
+        Notification::sendNow(auth()->user(), new TenantEventCompleted([
+            'title' => $config['title'],
+            'msg' => $message,
+            'url' => route('tenants.index'),
+        ]));
     }
 }

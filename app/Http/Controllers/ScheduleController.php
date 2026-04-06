@@ -12,6 +12,8 @@ class ScheduleController extends Controller
 
     public function __construct(EventRepo $event)
     {
+        $this->permissionMap = config('permissions.names.tenant.schedules');
+        parent::__construct();
         $this->event = $event;
     }
 

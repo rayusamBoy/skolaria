@@ -15,6 +15,8 @@ class TenantController extends Controller
     protected $tenant, $user;
     public function __construct(TenantRepo $tenant, UserRepo $user)
     {
+        $this->permissionMap = config('permissions.names.central.tenants');
+        parent::__construct();
         $this->tenant = $tenant;
         $this->user = $user;
     }
@@ -30,10 +32,9 @@ class TenantController extends Controller
         return view("pages.central.tenants.index", $data);
     }
 
-    public function show($id)
+    public function show($tenant)
     {
-        $id = Qs::decodeHash($id);
-        $data["tenant"] = $this->tenant->find($id);
+        $data["tenant"] = $this->tenant->find($tenant);
 
         return view("pages.central.tenants.show", $data);
     }
@@ -73,10 +74,9 @@ class TenantController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit($tenant)
     {
-        $id = Qs::decodeHash($id);
-        $data["tenant"] = $this->tenant->find($id);
+        $data["tenant"] = $this->tenant->find($tenant);
 
         return view("pages.central.tenants.edit", $data);
     }
@@ -84,10 +84,9 @@ class TenantController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(TenantRequest $request, string $id)
+    public function update(TenantRequest $request, $tenant)
     {
-        $id = Qs::decodeHash($id);
-        $tenant = $this->tenant->find($id);
+        $tenant = $this->tenant->find($tenant);
 
         $data = $request->only(['account_status', 'payment_status', 'remarks']);
         $data['updated_at'] = Carbon::now();
@@ -100,7 +99,7 @@ class TenantController extends Controller
             $data['domain'] = $request->domain;
         }
 
-        $this->tenant->update($id, $data);
+        $tenant->update($data);
 
         return Qs::json(null, null, ['msg' => __('msg.update_ok'), 'ok' => true, 'pop' => true]);
     }
@@ -108,11 +107,11 @@ class TenantController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($tenant)
     {
-        $id = Qs::decodeHash($id);
+        $tenant = $this->tenant->find($tenant);
         try {
-            $this->tenant->delete($id);
+            $tenant->delete();
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['delete_error' => $e->getMessage()]);
         }

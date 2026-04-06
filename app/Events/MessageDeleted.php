@@ -28,6 +28,6 @@ class MessageDeleted implements ShouldBroadcastNow
      */
     public function broadcastOn(): Channel
     {
-        return new PrivateChannel('messages.' . $this->message->thread_id . '.' . tenant('id'));
+        return new PrivateChannel('messages.' . $this->message->thread_id . '.' . tenant()?->getTenantKey());
     }
 }

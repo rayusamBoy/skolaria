@@ -21,7 +21,7 @@
                 <div class="media">
                     <div class="mr-3">
                         <a href="{{ route('my_account.edit') }}">
-                            <img src="{{ Usr::getTenantAwarePhoto(auth()->user()->photo) }}" width="38" height="38" class="rounded-circle" alt="photo">
+                            <img src="{{ Usr::getTenancyAwarePhoto(auth()->user()->photo) }}" width="38" height="38" class="rounded-circle" alt="photo">
                         </a>
                     </div>
                     <div class="media-body">
@@ -65,14 +65,14 @@
                 </li>
 
                 {{-- Academics --}}
-                @canany(array_values($tenant_permissions['time_tables']))
+                @canany(array_column($tenant_permissions['time_tables'], 'permission'))
                 <li class="nav-item nav-item-submenu {{ request()->routeIs('timetables.*', 'ttr.*') ? 'nav-item-expanded nav-item-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="material-symbols-rounded">school</i>
                         <span>Academics</span>
                     </a>
                     <ul class="nav nav-group-sub" data-submenu-title="Manage Academics">
-                        @can($tenant_permissions['time_tables']['index'])
+                        @can($tenant_permissions['time_tables']['index']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('timetables.index') }}" class="nav-link {{ request()->routeIs('timetables.*', 'ttr.*') ? 'active' : '' }}">
                                 Timetables
@@ -84,14 +84,14 @@
                 @endcanany
 
                 {{-- Students --}}
-                @canany([...array_values($tenant_permissions['student_records']), ...array_values($tenant_permissions['promotions'])])
+                @canany([...array_column($tenant_permissions['student_records'], 'permission'), ...array_column($tenant_permissions['promotions'], 'permission'), ...array_column($tenant_permissions['student_id_cards'], 'permission')])
                 <li class="nav-item nav-item-submenu {{ request()->routeIs('students.*') ? 'nav-item-expanded nav-item-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="material-symbols-rounded">groups</i>
                         <span>Students</span>
                     </a>
                     <ul class="nav nav-group-sub" data-submenu-title="Manage Students">
-                        @can($tenant_permissions['student_records']['create'])
+                        @can($tenant_permissions['student_records']['create']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('students.create') }}" class="nav-link {{ request()->routeIs('students.create') ? 'active' : '' }}">
                                 Admit Student
@@ -99,7 +99,7 @@
                         </li>
                         @endcan
 
-                        @can($tenant_permissions['student_records']['list_by_class'])
+                        @can($tenant_permissions['student_records']['list_by_class']['permission'])
                         <li class="nav-item nav-item-submenu {{ request()->routeIs('students.list','students.edit','students.show','students.list_by_class') ? 'nav-item-expanded' : '' }}">
                             <a href="#" class="nav-link {{ request()->routeIs('students.list','students.edit','students.show','students.list_by_class') ? 'active' : '' }}">
                                 Student Information
@@ -116,20 +116,20 @@
                         </li>
                         @endcan
 
-                        @canany(array_values($tenant_permissions['promotions']))
+                        @canany(array_column($tenant_permissions['promotions'], 'permission'))
                         <li class="nav-item nav-item-submenu {{ request()->routeIs('students.promotion*') ? 'nav-item-expanded' : '' }}">
                             <a href="#" class="nav-link {{ request()->routeIs('students.promotion*') ? 'active' : '' }}">
                                 Student Promotion
                             </a>
                             <ul class="nav nav-group-sub">
-                                @can($tenant_permissions['promotions']['promotion'])
+                                @can($tenant_permissions['promotions']['promotion']['permission'])
                                 <li class="nav-item">
                                     <a href="{{ route('students.promotion') }}" class="nav-link {{ request()->routeIs('students.promotion') ? 'active' : '' }}">
                                         Promote Students
                                     </a>
                                 </li>
                                 @endcan
-                                @can($tenant_permissions['promotions']['manage'])
+                                @can($tenant_permissions['promotions']['manage']['permission'])
                                 <li class="nav-item">
                                     <a href="{{ route('students.promotion.manage') }}" class="nav-link {{ request()->routeIs('students.promotion.manage') ? 'active' : '' }}">
                                         Manage Promotions
@@ -140,7 +140,7 @@
                         </li>
                         @endcanany
 
-                        @can($tenant_permissions['student_records']['graduated'])
+                        @can($tenant_permissions['student_records']['graduated']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('students.graduated') }}" class="nav-link {{ request()->routeIs('students.graduated') ? 'active' : '' }}">
                                 Students Graduated
@@ -148,9 +148,9 @@
                         </li>
                         @endcan
 
-                        @canany([$tenant_permissions['student_records']['id_cards'], $tenant_permissions['student_records']['id_cards_manage']])
+                        @canany([$tenant_permissions['student_id_cards']['index']['permission'], $tenant_permissions['student_id_cards']['manage']['permission']])
                         <li class="nav-item">
-                            <a href="{{ route('students.id_cards') }}" class="nav-link {{ request()->routeIs('students.id_cards','students.id_cards.manage') ? 'active' : '' }}">
+                            <a href="{{ route('students.id_cards') }}" class="nav-link {{ request()->routeIs('students.id_cards', 'students.id_cards.manage') ? 'active' : '' }}">
                                 Students ID Cards
                             </a>
                         </li>
@@ -160,17 +160,17 @@
                 @endcanany
 
                 {{-- Classes --}}
-                @canany(array_values($tenant_permissions['my_classes']))
+                @canany(array_column($tenant_permissions['my_classes'], 'permission'))
                 <li class="nav-item">
                     <a href="{{ route('classes.index') }}" class="nav-link {{ request()->routeIs('classes.*') ? 'active' : '' }}">
-                        <i class="material-symbols-rounded">domain</i>
+                        <i class="material-symbols-rounded">class</i>
                         <span>Classes</span>
                     </a>
                 </li>
                 @endcanany
 
                 {{-- Sections --}}
-                @canany(array_values($tenant_permissions['sections']))
+                @canany(array_column($tenant_permissions['sections'], 'permission'))
                 <li class="nav-item">
                     <a href="{{ route('sections.index') }}" class="nav-link {{ request()->routeIs('sections.*') ? 'active' : '' }}">
                         <i class="material-symbols-rounded">stacks</i>
@@ -180,24 +180,41 @@
                 @endcanany
 
                 {{-- Subjects --}}
-                @canany(array_values($tenant_permissions['subjects']))
-                <li class="nav-item">
-                    <a href="{{ route('subjects.index') }}" class="nav-link {{ request()->routeIs('subjects.*') ? 'active' : '' }}">
+                @canany(array_column($tenant_permissions['subjects'], 'permission'))
+                <li class="nav-item nav-item-submenu {{ request()->routeIs('subjects.*', 'subject_records.*') ? 'nav-item-expanded nav-item-open' : '' }}">
+                    <a href="#" class="nav-link">
                         <i class="material-symbols-rounded">subject</i>
                         <span>Subjects</span>
                     </a>
+                    <ul class="nav nav-group-sub" data-submenu-title="Manage Exams">
+                        @can($tenant_permissions['subjects']['index']['permission'])
+                        <li class="nav-item">
+                            <a href="{{ route('subjects.index') }}" class="nav-link {{ request()->routeIs('subjects.*') ? 'active' : '' }}">
+                                Manage
+                            </a>
+                        </li>
+                        @endcan
+
+                        @can($tenant_permissions['subjects']['index_record']['permission'])
+                        <li class="nav-item">
+                            <a href="{{ route('subject_records.index') }}" class="nav-link {{ request()->routeIs('subject_records.*') ? 'active' : '' }}">
+                                Manage Records
+                            </a>
+                        </li>
+                        @endcan
+                    </ul>
                 </li>
                 @endcanany
 
                 {{-- Exams --}}
-                @canany(array_values($tenant_permissions['exams']))
+                @canany(array_column($tenant_permissions['exams'], 'permission'))
                 <li class="nav-item nav-item-submenu {{ request()->routeIs('exams.*','grades.*','marks.*','divisions.*') ? 'nav-item-expanded nav-item-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="material-symbols-rounded">article</i>
                         <span>Exams</span>
                     </a>
                     <ul class="nav nav-group-sub" data-submenu-title="Manage Exams">
-                        @can($tenant_permissions['exams']['index'])
+                        @can($tenant_permissions['exams']['index']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('exams.index') }}" class="nav-link {{ request()->routeIs('exams.index') ? 'active' : '' }}">
                                 Exam List
@@ -205,7 +222,7 @@
                         </li>
                         @endcan
 
-                        @can($tenant_permissions['grades']['index'])
+                        @can($tenant_permissions['grades']['index']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('grades.index') }}" class="nav-link {{ request()->routeIs('grades.*') ? 'active' : '' }}">
                                 Grades
@@ -213,7 +230,7 @@
                         </li>
                         @endcan
 
-                        @can($tenant_permissions['divisions']['index'])
+                        @can($tenant_permissions['divisions']['index']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('divisions.index') }}" class="nav-link {{ request()->routeIs('divisions.*') ? 'active' : '' }}">
                                 Divisions
@@ -221,7 +238,7 @@
                         </li>
                         @endcan
 
-                        @canany([$tenant_permissions['marks']['tabulation'], $tenant_permissions['marks']['tabulation_select']])
+                        @canany([$tenant_permissions['marks']['tabulation']['permission'], $tenant_permissions['marks']['tabulation_select']['permission']])
                         <li class="nav-item">
                             <a href="{{ route('marks.tabulation') }}" class="nav-link {{ request()->routeIs('marks.tabulation') ? 'active' : '' }}">
                                 Tabulation Sheet
@@ -229,27 +246,27 @@
                         </li>
                         @endcanany
 
-                        @canany([$tenant_permissions['marks']['batch'], $tenant_permissions['marks']['index'], $tenant_permissions['marks']['convert']])
+                        @canany([$tenant_permissions['marks']['batch']['permission'], $tenant_permissions['marks']['index']['permission'], $tenant_permissions['marks']['convert']['permission']])
                         <li class="nav-item nav-item-submenu {{ request()->routeIs('marks.index','marks.convert','marks.batch','marks.manage') ? 'nav-item-expanded nav-item-open' : '' }}">
                             <a href="#" class="nav-link {{ request()->routeIs('marks.index','marks.convert','marks.batch') ? 'active' : '' }}">
                                 Marks
                             </a>
                             <ul class="nav nav-group-sub">
-                                @can($tenant_permissions['marks']['batch'])
+                                @can($tenant_permissions['marks']['batch']['permission'])
                                 <li class="nav-item">
                                     <a href="{{ route('marks.batch') }}" class="nav-link {{ request()->routeIs('marks.batch') ? 'active' : '' }}">
                                         Batch
                                     </a>
                                 </li>
                                 @endcan
-                                @can($tenant_permissions['marks']['index'])
+                                @can($tenant_permissions['marks']['index']['permission'])
                                 <li class="nav-item">
                                     <a href="{{ route('marks.index') }}" class="nav-link {{ request()->routeIs('marks.index','marks.manage') ? 'active' : '' }}">
                                         Manage
                                     </a>
                                 </li>
                                 @endcan
-                                @can($tenant_permissions['marks']['convert'])
+                                @can($tenant_permissions['marks']['convert']['permission'])
                                 <li class="nav-item">
                                     <a href="{{ route('marks.convert') }}" class="nav-link {{ request()->routeIs('marks.convert') ? 'active' : '' }}">
                                         Convert
@@ -260,7 +277,7 @@
                         </li>
                         @endcanany
 
-                        @canany([$tenant_permissions['marks']['bulk'], $tenant_permissions['marks']['bulk_select']])
+                        @canany([$tenant_permissions['marks']['bulk']['permission'], $tenant_permissions['marks']['bulk_select']['permission']])
                         <li class="nav-item">
                             <a href="{{ route('marks.bulk') }}" class="nav-link {{ request()->routeIs('marks.bulk','marks.show') ? 'active' : '' }}">
                                 Bulk Marks
@@ -272,14 +289,14 @@
                 @endcanany
 
                 {{-- Assessments --}}
-                @canany(array_values($tenant_permissions['assessments']))
+                @canany(array_column($tenant_permissions['assessments'], 'permission'))
                 <li class="nav-item nav-item-submenu {{ request()->routeIs('assessments.*') ? 'nav-item-expanded nav-item-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="material-symbols-rounded">folder</i>
                         <span>Assessments</span>
                     </a>
                     <ul class="nav nav-group-sub" data-submenu-title="Manage Assessments">
-                        @can($tenant_permissions['assessments']['list'])
+                        @can($tenant_permissions['assessments']['list']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('assessments.list') }}" class="nav-link {{ request()->routeIs('assessments.list') ? 'active' : '' }}">
                                 CA List
@@ -287,7 +304,7 @@
                         </li>
                         @endcan
 
-                        @can([$tenant_permissions['assessments']['progressive'], $tenant_permissions['assessments']['progressive_select']])
+                        @can([$tenant_permissions['assessments']['progressive']['permission'], $tenant_permissions['assessments']['progressive_select']['permission']])
                         <li class="nav-item">
                             <a href="{{ route('assessments.progressive') }}" class="nav-link {{ request()->routeIs('assessments.progressive') ? 'active' : '' }}">
                                 Progressive Sheet
@@ -295,7 +312,7 @@
                         </li>
                         @endcan
 
-                        @can($tenant_permissions['assessments']['index'])
+                        @can($tenant_permissions['assessments']['index']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('assessments.index') }}" class="nav-link {{ request()->routeIs('assessments.index','assessments.manage') ? 'active' : '' }}">
                                 Assessments
@@ -303,7 +320,7 @@
                         </li>
                         @endcan
 
-                        @can([$tenant_permissions['assessments']['bulk'], $tenant_permissions['assessments']['bulk_select']])
+                        @can([$tenant_permissions['assessments']['bulk']['permission'], $tenant_permissions['assessments']['bulk_select']['permission']])
                         <li class="nav-item">
                             <a href="{{ route('assessments.bulk') }}" class="nav-link {{ request()->routeIs('assessments.bulk','assessments.show','assessments.year_selector') ? 'active' : '' }}">
                                 Assessment Sheet
@@ -315,7 +332,7 @@
                 @endcanany
 
                 {{-- Results --}}
-                @canany([$tenant_permissions['marks']['year_selector'], $tenant_permissions['marks']['year_selected'], $tenant_permissions['assessments']['year_selector'], $tenant_permissions['assessments']['year_selected']])
+                @canany([$tenant_permissions['marks']['year_selector']['permission'], $tenant_permissions['marks']['year_selected']['permission'], $tenant_permissions['assessments']['year_selector']['permission'], $tenant_permissions['assessments']['year_selected']['permission']])
                 <li class="nav-item nav-item-submenu {{ request()->routeIs('assessments.*') ? 'nav-item-expanded nav-item-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="material-symbols-rounded">grading</i>
@@ -323,7 +340,7 @@
                     </a>
 
                     <ul class="nav nav-group-sub" data-submenu-title="Results">
-                        @can([$tenant_permissions['marks']['year_selector'], $tenant_permissions['marks']['year_selected']])
+                        @can([$tenant_permissions['marks']['year_selector']['permission'], $tenant_permissions['marks']['year_selected']['permission']])
                         <li class="nav-item">
                             <a href="{{ route('marks.year_selector', Qs::hash(Auth::user()->id)) }}" class="nav-link {{ request()->routeIs('marks.*', 'pins.enter') ? 'active' : '' }}">
                                 Marksheet
@@ -331,7 +348,7 @@
                         </li>
                         @endcan
 
-                        @can([$tenant_permissions['assessments']['year_selector'], $tenant_permissions['assessments']['year_selected']])
+                        @can([$tenant_permissions['assessments']['year_selector']['permission'], $tenant_permissions['assessments']['year_selected']['permission']])
                         <li class="nav-item">
                             <a href="{{ route('assessments.year_selector', Qs::hash(Auth::user()->id)) }}" class="nav-link {{ request()->routeIs('assessments.*') ? 'active' : '' }}">
                                 Assessment Sheet
@@ -343,10 +360,10 @@
                 @endcanany
 
                 {{-- Administrative --}}
-                @canany(array_values($tenant_permissions['payments']))
+                @canany(array_column($tenant_permissions['payments'], 'permission'))
                 <li class="nav-item nav-item-submenu {{ request()->routeIs('payments.*') ? 'nav-item-expanded nav-item-open' : '' }}">
                     <a href="#" class="nav-link">
-                        <i class="material-symbols-rounded">apartment</i>
+                        <i class="material-symbols-rounded">admin_panel_settings</i>
                         <span>Administrative</span>
                     </a>
                     <ul class="nav nav-group-sub" data-submenu-title="Administrative">
@@ -355,21 +372,21 @@
                                 Payments
                             </a>
                             <ul class="nav nav-group-sub">
-                                @can($tenant_permissions['payments']['create'])
+                                @can($tenant_permissions['payments']['create']['permission'])
                                 <li class="nav-item">
                                     <a href="{{ route('payments.create') }}" class="nav-link {{ request()->routeIs('payments.create') ? 'active' : '' }}">
                                         Create Payment
                                     </a>
                                 </li>
                                 @endcan
-                                @can($tenant_permissions['payments']['index'])
+                                @can($tenant_permissions['payments']['index']['permission'])
                                 <li class="nav-item">
                                     <a href="{{ route('payments.index') }}" class="nav-link {{ request()->routeIs('payments.index','payments.edit','payments.show') ? 'active' : '' }}">
                                         Manage Payments
                                     </a>
                                 </li>
                                 @endcan
-                                @can($tenant_permissions['payments']['manage'])
+                                @can($tenant_permissions['payments']['manage']['permission'])
                                 <li class="nav-item">
                                     <a href="{{ route('payments.manage') }}" class="nav-link {{ request()->routeIs('payments.manage','payments.invoice','payments.receipts') ? 'active' : '' }}">
                                         Student Payments
@@ -383,21 +400,21 @@
                 @endcanany
 
                 {{-- Books --}}
-                @canany([...array_values($tenant_permissions['books']), ...array_values($tenant_permissions['book_requests'])])
+                @canany([...array_column($tenant_permissions['books'], 'permission'), ...array_column($tenant_permissions['book_requests'], 'permission')])
                 <li class="nav-item nav-item-submenu {{ request()->routeIs('books.*', 'book_requests.*') ? 'nav-item-expanded nav-item-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="material-symbols-rounded">library_books</i>
                         <span>Books</span>
                     </a>
                     <ul class="nav nav-group-sub" data-submenu-title="Manage Books">
-                        @can($tenant_permissions['books']['index'])
+                        @can($tenant_permissions['books']['index']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('books.index') }}" class="nav-link {{ request()->routeIs('books.index','books.edit') ? 'active' : '' }}">
                                 Manage
                             </a>
                         </li>
                         @endcan
-                        @can($tenant_permissions['book_requests']['index'])
+                        @can($tenant_permissions['book_requests']['index']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('book_requests.index') }}" class="nav-link {{ request()->routeIs('book_requests.*') ? 'active' : '' }}">
                                 Manage Requests
@@ -409,7 +426,7 @@
                 @endcanany
 
                 {{-- Dormitories --}}
-                @canany(array_values($tenant_permissions['dorms']))
+                @canany(array_column($tenant_permissions['dorms'], 'permission'))
                 <li class="nav-item">
                     <a href="{{ route('dorms.index') }}" class="nav-link {{ request()->routeIs('dorms.*') ? 'active' : '' }}">
                         <i class="material-symbols-rounded">home_work</i>
@@ -419,7 +436,7 @@
                 @endcanany
 
                 {{-- Pins --}}
-                @canany(array_values($tenant_permissions['pins']))
+                @canany(array_column($tenant_permissions['pins'], 'permission'))
                 <li class="nav-item nav-item-submenu {{ request()->routeIs('pins.*') ? 'nav-item-expanded nav-item-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="material-symbols-rounded">password</i>
@@ -427,7 +444,7 @@
                     </a>
 
                     <ul class="nav nav-group-sub" data-submenu-title="Manage Pins">
-                        @can($tenant_permissions['pins']['create'])
+                        @can($tenant_permissions['pins']['create']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('pins.create') }}" class="nav-link {{ request()->routeIs('pins.create') ? 'active' : '' }}">
                                 Generate Pins
@@ -435,7 +452,7 @@
                         </li>
                         @endcan
 
-                        @can($tenant_permissions['pins']['index'])
+                        @can($tenant_permissions['pins']['index']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('pins.index') }}" class="nav-link {{ request()->routeIs('pins.index') ? 'active' : '' }}">
                                 View Pins
@@ -447,7 +464,7 @@
                 @endcanany
 
                 {{-- Users --}}
-                @canany(array_values($tenant_permissions['users']))
+                @canany(array_column($tenant_permissions['users'], 'permission'))
                 <li class="nav-item">
                     <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
                         <i class="material-symbols-rounded">group</i>
@@ -457,7 +474,7 @@
                 @endcan
 
                 {{-- Query Builder --}}
-                @canany(array_values($tenant_permissions['query_builders']))
+                @canany(array_column($tenant_permissions['query_builders'], 'permission'))
                 <li class="nav-item">
                     <a href="{{ route('query_builder.index') }}" class="nav-link {{ request()->routeIs('query_builder.*') ? 'active' : '' }}">
                         <i class="material-symbols-rounded">join</i>
@@ -467,21 +484,21 @@
                 @endcanany
 
                 {{-- Settings --}}
-                @canany([...array_values($tenant_permissions['settings']), ...array_values($tenant_permissions['roles'])])
+                @canany([...array_column($tenant_permissions['settings'], 'permission'), ...array_column($tenant_permissions['roles'], 'permission')])
                 <li class="nav-item nav-item-submenu {{ request()->routeIs('settings.*', 'permissions.*', 'roles.*') ? 'nav-item-expanded nav-item-open' : '' }}">
                     <a href="#" class="nav-link">
                         <i class="material-symbols-rounded">settings</i>
                         <span>Settings</span>
                     </a>
                     <ul class="nav nav-group-sub" data-submenu-title="Settings">
-                        @can($tenant_permissions['settings']['index'])
+                        @can($tenant_permissions['settings']['index']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('settings.index') }}" class="nav-link {{ request()->routeIs('settings.index') ? 'active' : '' }}">
                                 App
                             </a>
                         </li>
                         @endcan
-                        @can($tenant_permissions['roles']['index'])
+                        @can($tenant_permissions['roles']['index']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('roles.index') }}" class="nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}">
                                 Roles
@@ -493,7 +510,7 @@
                 @endcanany
 
                 {{-- My Children --}}
-                @canany(array_values($tenant_permissions['mies']))
+                @canany(array_column($tenant_permissions['childrens'], 'permission'))
                 <li class="nav-item">
                     <a href="{{ route('parent.my_children') }}" class="nav-link {{ request()->routeIs('parent.my_children', 'marks.year_selector', 'assessments.year_selector', 'payments.status', 'students.show', 'marks.show', 'assessments.show') ? 'active' : '' }}">
                         <i class="material-symbols-rounded">account_child_invert</i>

@@ -13,6 +13,10 @@ class SubjectRecord extends Eloquent
 
     protected $fillable = ['subject_id', 'section_id', 'teacher_id', 'students_ids'];
 
+    protected $casts = [
+        'students_ids' => 'array'
+    ];
+
     public function subject()
     {
         return $this->belongsTo(Subject::class);
@@ -32,6 +36,7 @@ class SubjectRecord extends Eloquent
     {
         return LogOptions::defaults()
             ->logFillable()
+            ->dontLogIfAttributesChangedOnly(['students_ids'])
             ->dontSubmitEmptyLogs()
             ->logOnlyDirty();
     }

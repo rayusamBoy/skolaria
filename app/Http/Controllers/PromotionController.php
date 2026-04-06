@@ -16,6 +16,8 @@ class PromotionController extends Controller
 
     public function __construct(MyClassRepo $my_class, StudentRepo $student)
     {
+        $this->permissionMap = config('permissions.names.tenant.promotions');
+        parent::__construct();
         $this->my_class = $my_class;
         $this->student = $student;
     }
@@ -25,7 +27,6 @@ class PromotionController extends Controller
         $d['old_year'] = $old_yr = Qs::getSetting('current_session');
         $old_yr = explode('-', $old_yr);
         $d['new_year'] = ++$old_yr[0] . '-' . ++$old_yr[1];
-        $d['my_classes'] = $this->my_class->all();
         $d['sections'] = $this->my_class->getAllSections();
         $d['selected'] = false;
 
@@ -170,7 +171,7 @@ class PromotionController extends Controller
 
         // Delete Marks if Already Inserted for New Session
         $this->delete_old_marks($prom->student_id, Qs::getNextSession());
-        
+
         return $this->student->deletePromotion($promotion_id);
     }
 }

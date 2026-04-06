@@ -9,7 +9,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class NewMessage implements ShouldBroadcastNow
+class MessageArrived implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -28,6 +28,6 @@ class NewMessage implements ShouldBroadcastNow
      */
     public function broadcastOn(): Channel
     {
-        return new PrivateChannel('messages.' . $this->message->thread_id . '.' . tenant('id'));
+        return new PrivateChannel('messages.' . $this->message->thread_id . '.' . tenant()?->getTenantKey());
     }
 }

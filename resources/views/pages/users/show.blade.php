@@ -8,7 +8,7 @@
     <div class="col-md-3 text-center">
         <div class="card">
             <div class="card-body">
-                <img style="width: 90%; height: 90%" src="{{ Usr::getTenantAwarePhoto($user->photo) }}" alt="photo" class="rounded-circle">
+                <img style="width: 90%; height: 90%" src="{{ Usr::getTenancyAwarePhoto($user->photo) }}" alt="photo" class="rounded-circle">
                 <br>
                 <h3 class="mt-3">{{ $user->name }}</h3>
             </div>
@@ -202,14 +202,10 @@
                                     <td class="font-weight-bold">Number of Periods</td>
                                     <td class="break-all">{{ $staff_rec->no_of_periods ?? '-' }}</td>
                                 </tr>
-                                @if($staff_rec->subjects_studied && json_decode($staff_rec->subjects_studied)[0] !== "")
+                                @if($staff_rec->subjects_studied)
                                 <tr>
                                     <td class="font-weight-bold">Subjects Studied</td>
-                                    <td class="break-all">
-                                        @foreach(json_decode($staff_rec->subjects_studied) as $sub)
-                                        {{ $loop->iteration }} - {{ $sub }}<br />
-                                        @endforeach
-                                    </td>
+                                    <td class="break-all">{{ $staff_rec->subjects_studied }} </td>
                                 </tr>
                                 @endif
                             </tbody>

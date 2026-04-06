@@ -9,7 +9,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
-class UserUpdate extends FormRequest
+class UserProfileUpdate extends FormRequest
 {
 
     public function authorize()

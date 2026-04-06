@@ -15,6 +15,8 @@ class TicketController extends Controller
     protected $ticket, $user;
     public function __construct(TicketRepo $ticket, UserRepo $user)
     {
+        $this->permissionMap = config('permissions.names.tenant.tickets');
+        parent::__construct();
         $this->ticket = $ticket;
         $this->user = $user;
     }
@@ -31,7 +33,7 @@ class TicketController extends Controller
 
     private function getTenantUserTickets()
     {
-        $where = ['tenant_id' => tenant('id'), 'user_id' => auth()->id()];
+        $where = ['tenant_id' => tenant()?->getTenantKey(), 'user_id' => auth()->id()];
         $tickets = $this->ticket->getTickets($where);
         return $tickets;
     }
@@ -41,7 +43,7 @@ class TicketController extends Controller
      */
     public function index()
     {
-        $where = ['tenant_id' => tenant('id'), 'user_id' => auth()->id()];
+        $where = ['tenant_id' => tenant()?->getTenantKey(), 'user_id' => auth()->id()];
         $tickets = $this->ticket->getTickets($where);
 
         $data['active_tickets'] = $tickets->where('is_archived', false);
@@ -62,7 +64,7 @@ class TicketController extends Controller
         $ticket_id = Usr::decodeHash($ticket_id);
 
         $where_msg = ['user_id' => auth()->id(), 'ticket_id' => $ticket_id];
-        $where_ticket = ['tenant_id' => tenant('id'), 'user_id' => auth()->id(), 'id' => $ticket_id];
+        $where_ticket = ['tenant_id' => tenant()?->getTenantKey(), 'user_id' => auth()->id(), 'id' => $ticket_id];
         $tickets = $this->ticket->getTickets($where_ticket);
 
         if ($tickets->isEmpty())
@@ -121,7 +123,7 @@ class TicketController extends Controller
     public function store(TicketCreate $request)
     {
         $ticket_data = $request->only(['department', 'priority', 'subject', 'category_id']);
-        $ticket_data['tenant_id'] = tenant('id');
+        $ticket_data['tenant_id'] = tenant()?->getTenantKey();
         $ticket_data['user_id'] = auth()->id();
         $ticket_data['labels_ids'] = serialize($request->labels_ids);
 

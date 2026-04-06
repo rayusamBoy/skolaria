@@ -7,7 +7,6 @@
 <script src="{{ asset('global_assets/js/plugins/forms/styling/uniform.min.js') }}"></script>
 <script src="{{ asset('global_assets/js/plugins/forms/inputs/inputmask.js') }}"></script>
 <script src="{{ asset('global_assets/js/plugins/forms/validation/validate.min.js') }}"></script>
-<script src="{{ asset('global_assets/js/plugins/extensions/js-cookie.js') }}"></script>
 
 {{-- Notifications --}}
 <script type="text/javascript" src="{{ asset('global_assets/js/plugins/notifications/sweetalert2.min.js') }}"></script>
@@ -49,7 +48,7 @@
 <script src="{{ asset('global_assets/js/plugins/prints/printThis-min.js') }}"></script>
 
 {{-- Editors --}}
-<script src="{{ asset('global_assets/js/plugins/editors/simplemde.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/overtype@latest/dist/overtype.min.js"></script>
 
 {{-- Theme JS files --}}
 <script src="{{ asset('assets/js/custom-min.js') }} "></script>

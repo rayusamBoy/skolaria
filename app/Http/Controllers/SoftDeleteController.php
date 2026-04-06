@@ -40,10 +40,10 @@ class SoftDeleteController extends Controller
 
     public function empty_soft_deleted_model($model_name)
     {
-        $can_soft_delete_models = ['users', 'pyaments', 'my_classes', 'exams', 'threads'];
+        $can_soft_delete_models = Usr::getCanSoftDeleteModelNames();
         $model_name = strtolower($model_name);
 
-        if (!\in_array($model_name, $can_soft_delete_models, true))
+        if (!\in_array($model_name, $can_soft_delete_models, true) || !auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
             return back()->with('pop_error', __('msg.denied'));
 
         if ($model_name === 'users') {

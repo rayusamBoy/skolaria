@@ -8,22 +8,7 @@
     <meta id="csrf-token" name="csrf-token" content="{{ csrf_token() }}">
     <meta name="author" content="Rashidi Said (rayusam)">
 
-    @php $settings = Qs::getSettings() @endphp
-
-    @if(Qs::googleAnalyticsSetUpOkAndEnabled())
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ $settings->firstWhere("type", "google_analytic_tag_id")->description }}"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-
-        function gtag() {
-            dataLayer.push(arguments);
-        }
-        gtag('js', new Date());
-        gtag('config', '{{ $settings->firstWhere("type", "google_analytic_tag_id")->description }}');
-
-    </script>
-    @endif
+    @includeUnless(!Qs::googleAnalyticsSetUpOkAndEnabled(), 'partials.js.google_tag')
 
     <title>@yield('page_title') &bull; {{ Qs::getStringAbbreviation(config('app.name')) }}</title>
 
@@ -34,7 +19,7 @@
     @stack('css')
 </head>
 
-<body class="{{ in_array(Route::currentRouteName(), ['payments.invoice', 'marks.tabulation', 'marks.manage', 'assessments.manage', 'assessments.index', 'assessments.show', 'assessments.progressive', 'assessments.bulk', 'marks.show', 'ttr.manage', 'ttr.show', 'bin', 'events.manage', 'events.edit', 'query_builder.index', 'query_builder.select', 'notices.index', 'notices.edit', 'users.index', 'books.index', 'logs.index', 'students.promotion_manage', 'tenants.index', 'settings.index', 'settings_non_tenancy.index', 'analytics.index', 'analytics.fetch_data', 'tickets.reply', 'tickets.index_central', 'tickets.answer']) || auth()->user()->sidebar_minimized ? 'sidebar-xs' : '' }}">
+<body class="{{ in_array(Route::currentRouteName(), ['payments.invoice', 'marks.tabulation', 'marks.manage', 'assessments.manage', 'assessments.index', 'assessments.show', 'assessments.progressive', 'assessments.bulk', 'marks.show', 'ttr.manage', 'ttr.show', 'bin', 'events.manage', 'events.edit', 'query_builder.index', 'query_builder.select', 'notices.index', 'notices.edit', 'users.index', 'books.index', 'logs.index', 'students.promotion_manage', 'tenants.index', 'settings.index', 'settings_non_tenancy.index', 'analytics.index', 'analytics.fetch_data', 'tickets.reply', 'tickets.index_central', 'tickets.answer']) || $user_preferences['always_minimize_sidebar'] == 1 ? 'sidebar-xs' : '' }}">
     {{-- Block UI -- Loading page indicator; Will be removed by js script on page load; Copied from Block UI interface implementation --}}
     <div class="blockUI blockOverlay custom" style="z-index: 1000;border: none;margin: 0px;padding: 0px;width: 100%;height: 100%;background-color: rgb(0, 0, 0);opacity: 0.6;cursor: wait;position: fixed;"></div>
     <div class="blockUI blockMsg blockPage custom">
@@ -72,7 +57,7 @@
         <button type="button" class="material-symbols-rounded btn btn-to-bottom float-right" title="Go to Bottom">arrow_downward</button>
     </div>
     {{-- Notification Sounds --}}
-    <span class="d-none" id="notification-sounds" data-allow_system_sounds="{{ auth()->user()->allow_system_sounds }}" data-base_url="{{ asset('global_assets/sounds') }}"></span>
+    <span class="d-none" id="notification-sounds" data-allow_system_sounds="{{ $user_preferences['allow_system_sounds'] }}" data-base_url="{{ asset('global_assets/sounds') }}"></span>
     {{-- Offline Indicator --}}
     <div id="offline-alert">Application Offline</div>
 

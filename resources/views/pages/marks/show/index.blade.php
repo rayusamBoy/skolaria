@@ -25,7 +25,7 @@
         @include('pages.marks.show.sheet')
 
         {{--Print Button--}}
-        @if(auth()->user()->can($tenant_permissions['marks']['print_view']))
+        @if(auth()->user()->can($tenant_permissions['marks']['print_view']['permission']))
         <div class="text-center mt-3">
             <a target="_blank" href="{{ route('marks.print', [Qs::hash($student_id), $ex->id, $year]) }}" class="btn btn-secondary btn-lg">Print Marksheet <i class="material-symbols-rounded ml-2">print</i></a>
         </div>
@@ -34,10 +34,10 @@
 </div>
 
 {{-- EXAM COMMENTS   --}}
-@includeWhen(auth()->user()->can($tenant_permissions['marks']['comment_update']), 'pages.marks.show.comments')
+@includeWhen(auth()->user()->can($tenant_permissions['marks']['comment_update']['permission']), 'pages.marks.show.comments')
 
 {{-- SKILL RATING --}}
-@includeWhen(auth()->user()->can($tenant_permissions['marks']['skills_update']), 'pages.marks.show.skills')
+@includeWhen(auth()->user()->can($tenant_permissions['marks']['skills_update']['permission']), 'pages.marks.show.skills')
 
 @endforeach
 @endforeach

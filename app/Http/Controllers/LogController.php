@@ -16,6 +16,8 @@ class LogController extends Controller
 
     public function __construct(UserRepo $user, MyClassRepo $my_class, LogRepo $log)
     {
+        $this->permissionMap = config('permissions.names.tenant.logs');
+        parent::__construct();
         $this->user = $user;
         $this->my_class = $my_class;
         $this->log = $log;
@@ -30,10 +32,8 @@ class LogController extends Controller
         return view('pages.logs', $d);
     }
 
-
     public function reset_login_histories($user_id)
     {
-        $user_id = Qs::decodeHash($user_id);
         $current_timestamp = Carbon::now()->toDateTimeString();
         $data = ['login_times' => 0, 'last_reset' => $current_timestamp, 'last_login' => NULL];
 

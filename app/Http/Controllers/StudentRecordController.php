@@ -25,6 +25,8 @@ class StudentRecordController extends Controller
 
     public function __construct(LocationRepo $loc, MyClassRepo $my_class, UserRepo $user, StudentRepo $student)
     {
+        $this->permissionMap = config('permissions.names.tenant.student_records');
+        parent::__construct();
         $this->loc = $loc;
         $this->my_class = $my_class;
         $this->user = $user;
@@ -32,7 +34,7 @@ class StudentRecordController extends Controller
         $this->students_batch_file_name_description = 'students batch add template';
     }
 
-    public function reset_pass($st_id)
+    public function reset_password($st_id)
     {
         $st_id = Usr::decodeHash($st_id);
         $data['password'] = Hash::make('student');
@@ -43,8 +45,7 @@ class StudentRecordController extends Controller
 
     public function create()
     {
-        $data['my_classes'] = $this->my_class->all();
-        $data['parents'] = $this->user->getUsersByRoleNames(['Parent']);
+        $data['parents'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.parent')]);
         $data['dorms'] = $this->student->getAllDorms();
         $data['states'] = $this->loc->getStates();
         $data['nationals'] = $this->loc->getAllNationals();
@@ -167,7 +168,6 @@ class StudentRecordController extends Controller
 
     public function graduated()
     {
-        $data['my_classes'] = $this->my_class->all();
         $data['grad_students'] = $this->student->allGradStudents()->whereNotNull('user');
 
         return view('pages.students.graduated', $data);
@@ -210,8 +210,7 @@ class StudentRecordController extends Controller
             return Usr::goWithDanger();
 
         $data['sr'] = $sr = $this->student->getRecord(['id' => $sr_id])->first() ?? $this->student->getRecord2(['id' => $sr_id])->first();
-        $data['my_classes'] = $this->my_class->all();
-        $data['parents'] = $this->user->getUsersByRoleNames(['Parent']);
+        $data['parents'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.parent')]);
         $data['dorms'] = $this->student->getAllDorms();
         $data['states'] = $this->loc->getStates();
         $data['nationals'] = $this->loc->getAllNationals();

@@ -16,6 +16,8 @@ class StatisticsController extends Controller
     protected $user, $class, $exam, $payment, $notice, $student, $mark, $year, $assessment;
     public function __construct(UserRepo $user, MyClassRepo $class, ExamRepo $exam, StudentRepo $student, MarkRepo $mark)
     {
+        $this->permissionMap = config('permissions.names.tenant.statistics');
+        parent::__construct();
         $this->user = $user;
         $this->class = $class;
         $this->exam = $exam;

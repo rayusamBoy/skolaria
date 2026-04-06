@@ -30,26 +30,26 @@ class UserController extends Controller
 
     public function index()
     {
-        $d['nationals'] = $this->loc->getAllNationals();
-        $d['blood_groups'] = $this->user->getBloodGroups();
         $except_role = config('roles.default_roles.tenant.student');
         $except_roles = (array) Usr::userIsHead() ? [$except_role] : [$except_role, config('roles.default_roles.tenant.superadmin')];
+
+        $d['nationals'] = $this->loc->getAllNationals();
+        $d['blood_groups'] = $this->user->getBloodGroups();
         $d['roles'] = $this->permission->getRoles($except_roles);
         $d['permissions'] = $this->permission->getPermissions();
 
         return view('pages.users.index', $d);
     }
 
-    public function edit($id)
+    public function edit($user)
     {
-        $id = Usr::decodeHash($id);
-
         $except_role = config('roles.default_roles.tenant.student');
         $except_roles = (array) Usr::userIsHead() ? [$except_role] : [$except_role, config('roles.default_roles.tenant.superadmin')];
+
         $d['roles'] = $roles = $this->permission->getRoles($except_roles);
         $d['permissions'] = $this->permission->getPermissions();
-        $d['user'] = $this->user->find($id);
-        $d['staff_rec'] = $this->user->getStaffRecord(['user_id' => $id])->first();
+        $d['user'] = $this->user->find($user);
+        $d['staff_rec'] = $this->user->getStaffRecord(['user_id' => $user])->first();
         $d['users'] = $this->user->getUsersByRoleNames($roles->pluck('name')->toArray());
         $d['blood_groups'] = $this->user->getBloodGroups();
         $d['nationals'] = $this->loc->getAllNationals();
@@ -57,18 +57,16 @@ class UserController extends Controller
         return view('pages.users.edit', $d);
     }
 
-    public function reset_pass($id)
+    public function reset_password($user)
     {
-        $id = Usr::decodeHash($id);
-
         // Redirect if Making Changes to Head
-        if (Usr::userIsHead($id) && !Usr::userIsHead())
+        if (Usr::userIsHead($user) && !Usr::userIsHead())
             return back()->with('flash_danger', __('msg.denied'));
 
         $data['password'] = Hash::make('user');
         $data['password_updated_at'] = NULL;
 
-        $this->user->update($id, $data);
+        $this->user->update($user, $data);
 
         return back()->with('flash_success', __('msg.pu_reset'));
     }
@@ -117,7 +115,6 @@ class UserController extends Controller
             $d2 = $req->only(Usr::getStaffRecord());
             $d2['user_id'] = $user->id;
             $d2['code'] = $staff_id;
-            $d2['subjects_studied'] = json_encode(explode(",", $d2['subjects_studied']));
 
             $this->user->createStaffRecord($d2);
         }
@@ -135,15 +132,13 @@ class UserController extends Controller
         return Usr::json(__('msg.store_ok') . " Default password: $last_role_name");
     }
 
-    public function update(UserRequest $req, $id)
+    public function update(UserRequest $req, $user_id)
     {
-        $id = (int) Usr::decodeHash($id);
-
         // Redirect if Making Changes to Head
-        if (Usr::userIsHead($id) && !Usr::userIsHead())
+        if (Usr::userIsHead($user_id) && !Usr::userIsHead())
             return Usr::json(__('msg.denied'), false);
 
-        $user = $this->user->find($id);
+        $user = $this->user->find($user_id);
         $role_names = $req->roles;
         $last_role_name = strtolower(last($role_names));
 
@@ -166,7 +161,7 @@ class UserController extends Controller
             $photo->storeAs($f['path']);
         }
 
-        $this->user->update($id, $data);
+        $user->update($data);
         $user->syncRoles($req->roles);
         if ($req->has('permissions') AND $req->filled('permissions')) {
             $user->syncPermissions($req->permissions);
@@ -176,22 +171,20 @@ class UserController extends Controller
             if ($user_is_staff) {
                 $d2 = $req->only(Usr::getStaffRecord());
                 $d2['code'] = $user->code;
-                $d2['subjects_studied'] = json_encode(explode(",", $d2['subjects_studied']));
-                $this->user->updateStaffRecord(['user_id' => $id], $d2);
+                $this->user->updateStaffRecord(['user_id' => $user->id], $d2);
             } else
-                $this->user->deleteStaffRecord(['user_id' => $id]);
+                $this->user->deleteStaffRecord(['user_id' => $user->id]);
         } elseif ($user_is_staff) {
             $d2 = $req->only(Usr::getStaffRecord());
             $d2['code'] = $user->code;
-            $d2['subjects_studied'] = json_encode(explode(",", $d2['subjects_studied']));
-            $this->user->updateStaffRecord(['user_id' => $id], $d2);
+            $this->user->updateStaffRecord(['user_id' => $user->id], $d2);
         }
 
         if ($user_is_parent) {
             $d3 = $req->only(Usr::getParentRelativeRecord(['user_id', 'name2']));
             $d3['name'] = ucwords(strtolower($req->name2));
             $d3['relation'] = $req->relation;
-            $this->user->updateParentRelativeRec(['user_id' => $id], $d3);
+            $this->user->updateParentRelativeRec(['user_id' => $user->id], $d3);
         }
 
         return Usr::jsonUpdateOk();
@@ -199,45 +192,43 @@ class UserController extends Controller
 
     public function show($user_id)
     {
-        $user_id = Usr::decodeHash($user_id);
         if (!$user_id)
             return back();
 
         $data['user'] = $user = $this->user->find($user_id);
 
         $user_is_staff = \count(array_diff($user->roles->pluck('name')->toArray(), Usr::getStaff())) > 0;
-        if ($user_is_staff)
-            $data['staff_rec'] = $this->user->getStaffRecord(['user_id' => $user_id])->first() ?: null;
+        if ($user_is_staff) {
+            $data['staff_rec'] = $this->user->getStaffRecord(['user_id' => $user->id])->first() ?: null;
+        }
 
         return view('pages.users.show', $data);
     }
 
-    public function destroy($id)
+    public function destroy($user_id)
     {
-        $id = Usr::decodeHash($id);
-
         // Redirect if Making Changes to Heads
-        if (Usr::userIsHead($id))
+        if (Usr::userIsHead($user_id))
             return back()->with('pop_error', __('msg.denied'));
 
-        $user = $this->user->find($id);
+        $user = $this->user->find($user_id);
 
-        if ($user->hasRole(config('roles.default_roles.tenant.teacher')) && $this->userTeachesSubject($user))
+        if ($user->hasRole(config('roles.default_roles.tenant.teacher')) && $this->userTeachesSubject($user->id))
             return back()->with('pop_error', __('msg.del_teacher'));
 
-        $this->user->delete($user->id);
+        $user->delete();
 
         return back()->with('flash_success', __('msg.del_ok'));
     }
 
-    protected function userTeachesSubject($user)
+    protected function userTeachesSubject($user_id)
     {
-        $subjects = $this->my_class->findSubjectRecByTeacher($user->id);
+        $subjects = $this->my_class->findSubjectRecByTeacher($user_id);
 
         return $subjects->isNotEmpty();
     }
 
-    public function update_staff_data_edit_state(UserStaffDataEditState $req)
+    public function toggle_staff_data_editing(UserStaffDataEditState $req)
     {
         $where = ['user_id' => $req->id];
         $data = $req->only("staff_data_edit");
@@ -246,7 +237,7 @@ class UserController extends Controller
         return Usr::json("ok");
     }
 
-    public function update_user_blocked_state(UserBlockedState $req)
+    public function toggle_user_block(UserBlockedState $req)
     {
         $user_id = $req->id;
         $data = $req->only("blocked");

@@ -10,7 +10,7 @@
     {{--Background Logo--}}
 
     <div style="position: relative;  text-align: center; ">
-        <img src="{{ tenant_asset($settings->firstWhere('type', 'logo')->description) }}" style="max-width: 500px; max-height:600px; margin-top: 60px; position:absolute ; opacity: 0.1; margin-left: auto;margin-right: auto; left: 0; right: 0;" />
+        <img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'logo')) }}" style="max-width: 500px; max-height:600px; margin-top: 60px; position:absolute ; opacity: 0.1; margin-left: auto;margin-right: auto; left: 0; right: 0;" />
     </div>
 
     <div style="margin: 2em;">

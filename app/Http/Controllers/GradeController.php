@@ -13,6 +13,8 @@ class GradeController extends Controller
 
     public function __construct(ExamRepo $exam, MyClassRepo $my_class)
     {
+        $this->permissionMap = config('permissions.names.tenant.grades');
+        parent::__construct();
         $this->exam = $exam;
         $this->my_class = $my_class;
     }

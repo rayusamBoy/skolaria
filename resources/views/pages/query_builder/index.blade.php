@@ -5,6 +5,7 @@
 @section('content')
 
 {{-- Query Print --}}
+@can($tenant_permissions['query_builders']['print_staff_data']['permission'])
 <div class="card card-collapsed">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded mr-2">print</i> Query Print</h6>
@@ -31,7 +32,7 @@
                     <label for="paper-size">Select Paper</label>
                     <select name="paper_size" id="paper-size" class="form-control select select-search">
                         @foreach(Qs::getDompdfSupportedPaperSizes() as $name => $size)
-                        <option value="{{ $name }}" @selected($name === 'a4')>{{ $name }}</option>
+                        <option value="{{ $name }}" @selected($name==='a4' )>{{ $name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -51,8 +52,10 @@
         </form>
     </div>
 </div>
+@endcan
 
 {{-- Query Select --}}
+@can($tenant_permissions['query_builders']['select']['permission'])
 <div class="card card-collapsed" id="query-box">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded mr-2">lasso_select</i> Query Select</h6>
@@ -163,6 +166,7 @@
         </form>
     </div>
 </div>
+@endcan
 
 {{-- Query Results --}}
 @if($queryed)

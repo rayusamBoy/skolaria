@@ -173,11 +173,7 @@
                                 @if(isset($staff_rec->subjects_studied))
                                 <tr>
                                     <td class="font-weight-bold">Subjects Studied</td>
-                                    <td class="break-all">
-                                        @foreach(json_decode($staff_rec->subjects_studied) as $sub)
-                                        {{ $loop->iteration }} - {{ $sub ?? '-' }}<br />
-                                        @endforeach
-                                    </td>
+                                    <td class="break-all">{{ $staff_rec->subjects_studied }}</td>
                                 </tr>
                                 @endif
                             </tbody>

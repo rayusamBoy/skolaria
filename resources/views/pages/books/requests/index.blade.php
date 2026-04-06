@@ -12,26 +12,25 @@
 
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
-            <li class="nav-item">
-                <a href="#new-request" class="nav-link active" data-toggle="tab">Add a Request</a>
-            </li>
-
-            @if($requests->isNotEmpty())
             <li class="nav-item dropdown">
-                <a href="javascript:;" class="nav-link dropdown-toggle" data-toggle="dropdown">Manage Requests</a>
+                <a href="javascript:;" class="nav-link active dropdown-toggle" data-toggle="dropdown">Manage Requests</a>
                 <div class="dropdown-menu dropdown-menu-right">
-                    @foreach ($requests->groupBy('book.id') as $group)
-                    <a href="#grp-{{ $group->first()->book->id }}" class="dropdown-item" data-toggle="tab">
-                        {{ $group->first()->book->name }}
-                    </a>
+                    @foreach($books as $book)
+                    <a href="#book{{ $book->id }}" class="dropdown-item" data-toggle="tab">{{ $book->name }}</a>
                     @endforeach
                 </div>
             </li>
-            @endif
+
+            @can($tenant_permissions['book_requests']['store']['permission'])
+            <li class="nav-item">
+                <a href="#new-request" class="nav-link" data-toggle="tab">Add a Request</a>
+            </li>
+            @endcan
         </ul>
 
         <div class="tab-content">
-            <div class="tab-pane fade show active" id="new-request">
+            @can($tenant_permissions['book_requests']['store']['permission'])
+            <div class="tab-pane fade" id="new-request">
                 <form method="post" enctype="multipart/form-data" class="ajax-store" action="{{ route('book_requests.store') }}" data-fouc>
                     @csrf
                     <div class="row">
@@ -84,9 +83,10 @@
                     </div>
                 </form>
             </div>
+            @endcan
 
-            @foreach($requests->groupBy('book.id') as $group)
-            <div class="tab-pane fade" id="grp-{{ $group->first()->book->id }}">
+            @foreach($books as $book)
+            <div class="tab-pane fade show" id="book{{ $book->id }}">
                 <table class="table datatable-button-html5-columns w-100">
                     <thead>
                         <tr>
@@ -102,34 +102,33 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($group as $book_req)
+                        @foreach($requests->where('book_id', $book->id) as $book_req)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $book_req->book->name }}</td>
                             <td>
-                                <a href="{{ route('users.show', Qs::hash($book_req->borrower->id)) }}">
-                                    {{ $book_req->borrower->name }}
-                                </a>
+                                <a href="{{ route('users.show', Qs::hash($book_req->borrower->id)) }}">{{ $book_req->borrower->name }}</a>
                             </td>
                             <td>{{ $book_req->returned ? 'Yes' : 'No' }}</td>
                             <td>{{ $book_req->remarks }}</td>
                             <td>{{ $book_req->start_date }}</td>
                             <td>{{ $book_req->end_date }}</td>
                             <td>
-                                <a href="{{ route('users.show', Qs::hash($book_req->user->id)) }}">
-                                    {{ $book_req->user->name }}
-                                </a>
+                                <a href="{{ route('users.show', Qs::hash($book_req->user->id)) }}">{{ $book_req->user->name }}</a>
                             </td>
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-
+                                            {{-- Edit --}}
+                                            @can($tenant_permissions['book_requests']['edit']['permission'])
                                             <a href="{{ route('book_requests.edit', Qs::hash($book_req->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-
+                                            @endcan
+                                            {{-- Delete --}}
+                                            @can($tenant_permissions['book_requests']['destroy']['permission'])
                                             <a id="br-delete-{{ Qs::hash($book_req->id) }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -137,7 +136,7 @@
                                                 @csrf
                                                 @method('delete')
                                             </form>
-
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>
@@ -148,7 +147,6 @@
                 </table>
             </div>
             @endforeach
-
         </div>
     </div>
 </div>

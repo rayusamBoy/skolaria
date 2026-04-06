@@ -18,7 +18,7 @@ class NoticeController extends Controller
 
     public function __construct(NoticeRepo $notice, UserRepo $user)
     {
-        $this->permissionMap = config('permissions.notices');
+        $this->permissionMap = config('permissions.names.tenant.notices');
         parent::__construct();
         $this->notice = $notice;
         $this->user = $user;
@@ -51,17 +51,16 @@ class NoticeController extends Controller
         return Qs::jsonUpdateOk();
     }
 
-    public function edit($id)
+    public function edit($notice)
     {
-        $id = Qs::decodeHash($id);
-        $d['notice'] = $this->notice->getById($id)->first();
+        $d['notice'] = $this->notice->getById($notice)->first();
         $d['notices'] = $this->notice->allOrOnlyMine();
         $d['edit'] = true;
 
         return view('pages.notices.index', $d);
     }
 
-    public function set_as_viewed(NoticeSetAsViewed $req)
+    public function mark_as_viewed(NoticeSetAsViewed $req)
     {
         $ntc_id = $req->id;
         $viewers_ids = json_decode($this->notice->getById($ntc_id)->value("viewers_ids"));

@@ -12,26 +12,25 @@
 
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
-            <li class="nav-item">
-                <a href="#new-book" class="nav-link active" data-toggle="tab">Add a Book</a>
-            </li>
-
-            @if($books->isNotEmpty())
             <li class="nav-item dropdown">
-                <a href="javascript:;" class="nav-link dropdown-toggle" data-toggle="dropdown">Manage Books</a>
+                <a href="javascript:;" class="nav-link dropdown-toggle active" data-toggle="dropdown">Manage Books</a>
                 <div class="dropdown-menu dropdown-menu-right">
-                    @foreach($books->groupBy('my_class.id') as $group)
-                    <a href="#grp-{{ $group->first()->my_class->id }}" class="dropdown-item" data-toggle="tab">
-                        {{ $group->first()->my_class->name }}
-                    </a>
+                    @foreach($my_classes as $mc)
+                    <a href="#book{{ $mc->id }}" class="dropdown-item" data-toggle="tab">{{ $mc->name }}</a>
                     @endforeach
                 </div>
             </li>
-            @endif
+
+            @can($tenant_permissions['books']['store']['permission'])
+            <li class="nav-item">
+                <a href="#new-book" class="nav-link" data-toggle="tab">Add a Book</a>
+            </li>
+            @endcan
         </ul>
 
         <div class="tab-content">
-            <div class="tab-pane fade show active" id="new-book">
+            @can($tenant_permissions['books']['store']['permission'])
+            <div class="tab-pane fade" id="new-book">
                 <form method="post" enctype="multipart/form-data" class="ajax-store" action="{{ route('books.store') }}" data-fouc>
                     @csrf
                     <div class="row">
@@ -123,9 +122,10 @@
                     </div>
                 </form>
             </div>
+            @endcan
 
-            @foreach($books->groupBy('my_class.id') as $group)
-            <div class="tab-pane fade" id="grp-{{ $group->first()->my_class->id }}">
+            @foreach($my_classes as $mc)
+            <div class="tab-pane fade show" id="book{{ $mc->id }}">
                 <table class="table datatable-button-html5-columns w-100">
                     <thead>
                         <tr>
@@ -145,7 +145,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($group as $book)
+                        @foreach($books->where('my_class.id', $mc->id) as $book)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $book->author }}</td>
@@ -164,10 +164,14 @@
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
+                                            {{-- Edit --}}
+                                            @can($tenant_permissions['books']['edit']['permission'])
                                             <a href="{{ route('books.edit', Qs::hash($book->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-
+                                            @endcan
+                                            {{-- Delete --}}
+                                            @can($tenant_permissions['books']['destroy']['permission'])
                                             <a id="book-delete-{{ Qs::hash($book->id) }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -175,6 +179,7 @@
                                                 @csrf
                                                 @method('delete')
                                             </form>
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>

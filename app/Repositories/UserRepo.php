@@ -156,11 +156,6 @@ class UserRepo
         return Notification::where($where)->get();
     }
 
-    public function getDeviceTokens()
-    {
-        return User::whereNotNull("firebase_device_token")->pluck("firebase_device_token")->toArray();
-    }
-
     /********** Roles ********/
     public function getRoles($except = [])
     {

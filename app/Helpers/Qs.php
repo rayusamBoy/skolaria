@@ -59,11 +59,16 @@ class Qs
         return ParentRelative::where('user_id', $user_id)->first();
     }
 
+    protected static ?Hashids $hashids = null;
+
     protected static function getHashidsInstance()
     {
-        $salt = date('dMY') . tenant('id') ?? config('app.name');
-        $hash = new Hashids($salt, 10);
-        return $hash;
+        if (!self::$hashids) {
+            $salt = tenant()?->getTenantKey() ?? config('app.key');
+            self::$hashids = new Hashids($salt, 10);
+        }
+
+        return self::$hashids;
     }
 
     public static function hash($id)
@@ -264,17 +269,17 @@ class Qs
     public static function getSetting($type, $use_central_connection = false)
     {
         if ($use_central_connection) {
-            $settting = tenancy()->central(fn() => Setting::where('type', $type)->value('description'));
+            $settting = tenancy()->central(fn() => once(fn() => Setting::where('type', $type)->value('description')));
 
             return $settting;
         }
 
-        return Setting::where('type', $type)->value('description');
+        return once(fn() => Setting::where('type', $type)->value('description'));
     }
 
     public static function getSettings()
     {
-        return Setting::all();
+        return once(fn() => Setting::all());
     }
 
     public static function getCurrentSession()
@@ -347,7 +352,7 @@ class Qs
         return self::json(__('msg.denied'), FALSE);
     }
 
-    public static function jsonOnyWithMsg($msg, $ok = TRUE)
+    public static function jsonWithMsgOnly($msg, $ok = TRUE)
     {
         return response()->json([$msg => $ok]);
     }
@@ -577,7 +582,7 @@ class Qs
         };
     }
 
-    public static function getSelectedTableCols($columns = [], $name)
+    public static function getSelectedTableCols($name, $columns = [])
     {
         $data = self::getTableCols($name);
         // Flip the array to get the keys. The keys are the actual database column names
@@ -591,7 +596,7 @@ class Qs
         }
     }
 
-    public static function getPresentableTableCols($columns = [], $name): array
+    public static function getPresentableTableCols($name, $columns = []): array
     {
         $data = self::getTableCols($name);
         // Flip the array to get the keys. The keys are the actual database column names
@@ -723,76 +728,16 @@ class Qs
 
     public static function getTenancyAwareIDCardsThemeDir($tenant_id = null)
     {
-        $id = $tenant_id ?? tenant('id');
+        $id = $tenant_id ?? tenant()?->getTenantKey();
         return resource_path() . '/views/pages/students/id_cards/themes/' . config('tenancy.database.prefix') . $id . '/';
-    }
-
-    public static function is_serialized($data, $strict = true)
-    {
-        // If it isn't a string, it isn't serialized.
-        if (!\is_string($data)) {
-            return false;
-        }
-        $data = trim($data);
-        if ('N;' === $data) {
-            return true;
-        }
-        if (\strlen($data) < 4) {
-            return false;
-        }
-        if (':' !== $data[1]) {
-            return false;
-        }
-        if ($strict) {
-            $lastc = substr($data, -1);
-            if (';' !== $lastc && '}' !== $lastc) {
-                return false;
-            }
-        } else {
-            $semicolon = strpos($data, ';');
-            $brace = strpos($data, '}');
-            // Either ; or } must exist.
-            if (false === $semicolon && false === $brace) {
-                return false;
-            }
-            // But neither must be in the first X characters.
-            if (false !== $semicolon && $semicolon < 3) {
-                return false;
-            }
-            if (false !== $brace && $brace < 4) {
-                return false;
-            }
-        }
-        $token = $data[0];
-        switch ($token) {
-            case 's':
-                if ($strict) {
-                    if ('"' !== substr($data, -2, 1)) {
-                        return false;
-                    }
-                } elseif (false === strpos($data, '"')) {
-                    return false;
-                }
-            // Or else fall through.
-            case 'a':
-            case 'O':
-                return (bool) preg_match("/^{$token}:[0-9]+:/s", $data);
-            case 'b':
-            case 'i':
-            case 'd':
-                $end = $strict ? '$' : '';
-                return (bool) preg_match("/^{$token}:[0-9.E+-]+;$end/", $data);
-        }
-
-        return false;
     }
 
     public static function getActiveNotificationChannels($notifiable, $include_database = false, $include_email = false, $include_push_notification = false, $include_sms = false)
     {
-        if (!self::is_serialized($notifiable->is_notifiable) || !\is_array(unserialize($notifiable->is_notifiable)))
+        if (!$notifiable->is_notifiable || !\is_array($notifiable->is_notifiable))
             return [];
 
-        $is_notifiable = unserialize($notifiable->is_notifiable);
+        $is_notifiable = $notifiable->is_notifiable;
         $channels = [];
 
         // Check the user's status and available notification channels
@@ -824,5 +769,11 @@ class Qs
     {
         $parsedown = new Parsedown();
         return $parsedown->text($input);
+    }
+
+    public static function getCanSoftDeleteModelNames($remove = [])
+    {
+        $names = ['users', 'payments', 'my_classes', 'exams', 'threads'];
+        return $remove ? array_values(array_diff($names, $remove)) : $names;
     }
 }

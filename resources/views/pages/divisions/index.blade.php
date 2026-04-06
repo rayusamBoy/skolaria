@@ -15,12 +15,12 @@
             <li class="nav-item">
                 <a href="#all-divisions" class="nav-link active" data-toggle="tab">Manage Divisions</a>
             </li>
-       
+
+            @can($tenant_permissions['divisions']['store']['permission'])
             <li class="nav-item">
-                <a href="#new-division" class="nav-link" data-toggle="tab">
-                    Add Division
-                </a>
+                <a href="#new-division" class="nav-link" data-toggle="tab">Add Division</a>
             </li>
+            @endcan
         </ul>
 
         <div class="tab-content">
@@ -55,11 +55,13 @@
                                     <div class="dropdown">
                                         <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-
+                                            @can($tenant_permissions['divisions']['edit']['permission'])
                                             <a href="{{ route('divisions.edit', $dv->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-                                       
+                                            @endcan
+
+                                            @can($tenant_permissions['divisions']['destroy']['permission'])
                                             <a id="division-delete-{{ $dv->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -67,7 +69,7 @@
                                                 @csrf
                                                 @method('delete')
                                             </form>
-
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>
@@ -78,6 +80,7 @@
                 </table>
             </div>
 
+            @can($tenant_permissions['divisions']['store']['permission'])
             <div class="tab-pane fade" id="new-division">
                 <div class="row mb-3">
                     <div class="col-md-12">
@@ -159,6 +162,7 @@
                     </div>
                 </div>
             </div>
+            @endcan
         </div>
     </div>
 </div>

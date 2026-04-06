@@ -24,11 +24,13 @@ class NonTenancyPermissionsTableSeeder extends Seeder
             return;
         }
 
-        // For each top-level key inside central (e.g., 'users', 'roles'), collect permission strings
+        // For each top-level key inside tenant (e.g., 'users', 'roles'), collect nodes array
         $groups = [];
-        foreach ($centralPerms as $groupName => $groupNode) {
-            $perms = $this->collectPermissionValues($groupNode);
-            $perms = array_values(array_unique($perms));
+        foreach ($centralPerms as $groupName => $groupNodes) {
+            $perms = [];
+            foreach ($groupNodes as $groupNode) {
+                $perms[] = $this->collectPermissionValues($groupNode);
+            }
             if (!empty($perms)) {
                 $groups[$groupName] = $perms;
             }
@@ -48,13 +50,13 @@ class NonTenancyPermissionsTableSeeder extends Seeder
         foreach ($groups as $groupName => $perms) {
             sort($perms);
             $this->command->info(\sprintf(" - group '%s' (%d permissions)", $groupName, \count($perms)));
-            foreach ($perms as $name) {
-                if (!\is_string($name) || strpos($name, '.') === false) {
+            foreach ($perms as $perm) {
+                if (!\is_array($perm)) {
                     continue;
                 }
                 DB::table($table)->updateOrInsert(
-                    ['name' => $name, 'guard_name' => $guard],
-                    ['created_at' => $now, 'updated_at' => $now]
+                    ['name' => $perm['name'], 'guard_name' => $guard],
+                    ['label' => $perm['label'], 'description' => $perm['description'], 'created_at' => $now, 'updated_at' => $now]
                 );
             }
         }
@@ -64,27 +66,33 @@ class NonTenancyPermissionsTableSeeder extends Seeder
     }
 
     /**
-     * Same collector as tenant seeder.
+     * Recursively collect permission strings from the permission configuration.
+     *
+     * Supports both the old structure (string permission names or boolean flags)
+     * and the new structure where each permission is an array with a 'permission' key.
      *
      * @param mixed $node
      * @return string[]
      */
-    protected function collectPermissionValues($node)
+    protected function collectPermissionValues($node): array
     {
         $out = [];
 
         if (\is_array($node)) {
-            foreach ($node as $k => $v) {
-                if (\is_string($v) && strpos($v, '.') !== false) {
-                    $out[] = trim($v);
-                    continue;
-                }
-                if (\is_string($k) && strpos($k, '.') !== false && ($v === true || $v === 1 || $v === '1')) {
-                    $out[] = trim($k);
-                    continue;
-                }
-                if (\is_array($v)) {
-                    $out = [...$out, ...$this->collectPermissionValues($v)];
+            // Check if this array represents a permission leaf (has 'permission', 'label', and 'description' keys)
+            if (isset($node['permission']) && isset($node['label']) && isset($node['description']) && \is_string($node['permission']) && \is_string($node['label']) && \is_string($node['description'])) {
+                $out['name'] = trim($node['permission']);
+                $out['label'] = trim($node['label']);
+                $out['description'] = trim($node['description']);
+                return $out;
+            }
+
+            // Otherwise, recursively process each element
+            foreach ($node as $value) {
+                if (\is_array($value)) {
+                    $out = [...$out, ...$this->collectPermissionValues($value)];
+                } elseif (\is_string($value) && strpos($value, '.') !== false) {
+                    $out[] = trim($value);
                 }
             }
         } elseif (\is_string($node) && strpos($node, '.') !== false) {

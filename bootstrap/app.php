@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromUnwantedDomains;
 
@@ -31,18 +32,22 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->web([
+            \App\Http\Middleware\Custom\LoadCommonContext::class,
+            \App\Http\Middleware\Custom\HandleCookie::class,
+        ]);
         $middleware->alias([
             'checkForPassUpdate' => \App\Http\Middleware\Custom\CheckForPasswordUpdate::class,
-            'handleCookie' => \App\Http\Middleware\Custom\HandleCookie::class,
             'examIsLocked' => \App\Http\Middleware\Custom\ExamIsLocked::class,
             '2fa' => \PragmaRX\Google2FALaravel\Middleware::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'roleOrPermission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'decodeRouteParams' => \App\Http\Middleware\Custom\DecodeRouteParamsMiddleware::class,
         ]);
         $middleware->encryptCookies(except: [
             'do_not_show_els_with_these_ids_again',
+            'active_system_skin',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

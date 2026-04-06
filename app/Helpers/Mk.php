@@ -66,7 +66,7 @@ class Mk extends Qs
                 // Get all subject exam sums - for finding subject rank
                 foreach ($marks_all_subjects as $mark) {
                     $p = Mark::where(['subject_id' => $mark->subject->id, 'my_class_id' => $my_class->id, 'exam_id' => $exam_id]);
-                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count(json_decode($sids)));
+                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count($sids));
                     $q = Mark::whereIn('student_id', $sids);
 
                     $avg_sum = $q->where(['subject_id' => $mark->subject->id, 'exam_id' => $exam_id, 'my_class_id' => $my_class->id])->avg('exm');
@@ -79,7 +79,7 @@ class Mk extends Qs
 
                 foreach ($marks_all_subjects as $mark) {
                     $p = Mark::where(['subject_id' => $mark->subject->id, 'my_class_id' => $my_class->id, 'exam_id' => $exam_id]);
-                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count(json_decode($sids)));
+                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count($sids));
                     $q = Mark::whereIn('student_id', $sids);
 
                     $sat = $q->where(['exam_id' => $exam_id, 'subject_id' => $mark->subject->id])->whereNotNull('exm')->count();
@@ -119,7 +119,7 @@ class Mk extends Qs
                 // Get all subject exam sums - for finding subject rank
                 foreach ($marks_per_section as $mark) {
                     $p = Mark::where(['subject_id' => $mark->subject->id, 'my_class_id' => $my_class->id, 'exam_id' => $exam_id, 'section_id' => $section_id]);
-                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count(json_decode($sids)));
+                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count($sids));
                     $q = Mark::whereIn('student_id', $sids);
 
                     $avg_sum = $q->where(['subject_id' => $mark->subject->id, 'exam_id' => $exam_id, 'my_class_id' => $my_class->id, 'section_id' => $section_id])->avg('exm');
@@ -132,7 +132,7 @@ class Mk extends Qs
 
                 foreach ($marks_per_section as $mark) {
                     $p = Mark::where(['subject_id' => $mark->subject->id, 'my_class_id' => $my_class->id, 'exam_id' => $exam_id, 'section_id' => $section_id]);
-                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count(json_decode($sids)));
+                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count($sids));
                     $q = Mark::whereIn('student_id', $sids);
 
                     $sat = $q->where(['exam_id' => $exam_id, 'subject_id' => $mark->subject->id, 'section_id' => $section_id])->whereNotNull('exm')->count();

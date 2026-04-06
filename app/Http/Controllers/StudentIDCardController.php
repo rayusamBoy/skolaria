@@ -17,13 +17,14 @@ class StudentIDCardController extends Controller
 
     public function __construct(MyClassRepo $my_class, StudentRepo $student)
     {
+        $this->permissionMap = config('permissions.names.tenant.student_id_cards');
+        parent::__construct();
         $this->my_class = $my_class;
         $this->student = $student;
     }
 
     public function index()
     {
-        $d['my_classes'] = $this->my_class->all();
         $d['theme_names'] = $this->getThemeFilesNames();
         $d['selected'] = false;
 
@@ -43,7 +44,6 @@ class StudentIDCardController extends Controller
         ], [], ['my_class_id' => 'Class', 'phone' => 'phone number'])->validate();
 
         $d = $req->except('_token');
-        $d['my_classes'] = $this->my_class->all();
 
         if ($req->filled(['my_class_id', 'issued_date', 'expire_date', 'id_theme'])) {
             // Exclude students with soft deleted user record
@@ -74,7 +74,7 @@ class StudentIDCardController extends Controller
         $d['settings'] = Qs::getSettings();
 
         // Theme name should be a four digit code name like '0001' etc.
-        return view('pages.students.id_cards.themes.' . config('tenancy.database.prefix') . tenant('id') . '/' . $theme, $d);
+        return view('pages.students.id_cards.themes.' . config('tenancy.database.prefix') . tenant()?->getTenantKey() . '/' . $theme, $d);
     }
 
     public function print_selected(Request $req)
@@ -90,7 +90,7 @@ class StudentIDCardController extends Controller
         $d['phone'] = $req->phone;
         $d['settings'] = Qs::getSettings();
 
-        return view('pages.students.id_cards.themes.' . config('tenancy.database.prefix') . tenant('id') . '/' . $d['theme'], $d);
+        return view('pages.students.id_cards.themes.' . config('tenancy.database.prefix') . tenant()?->getTenantKey() . '/' . $d['theme'], $d);
     }
 
     private function getThemeFilesNames()

@@ -12,68 +12,60 @@
 
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
-            <li class="nav-item">
-                <a href="#add-tt" class="nav-link active" data-toggle="tab">Create Timetable</a>
-            </li>
-
             <li class="nav-item dropdown">
-                <a href="javascript:;" class="nav-link dropdown-toggle" data-toggle="dropdown">Show TimeTables</a>
+                <a href="javascript:;" class="nav-link active dropdown-toggle" data-toggle="dropdown">Show TimeTables</a>
                 <div class="dropdown-menu dropdown-menu-right">
                     @foreach($my_classes as $mc)
                     <a href="#ttr{{ $mc->id }}" class="dropdown-item" data-toggle="tab">{{ $mc->name }}</a>
                     @endforeach
                 </div>
             </li>
+            @can($tenant_permissions['time_tables']['store']['permission'])
+            <li class="nav-item">
+                <a href="#add-tt" class="nav-link" data-toggle="tab">Create Timetable</a>
+            </li>
+            @endcan
         </ul>
 
         <div class="tab-content">
-            <div class="tab-pane fade show active" id="add-tt">
+            @can($tenant_permissions['time_tables']['store']['permission'])
+            <div class="tab-pane fade" id="add-tt">
                 <div class="col-md-8">
                     <form class="ajax-store" method="post" action="{{ route('ttr.store') }}">
                         @csrf
                         <div class="form-group row">
-                            <label class="col-lg-3 col-form-label font-weight-semibold">
-                                Name <span class="text-danger">*</span>
-                            </label>
+                            <label class="col-lg-3 col-form-label font-weight-semibold">Name <span class="text-danger">*</span></label>
                             <div class="col-lg-9">
                                 <input name="name" value="{{ old('name') }}" required type="text" class="form-control" placeholder="Name of TimeTable">
                             </div>
                         </div>
 
                         <div class="form-group row">
-                            <label for="exam_id" class="col-lg-3 col-form-label font-weight-semibold">
-                                Type (Class or Exam)
-                            </label>
+                            <label for="exam_id" class="col-lg-3 col-form-label font-weight-semibold">Type (Class or Exam)</label>
                             <div class="col-lg-9">
                                 <select class="select form-control" onchange="hideShowSection(this.value, '#section_id');" name="exam_id" id="exam_id">
                                     <option value="class">Class Timetable</option>
                                     @foreach($exams as $ex)
-                                    <option @selected(old('exam_id')==$ex->id)
-                                        value="{{ $ex->id }}">{{ $ex->name }}</option>
+                                    <option @selected(old('exam_id')==$ex->id) value="{{ $ex->id }}">{{ $ex->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
 
                         <div class="form-group row">
-                            <label for="my_class_id" class="col-lg-3 col-form-label font-weight-semibold">
-                                Class <span class="text-danger">*</span>
-                            </label>
+                            <label for="my_class_id" class="col-lg-3 col-form-label font-weight-semibold">Class <span class="text-danger">*</span></label>
                             <div class="col-lg-9">
                                 <select required data-placeholder="Select Class" onchange="getClassSections(this.value)" class="form-control select" name="my_class_id" id="my_class_id">
                                     <option value=""></option>
                                     @foreach($my_classes as $mc)
-                                    <option @selected(old('my_class_id')==$mc->id)
-                                        value="{{ $mc->id }}">{{ $mc->name }}</option>
+                                    <option @selected(old('my_class_id')==$mc->id) value="{{ $mc->id }}">{{ $mc->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
 
                         <div class="form-group row">
-                            <label for="section_id" class="col-lg-3 col-form-label font-weight-semibold">
-                                Section <span class="text-danger">*</span>
-                            </label>
+                            <label for="section_id" class="col-lg-3 col-form-label font-weight-semibold">Section <span class="text-danger">*</span></label>
                             <div class="col-lg-9">
                                 <select required data-placeholder="Select Class First" class="form-control select" name="section_id" id="section_id"></select>
                             </div>
@@ -87,9 +79,10 @@
                     </form>
                 </div>
             </div>
+            @endcan
 
             @foreach($my_classes as $mc)
-            <div class="tab-pane fade" id="ttr{{ $mc->id }}">
+            <div class="tab-pane fade show" id="ttr{{ $mc->id }}">
                 <table class="table datatable-button-html5-columns">
                     <thead>
                         <tr>
@@ -116,30 +109,33 @@
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-right">
-
+                                            {{-- View Record --}}
+                                            @can($tenant_permissions['time_tables']['show_record']['permission'])
                                             <a href="{{ route('ttr.show', $ttr->id) }}" class="dropdown-item">
-                                                <i class="material-symbols-rounded">visibility</i>
-                                                View
+                                                <i class="material-symbols-rounded">visibility</i>View
                                             </a>
-
+                                            @endcan
+                                            {{-- Edit Record --}}
+                                            @can($tenant_permissions['time_tables']['edit_record']['permission'])
                                             <a href="{{ route('ttr.edit', $ttr->id) }}" class="dropdown-item">
-                                                <i class="material-symbols-rounded">edit</i>
-                                                Edit
+                                                <i class="material-symbols-rounded">edit</i>Edit
                                             </a>
-
+                                            @endcan
+                                            {{-- Manage Record --}}
+                                            @can($tenant_permissions['time_tables']['manage_record']['permission'])
                                             <a href="{{ route('ttr.manage', $ttr->id) }}" class="dropdown-item">
-                                                <i class="material-symbols-rounded">manage_search</i>
-                                                Manage
+                                                <i class="material-symbols-rounded">manage_search</i>Manage
                                             </a>
-
+                                            @endcan
+                                            {{-- Delete Record --}}
+                                            @can($tenant_permissions['time_tables']['delete_record']['permission'])
                                             <a id="{{ $ttr->id }}" onclick="confirmPermanentDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
-                                                <i class="material-symbols-rounded">delete</i>
-                                                Delete
+                                                <i class="material-symbols-rounded">delete</i>Delete
                                             </a>
                                             <form method="post" id="item-delete-{{ $ttr->id }}" action="{{ route('ttr.destroy', $ttr->id) }}" class="hidden">
                                                 @csrf @method('delete')
                                             </form>
-
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>

@@ -22,13 +22,13 @@
                             <input type="text" name="name" id="name" disabled class="form-control" value="{{ auth()->user()->name }}" readonly>
                         </div>
                         <div class="col-lg-6">
-                            <label for="email">Contact</label>
+                            <label for="contact">Contact</label>
                             @if(auth()->user()->hasVerifiedEmail())
-                            <input type="text" name="email" id="email" disabled class="form-control" value="{{ auth()->user()->email }}" readonly>
+                            <input type="text" name="email" id="contact" disabled class="form-control" value="{{ auth()->user()->email }}" readonly>
                             @elseif(auth()->user()->phone || auth()->user()->phone2)
-                            <input type="text" name="phone" id="phone" disabled class="form-control" value="{{ auth()->user()->phone ?? auth()->user()->phone2 }}" readonly>
+                            <input type="text" name="phone" id="contact" disabled class="form-control" value="{{ auth()->user()->phone ?? auth()->user()->phone2 }}" readonly>
                             @else
-                            <input type="text" id="email" disabled class="form-control" placeholder="Not provided" readonly>
+                            <input type="text" id="contact" disabled class="form-control" placeholder="Not provided" readonly>
                             @endif
                         </div>
                     </div>
@@ -83,10 +83,10 @@
 
                     <div class="row">
                         <div class="col-12">
-                            <label for="markdown-editor">Message <span class="text-danger">*</span></label>
+                            <label class="mt-3">Message <span class="text-danger">*</span></label>
                             <div class="form-group row">
                                 <div class="col-12">
-                                    <textarea placeholder="Message" name="message" id="markdown-editor" data-autosave-unique-id="user-message-{{ auth()->id() }}"></textarea>
+                                    <div id="message-ticket-editor"></div>
                                 </div>
                             </div>
                             <div class="form-group row float-right">
@@ -138,13 +138,14 @@
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @can($tenant_permissions['tickets']['reply'])
+                                            {{-- Reply --}}
+                                            @can($tenant_permissions['tickets']['reply']['permission'])
                                             <a href="{{ route('tickets.reply', Qs::hash($ticket->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">reply</i> Reply
                                             </a>
                                             @endcan
-
-                                            @can($tenant_permissions['tickets']['archive_ticket'])
+                                            {{-- Archive --}}
+                                            @can($tenant_permissions['tickets']['archive_ticket']['permission'])
                                             <a id="{{ $ticket->id }}" onclick="confirmArchive(this.id)" href="javascript:;" class="dropdown-item text-warning">
                                                 <i class="material-symbols-rounded">archive</i> Archive
                                             </a>
@@ -165,7 +166,7 @@
     </div>
 </div>
 
-@if ($archived_tickets->isNotEmpty() && auth()->user()->can($tenant_permissions['tickets']['unarchive_ticket']))
+@if ($archived_tickets->isNotEmpty() && auth()->user()->can($tenant_permissions['tickets']['unarchive_ticket']['permission']))
 <div class="card card-collapsed">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Archived Tickets</h6>
@@ -219,10 +220,4 @@
 </div>
 @endif
 
-@include('pages.modals.simplemde_markdown_guide')
-
 @endsection
-
-@pushOnce('scripts')
-@include('partials.js.tickets')
-@endPushOnce

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Central;
 
-use App\Helpers\Qs;
 use App\Http\Controllers\Controller;
 use App\Repositories\LogRepo;
 use App\Repositories\MyClassRepo;
@@ -15,6 +14,8 @@ class LogController extends Controller
 
     public function __construct(UserRepo $user, MyClassRepo $my_class, LogRepo $log)
     {
+        $this->permissionMap = config('permissions.names.central.central_logs');
+        parent::__construct();
         $this->user = $user;
         $this->my_class = $my_class;
         $this->log = $log;
@@ -29,13 +30,12 @@ class LogController extends Controller
         return view('pages.central.logs', $d);
     }
 
-    public function reset_login_hist($user_id)
+    public function reset_login_hist($user)
     {
-        $user_id = Qs::decodeHash($user_id);
         $current_timestamp = Carbon::now()->toDateTimeString();
         $data = ['login_times' => 0, 'last_reset' => $current_timestamp, 'last_login' => NULL];
 
-        $this->log->updateLoginHist(['user_id' => $user_id], $data);
+        $this->log->updateLoginHist(['user_id' => $user], $data);
 
         return back()->with('flash_success', __('msg.login_history_reset_success'));
     }

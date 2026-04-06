@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Helpers\Qs;
 use App\Rules\Domain;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -19,7 +18,7 @@ class TenantRequest extends FormRequest
     {
         // If not data store
         if ($this->method() !== "POST")
-            return Qs::decodeHash($this->route('tenant'));
+            return $this->route('tenant');
     }
 
     /**

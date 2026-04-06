@@ -17,7 +17,7 @@
                 <a href="javascript:;" class="nav-link dropdown-toggle" data-toggle="dropdown">Select User Role</a>
                 <div class="dropdown-menu dropdown-menu-right">
                     @foreach ($user_roles as $ur)
-                    <a href="#ut-{{ Qs::hash($ur->id) }}" class="dropdown-item" data-toggle="tab">{{ $ur->name }}s</a>
+                    <a href="#ut-{{ Qs::hash($ur->id) }}" class="dropdown-item" data-toggle="tab">{{ Str::plural($ur->name) }}</a>
                     @endforeach
                 </div>
             </li>
@@ -47,7 +47,7 @@
                         @foreach ($login_histories->whereIn('user.id', $role_scoped_users_ids) as $lh)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td><img class="rounded-circle" style="height:40px; width:40px;" src="{{ Usr::getTenantAwarePhoto($lh->user->photo) }}" alt="photo"></td>
+                            <td><img class="rounded-circle" style="height:40px; width:40px;" src="{{ Usr::getTenancyAwarePhoto($lh->user->photo) }}" alt="photo"></td>
                             <td>{{ $lh->user->name }}</td>
                             <td>{{ $lh->login_times }}</td>
                             <td>{{ Qs::fullDateTimeFormat($lh->created_at) }}</td>
@@ -59,14 +59,15 @@
                                         <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
                                             {{-- View Profile --}}
+                                            @can($tenant_permissions['users']['show']['permission'])
                                             <a href="{{ route('users.show', Qs::hash($lh->user->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> View Profile</a>
+                                            @endcan
                                             {{-- Reset Login History --}}
-                                            @php
-                                            $route = route('login_histories.reset', Qs::hash($lh->user->id));
-                                            @endphp
-                                            <a href="javascript:;" onclick="confirmReset(null, '{{ $route }}')" class="dropdown-item">
+                                            @can($tenant_permissions['logs']['reset_login_hist']['permission'])
+                                            <a href="javascript:;" onclick="confirmReset(null, '{{ route('login_histories.reset', Qs::hash($lh->user->id)) }}')" class="dropdown-item">
                                                 <i class="material-symbols-rounded">history</i> Reset Login History
                                             </a>
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>
@@ -99,7 +100,9 @@
                     <th>Causer</th>
                     <th>Properties</th>
                     <th>Created At</th>
+                    @can($tenant_permissions['logs']['delete_activity']['permission'])
                     <th class="text-center">Action</th>
+                    @endcan
                 </tr>
             </thead>
             <tbody>
@@ -120,6 +123,7 @@
                         </a>
                     </td>
                     <td>{{ Qs::fullDateTimeFormat($chk->created_at) }}</td>
+                    @can($tenant_permissions['logs']['delete_activity']['permission'])
                     <td class="text-center">
                         {{-- Delete --}}
                         <a id="{{ $chk->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="btn btn-danger">
@@ -127,6 +131,7 @@
                         </a>
                         <form method="post" id="item-delete-{{ $chk->id }}" action="{{ route('activity_log.delete',$chk->id) }}" class="d-none">@csrf</form>
                     </td>
+                    @endcan
                 </tr>
                 @endforeach
                 @endforeach
@@ -135,13 +140,14 @@
     </div>
 
     {{-- Clean Activity Logs --}}
+    @can($tenant_permissions['logs']['clean_activity_log']['permission'])
     <div class="m-2">
         <button class="btn btn-danger float-right" onclick="confirmOperation(this.id)" id="activity_log_clean" data-toggle="tooltip" title="Deletes all logs older than {{ config('activitylog.delete_records_older_than_days') }} days">
             Activity Log Clean
         </button>
         <form method="post" id="item-confirm-operation-activity_log_clean" action="{{ route('activity_log.clean') }}" class="hidden ajax-update page-block">@csrf</form>
     </div>
-
+    @endcan
 </div>
 
 @endsection

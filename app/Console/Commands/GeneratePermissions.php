@@ -8,6 +8,14 @@ use Illuminate\Support\Str;
 use ReflectionClass;
 use ReflectionMethod;
 
+/**
+ * This command scans the app/Http/Controllers directory for controller classes and their public methods,
+ * and generates permission names based on method names and configurable mapping rules.
+ * The generated permission names are then printed to the console in a structured format.
+ * This is intended as a developer tool to help maintain a consistent permission naming scheme across the application.
+ * 
+ * The printed permission names can be used to populate the permissions configuration or for reference when reviewing permissions.
+ */
 class GeneratePermissions extends Command
 {
     protected $signature = 'permissions:generate';
@@ -135,7 +143,7 @@ class GeneratePermissions extends Command
 
     /**
      * Build permission name with support for:
-     * - method attribute/docblock override (@permission or Permission attribute)
+     * - method attribute/docblock override (@permission or \App\Auth\Attributes\Permission attribute)
      * - config overrides per controller short name or resource name
      * - method_map and use_dots config behavior
      */

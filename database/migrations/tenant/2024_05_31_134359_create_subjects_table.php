@@ -15,7 +15,7 @@ return new class extends Migration
             $table->increments('id');
             $table->string('name', 100);
             $table->string('slug', 100);
-            $table->unsignedInteger('core')->default(1);
+            $table->boolean('core')->default(true);
             $table->unsignedInteger('my_class_id')->nullable()->index();
             $table->timestamps();
 

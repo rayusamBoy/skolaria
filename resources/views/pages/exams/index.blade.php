@@ -15,9 +15,11 @@
             {{-- Manage exam item --}}
             <li class="nav-item"><a href="#all-exams" class="{{ session('announce_exam') || $errors->any() ? 'nav-link' : 'nav-link active' }}" data-toggle="tab">Manage Exam</a></li>
             {{-- Add exam item --}}
+            @can($tenant_permissions['exams']['store']['permission'])
             <li class="nav-item"><a href="#new-exam" class="{{ $errors->any() ? 'nav-link active' : 'nav-link' }}" data-toggle="tab">Add Exam</a></li>
+            @endcan
             {{-- Announce exam item --}}
-            @if (session('announce_exam'))
+            @if (session('announce_exam') && auth()->user()->can($tenant_permissions['exams']['announce']['permission']))
             <li class="nav-item"><a href="#announce-exam" class="nav-link active" data-toggle="tab"></i> Announce the Exam</a></li>
             @endif
         </ul>
@@ -49,16 +51,16 @@
                             <td>{{ $ex->category->name }}</td>
                             <td>{{ $ex->class_type->name }}</td>
 
-                            @if (auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
-                            <td><label class="form-switch m-0"><input id="checkbox-exam-edit-{{ $ex->id }}" onchange="updateExamEditState(<?php echo $ex->id; ?>, this)" type="checkbox" @if ($ex->editable) checked @endif><i></i></label></td>
+                            @if (auth()->user()->can($tenant_permissions['exams']['update_edit_state']['permission']))
+                            <td><label class="form-switch m-0"><input id="checkbox-exam-edit-{{ $ex->id }}" onchange="updateExamEditState({{ $ex->id }}, this)" type="checkbox" @checked($ex->editable)><i></i></label></td>
                             @else
-                            <td><label class="form-switch disabled m-0"><input type="checkbox" @if ($ex->editable) checked @endif><i></i></label></td>
+                            <td><label class="form-switch disabled m-0"><input type="checkbox" @checked($ex->editable)><i></i></label></td>
                             @endif
 
-                            @if(Qs::userIsHead(auth()->id()))
-                            <td><label class="form-switch m-0"><input id="checkbox-exam-lock-{{ $ex->id }}" onchange="updateExamLockState(<?php echo $ex->id; ?>, this)" type="checkbox" @if ($ex->locked) checked @endif><i></i></label></td>
+                            @if(auth()->user()->can($tenant_permissions['exams']['update_lock_state']['permission']))
+                            <td><label class="form-switch m-0"><input id="checkbox-exam-lock-{{ $ex->id }}" onchange="updateExamLockState({{ $ex->id }}, this)" type="checkbox" @checked($ex->locked)><i></i></label></td>
                             @else
-                            <td><label class="form-switch disabled m-0"><input type="checkbox" @if ($ex->locked) checked @endif><i></i></label></td>
+                            <td><label class="form-switch disabled m-0"><input type="checkbox" @checked($ex->locked)><i></i></label></td>
                             @endif
 
                             <td class="text-center">
@@ -68,21 +70,22 @@
 
                                         <div class="dropdown-menu dropdown-menu-left">
                                             {{-- Edit --}}
+                                            @can($tenant_permissions['exams']['store']['permission'])
                                             <a href="{{ route('exams.edit', $ex->id) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
+                                            @endcan
                                             {{-- Publish --}}
-                                            @if (!$ex->published)
-                                            @if (auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
+                                            @if (!$ex->published && auth()->user()->can($tenant_permissions['exams']['publish']['permission']))
                                             <a id="{{ $ex->id }}" onclick="confirmPublish(this.id)" href="javascript:;" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> Publish</a>
                                             <form method="get" id="item-publish-{{ $ex->id }}" action="{{ route('exams.publish', $ex->id) }}" class="hidden">@csrf @method('get')</form>
                                             @endif
-
-                                            @endif
                                             {{-- Delete --}}
-                                            @if (auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
+                                            @can($tenant_permissions['exams']['destroy']['permission'])
                                             <a id="{{ $ex->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                             <form method="post" id="item-delete-{{ $ex->id }}" action="{{ route('exams.destroy', $ex->id) }}" class="hidden">
-                                                @csrf @method('delete')</form>
-                                            @endif
+                                                @csrf
+                                                @method('delete')
+                                            </form>
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>
@@ -94,6 +97,7 @@
             </div>
 
             {{-- Add exam tab --}}
+            @can($tenant_permissions['exams']['store']['permission'])
             <div class="{{ $errors->any() ? 'tab-pane fade show active' : 'tab-pane fade' }}" id="new-exam">
                 <div class="row">
                     <div class="col-md-12">
@@ -148,8 +152,8 @@
                                 <div class="col-lg-9">
                                     <select data-placeholder="Select" class="form-control select" name="term" id="term">
                                         <option selected disabled value="">Select</option>
-                                        <option @selected(old('term') == 1) value="1">First Term</option>
-                                        <option @selected(old('term') == 2) value="2">Second Term</option>
+                                        <option @selected(old('term')==1) value="1">First Term</option>
+                                        <option @selected(old('term')==2) value="2">Second Term</option>
                                     </select>
                                 </div>
                             </div>
@@ -167,7 +171,7 @@
                                     @foreach (Mk::getStudentExamPositionByValues() as $key => $value)
                                     <div class="d-flex mb-2">
                                         <span><input type="radio" id="exm-pos-by-{{ $key }}" name="exam_student_position_by_value" value="{{ $key }}" class="form-input-styled text-center" data-fouc></span>
-                                        <label @checked(old("exam_student_position_by_value") == $key) for="exm-pos-by-{{ $key }}" class="ml-2 w-50 m-auto-0">{{ $value }}</label>
+                                        <label @checked(old("exam_student_position_by_value")==$key) for="exm-pos-by-{{ $key }}" class="ml-2 w-50 m-auto-0">{{ $value }}</label>
                                     </div>
                                     @endforeach
                                 </div>
@@ -252,9 +256,10 @@
                     </div>
                 </form>
             </div>
+            @endcan
 
             {{-- Announce exam tab --}}
-            @if (session('announce_exam'))
+            @if (session('announce_exam') && auth()->user()->can($tenant_permissions['exams']['announce']['permission']))
             <div class="tab-pane fade show active" id="announce-exam">
                 <div class="row">
                     <div class="col-md-12">

@@ -38,7 +38,7 @@ class NonTenancyStaffRecordsTableSeeder extends Seeder
                 'education_level' => 'Degree',
                 'college_attended' => 'Mzumbe University',
                 'year_graduated' => '2018',
-                'subjects_studied' => '["Information and Computer Studies", "Basic Mathematics", "Additional Mathematics"]',
+                'subjects_studied' => 'Information and Computer Studies, Basic Mathematics, Additional Mathematics',
                 'created_at' => NULL,
                 'updated_at' => NULL,
             ),

@@ -14,6 +14,8 @@ class DormController extends Controller
 
     public function __construct(DormRepo $dorm)
     {
+        $this->permissionMap = config('permissions.names.tenant.dorms');
+        parent::__construct();
         $this->dorm = $dorm;
     }
 

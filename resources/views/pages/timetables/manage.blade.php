@@ -24,12 +24,11 @@
             {{-- Add Time Slots --}}
             @include('pages.timetables.time_slots.index')
             {{-- Add Subject --}}
-            @includeWhen(auth()->user()->can($tenant_permissions['time_tables']['store']), 'pages.timetables.subjects.add')
+            @includeWhen(auth()->user()->can($tenant_permissions['time_tables']['store']['permission']), 'pages.timetables.subjects.add')
             {{-- Edit Subject --}}
-            @includeWhen(auth()->user()->can($tenant_permissions['time_tables']['update']), 'pages.timetables.subjects.edit')
+            @includeWhen(auth()->user()->can($tenant_permissions['time_tables']['update']['permission']), 'pages.timetables.subjects.edit')
         </div>
     </div>
 </div>
 
-{{--TimeTable Manage Ends--}}
 @endsection

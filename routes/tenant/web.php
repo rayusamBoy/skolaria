@@ -18,7 +18,7 @@ use App\Http\Controllers\MarkController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MyAccountController;
 use App\Http\Controllers\MyClassController;
-use App\Http\Controllers\MyController;
+use App\Http\Controllers\ChildrenController;
 use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
@@ -55,28 +55,28 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group(["middleware" => ["universal"]], function () {
+Route::group(["middleware" => ['universal']], function () {
     Auth::routes();
 
     /****************** My Account ***************/
-    Route::group(['prefix' => 'my-account', 'middleware' => ['universal']], function () {
+    Route::group(['prefix' => 'my-account', 'middleware' => ['auth', 'checkForPassUpdate']], function () {
         Route::get('profile/edit', [MyAccountController::class, 'edit_profile'])->name('my_account.edit');
         Route::put('profile', [MyAccountController::class, 'update_profile'])->name('my_account.update');
         Route::put('password/change', [MyAccountController::class, 'change_pass'])->name('my_account.change_pass');
-        Route::put('other/update', [MyAccountController::class, 'other'])->name('my_account.other');
+        Route::put('preferences/update', [MyAccountController::class, 'update_preferences'])->name('my_account.update_preferences');
         Route::post('hidden-alerts/update', [MyAccountController::class, 'update_hidden_alerts'])->name('my_account.update_hidden_alerts');
         Route::post('hidden-alerts/clear', [MyAccountController::class, 'clear_hidden_alerts'])->name('my_account.clear_hidden_alerts');
     });
 
     /*************** Test *****************/
-    Route::get('test', [TestController::class, 'index'])->name('test');
+    Route::get('test', [TestController::class, 'index'])->name('test')->middleware('auth');
 
     /*************** Others (public pages) *****************/
     Route::get('privacy-policy', [HomeController::class, 'privacy_policy'])->name('pages.privacy_policy');
     Route::get('terms-of-use', [HomeController::class, 'terms_of_use'])->name('pages.terms_of_use');
 });
 
-Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], function () {
+Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
     /*************** Two-factor authentication (account-scoped) *****************/
     Route::group(['prefix' => 'two-factor-authentication', 'middleware' => 'universal'], function () {
         Route::get('account/security', [AccountSecurityController::class, 'index'])->name('account_security.index')->middleware('2fa');
@@ -130,7 +130,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
 
         /*************** Students *****************/
         Route::prefix('students')->group(function () {
-            Route::get('{student}/password/reset', [StudentRecordController::class, 'reset_pass'])->name('students.password.reset');
+            Route::get('{student}/password/reset', [StudentRecordController::class, 'reset_password'])->name('students.password.reset');
             Route::get('graduated', [StudentRecordController::class, 'graduated'])->name('students.graduated');
             Route::put('{student}/{prom_id}/not-graduated', [StudentRecordController::class, 'not_graduated'])->name('students.not_graduated');
 
@@ -164,9 +164,9 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
 
         /*************** Users (admin operations) *****************/
         Route::prefix('users')->group(function () {
-            Route::get('password/reset/{user}', [UserController::class, 'reset_pass'])->name('users.password.reset');
-            Route::post('update/staff-data/edit-state', [UserController::class, 'update_staff_data_edit_state'])->name('users.update_staff_data_edit_state');
-            Route::post('update/blocked-state', [UserController::class, 'update_user_blocked_state'])->name('users.update_user_blocked_state');
+            Route::get('password/reset/{user}', [UserController::class, 'reset_password'])->name('users.password.reset');
+            Route::post('toggle/staff-data-editing', [UserController::class, 'toggle_staff_data_editing'])->name('users.toggle_staff_data_editing');
+            Route::post('update/blocked-state', [UserController::class, 'toggle_user_block'])->name('users.toggle_user_block');
         });
 
         /*************** Query Builder (reports / printing) *****************/
@@ -186,7 +186,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
 
             /*************** TimeTable Records (records are under timetables) *****************/
             Route::prefix('records')->group(function () {
-                Route::get('manage/{record}', [TimeTableController::class, 'manage'])->name('ttr.manage');
+                Route::get('manage/{record}', [TimeTableController::class, 'manage_record'])->name('ttr.manage');
                 Route::post('store', [TimeTableController::class, 'store_record'])->name('ttr.store');
                 Route::get('{record}/edit', [TimeTableController::class, 'edit_record'])->name('ttr.edit');
                 Route::put('{record}', [TimeTableController::class, 'update_record'])->name('ttr.update');
@@ -208,25 +208,27 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
 
         /*************** Notices (CRUD + mark viewed) *****************/
         Route::prefix('notices')->group(function () {
-            Route::post('set-viewed', [NoticeController::class, 'set_as_viewed'])->name('notices.set_viewed');
+            Route::post('set-viewed', [NoticeController::class, 'mark_as_viewed'])->name('notices.mark_as_viewed');
             Route::get('/', [NoticeController::class, 'index'])->name('notices.index');
             Route::post('store', [NoticeController::class, 'store'])->name('notices.store');
             Route::delete('{notice}', [NoticeController::class, 'destroy'])->name('notices.destroy');
-            Route::get('{notice}/edit', [NoticeController::class, 'edit'])->name('notices.edit');
+            Route::get('{notice}/edit', [NoticeController::class, 'edit'])->name('notices.edit')->middleware('decodeRouteParams');
             Route::post('{notice}', [NoticeController::class, 'update_record'])->name('notices.update');
         });
 
         /*************** Payments (invoices, receipts, actions) *****************/
         Route::prefix('payments')->group(function () {
             Route::get('manage/{class?}', [PaymentController::class, 'manage'])->name('payments.manage');
-            Route::get('invoice/{payment}/{year?}', [PaymentController::class, 'invoice'])->name('payments.invoice');
-            Route::get('status/{payment}/{year?}', [PaymentController::class, 'status'])->name('payments.status');
-            Route::get('receipts/{payment}/{notification_id?}', [PaymentController::class, 'receipts'])->name('payments.receipts');
-            Route::get('receipts/pdf/{payment}', [PaymentController::class, 'pdf_receipts'])->name('payments.pdf_receipts');
             Route::post('select/year', [PaymentController::class, 'select_year'])->name('payments.select_year');
             Route::post('select/class', [PaymentController::class, 'select_class'])->name('payments.select_class');
-            Route::delete('record/{payment}/reset', [PaymentController::class, 'reset_record'])->name('payments.reset_record');
-            Route::post('pay-now/{payment}', [PaymentController::class, 'pay_now'])->name('payments.pay_now');
+
+            Route::middleware('decodeRouteParams')->group(function () {
+                Route::get('invoice/{student}/{year?}', [PaymentController::class, 'invoice'])->name('payments.invoice');
+                Route::get('status/{student}/{year?}', [PaymentController::class, 'status'])->name('payments.status');
+                Route::get('receipts/{payment}/{notification_id?}', [PaymentController::class, 'receipts'])->name('payments.receipts');
+                Route::delete('record/{payment}/reset', [PaymentController::class, 'reset_record'])->name('payments.reset_record');
+                Route::post('pay-now/{payment}', [PaymentController::class, 'pay_now'])->name('payments.pay_now');
+            });
         });
 
         /*************** Pins *****************/
@@ -247,7 +249,6 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
             Route::post('batch/delete', [MarkController::class, 'batch_delete'])->name('marks.batch_delete');
             Route::put('batch/upload', [MarkController::class, 'batch_upload'])->name('marks.batch_upload');
 
-            // Prefer query params for optional filters: /marks/tabulation?exam=&class=&section=&year=
             Route::get('tabulation', [MarkController::class, 'tabulation'])->name('marks.tabulation');
             Route::post('tabulation/select', [MarkController::class, 'tabulation_select'])->name('marks.tabulation_select');
             Route::get('tabulation/print/{exam}/{class}/{section?}/{year?}', [MarkController::class, 'print_tabulation'])->name('marks.print_tabulation');
@@ -263,7 +264,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
             Route::post('bulk/select', [MarkController::class, 'bulk_select'])->name('marks.bulk_select');
 
             Route::get('selector/year/{id}', [MarkController::class, 'year_selector'])->name('marks.year_selector');
-            Route::post('selected/year/{id}', [MarkController::class, 'year_select'])->name('marks.year_select');
+            Route::post('selected/year/{id}', [MarkController::class, 'year_selected'])->name('marks.year_selected');
             Route::get('show/{id}/{year}', [MarkController::class, 'show'])->name('marks.show');
             Route::get('print/{id}/{exam_id}/{year}', [MarkController::class, 'print_view'])->name('marks.print');
         });
@@ -283,14 +284,14 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
             Route::post('selector', [AssessmentController::class, 'selector'])->name('assessments.selector');
             Route::get('bulk/{class?}/{section?}', [AssessmentController::class, 'bulk'])->name('assessments.bulk');
             Route::post('bulk', [AssessmentController::class, 'bulk_select'])->name('assessments.bulk_select');
-            Route::get('print/{exam}/{class}/{subject}/{year}/{sec_id?}', [AssessmentController::class, 'print_assessments'])->name('assessments.print_assessments');
+            Route::get('print/{exam}/{class}/{subject}/{year}/{sec_id?}', [AssessmentController::class, 'print'])->name('assessments.print');
             Route::get('print/cover/{student}', [AssessmentController::class, 'print_cover'])->name('assessments.print_cover');
             Route::put('comment/{as_id}', [AssessmentController::class, 'comment_update'])->name('assessments.comment_update');
             Route::put('skills/{skill}/{as_id}', [AssessmentController::class, 'skills_update'])->name('assessments.skills_update');
 
             Route::get('show/{id}/{year}', [AssessmentController::class, 'show'])->name('assessments.show');
             Route::get('selector/year/{id}', [AssessmentController::class, 'year_selector'])->name('assessments.year_selector');
-            Route::post('selected/year/{id}', [AssessmentController::class, 'year_select'])->name('assessments.year_select');
+            Route::post('selected/year/{id}', [AssessmentController::class, 'year_selected'])->name('assessments.year_selected');
             Route::get('detailed/print/{id}/{exam_id}/{year}', [AssessmentController::class, 'print_detailed'])->name('assessments.print_detailed');
             Route::get('minimal/print/{id}/{exam_id}/{year}', [AssessmentController::class, 'print_minimal'])->name('assessments.print_minimal');
         });
@@ -309,21 +310,23 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
             Route::post('participant/activate/all/thread/{thread}', [MessageController::class, 'activate_all_participants'])->name('messages.activate_all_participants');
             Route::delete('delete/{message}', [MessageController::class, 'user_delete'])->name('messages.user_delete');
             Route::post('participant/{thread}/last-read', [MessageController::class, 'update_participant_last_read'])->name('messages.update_participant_last_read');
-            Route::post('previous/fetch/{thread}/{current_first_msg_id_in_view}', [MessageController::class, 'fetch_previous'])->name('messages.fetch_previous');
+            Route::post('previous/fetch/{thread}/{current_first_msg_id_in_view}', [MessageController::class, 'load_previous'])->name('messages.load_previous');
         });
 
         /*************** Subject Record operations **********************/
-        Route::prefix('subject')->group(function () {
-            Route::get('record/{record}/edit', [SubjectController::class, 'edit_record'])->name('subjects.edit_record');
-            Route::delete('record/{subject}/{record}', [SubjectController::class, 'delete_record'])->name('subjects.delete_record');
-            Route::put('record/{record}', [SubjectController::class, 'update_record'])->name('subjects.update_record');
+        Route::prefix('subject-record')->group(function () {
+            Route::get('index', [SubjectController::class, 'index_record'])->name('subject_records.index');
+            Route::post('store', [SubjectController::class, 'store_record'])->name('subject_records.store');
+            Route::get('{record}/edit', [SubjectController::class, 'edit_record'])->name('subject_records.edit');
+            Route::delete('/{record}', [SubjectController::class, 'delete_record'])->name('subject_records.delete');
+            Route::put('{record}', [SubjectController::class, 'update_record'])->name('subject_records.update');
         });
 
         /*************** Core resources **************/
         Route::resource('students', StudentRecordController::class);
-        Route::resource('books', BookController::class);
-        Route::resource('book_requests', BookRequestController::class);
-        Route::resource('users', UserController::class);
+        Route::resource('books', BookController::class)->middleware('decodeRouteParams');
+        Route::resource('book_requests', BookRequestController::class)->middleware('decodeRouteParams');
+        Route::resource('users', UserController::class)->middleware('decodeRouteParams');
         Route::resource('classes', MyClassController::class);
         Route::resource('sections', SectionController::class);
         Route::resource('subjects', SubjectController::class);
@@ -390,7 +393,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
             /************* Logs ************/
             Route::prefix('logs')->group(function () {
                 Route::get('/', [LogController::class, 'index'])->name('logs.index');
-                Route::post('login-history/reset/{user}', [LogController::class, 'reset_login_histories'])->name('login_histories.reset');
+                Route::post('login-history/reset/{user_id}', [LogController::class, 'reset_login_histories'])->name('login_histories.reset')->middleware('decodeRouteParams');
                 Route::post('delete-activity/{log}', [LogController::class, 'delete_activity'])->name('activity_log.delete');
                 Route::post('activity-log/clean', [LogController::class, 'clean_activity_log'])->name('activity_log.clean');
             });
@@ -398,7 +401,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate', 'handleCookie']], f
 
         /************************ PARENT ****************************/
         Route::prefix('parent')->group(function () {
-            Route::get('my-children', [MyController::class, 'children'])->name('parent.my_children');
+            Route::get('my-children', [ChildrenController::class, 'children'])->name('parent.my_children');
         });
 
         /*************** Analytics (tracking & fetch) **************/

@@ -12,11 +12,12 @@
     const $typingStatus = $('#user-is-typing');
     const $typingIndicator = $('#typing-indicator');
     const $messagesRow = $('#messages-row');
+    const $msgTxtAreaHint = $('#message-textarea-actions-subtle-hint');
   
     let typingNow = 0, typingTimeout;
   
     // Open a private channel using Echo (server-side values injected)
-    const channel = Echo.private(`messages.{{ $thread->id }}.{{ tenant("id") }}`);
+    const channel = Echo.private(`messages.{{ $thread->id }}.{{ tenant()?->getTenantKey() }}`);
 
     /**
      *-------------------------------------------------------------
@@ -35,7 +36,7 @@
      * On keydown in the message textarea, trigger typing indicator
      *-------------------------------------------------------------
      */
-    $textarea.on('keydown', () => {
+    $textarea.on('keydown', (e) => {
         if (typingNow < 1) {
             isTyping(true);
             typingNow = 1;
@@ -45,7 +46,13 @@
         typingTimeout = setTimeout(() => {
             isTyping(false);
             typingNow = 0;
+            $msgTxtAreaHint.show(250);
         }, 1000);
+
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            $sendBtn.click();
+        }
     });
   
     /**
@@ -76,7 +83,7 @@
      * Listen for new messages and update UI accordingly
      *-------------------------------------------------------------
      */
-    channel.listen('NewMessage', (e) => {
+    channel.listen('MessageArrived', (e) => {
         $messagesRow.append(getMessage(authId, e));
         updateParticipantLastRead(e.message.thread_id);
         playNotificationSound('message-notification.mp3', true);
@@ -172,7 +179,7 @@
         if (message.user.id == authId) {
             if (!message.deleted_at) {
                 const $deleteBtn = $(`
-                    <button data-toggle="popover" data-placement="left" data-html="true" class="material-symbols-rounded position-absolute left-neg-25 text-info-400 opacity-75 opacity-100-on-hover border-0 outline-0 action-btn"
+                    <button data-toggle="popover" data-placement="left" data-html="true" class="material-symbols-rounded position-absolute left-neg-p5rem text-info-400 opacity-75 opacity-100-on-hover border-0 outline-0 action-btn"
                         data-content="
                             <div class='d-flex justify-center'>
                                 <button type='button' data-text='Deleting...' id='${message.id}' onclick='prepareDeleteUserMessageForm(this.id)' data-toggle='modal' data-target='#confirm-message-delete' class='btn btn-sm p-0 pr-1 pl-1 m-auto text-danger-800 w-100 text-left bg-transparent'>
@@ -228,7 +235,7 @@
     $loadPrevBtn.on('click', (e) => {
         e.preventDefault();
         const currentFirstMsgId = $messagesRow.children(":first").attr('id').split('-')[1];
-        let url = '{{ route("messages.fetch_previous", [":thread_id", ":current_first_msg_id_in_view"]) }}'.replace(':thread_id', '{{ $thread->id }}').replace(':current_first_msg_id_in_view', currentFirstMsgId);
+        let url = '{{ route("messages.load_previous", [":thread_id", ":current_first_msg_id_in_view"]) }}'.replace(':thread_id', '{{ $thread->id }}').replace(':current_first_msg_id_in_view', currentFirstMsgId);
         const requestData = {
             url, 
             prepend_previous_messages: true, 
@@ -344,5 +351,22 @@
         const dotClasses = ["dot-flashing", "dot-elastic", "dot-collision"];
         return dotClasses[Math.floor(Math.random() * dotClasses.length)];
     }
+
+    /**
+     *-------------------------------------------------------------
+     * Initialize overtype markdown 
+     *-------------------------------------------------------------
+     */
+    const [overType] = new OverType('#message', {
+        placeholder: 'Type to add a message...',
+        value: '',
+        autoResize: true,
+        textareaProps: {
+            required: true,
+            name: 'message',
+        },
+        fontSize: '1rem',
+        theme: getOvertypeTheme() ?? 'solar',
+    });
 
 </script>

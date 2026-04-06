@@ -1,5 +1,6 @@
 @php
-$unread_notifications_count = auth()->user()->unreadNotifications()->count();
+$unread_notifications = once(fn() => auth()->user()->unreadNotifications()->get());
+$unread_notifications_count = $unread_notifications->count();
 @endphp
 <a href="javascript:;" class="breadcrumb-elements-item" data-toggle="dropdown" title="Notifications">
     @if($unread_notifications_count > 0)
@@ -14,10 +15,10 @@ $unread_notifications_count = auth()->user()->unreadNotifications()->count();
 
 <div class="dropdown-menu dropdown-menu-right m-0">
     <div class="modal-body px-0 py-1">
-        @if(auth()->user()->notifications()->get()->isNotEmpty())
+        @if($unread_notifications_count > 0)
         <div>
             <ul class="list-style-circle text-default unread-notifications-list px-2">
-                @forelse(auth()->user()->unreadNotifications()->get() as $not)
+                @forelse($unread_notifications as $not)
                 <li class="unread-{{ $not->id }}"><a target="_blank" @if(isset($not->data['receipt'])) href="{{ route('payments.receipts', [Qs::hash($not->data['receipt']['pr_id']), $not->id]) }}" @elseif($not->data['url']) href="{{ $not->data['url'] }}" @endif><strong>{{ $not->data['subject'] }}</strong></a><small class="float-right pl-2">{{ $not->created_at }}</small></li>
                 @empty
                 <h6 class="text-success">No new notifications</h6>

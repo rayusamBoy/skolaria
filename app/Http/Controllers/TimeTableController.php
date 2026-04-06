@@ -19,6 +19,8 @@ class TimeTableController extends Controller
 
     public function __construct(TimeTableRepo $tt, MyClassRepo $mc, ExamRepo $exam)
     {
+        $this->permissionMap = config('permissions.names.tenant.time_tables');
+        parent::__construct();
         $this->tt = $tt;
         $this->my_class = $mc;
         $this->exam = $exam;
@@ -28,19 +30,18 @@ class TimeTableController extends Controller
     public function index()
     {
         $d['exams'] = $this->exam->getExam(['year' => $this->year]);
-        $d['my_classes'] = $this->my_class->all();
         $d['tt_records'] = $this->tt->getAllRecords();
 
         return view('pages.timetables.index', $d);
     }
 
-    public function manage($ttr_id)
+    public function manage_record($ttr_id)
     {
         $d['ttr_id'] = $ttr_id;
         $d['ttr'] = $ttr = $this->tt->findRecord($ttr_id);
         $d['time_slots'] = $this->tt->getTimeSlotByTTR($ttr_id);
         $d['ts_existing'] = $this->tt->getExistingTS($ttr_id);
-        $d['subjects'] = $this->my_class->getSubject(['my_class_id' => $ttr->my_class_id])->get();
+        $d['subjects'] = $this->my_class->whereSubject(['my_class_id' => $ttr->my_class_id])->get();
         $d['my_class'] = $this->my_class->find($ttr->my_class_id);
 
         if ($ttr->exam_id) {
@@ -160,7 +161,6 @@ class TimeTableController extends Controller
     {
         $d['ttr'] = $ttr = $this->tt->findRecord($ttr_id);
         $d['exams'] = $this->exam->getExam(['year' => $ttr->year]);
-        $d['my_classes'] = $this->my_class->all();
         $d['sections'] = $this->exam->getSections(['my_class_id' => $ttr->my_class_id]);
 
         return view('pages.timetables.edit', $d);

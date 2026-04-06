@@ -15,7 +15,7 @@
                         <div class="card-body text-muted">
                             <p>{{ ('You have two factor authentication enabled. Please open Google authenticator app and enter your one-time password to complete your login.') }}</p>
 
-                            <form method="POST" action="{{ route('2fa.authenticate') }}">
+                            <form method="POST" action="{{ route('two_factor.authenticate') }}">
                                 @csrf
 
                                 <div class="form-group row">
@@ -43,7 +43,7 @@
                                     </div>
                                 </div>
                             </form>
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                 @csrf
                             </form>
                         </div>

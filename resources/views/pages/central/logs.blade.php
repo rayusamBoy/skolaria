@@ -62,9 +62,13 @@
 
                                         <div class="dropdown-menu dropdown-menu-left">
                                             {{-- View Profile --}}
+                                            @can($central_permissions['central_users']['show']['permission'])
                                             <a href="{{ route('central_users.show', Qs::hash($lh->user->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> View Profile</a>
+                                            @endcan
                                             {{--Reset Login history--}}
+                                            @can($central_permissions['central_logs']['reset_login_hist']['permission'])
                                             <a href="javascript:;" onclick="confirmReset(null, '{{ route('logs.login_history_reset', Qs::hash($lh->user->id)) }}')" class="dropdown-item"><i class="material-symbols-rounded">history</i> Reset Login History</a>
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>
@@ -98,7 +102,9 @@
                             <th>Causer</th>
                             <th>Properties</th>
                             <th>Created At</th>
+                            @can($central_permissions['central_logs']['delete_activity']['permission'])
                             <th class="text-center">Action</th>
+                            @endcan
                         </tr>
                     </thead>
                     <tbody>
@@ -117,11 +123,13 @@
                                 <a href="javascript:;" data-toggle="modal" data-target="#activity-log-properties-{{ $chk->id }}">show</a>
                             </td>
                             <td>{{ Qs::onlyDateFormat($chk->created_at) }}</td>
+                            @can($central_permissions['central_logs']['delete_activity']['permission'])
                             <td class="text-center">
                                 {{--Delete--}}
                                 <a id="{{ $chk->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="btn btn-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                 <form class="d-none" method="post" id="item-delete-{{ $chk->id }}" action="{{ route('logs.activity_log_delete', $chk->id) }}" class="hidden">@csrf</form>
                             </td>
+                            @endcan
                         </tr>
                         @endforeach
                         @endforeach

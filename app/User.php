@@ -54,17 +54,20 @@ class User extends Authenticatable implements MustVerifyEmail
         'secondary_id',
         'twofa_secret_code',
         'twofa_recovery_codes',
-        'sidebar_minimized',
-        'allow_system_sounds',
         'is_notifiable',
-        'show_charts',
+        'preferences',
         'message_media_heading_color',
-        'firebase_device_token',
+        'firebase_device_tokens',
         'hidden_alert_ids',
+        'password_updated_at'
     ];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'is_notifiable' => 'array',
+        'preferences' => 'array',
+        'firebase_device_tokens' => 'array',
+        'hidden_alert_ids' => 'array',
     ];
 
     public const string GENDER_MALE = 'Male';
@@ -80,7 +83,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
         'twofa_secret_code',
         'twofa_recovery_codes',
-        'firebase_device_token',
+        'firebase_device_tokens',
     ];
 
     public function student_record()
@@ -128,11 +131,11 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function getDeviceTokens()
     {
-        return auth()->user()->firebase_device_token === null ? [] : unserialize(auth()->user()->firebase_device_token);
+        return $this->firebase_device_tokens ?? [];
     }
 
     /**
-     * Specifies the user's FCM token
+     * Specifies the user's FCM tokens
      *
      * @return string|array
      */
@@ -146,7 +149,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function routeNotificationForVonage(): string
     {
-        return auth()->user()->phone ?? auth()->user()->phone2;
+        return $this->phone ?? $this->phone2;
     }
 
     public function loginHistory()

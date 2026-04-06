@@ -11,7 +11,7 @@
     </div>
 
     <div class="card-body">
-        @can($tenant_permissions['payments']['select_year'])
+        @can($tenant_permissions['payments']['select_year']['permission'])
         <form method="post" action="{{ route('payments.select_year') }}">
             @csrf
             <div class="row">
@@ -51,7 +51,7 @@
     </div>
 
     <div class="card-body">
-        @can($tenant_permissions['payments']['index'])
+        @can($tenant_permissions['payments']['index']['permission'])
         <ul class="nav nav-tabs nav-tabs-highlight">
             <li class="nav-item"><a href="#all-payments" class="nav-link active" data-toggle="tab">All Classes</a></li>
             <li class="nav-item dropdown">
@@ -95,12 +95,12 @@
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @can($tenant_permissions['payments']['edit'])
+                                            @can($tenant_permissions['payments']['edit']['permission'])
                                             <a href="{{ route('payments.edit', $p->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
                                             @endcan
-                                            @can($tenant_permissions['payments']['destroy'])
+                                            @can($tenant_permissions['payments']['destroy']['permission'])
                                             <a id="{{ $p->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -149,12 +149,12 @@
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @can($tenant_permissions['payments']['edit'])
+                                            @can($tenant_permissions['payments']['edit']['permission'])
                                             <a href="{{ route('payments.edit', $p->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
                                             @endcan
-                                            @can($tenant_permissions['payments']['destroy'])
+                                            @can($tenant_permissions['payments']['destroy']['permission'])
                                             <a id="{{ $p->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>

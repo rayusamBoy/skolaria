@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" {{ request()->routeIs('login', 'password.*', 'two_factor.*') ? 'force-dark-theme' : '' }}>
 
 <head>
     <meta charset="utf-8">
@@ -8,29 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="author" content="Rashidi Said (rayusam)">
 
-    @php
-    $settings = Qs::getSettings();
-    $colors = $settings->firstWhere('type', 'login_and_related_pgs_txts_and_bg_colors')->description;
-        if ($colors !== null) {
-            $colors_exploaded = explode(Qs::getDelimiter(), $colors);
-            $texts_color = $colors_exploaded[0];
-            $bg_color = $colors_exploaded[1];
-        }
-    @endphp
-
-    @if (Qs::googleAnalyticsSetUpOkAndEnabled())
-        <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id={{ $settings->firstWhere("type", "google_analytic_tag_id")->description }}"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-
-            function gtag() {
-                dataLayer.push(arguments);
-            }
-            gtag('js', new Date());
-            gtag('config', '{{ $settings->firstWhere("type", "google_analytic_tag_id")->description }}');
-        </script>
-    @endif
+    @includeUnless(!Qs::googleAnalyticsSetUpOkAndEnabled(), 'partials.js.google_tag')
 
     <title>@yield('page_title') &bull; {{ Qs::getStringAbbreviation(config('app.name')) }}</title>
 
@@ -49,10 +27,11 @@
     @include('partials.login.footer')
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             // Initialize uniform
             $('.form-input-styled').uniform();
-        }); 
+        });
+
     </script>
 </body>
 

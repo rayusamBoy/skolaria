@@ -3,18 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Events\MessageDeleted;
-use App\Events\NewMessage;
+use App\Events\MessageArrived;
 use App\Helpers\Usr;
 use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\StudentRecord;
 use App\Models\Thread;
-use App\Notifications\MessageSent;
+use App\Notifications\NewMessageArrived;
 use App\Repositories\UserRepo;
 use App\User;
 use Carbon\Carbon;
 use Cmgmyr\Messenger\Models\Participant;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
@@ -209,6 +210,7 @@ class MessageController extends Controller
         } catch (Throwable $e) {
             // Rollback the created message.
             $message->deleteMessageForever($message->id);
+            Log::error("Error in MessageController@update while creating a message: " . $e->getMessage());
             return Usr::json(null, false, ['msg' => "Something went wrong. Cannot create a message.", 'ok' => false, 'complete' => true]);
         }
 
@@ -216,14 +218,15 @@ class MessageController extends Controller
             $message = Message::with(['user', 'deletor', 'deletor.roles', 'user.roles'])->find($message->id);
             $users = Participant::where('thread_id', $thread->id)->with('user')->get()->where('user.id', '<>', auth()->id())->whereNotNull('user')->pluck('user');
             // Update user photo path to full asset url
-            $message['user']['photo'] = Usr::getTenantAwarePhoto($message['user']['photo']);
+            $message['user']['photo'] = Usr::getTenancyAwarePhoto($message['user']['photo']);
 
-            Notification::sendNow($users, new MessageSent($message));
-            broadcast(new NewMessage($message));
+            Notification::sendNow($users, new NewMessageArrived($message));
+            broadcast(new MessageArrived($message));
 
-            return Usr::jsonOnyWithMsg('scrollToBtn');
+            return Usr::jsonWithMsgOnly('scrollToBtn');
         } catch (Throwable $e) {
             $message->deleteMessageForever($message->id);
+            Log::error("Error in MessageController@update while sending a message: " . $e->getMessage());
             return Usr::json(null, false, ['msg' => "Something went wrong. Cannot send a message.", 'ok' => false, 'complete' => true]);
         }
     }
@@ -234,7 +237,7 @@ class MessageController extends Controller
      * @param int $thread_id
      * @return mixed
      */
-    public function update_participant_last_read($thread_id)
+    public function update_participant_last_read(int $thread_id)
     {
         $thread = Thread::withTrashed()->findOrFail($thread_id);
         $thread->markAsRead(auth()->id());
@@ -266,7 +269,7 @@ class MessageController extends Controller
      * @param int $participant_id
      * @return mixed
      */
-    public function remove_participant($thread_id, $participant_id)
+    public function remove_participant(int $thread_id, int $participant_id)
     {
         $thread_id = Usr::decodeHash($thread_id);
         $participant_id = Usr::decodeHash($participant_id);
@@ -286,11 +289,10 @@ class MessageController extends Controller
     /**
      * Delete a user creted message.
      *
-     * @param int $thread_id
-     * @param int $participant_id
+     * @param int $msg_id
      * @return mixed
      */
-    public function user_delete($msg_id)
+    public function user_delete(int $msg_id)
     {
         try {
             $message = Message::findOrFail($msg_id);
@@ -303,10 +305,10 @@ class MessageController extends Controller
             $message->deleteMessage($msg_id);
             $message = Message::onlyTrashed()->with(['user', 'deletor', 'deletor.roles', 'user.roles'])->find($message->id);
             // Update user photo path to full asset url
-            $message['user']['photo'] = Usr::getTenantAwarePhoto($message['user']['photo']);
+            $message['user']['photo'] = Usr::getTenancyAwarePhoto($message['user']['photo']);
 
             broadcast(new MessageDeleted($message));
-            return Usr::jsonOnyWithMsg('complete');
+            return Usr::jsonWithMsgOnly('complete');
         } catch (Throwable $e) {
             // Roll back message actions.
             $message->updateMessage($msg_id, ['deleted_by' => NULL]);
@@ -323,7 +325,7 @@ class MessageController extends Controller
      * @param int $participant_id
      * @return mixed
      */
-    public function activate_all_participants($thread_id)
+    public function activate_all_participants(int $thread_id)
     {
         $thread_id = Usr::decodeHash($thread_id);
 
@@ -338,13 +340,13 @@ class MessageController extends Controller
     }
 
     /**
-     * Fetch previous messages.
+     * Load previous messages.
      *
      * @param int $thread_id
      * @param int $current_first_msg_id_in_view
      * @return mixed
      */
-    public function fetch_previous($thread_id, $current_first_msg_id_in_view)
+    public function load_previous(int $thread_id, int $current_first_msg_id_in_view)
     {
         $messages_string = '';
         $messages = Message::withTrashed()->with(['user', 'deletor', 'deletor.roles'])->where('thread_id', $thread_id)->where('id', '<', $current_first_msg_id_in_view)->get()->take(-$this->extra_messages_to_count);

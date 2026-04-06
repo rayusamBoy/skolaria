@@ -161,7 +161,7 @@ class Usr extends Qs
 
     public static function getAllClassesOrdered($order_by = "name")
     {
-        return MyClass::orderBy($order_by)->get();
+        return once(fn() => MyClass::with(['class_type', 'section'])->orderBy($order_by)->get());
     }
 
     public static function getClassTypes()
@@ -171,7 +171,7 @@ class Usr extends Qs
 
     public static function getStudents($data)
     {
-        return StudentRecord::with('user')->where($data)->get()->whereNotNull('user');
+        return once(fn() => StudentRecord::with('user')->where($data)->get()->whereNotNull('user'));
     }
 
     public static function getClassStudents($class_id)
@@ -360,7 +360,7 @@ class Usr extends Qs
         return $remove ? array_values(array_diff($statuses, $remove)) : $statuses;
     }
 
-    public static function getTenantAwarePhoto(string $url): string
+    public static function getTenancyAwarePhoto(string $url): string
     {
         return self::tenancyInitilized() ? (str_contains($url, 'global_assets') ? asset($url) : tenant_asset($url)) : asset($url);
     }
@@ -388,7 +388,7 @@ class Usr extends Qs
     public static function userAssignedTickets($user_id = null)
     {
         $user_id ??= auth()->id();
-        return Ticket::where('assigned_to', $user_id)->where('status', '!=', 'closed')->where('is_archived', false)->get();
+        return once(fn() => Ticket::where('assigned_to', $user_id)->where('status', '!=', 'closed')->where('is_archived', false)->get());
     }
 
     public static function getUserMediaHeadingColor($name)
@@ -412,5 +412,62 @@ class Usr extends Qs
             $path = self::getUploadPath(strtolower($name)) . $code;
             Storage::exists($path) ? Storage::deleteDirectory($path) : false;
         }
+    }
+
+    public static function getAvailableAppSkins()
+    {
+        return [
+            'default' => 'Original light/dark balanced theme',
+            'teal' => 'Modern teal with a fresh, tech‑friendly feel',
+            'slate' => 'Professional slate theme with balanced neutrals and blue accents',
+            'navy' => 'Professional deep blue with sage green accents',
+            'green' => 'Calm, natural green inspired by growth and learning',
+            'warm' => 'Friendly slate blue with warm orange highlights',
+            'combined' => 'Harmonious blend of teal, navy, and green',
+            'highcontrast' => 'Maximum readability for low‑vision users',
+            'invert' => 'Simple inversion of the default theme',
+            'grayscale' => 'Distraction‑free shades of gray',
+            'slateglass' => 'Professional slate theme with transparent elements',
+        ];
+    }
+
+    public static function getDefaultUserPreferences()
+    {
+        $preferences = [
+            'always_minimize_sidebar' => 0,
+            'allow_system_sounds' => 1,
+            'active_system_skin' => array_key_first(self::getAvailableAppSkins()),
+        ];
+
+        return $preferences;
+    }
+
+    public static function getDefaultIsNotifiableUserColumnValues()
+    {
+        $values = [
+            'status' => (bool) true,
+            'on_email_channel' => (bool) true,
+            'on_sms_channel' => (bool) true,
+            'on_push_channel' => (bool) true,
+        ];
+
+        return $values;
+    }
+
+    public static function getLoginAndRelatedPagesBgDescription()
+    {
+        return 'storage/uploads/login_and_related_pages_bg.png';
+    }
+
+    public static function getTenancyAwareImgOrDefaultBgUrl($img)
+    {
+        if ($img === null)
+            return asset(path: self::getLoginAndRelatedPagesBgDescription());
+
+        $img_desc = $img->description;
+        $img_url = $img_desc === null ? asset(path: self::getLoginAndRelatedPagesBgDescription()) : (self::tenancyInitilized() ? tenant_asset($img_desc) : asset($img_desc));
+        $img_url = "$img_url?" . strtotime($img->updated_at);
+
+        return $img_url;
     }
 }

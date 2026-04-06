@@ -50,7 +50,7 @@ $calendar_events = json_encode(['events' => Evt::all() ]);
                     </table>
                 </div>
 
-                @can($tenant_permissions['schedules']['create_event'])
+                @can($tenant_permissions['schedules']['create_event']['permission'])
                 <button class="btn btn-info btn-sm float-right" id="add-button">Add Event</button>
                 @endcan
 

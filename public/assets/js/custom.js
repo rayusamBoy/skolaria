@@ -384,8 +384,8 @@ const disableElement = (selector) => $(selector).prop("disabled", true);
 const updateSectionDisableState = () => {
     const values = $("#students-ids").val();
     return values.length
-        ? disableElement("#sec_id_add_not_applicable")
-        : enableElement("#sec_id_add_not_applicable");
+        ? disableElement("#sec_id_add_not_applicable, #section_id")
+        : enableElement("#sec_id_add_not_applicable, #section_id");
 };
 
 const hide = (selector, duration = 0) => $(selector).hide(duration);
@@ -1779,7 +1779,7 @@ function rollbackUpdateExamEditAction(el) {
 
 function updateStaffDataEdtiState(user_id, el) {
     if (sessionStorage.getItem("update-staff-data-edit-ok") !== "false") {
-        const url = update_staff_data_edit_state_url;
+        const url = toggle_staff_data_editing_url;
         const value = el.checked ? 1 : 0;
         $.ajax({
             method: "post",
@@ -1805,7 +1805,7 @@ function rollbackUpdateStaffDataEditAction(el) {
 
 function updateUserBlockedState(user_id, el) {
     if (sessionStorage.getItem("update-user-blocked-state-ok") !== "false") {
-        const url = update_user_blocked_state_url;
+        const url = toggle_user_block_url;
         const value = el.checked ? 1 : 0;
         $.ajax({
             method: "post",
@@ -2043,7 +2043,11 @@ function closeConfirmMessageDeleteModal() {
 }
 
 function disableBtn($btn) {
-    const btnText = $btn.data("text") ? $btn.data("text") : "Submitting...";
+    const btnText = $btn.data("text")
+        ? $btn.data("text")
+        : $btn.data("text") == " "
+          ? ""
+          : "Submitting...";
     $btn.prop("disabled", true).html(
         `<i class="material-symbols-rounded mr-2 spinner">progress_activity</i>${btnText}`,
     );
@@ -2470,6 +2474,31 @@ $(function () {
     // Initial setup
     initManualSelected();
     refreshPermissionsUI();
+});
 
-    // If you initialize select2 after this script, call refreshPermissionsUI() once afterwards.
+const messageTicketEditor = document.getElementById("message-ticket-editor");
+if (messageTicketEditor) {
+    const [overType] = new OverType("#message-ticket-editor", {
+        placeholder: "Your message...",
+        value: "",
+        autoResize: true,
+        textareaProps: {
+            required: true,
+            name: "message",
+        },
+        showStats: true,
+        fontSize: "1rem",
+        theme: getOvertypeTheme() ?? "solar",
+        toolbar: true,
+    });
+}
+
+// Select all / Deselect all per permission group
+$(".select-all-group").click(function () {
+    var group = $(this).data("group");
+    $('input[data-group="' + group + '"]').prop("checked", true);
+});
+$(".deselect-all-group").click(function () {
+    var group = $(this).data("group");
+    $('input[data-group="' + group + '"]').prop("checked", false);
 });

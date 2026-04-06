@@ -15,6 +15,8 @@ class BookRequestController extends Controller
 
     public function __construct(BookRepo $book, UserRepo $user)
     {
+        $this->permissionMap = config('permissions.names.tenant.book_requests');
+        parent::__construct();
         $this->book = $book;
         $this->user = $user;
     }
@@ -26,7 +28,7 @@ class BookRequestController extends Controller
     {
         $d["requests"] = $this->book->getRequests();
         $d["books"] = $this->book->getAll();
-        $d["users"] = $this->user->getUsersByRoleNames(['Student', 'Teacher', 'Admin', 'Super Admin']);
+        $d["users"] = $this->user->all();
 
         return view('pages.books.requests.index', $d);
     }
@@ -53,10 +55,9 @@ class BookRequestController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($book_req_id)
+    public function edit($book_request)
     {
-        $book_req_id = Qs::decodeHash($book_req_id);
-        $d["book_request"] = $this->book->findRequest($book_req_id);
+        $d["book_request"] = $this->book->findRequest($book_request);
         $d["books"] = $this->book->getAll();
 
         return view("pages.books.requests.edit", $d);
@@ -87,10 +88,9 @@ class BookRequestController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($book_req_id)
+    public function destroy($book_request)
     {
-        $book_req_id = Qs::decodeHash($book_req_id);
-        $book_request = $this->book->findRequest($book_req_id);
+        $book_request = $this->book->findRequest($book_request);
         $book_id = $book_request->book_id;
         $book_request->delete();
 

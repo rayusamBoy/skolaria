@@ -43,8 +43,6 @@ class TenancyUsersTableSeeder extends Seeder
             'email_verified_at' => NULL,
             'password' => Hash::make('superadmin'),
             'remember_token' => NULL,
-            'sidebar_minimized' => 0,
-            'show_charts' => 1,
             'password_updated_at' => NULL,
             'twofa_secret_code' => NULL,
             'twofa_recovery_codes' => NULL,
@@ -76,8 +74,6 @@ class TenancyUsersTableSeeder extends Seeder
             'email_verified_at' => NULL,
             'password' => Hash::make('admin'),
             'remember_token' => NULL,
-            'sidebar_minimized' => 0,
-            'show_charts' => 1,
             'password_updated_at' => NULL,
             'twofa_secret_code' => NULL,
             'twofa_recovery_codes' => NULL,
@@ -109,8 +105,6 @@ class TenancyUsersTableSeeder extends Seeder
             'email_verified_at' => NULL,
             'password' => Hash::make('teacher'),
             'remember_token' => NULL,
-            'sidebar_minimized' => 0,
-            'show_charts' => 1,
             'password_updated_at' => NULL,
             'twofa_secret_code' => NULL,
             'twofa_recovery_codes' => NULL,
@@ -142,8 +136,6 @@ class TenancyUsersTableSeeder extends Seeder
             'email_verified_at' => NULL,
             'password' => Hash::make('accountant'),
             'remember_token' => NULL,
-            'sidebar_minimized' => 0,
-            'show_charts' => 1,
             'password_updated_at' => NULL,
             'twofa_secret_code' => NULL,
             'twofa_recovery_codes' => NULL,
@@ -175,8 +167,6 @@ class TenancyUsersTableSeeder extends Seeder
             'email_verified_at' => NULL,
             'password' => Hash::make('librarian'),
             'remember_token' => NULL,
-            'sidebar_minimized' => 0,
-            'show_charts' => 1,
             'password_updated_at' => NULL,
             'twofa_secret_code' => NULL,
             'twofa_recovery_codes' => NULL,
@@ -208,8 +198,6 @@ class TenancyUsersTableSeeder extends Seeder
             'email_verified_at' => NULL,
             'password' => Hash::make('parent'),
             'remember_token' => NULL,
-            'sidebar_minimized' => 0,
-            'show_charts' => 1,
             'password_updated_at' => NULL,
             'twofa_secret_code' => NULL,
             'twofa_recovery_codes' => NULL,
@@ -241,8 +229,6 @@ class TenancyUsersTableSeeder extends Seeder
             'email_verified_at' => NULL,
             'password' => Hash::make('student'),
             'remember_token' => NULL,
-            'sidebar_minimized' => 0,
-            'show_charts' => 1,
             'password_updated_at' => NULL,
             'twofa_secret_code' => NULL,
             'twofa_recovery_codes' => NULL,
@@ -251,12 +237,12 @@ class TenancyUsersTableSeeder extends Seeder
             'deleted_at' => NULL,
         ]);
 
-        $super_admin->assignRole('Super Admin');
-        $admin->assignRole('Admin');
-        $teacher->assignRole('Teacher');
-        $accountant->assignRole('Accountant');
-        $librarian->assignRole('Librarian');
-        $parent->assignRole('Parent');
-        $student->assignRole('Student');
+        $super_admin->assignRole(config('roles.default_roles.tenant.superadmin'));
+        $admin->assignRole(config('roles.default_roles.tenant.admin'));
+        $teacher->assignRole(config('roles.default_roles.tenant.teacher'));
+        $accountant->assignRole(config('roles.default_roles.tenant.accountant'));
+        $librarian->assignRole(config('roles.default_roles.tenant.librarian'));
+        $parent->assignRole(config('roles.default_roles.tenant.parent'));
+        $student->assignRole(config('roles.default_roles.tenant.student'));
     }
 }

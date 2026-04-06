@@ -61,7 +61,7 @@
             {{-- Logo and School Details--}}
             <table width="100%">
                 <tr>
-                    <td><img src="{{ tenant_asset($settings->firstWhere('type', 'logo')->description) }}" style="max-height : 100px;"></td>
+                    <td><img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'logo')) }}" style="max-height : 100px;"></td>
                     <td>
                         <strong><span style="color: #1b0c80; font-size: 25px;">{{ strtoupper($settings->firstWhere('type', 'system_name')) }}</span></strong><br /><br />
                         <strong><span style="color: #000; font-size: 15px;"><span>{{ ucwords($settings->firstWhere('type', 'address')->description) }}</span></span></strong><br />
@@ -73,7 +73,7 @@
 
             {{--Background Logo--}}
             <div style="position: relative; text-align: center; ">
-                <img src="{{ tenant_asset($settings->firstWhere('type', 'logo')->description) }}" class="bg-logo" />
+                <img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'logo')) }}" class="bg-logo" />
             </div>
 
             {{-- Summaries --}}

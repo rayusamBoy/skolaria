@@ -182,9 +182,19 @@ Breadcrumbs::for('subjects.index', function (BreadcrumbTrail $trail) {
     $trail->push('Manage Subjects', route('subjects.index'));
 });
 
-Breadcrumbs::for('subjects.edit_record', function (BreadcrumbTrail $trail, $subject) {
+Breadcrumbs::for('subject_records.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('dashboard');
+    $trail->push('Manage Subject Records', route('subject_records.index'));
+});
+
+Breadcrumbs::for('subjects.edit', function (BreadcrumbTrail $trail, $subject) {
     $trail->parent('subjects.index');
-    $trail->push('Edit Subject Record', route('subjects.edit_record', $subject));
+    $trail->push('Edit Subject', route('subjects.edit', $subject));
+});
+
+Breadcrumbs::for('subject_records.edit', function (BreadcrumbTrail $trail, $subject) {
+    $trail->parent('subject_records.index');
+    $trail->push('Edit Subject Record', route('subject_records.edit', $subject));
 });
 
 // Exams

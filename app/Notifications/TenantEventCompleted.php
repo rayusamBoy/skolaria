@@ -7,15 +7,15 @@ use Illuminate\Notifications\Notification;
 use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
 
-class SendTenantEvent extends Notification
+class TenantEventCompleted extends Notification
 {
     /**
      * Create a new notification instance.
      */
-    protected $event;
-    public function __construct($event)
+    protected $data;
+    public function __construct($data)
     {
-        $this->event = $event;
+        $this->data = $data;
     }
 
     /**
@@ -27,9 +27,9 @@ class SendTenantEvent extends Notification
     {
         $channels = [];
 
-        if (Qs::is_serialized($notifiable->is_notifiable)) {
-            if (\is_array(unserialize($notifiable->is_notifiable)) && unserialize($notifiable->is_notifiable)['status'] === 1) {
-                $channels = FcmChannel::class;
+        if ($notifiable->is_notifiable) {
+            if (\is_array($notifiable->is_notifiable) && $notifiable->is_notifiable['status']) {
+                $channels = [FcmChannel::class];
             }
         }
 
@@ -38,12 +38,15 @@ class SendTenantEvent extends Notification
 
     public function toFcm(): FcmMessage
     {
+        $title = $this->data['title'] ?? 'Tenant update';
+        $body = mb_strimwidth($this->data['msg'] ?? 'Tenant operation completed.', 0, 150, '...');
+
         $data = [
-            'title' => "Tenant action status",
-            'body' => mb_strimwidth($this->event->data["msg"], 0, 50, "..."),
+            'title' => $title,
+            'body' => $body,
             'icon' => Qs::getAppIcon(),
             'type' => 'tenancy',
-            'url' => $this->event->data["url"],
+            'url' => $this->data['url'] ?? route('tenants.index'),
         ];
 
         return (new FcmMessage())

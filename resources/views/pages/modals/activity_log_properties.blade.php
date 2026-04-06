@@ -20,10 +20,14 @@ $keys = array_keys($attributes)
                         <td>Old</td>
                     </tr>
                     @foreach ($keys as $key)
+                    @php
+                    $new_value = array_key_exists($key, $attributes) ? (is_array($attributes[$key]) ? implode(',', $attributes[$key]) : $attributes[$key]) : 'N/A';
+                    $old_value = array_key_exists($key, $old) ? (is_array($old[$key]) ? implode(',', $old[$key]) : $old[$key]) : 'N/A';
+                    @endphp
                     <tr>
                         <td>{{ $key }}</td>
-                        <td class="break-all break-spaces">{{ $attributes[$key] ?? '' }}</td>
-                        <td class="break-all break-spaces">{{ $old[$key] ?? '' }}</td>
+                        <td class="break-all break-spaces">{{ $new_value }}</td>
+                        <td class="break-all break-spaces">{{ $old_value }}</td>
                     </tr>
                     @endforeach
                 </table>

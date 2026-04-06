@@ -11,34 +11,29 @@
         <div class="content d-flex justify-content-center">
             <div class="row align-items-center">
 
-                {{-- <div class="col-md-7">
+                <div class="col-md-7">
                     <div class="introductory-section">
-                        <div class="card intro border-0">
+                        <div class="card intro border-0 bg-transparent">
                             <div class="card-body">
-                                <h4 class="card-title"><strong class="text-info">Peace Be Upon You, Welcome.</strong></h4>
+                                <h4 class="card-title"><strong>Welcome to the School Management System</strong></h4>
                                 <div class="card-text">
                                     <p>
-                                        {{ ("School Maanagement System (SMS) deals with information related to the school
-                                        in general such as; teachers information, parents information,
-                                        students information, students accommodation status,
-                                        students academic records, fees payments records and
-                                        other related informations.") }}
+                                        A multi‑tenant platform that centralises student records, academic management,
+                                        fee collections, and communication – accessible even offline. Ideal for schools and colleges.
                                     </p>
-
-                                    <h5><strong class="text-info">{{ ("Authorized Users can,") }}</strong></h5>
+                                    <h5><strong>Key capabilities</strong></h5>
                                     <ul class="pl-3">
-                                        <li>{{ ("Publish Exam Results.") }}</li>
-                                        <li>{{ ("Manage Classes, Subjects, Examinations, Payments, Books, Announcements etc...") }}</li>
-                                        <li>{{ ("View respective Informations.") }}</li>
-                                        <li>{{ ("Create, View, Delete, and Edit records.") }}</li>
-                                        <li>{{ ("Generate Reports.") }}</li>
-                                        <li>{{ ("Among others...") }}</li>
+                                        <li>Publish exam results and generate marksheets</li>
+                                        <li>Manage classes, subjects, timetables, and assessments</li>
+                                        <li>Track student information, payments, and library books</li>
+                                        <li>Role‑specific dashboards for teachers, parents, accountants, and more</li>
                                     </ul>
+                                    <p class="mt-2">Please sign in with your credentials to continue.</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div> --}}
+                </div>
 
                 <!-- Login card -->
                 <div class="col-md-5">

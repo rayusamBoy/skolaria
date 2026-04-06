@@ -7,7 +7,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class SubjectRecordUpdate extends FormRequest
 {
-
     public function authorize()
     {
         return true;
@@ -21,20 +20,18 @@ class SubjectRecordUpdate extends FormRequest
     public function rules()
     {
         return [
+            'section_id' => 'nullable|prohibited_unless:students_ids,null',
             'students_ids' => 'nullable',
             'teacher_id' => 'sometimes|nullable|exists:users,id',
-            'slug' => 'nullable|string|min:2|max:7',
-            'core' => 'required|in:0,1'
         ];
     }
 
     public function attributes()
     {
-        return  [
-            'teacher_id' => 'Teacher',
+        return [
+            'section_id' => 'section',
+            'teacher_id' => 'teacher',
             'students_ids' => 'students',
-            'slug' => 'Short Name',
-            'core' => 'Core Subject'
         ];
     }
 
@@ -42,7 +39,7 @@ class SubjectRecordUpdate extends FormRequest
     {
         $input = $this->all();
 
-        $input['teacher_id'] = $input['teacher_id'] ? Qs::decodeHash($input['teacher_id']) : NULL;
+        $input['teacher_id'] = $input['teacher_id'] ? Qs::decodeHash($input['teacher_id']) : null;
 
         $this->getInputSource()->replace($input);
 
