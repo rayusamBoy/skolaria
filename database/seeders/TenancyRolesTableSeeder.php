@@ -20,26 +20,21 @@ class TenancyRolesTableSeeder extends Seeder
         $rootRoles = (array) array_values(config('roles.root_roles.tenant', []));
         $defaultRoles = (array) array_values(config('roles.default_roles.tenant', []));
 
-        // Remove root roles from default roles – they are not seeded here
-        $rolesToSeed = array_diff($defaultRoles, $rootRoles);
-
-        if (empty($rolesToSeed)) {
-            $this->command->info('No non‑root roles to seed.');
-            return;
-        }
-
-        // Clean existing roles (safe delete – all roles will be recreated)
+        // Clean existing roles
         Role::query()->delete();
 
-        // Create only non‑root roles
+        // Create roles
         $createdRoles = [];
-        foreach ($rolesToSeed as $roleName) {
+        foreach ($defaultRoles as $roleName) {
             $roleName = (string) $roleName;
             $createdRoles[$roleName] = Role::create([
                 'name' => $roleName,
                 'guard_name' => $default_guard,
             ]);
         }
+
+        // Remove root roles from the created list to avoid assigning permissions to them
+        $createdRoles = array_filter($createdRoles, fn($r) => !\in_array($r->name, $rootRoles));
 
         // Fetch all permission names present in this tenant DB
         $allPermissions = Permission::all()->pluck('name')->toArray();
