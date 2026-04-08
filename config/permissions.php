@@ -271,6 +271,11 @@ return [
                     'label' => 'View Year Selector',
                     'description' => 'Access the year selection interface for assessments.',
                 ],
+                'year_selected' => [
+                    'permission' => 'assessments.year_selected',
+                    'label' => 'Selected Assessments Year',
+                    'description' => 'View assessments for a selected year.',
+                ],
             ],
             'book_requests' => [
                 'destroy' => [
