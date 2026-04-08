@@ -19,6 +19,17 @@ class UserRequest extends FormRequest
     }
 
     /**
+     * Get the user ID being acted upon. 
+     * This is used for unique validation rules to ignore the current user's record.
+     *
+     * @return int|string|null
+     */
+    public function userId()
+    {
+        return $this->user ?? $this->central_user ?? null;
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array
@@ -63,11 +74,11 @@ class UserRequest extends FormRequest
         $update = [
             'name' => 'required|string|min:6|max:150',
             'gender' => 'required|string',
-            'phone' => ['sometimes', 'nullable', 'string', Rule::unique(User::class)->ignore($this->user), new StartsWithProperPhoneCode],
-            'phone2' => ['sometimes', 'nullable', 'string', Rule::unique(User::class)->ignore($this->user), new StartsWithProperPhoneCode],
-            'phone3' => ['sometimes', 'nullable', 'string', Rule::unique(ParentRelative::class)->ignore($this->user, 'user_id'), new StartsWithProperPhoneCode],
-            'phone4' => ['sometimes', 'nullable', 'string', Rule::unique(ParentRelative::class)->ignore($this->user), new StartsWithProperPhoneCode],
-            'email' => ["sometimes", "nullable", "email", "max:100", Rule::unique(User::class)->ignore($this->user)],
+            'phone' => ['sometimes', 'nullable', 'string', Rule::unique(User::class)->ignore($this->userId()), new StartsWithProperPhoneCode],
+            'phone2' => ['sometimes', 'nullable', 'string', Rule::unique(User::class)->ignore($this->userId()), new StartsWithProperPhoneCode],
+            'phone3' => ['sometimes', 'nullable', 'string', Rule::unique(ParentRelative::class)->ignore($this->userId(), 'user_id'), new StartsWithProperPhoneCode],
+            'phone4' => ['sometimes', 'nullable', 'string', Rule::unique(ParentRelative::class)->ignore($this->userId()), new StartsWithProperPhoneCode],
+            'email' => ["sometimes", "nullable", "email", "max:100", Rule::unique(User::class)->ignore($this->userId())],
             'photo' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:2048',
             'address' => 'required|string|min:3|max:120',
             'state_id' => 'required',
@@ -78,12 +89,12 @@ class UserRequest extends FormRequest
             'relation' => 'sometimes|required|string|min:4|max:150',
             'bank_name' => 'sometimes|nullable|required_with:bank_acc_no',
             'file_number' => 'sometimes|nullable|string|max:15',
-            'primary_id' => ['sometimes', 'nullable', 'alpha_num', 'min:3', 'max:20', Rule::unique(User::class)->ignore($this->user)],
-            'secondary_id' => ['sometimes', 'nullable', 'alpha_num', 'min:3', 'max:20', Rule::unique(User::class)->ignore($this->user)],
-            'bank_acc_no' => ['sometimes', 'nullable', 'string', 'min:5', 'max:11', 'required_unless:bank_name,null', Rule::unique('staff_records', 'bank_acc_no')->ignore($this->user, 'user_id')],
-            'tin_number' => ['sometimes', 'nullable', 'alpha_num', 'min:3', 'max:15', Rule::unique('staff_records')->ignore($this->user, 'user_id')],
-            'ss_number' => ['sometimes', 'nullable', 'string', 'min:3', 'max:15', Rule::unique('staff_records')->ignore($this->user, 'user_id')],
-            'licence_number' => ['sometimes', 'nullable', 'string', 'max:10', Rule::unique('staff_records')->ignore($this->user, 'user_id')],
+            'primary_id' => ['sometimes', 'nullable', 'alpha_num', 'min:3', 'max:20', Rule::unique(User::class)->ignore($this->userId())],
+            'secondary_id' => ['sometimes', 'nullable', 'alpha_num', 'min:3', 'max:20', Rule::unique(User::class)->ignore($this->userId())],
+            'bank_acc_no' => ['sometimes', 'nullable', 'string', 'min:5', 'max:11', 'required_unless:bank_name,null', Rule::unique('staff_records', 'bank_acc_no')->ignore($this->userId(), 'user_id')],
+            'tin_number' => ['sometimes', 'nullable', 'alpha_num', 'min:3', 'max:15', Rule::unique('staff_records')->ignore($this->userId(), 'user_id')],
+            'ss_number' => ['sometimes', 'nullable', 'string', 'min:3', 'max:15', Rule::unique('staff_records')->ignore($this->userId(), 'user_id')],
+            'licence_number' => ['sometimes', 'nullable', 'string', 'max:10', Rule::unique('staff_records')->ignore($this->userId(), 'user_id')],
             'place_of_living' => 'sometimes|nullable|string|max:100|min:3',
             'dob' => 'sometimes|nullable|date_format:' . Usr::getDateFormat(),
             'subjects_studied' => 'sometimes|nullable|max:250|regex:/^([a-zA-Z\s]+)(,\s*[a-zA-Z\s]+)*$/',
