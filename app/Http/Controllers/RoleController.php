@@ -51,14 +51,15 @@ class RoleController extends Controller
 
     public function edit($id)
     {
-        $data['permissions'] = $this->permission->getPermissions();
+        $permissions = $this->permission->getPermissions();
+        $data['groupedPermissions'] = $permissions->groupBy(function ($perm) {
+            return explode('.', $perm->name)[0];
+        });
         $data['role'] = $role = $this->permission->getRole(['id' => $id]);
 
         if (\in_array($role->name, Usr::getTenancyAwareRootRoles(), true)) {
             return redirect()->route('roles.index')->with('flash_warning', __('msg.denied'));
         }
-
-        $data['rolePermissions'] = $role->permissions->pluck('id')->toArray();
 
         return view('pages.roles.edit', $data);
     }
