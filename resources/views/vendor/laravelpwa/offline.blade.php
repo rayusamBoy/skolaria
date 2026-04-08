@@ -10,7 +10,7 @@
             font-family: system-ui;
         }
 
-        .retryBtn {
+        .btn {
             align-items: center;
             background: #1A73E8;
             border-radius: 4px;
@@ -20,7 +20,6 @@
             flex: none;
             flex-direction: column;
             flex-grow: 0;
-            font-family: 'Google Sans', Arial, sans-serif;
             font-size: 14px;
             font-weight: 500;
             letter-spacing: 0.25px;
@@ -29,6 +28,20 @@
             padding: 8px 24px;
             justify-content: center;
             text-align: center;
+        }
+
+        .btn:hover,
+        .btn:focus {
+            opacity: 0.8;
+        }
+
+        .retryBtn {
+            background: #1A73E8;
+        }
+
+        .backBtn {
+            background: #39485c;
+            margin-right: 0.5rem;
         }
 
         [data-theme=dark] #offlineViewBody {
@@ -133,7 +146,8 @@
             Please visit the page for offline access when you're back online.
         </div>
         <div style="padding-top:20px; display:flex; justify-content:center;" dir="auto">
-            <div role="button" id="retryBtn" class="retryBtn" tabindex="0"><span>Retry</span></div>
+            <div role="button" id="backBtn" class="btn backBtn" tabindex="0"><span>Back</span></div>
+            <div role="button" id="retryBtn" class="btn retryBtn" tabindex="0"><span>Retry</span></div>
         </div>
     </div>
     <div id="backOnlineAlert">
@@ -142,6 +156,8 @@
 
     <script>
         document.getElementById("retryBtn").addEventListener('click', (e) => window.location.reload());
+        document.getElementById("backBtn").addEventListener('click', (e) => window.history.back());
+
         const offlineIcon = document.getElementById("offlineIcon");
         offlineIcon.addEventListener('error', (e) => {
             offlineIcon.style.display = 'none';
