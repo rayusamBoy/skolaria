@@ -21,7 +21,7 @@
             {{-- Create Role Tab --}}
             @can($tenant_permissions['roles']['store']['permission'])
             <div class="tab-pane fade" id="create-role">
-                <form method="POST" action="{{ route('roles.store') }}" class="ajax-store">
+                <form method="POST" action="{{ route('roles.store') }}" class="ajax-store" data-reload="#manage-roles-table">
                     @csrf
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label font-weight-semibold" for="name">Role Name <span class="text-danger">*</span></label>
@@ -86,12 +86,13 @@
 
             {{-- Manage Roles Tab --}}
             <div class="tab-pane fade show active" id="manage-roles">
-                <table class="table datatable-button-html5-columns">
+                <table class="table datatable-button-html5-columns" id="manage-roles-table">
                     <thead>
                         <tr>
                             <th>#</th>
                             <th>Name</th>
                             <th># Permissions</th>
+                            <th># Users</th>
                             <th>Created</th>
                             <th>Updated</th>
                             <th class="text-center">Action</th>
@@ -106,6 +107,7 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $role->name }}</td>
                             <td>{{ in_array($role->name, Usr::getTenancyAwareRootRoles(), true) ? "All" : $permissions->count() }}</td>
+                            <td>{{ $role->users->count() }}</td>
                             <td>{{ $role->created_at->diffForHumans() }}</td>
                             <td>{{ $role->updated_at->diffForHumans() }}</td>
                             @if(!\in_array($role->name, Usr::getTenancyAwareRootRoles(), true))

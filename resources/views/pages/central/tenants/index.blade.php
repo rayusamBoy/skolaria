@@ -21,7 +21,7 @@
         <div class="tab-content">
             @can($central_permissions['tenants']['store']['permission'])
             <div class="tab-pane fade" id="new-tenant">
-                <form class="page-block" method="post" action="{{ route('tenants.store') }}">
+                <form class="ajax-store" data-reload="#manage-tenants-table" method="post" action="{{ route('tenants.store') }}">
                     @csrf
                     <div class="row">
                         <div class="col-md-3">
@@ -81,7 +81,7 @@
             @endcan
 
             <div class="tab-pane fade show active" id="manage-tenants">
-                <table class="table datatable-button-html5-columns ">
+                <table class="table datatable-button-html5-columns" id="manage-tenants-table">
                     <thead>
                         <tr>
                             <th>S/N</th>
