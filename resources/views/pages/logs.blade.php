@@ -14,7 +14,7 @@
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
             <li class="nav-item dropdown">
-                <a href="javascript:;" class="nav-link dropdown-toggle" data-toggle="dropdown">Select User Role</a>
+                <a href="javascript:;" class="nav-link active dropdown-toggle" data-toggle="dropdown">Select User Role</a>
                 <div class="dropdown-menu dropdown-menu-right">
                     @foreach ($user_roles as $ur)
                     <a href="#ut-{{ Qs::hash($ur->id) }}" class="dropdown-item" data-toggle="tab">{{ Str::plural($ur->name) }}</a>
