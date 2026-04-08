@@ -58,7 +58,7 @@
                             <div class="form-group text-center">
                                 <label class="col-form-label font-weight-semibold">Change Login Page Background:</label>
                                 <div class="mb-3">
-                                    <img style="width: 100px" height="100px" src="{{ asset($settings->firstWhere('type' , 'login_and_related_pages_bg')->description) }}" alt="">
+                                    <img style="width: 100px" height="100px" src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type' , 'login_and_related_pages_bg')) }}" alt="">
                                 </div>
                                 <input id="login-and-related-pgs-bg-input" name="login_and_related_pages_bg" accept="image/*" type="file" class="file-input" data-show-caption="false" data-show-upload="false" data-fouc>
                             </div>
