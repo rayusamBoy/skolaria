@@ -130,7 +130,7 @@ class TicketController extends Controller
         try {
             $ticket = $this->ticket->createTicket($ticket_data);
 
-            $is_from_tenant = Usr::tenancyInitilized();
+            $is_from_tenant = Usr::tenancyInitialized();
             $message_data = ['ticket_id' => $ticket->id, 'user_id' => auth()->id(), 'body' => $request->message, 'is_from_tenant' => $is_from_tenant];
             $this->ticket->createMessage($message_data);
         } catch (\Exception $e) {
@@ -149,7 +149,7 @@ class TicketController extends Controller
         Validator::make($request->toArray(), ['message' => 'required|string|max:400'])->validate();
 
         $ticket_id = $request->ticket_id;
-        $is_from_tenant = Usr::tenancyInitilized();
+        $is_from_tenant = Usr::tenancyInitialized();
         $message_data = ['ticket_id' => $ticket_id, 'user_id' => auth()->id(), 'body' => $request->message, 'is_from_tenant' => $is_from_tenant];
 
         $this->ticket->createMessage($message_data);
@@ -163,7 +163,7 @@ class TicketController extends Controller
         Validator::make($request->toArray(), ['message' => 'required|string|max:400'])->validate();
 
         $ticket_id = $request->ticket_id;
-        $is_from_tenant = Usr::tenancyInitilized();
+        $is_from_tenant = Usr::tenancyInitialized();
         $message_data = ['ticket_id' => $ticket_id, 'user_id' => auth()->id(), 'body' => $request->message, 'is_from_tenant' => $is_from_tenant];
 
         $this->ticket->createMessage($message_data);
@@ -178,33 +178,39 @@ class TicketController extends Controller
     public function update_properties(TicketPropertiesCreate $request)
     {
         // Save categories
+        $category_names = $request->input('categories.name') ?? [];
+        $this->ticket->deleteCategoryWhereNotIn('name', $category_names);
+
         if ($request->has('categories')) {
-            $names = $request->input('categories.name');
             $descriptions = $request->input('categories.description');
             $visibilities = $request->input('categories.is_visible');
 
-            foreach ($names as $index => $name) {
+            foreach ($category_names as $index => $name) {
                 $values = [
                     'description' => $descriptions[$index],
                     'is_visible' => $visibilities[$index],
                 ];
                 $this->ticket->updateOrCreateCategory(['name' => $name], $values);
             }
+
         }
 
         // Save labels
+        $label_names = $request->input('labels.name') ?? [];
+        $this->ticket->deleteLabelWhereNotIn('name', $label_names);
+
         if ($request->has('labels')) {
-            $names = $request->input('labels.name');
             $descriptions = $request->input('labels.description');
             $visibilities = $request->input('labels.is_visible');
 
-            foreach ($names as $index => $name) {
+            foreach ($label_names as $index => $name) {
                 $values = [
                     'description' => $descriptions[$index],
                     'is_visible' => $visibilities[$index],
                 ];
                 $this->ticket->updateOrCreateLabel(['name' => $name], $values);
             }
+
         }
 
         return Usr::jsonUpdateOk();

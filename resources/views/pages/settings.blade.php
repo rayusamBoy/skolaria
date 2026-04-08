@@ -187,10 +187,7 @@
                     </div>
 
                     @if(session()->has('show_login_and_related_pgs_preview'))
-                    @php
-                    $preview_route = Usr::tenancyInitilized() ? route('settings.preview_login_form') : route('settings_non_tenancy.preview_login_form');
-                    @endphp
-                    @include('pages.modals.auth_pages_preview', ['preview_route' => $preview_route])
+                    @include('pages.modals.auth_pages_preview')
                     @endif
 
                 </div>

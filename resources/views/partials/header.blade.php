@@ -16,7 +16,7 @@
                     <i class="material-symbols-rounded text-primary">info</i> <span class="d-none d-sm-block">About</span>
                 </a>
 
-                @if(Usr::tenancyInitilized())
+                @if(Usr::tenancyInitialized())
                 {{-- Analytics --}}
                 @can($tenant_permissions['analytics']['index']['permission'])
                 <a href="{{ route('analytics.index') }}" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary">analytics</i> <span class="d-none d-sm-block">Analytics</span></a>
@@ -49,7 +49,7 @@
                     @include('pages.notifications.badge')
                 </div>
 
-                @if(Usr::tenancyInitilized())
+                @if(Usr::tenancyInitialized())
                 @can($tenant_permissions['messages']['index']['permission'])
                 <a class="breadcrumb-elements-item d-none d-md-block" data-toggle="tooltip" title="Messages" href="/messages">@include('messenger.unread-count')</a>
                 @endcan
@@ -72,7 +72,7 @@
                 </div>
                 @endif
 
-                @if(Usr::tenancyInitilized() && auth()->user()->can($tenant_permissions['soft_deletes']['bin']['permission']))
+                @if(Usr::tenancyInitialized() && auth()->user()->can($tenant_permissions['soft_deletes']['bin']['permission']))
                 <div class="breadcrumb-elements-item">
                     <a href="{{ route('bin') }}" @if(request()->routeIs('bin')) class="breadcrumb-elements-item is-disabled d-block" @else class="breadcrumb-elements-item" @endif>
                         <i class="material-symbols-rounded mr-1 align-middle">delete_forever</i>

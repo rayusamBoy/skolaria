@@ -348,7 +348,7 @@ class Usr extends Qs
         ];
     }
 
-    public static function tenancyInitilized(): bool
+    public static function tenancyInitialized(): bool
     {
         return tenancy()->initialized;
     }
@@ -362,7 +362,7 @@ class Usr extends Qs
 
     public static function getTenancyAwarePhoto(string $url): string
     {
-        return self::tenancyInitilized() ? (str_contains($url, 'global_assets') ? asset($url) : tenant_asset($url)) : asset($url);
+        return self::tenancyInitialized() ? (str_contains($url, 'global_assets') ? asset($url) : tenant_asset($url)) : asset($url);
     }
 
     public static function getStudentExamNumberPlaceholder()
@@ -396,14 +396,28 @@ class Usr extends Qs
         return '#' . substr(md5($name), 0, 6);
     }
 
-    public static function getTenancyAwareRootRoles()
+    public static function getTenancyAwareRootRoles(): array
     {
-        return self::tenancyInitilized() ? array_values(config('roles.root_roles.tenant')) : array_values(config('roles.root_roles.central'));
+        return array_values(
+            config(
+                self::tenancyInitialized()
+                ? 'roles.root_roles.tenant'
+                : 'roles.root_roles.central',
+                []
+            )
+        );
     }
 
     public static function getTenancyAwareDefaultRoles()
     {
-        return self::tenancyInitilized() ? array_values(config('roles.default_roles.tenant')) : array_values(config('roles.default_roles.central'));
+        return array_values(
+            config(
+                self::tenancyInitialized()
+                ? 'roles.default_roles.tenant'
+                : 'roles.default_roles.central',
+                []
+            )
+        );
     }
 
     public static function deleteUserPhotoDirs(collection|array $role_names, string $code)
@@ -465,7 +479,7 @@ class Usr extends Qs
             return asset(path: self::getLoginAndRelatedPagesBgDescription());
 
         $img_desc = $img->description;
-        $img_url = $img_desc === null ? asset(path: self::getLoginAndRelatedPagesBgDescription()) : (self::tenancyInitilized() ? tenant_asset($img_desc) : asset($img_desc));
+        $img_url = $img_desc === null ? asset(path: self::getLoginAndRelatedPagesBgDescription()) : (self::tenancyInitialized() ? tenant_asset($img_desc) : asset($img_desc));
         $img_url = "$img_url?" . strtotime($img->updated_at);
 
         return $img_url;

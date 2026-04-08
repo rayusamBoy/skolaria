@@ -20,7 +20,7 @@ class LoadCommonContext
     {
         $user = $request->user();
         $preferences = $user->preferences ?? Usr::getDefaultUserPreferences();
-        $my_classes = Usr::tenancyInitilized() ? Usr::getAllClassesOrdered() : collect();
+        $my_classes = Usr::tenancyInitialized() ? Usr::getAllClassesOrdered() : collect();
         $settings = Usr::getSettings();
 
         View::share([

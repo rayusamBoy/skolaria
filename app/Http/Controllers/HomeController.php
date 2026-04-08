@@ -163,7 +163,7 @@ class HomeController extends Controller
             'students_per_class_counts' => $class_counts
         ];
 
-        $view = Usr::tenancyInitilized() ? 'pages.dashboard' : 'pages.central.dashboard';
+        $view = Usr::tenancyInitialized() ? 'pages.dashboard' : 'pages.central.dashboard';
         return view($view, $d);
     }
 

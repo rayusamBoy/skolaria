@@ -44,7 +44,7 @@
             <ul class="nav nav-sidebar" data-nav-type="accordion">
 
                 {{-- Tenant Menu --}}
-                @if (Usr::tenancyInitilized())
+                @if (Usr::tenancyInitialized())
 
                 {{-- Dashboard --}}
                 <li class="nav-item">

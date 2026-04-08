@@ -11,7 +11,7 @@
             @include('pages.notifications.badge')
         </span>
 
-        @if(Usr::tenancyInitilized())
+        @if(Usr::tenancyInitialized())
         @can($tenant_permissions['messages']['index']['permission'])
         <a class="navbar-toggler text-default" title="Messages" href="{{ route('messages.index') }}">
             @include('messenger.unread-count')
@@ -78,11 +78,11 @@
                     {{-- Profile --}}
                     <a href="{{ auth()->user()->hasRole(config('roles.default_roles.tenant.student'))
                                   ? route('students.show',  Qs::hash(Qs::findStudentRecord(auth()->id())->id))
-                                  : route(Usr::tenancyInitilized() ? 'users.show' : 'central_users.show', Qs::hash(auth()->id())) }}" class="dropdown-item {{ request()->routeIs('students.show', 'users.show', 'central_users.show') ? 'active' : '' }}">
+                                  : route(Usr::tenancyInitialized() ? 'users.show' : 'central_users.show', Qs::hash(auth()->id())) }}" class="dropdown-item {{ request()->routeIs('students.show', 'users.show', 'central_users.show') ? 'active' : '' }}">
                         <i class="material-symbols-rounded">person</i>My Profile
                     </a>
 
-                    @unless(Usr::tenancyInitilized())
+                    @unless(Usr::tenancyInitialized())
                     <div class="dropdown-divider"></div>
                     {{-- View System Log --}}
                     @if(array_intersect(auth()->user()->roles()->pluck('name')->toArray(), array_values(config('roles.root_roles.central'))) > 0)

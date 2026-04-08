@@ -47,7 +47,7 @@ class MyAccountController extends Controller
             $f = Qs::getFileMetaData($photo);
             $f['name'] = 'photo.' . $f['ext'];
 
-            if (Usr::tenancyInitilized()) {
+            if (Usr::tenancyInitialized()) {
                 $f['path'] = $d['photo'] = Qs::getUploadPath($user_role) . '/' . $code . '/' . $f['name'];
                 $photo->storeAs($f['path']);
             } else {
