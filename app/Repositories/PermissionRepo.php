@@ -34,9 +34,9 @@ class PermissionRepo
     }
 
     /*********** Role ***************/
-    public function getRoles(array $except = [])
+    public function getRoles(array $except = [], array $with = ['permissions'])
     {
-        return Role::with('permissions')->whereNotIn('name', $except)->orderBy('name')->get();
+        return Role::with($with)->whereNotIn('name', $except)->orderBy('name')->get();
     }
 
     public function createRole(array $attributes)
@@ -44,9 +44,9 @@ class PermissionRepo
         return Role::create($attributes);
     }
 
-    public function getRole(array $where)
+    public function getRole(array $where, array $with = ['permissions'])
     {
-        return Role::where($where)->with('permissions')->first();
+        return Role::where($where)->with($with)->first();
     }
 
     public function updateRole(array $where, array $attributes)
