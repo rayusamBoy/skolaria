@@ -57,12 +57,12 @@ class TicketRepo
         return TicketCategory::all();
     }
 
-    public function updateOrCreateCategory($attributes, $values)
+    public function updateOrCreateCategory(array $attributes, array $values)
     {
         return TicketCategory::updateOrCreate($attributes, $values);
     }
 
-    public function deleteCategoryWhereNotIn($column, $values)
+    public function deleteCategoryWhereNotIn(string $column, array $values)
     {
         return TicketCategory::whereNotIn($column, $values)->delete();
     }
@@ -73,12 +73,12 @@ class TicketRepo
         return TicketLabel::all();
     }
 
-    public function updateOrCreateLabel($attributes, $values)
+    public function updateOrCreateLabel(array $attributes, array $values)
     {
         return TicketLabel::updateOrCreate($attributes, $values);
     }
 
-    public function deleteLabelWhereNotIn($column, $values)
+    public function deleteLabelWhereNotIn(string $column, array $values)
     {
         return TicketLabel::whereNotIn($column, $values)->delete();
     }
