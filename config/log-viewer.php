@@ -73,6 +73,7 @@ return [
 
     'middleware' => [
         'web',
+        'role:Root',
     ],
 
     /*

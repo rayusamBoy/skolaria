@@ -56,4 +56,5 @@ return
         'all_book_copies_issued' => 'All copies of this book are already issued.',
         'point_info' => 'This point will be used in calculating student division.',
         'credit_info' => 'This weight calculates GPA, with the highest grade earning the most credit.',
+        'role_in_use' => 'This role is currently assigned to one or more users and cannot be deleted.',
     ];

@@ -2,70 +2,96 @@
 
 /*
 |--------------------------------------------------------------------------
-| Roles configuration
+| Roles Configuration
 |--------------------------------------------------------------------------
-| This file contains the configuration for roles in both tenant and central contexts.
-| All roles defined here are key-value pairs: the key is the role identifier
-| and the value is the human-readable name of the role.
-| Please do not modify the role keys, as they are used internally by the system.
-| Only the values (names) can be changed to suit your application's needs.
+| This file defines the roles for both central and tenant contexts.
+| Constants are used for role keys and are used internally in the system. 
+| Changing the values (names) is safe, but keys should remain constant.
+|
+| Important: if you change the central root role name, make sure to update
+| any middleware (like in config/log-viewer.php) that depends on that role.
 */
+
+// --------------------
+// Role Key Constants
+// --------------------
+// These constants prevent typos and keep role keys consistent across the app.
+const ROLE_ROOT = 'root';
+const ROLE_SUPERADMIN = 'superadmin';
+const ROLE_ADMIN = 'admin';
+const ROLE_TEACHER = 'teacher';
+const ROLE_ACCOUNTANT = 'accountant';
+const ROLE_LIBRARIAN = 'librarian';
+const ROLE_PARENT = 'parent';
+const ROLE_STUDENT = 'student';
+
+// --------------------
+// Central Roles
+// --------------------
+// Central roles are for the main system (non-tenant context).
+$centralRoot = [
+    ROLE_ROOT => 'Root', // The main superuser
+];
+
+// --------------------
+// Tenant Roles
+// --------------------
+// Tenant roles are for individual tenants
+$tenantRoot = [
+    ROLE_SUPERADMIN => 'Super Admin', // Tenant superuser
+];
+
+// Staff roles
+$tenantStaff = [
+    ROLE_SUPERADMIN => 'Super Admin',
+    ROLE_ADMIN => 'Admin',
+    ROLE_TEACHER => 'Teacher',
+    ROLE_ACCOUNTANT => 'Accountant',
+    ROLE_LIBRARIAN => 'Librarian',
+];
+
+// Default roles
+$tenantDefault = [
+    ...$tenantStaff,
+    ROLE_PARENT => 'Parent',
+    ROLE_STUDENT => 'Student'
+];
 
 return [
 
     /*
     |--------------------------------------------------------------------------
-    | Tenant and Central root roles
+    | Root Roles
     |--------------------------------------------------------------------------
-    | Roles defined here have all permissions by default.
+    | Roles that have all permissions by default.
+    | Usually used for access checks, gates, and full administrative privileges.
     */
     'root_roles' => [
-        'central' => [
-            'root' => 'Root',
-        ],
-        'tenant' => [
-            'superadmin' => 'Super Admin',
-        ]
+        'central' => $centralRoot,
+        'tenant' => $tenantRoot,
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Tenant and Central default roles
+    | Default Roles
     |--------------------------------------------------------------------------
-    | These roles are created during the initial setup of the application.
-    | They do not have all permissions by default (except for root roles).
+    | Roles created during initial setup. They may not have all permissions.
+    | Includes root roles by default.
     */
     'default_roles' => [
-        'central' => [
-            'root' => 'Root',
-        ],
-        'tenant' => [
-            'superadmin' => 'Super Admin',
-            'admin' => 'Admin',
-            'teacher' => 'Teacher',
-            'accountant' => 'Accountant',
-            'librarian' => 'Librarian',
-            'parent' => 'Parent',
-            'student' => 'Student',
-        ]
+        'central' => $centralRoot,
+        'tenant' => $tenantDefault,
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Staff roles
+    | Staff Roles
     |--------------------------------------------------------------------------
-    | Define the roles that are considered staff members here.
+    | Roles considered staff members.
+    | Typically a subset of default roles that have staff information.
     */
     'staff_roles' => [
-        'central' => [
-            'root' => 'Root',
-        ],
-        'tenant' => [
-            'superadmin' => 'Super Admin',
-            'admin' => 'Admin',
-            'teacher' => 'Teacher',
-            'accountant' => 'Accountant',
-            'librarian' => 'Librarian',
-        ]
-    ]
+        'central' => $centralRoot,
+        'tenant' => $tenantStaff,
+    ],
 ];
