@@ -491,7 +491,7 @@ const updateHiddenIDs = (ids, $el) => {
             if (resp.ok && resp.msg) {
                 removeElement($el);
                 flash({
-                    msg: "Done. To view this again, go to <strong>My Account</strong> to reveal all hidden messages.",
+                    msg: "Done. To view this again, go to <strong>My Account</strong> >> <strong>Preferences</strong> to reveal all hidden messages.",
                     type: "info",
                 });
                 return console.log(resp.msg);
@@ -1984,7 +1984,7 @@ function submitForm($form, formType) {
                 resp.pop
                     ? pop({
                           msg: resp.msg,
-                          type: "success",
+                          type: "error",
                           timer: resp.pop_timer,
                       })
                     : flash({ msg: resp.msg, type: "error" });
