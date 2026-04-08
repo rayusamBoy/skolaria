@@ -8,6 +8,7 @@ use App\Http\Requests\TenantRequest;
 use App\Repositories\TenantRepo;
 use App\Repositories\UserRepo;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Stancl\Tenancy\Resolvers\DomainTenantResolver;
 
 class TenantController extends Controller
@@ -46,29 +47,52 @@ class TenantController extends Controller
     {
         set_time_limit(600); // Set time limit for this method to 10 minutes.
         $data = $request->except(['_token', '_method', 'domain']);
+        $cleaning_error = $creation_error = $domain_error = $tenant = null;
 
         try {
             $tenant = $this->tenant->create($data);
-        } catch (\Throwable $e) {
-            $cleaning_error = null;
-
-            try {
-                if (session()->has("created_tenant_id")) {
+        } catch (\Throwable $t) {
+            $creation_error = $t->getMessage();
+            if (session()->has("created_tenant_id")) {
+                try {
                     $this->tenant->delete(session()->get("created_tenant_id"));
-                    session()->forget("created_tenant_id");
+                } catch (\Throwable $t) {
+                    $cleaning_error = $t->getMessage();
                 }
-            } catch (\Throwable $t) {
-                $cleaning_error = $t->getMessage();
+                session()->forget("created_tenant_id");
             }
-
-            return redirect()->back()->withErrors(['tenant_create_error' => $e->getMessage(), 'cleaning_error' => $cleaning_error]);
         }
 
-        $tenant->createDomain(['domain' => $request->domain]);
+        if ($tenant) {
+            try {
+                $tenant->createDomain(['domain' => $request->domain]);
+            } catch (\Throwable $t) {
+                $domain_error = $t->getMessage();
+            }
+        } else {
+            $domain_error = "Tenant creation failed, so domain creation skipped.";
+        }
 
-        session()->forget("created_tenant_id");
+        $errors = [];
 
-        return back()->with('pop_success', __('msg.store_ok'))->with('pop_timer', 0);
+        if ($creation_error) {
+            $errors['tenant_creation_error'] = $creation_error;
+        }
+
+        if ($cleaning_error) {
+            $errors['tenant_cleaning_error'] = $cleaning_error;
+        }
+
+        if ($domain_error) {
+            $errors['domain_creation_error'] = $domain_error;
+        }
+
+        if ($creation_error || $cleaning_error || $domain_error) {
+            Log::error("Errors during tenant creation process: ", $errors);
+            return Qs::json(null, null, ['msg' => implode(", ", $errors), 'ok' => false, 'pop' => true, 'pop_timer' => 0]);
+        }
+
+        return Qs::json(null, null, ['msg' => __('msg.store_ok'), 'ok' => true, 'pop' => true, 'pop_timer' => 0]);
     }
 
     /**
