@@ -10,8 +10,6 @@ class TicketLabel extends Model
 {
     use CentralConnection, MassUpdatable;
 
-    protected $table = 'ticket_labels';
-    
     /**
      * The attributes that aren't mass assignable.
      *

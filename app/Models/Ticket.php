@@ -11,8 +11,6 @@ class Ticket extends Model
 {
     use CentralConnection;
 
-    protected $table = 'tickets';
-
     protected $fillable = [
         'user_id',
         'tenant_id',

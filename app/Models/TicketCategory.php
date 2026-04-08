@@ -10,8 +10,6 @@ class TicketCategory extends Model
 {
     use CentralConnection, MassUpdatable;
 
-    protected $table = 'ticket_categories';
-    
     /**
      * The attributes that aren't mass assignable.
      *

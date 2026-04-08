@@ -9,8 +9,6 @@ class TicketMessage extends Model
 {
     use CentralConnection;
 
-    protected $table = 'ticket_messages';
-
     /**
      * The attributes that aren't mass assignable.
      *
