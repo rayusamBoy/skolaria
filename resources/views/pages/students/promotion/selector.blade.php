@@ -69,7 +69,7 @@
 
         <div class="col-md-2 mt-4">
             <div class="text-right mt-1">
-                <button type="submit" class="btn btn-primary">Manage Promotion <i class="material-symbols-rounded ml-2">send</i></button>
+                <button type="submit" class="btn btn-primary">Manage <i class="material-symbols-rounded ml-2">send</i></button>
             </div>
         </div>
     </div>

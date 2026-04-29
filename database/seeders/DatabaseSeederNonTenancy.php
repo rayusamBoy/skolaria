@@ -13,14 +13,11 @@ class DatabaseSeederNonTenancy extends Seeder
     public function run(): void
     {
         // Universal seeders       
-        $this->call(NationalitiesTableSeeder::class);
-        $this->call(StatesTableSeeder::class);
-        $this->call(LgasTableSeeder::class);
+        $this->call(WorldSeeder::class);
         $this->call(BloodGroupsTableSeeder::class);
-        $this->call(LanguagesTableSeeder::class);
-        $this->call(TimezonesTableSeeder::class);
         // Not tenancy specific seeders
         $this->call(NonTenancySettingsTableSeeder::class);
+        $this->call(NonTenancyRolesTableSeeder::class);
         $this->call(NonTenancyPermissionsTableSeeder::class);
         $this->call(NonTenancyUsersTableSeeder::class);
         $this->call(NonTenancyStaffRecordsTableSeeder::class);

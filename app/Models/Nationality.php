@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Eloquent;
+use App\Traits\CentralDatabase;
+use Nnjeim\World\Models\Country as CountryModel;
 
-class Nationality extends Eloquent
+class Nationality extends CountryModel
 {
-    //
+    use CentralDatabase;
 }

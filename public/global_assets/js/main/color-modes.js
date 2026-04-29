@@ -21,12 +21,7 @@ const getPreferredTheme = () => {
 // Update charts with the given theme
 const updateJSCharts = (themeInput) => {
     // Resolve 'auto' to the actual theme
-    const theme =
-        themeInput === "auto"
-            ? window.matchMedia("(prefers-color-scheme: dark)").matches
-                ? "dark"
-                : "light"
-            : themeInput;
+    const theme = getResolvedTheme(themeInput);
 
     if (typeof Chart !== "undefined") {
         Chart.helpers.each(Chart.instances, (instance) => {
@@ -150,9 +145,20 @@ const getOvertypeTheme = () => {
     return theme === "dark" ? "cave" : "solar";
 };
 
+const applyThemeToAllEditors = () => {
+    const theme = getOvertypeTheme();
+
+    document.querySelectorAll('.overtype-editor').forEach(el => {
+        const instance = OverType.getInstance(el);
+        if (instance) {
+            instance.setTheme?.(theme);
+        }
+    });
+};
+
 // Set the overtype editor theme based on the current color scheme
 const setOvertypeTheme = () => {
-    if (typeof overType !== "undefined") overType.setTheme(getOvertypeTheme());
+    applyThemeToAllEditors();
 };
 
 // Listen for system color scheme changes

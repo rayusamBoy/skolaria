@@ -31,7 +31,7 @@ class SoftDeleteController extends Controller
     {
         $data['payments'] = $this->pay->getTrashed();
         $data['users'] = $this->user->getTrashed();
-        $data['my_classes'] = $this->my_class->getTrashed();
+        $data['trashed_my_classes'] = $this->my_class->getTrashed();
         $data['exams'] = $this->exm->getTrashed();
         $data['threads'] = Thread::getTrashed();
 

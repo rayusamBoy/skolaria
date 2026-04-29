@@ -8,6 +8,7 @@ use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\Auth\AccountSecurityController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BookRequestController;
+use App\Http\Controllers\ClassTypeController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\DormController;
 use App\Http\Controllers\ExamController;
@@ -81,7 +82,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
     Route::group(['prefix' => 'two-factor-authentication', 'middleware' => 'universal'], function () {
         Route::get('account/security', [AccountSecurityController::class, 'index'])->name('account_security.index')->middleware('2fa');
         Route::match(['POST', 'GET'], 'account/recovery', [AccountSecurityController::class, 'account_recovery'])->name('account_security.account_recovery');
-        Route::get('show', [AccountSecurityController::class, 'showGoogle2FAVerification'])->name('two_factor.show');
+        Route::get('show', [AccountSecurityController::class, 'show_google_2fa_verification'])->name('two_factor.show');
         // middleware captures OTP and runs authenticate
         Route::post('authenticate', [AccountSecurityController::class, 'authenticate'])->name('two_factor.authenticate')->middleware(['2fa', 'throttle:5,1']);
         Route::post('update/code', [AccountSecurityController::class, 'update_secret_codes'])->name('two_factor.update_secret_codes')->middleware('2fa');
@@ -92,7 +93,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
     // Require 2FA for the routes below
     Route::group(['middleware' => '2fa'], function () {
         /*************** Permissions and Roles (admin-protected) *****************/
-        Route::group(['middleware' => ['auth', 'password.confirm', 'universal'], 'prefix' => 'settings'], function () {
+        Route::group(['middleware' => ['auth', 'password.confirm', 'universal']], function () {
             Route::resource('roles', RoleController::class);
         });
 
@@ -130,10 +131,9 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
 
         /*************** Students *****************/
         Route::prefix('students')->group(function () {
-            Route::get('{student}/password/reset', [StudentRecordController::class, 'reset_password'])->name('students.password.reset');
+            Route::get('{student}/password/reset', [StudentRecordController::class, 'reset_password'])->name('students.password.reset')->middleware('decodeRouteParams');
             Route::get('graduated', [StudentRecordController::class, 'graduated'])->name('students.graduated');
-            Route::put('{student}/{prom_id}/not-graduated', [StudentRecordController::class, 'not_graduated'])->name('students.not_graduated');
-
+            Route::put('{student}/{prom_id}/mark-not-graduated', [StudentRecordController::class, 'mark_not_graduated'])->name('students.mark_not_graduated')->middleware('decodeRouteParams');
             Route::get('class/{class_id}/list', [StudentRecordController::class, 'list_by_class'])->name('students.list_by_class');
 
             /* ID Cards */
@@ -249,24 +249,25 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             Route::post('batch/delete', [MarkController::class, 'batch_delete'])->name('marks.batch_delete');
             Route::put('batch/upload', [MarkController::class, 'batch_upload'])->name('marks.batch_upload');
 
-            Route::get('tabulation', [MarkController::class, 'tabulation'])->name('marks.tabulation');
+            Route::get('tabulation/{exam?}/{class?}/{section?}/{year?}', [MarkController::class, 'tabulation'])->name('marks.tabulation');
             Route::post('tabulation/select', [MarkController::class, 'tabulation_select'])->name('marks.tabulation_select');
             Route::get('tabulation/print/{exam}/{class}/{section?}/{year?}', [MarkController::class, 'print_tabulation'])->name('marks.print_tabulation');
 
-            Route::get('/', [MarkController::class, 'index'])->name('marks.index');
             Route::get('convert', [MarkController::class, 'convert'])->name('marks.convert');
-            Route::get('manage/{exam}/{class}/{subject}/{section?}', [MarkController::class, 'manage'])->name('marks.manage');
+            Route::get('manage/{exam?}/{class?}/{subject?}/{section?}/{selected?}', [MarkController::class, 'manage'])->name('marks.manage');
             Route::put('update/{exam}/{class}/{subject}/{section?}', [MarkController::class, 'update'])->name('marks.update');
             Route::put('comment/{exr_id}', [MarkController::class, 'comment_update'])->name('marks.comment_update');
             Route::put('skills/{skill}/{exr_id}', [MarkController::class, 'skills_update'])->name('marks.skills_update');
             Route::post('selector', [MarkController::class, 'selector'])->name('marks.selector');
-            Route::get('bulk/{class?}/{section?}', [MarkController::class, 'bulk'])->name('marks.bulk');
-            Route::post('bulk/select', [MarkController::class, 'bulk_select'])->name('marks.bulk_select');
+            Route::get('sheets/{class?}/{section?}', [MarkController::class, 'sheets'])->name('marks.sheets');
+            Route::post('sheets/select', [MarkController::class, 'sheets_select'])->name('marks.sheets_select');
 
-            Route::get('selector/year/{id}', [MarkController::class, 'year_selector'])->name('marks.year_selector');
-            Route::post('selected/year/{id}', [MarkController::class, 'year_selected'])->name('marks.year_selected');
-            Route::get('show/{id}/{year}', [MarkController::class, 'show'])->name('marks.show');
-            Route::get('print/{id}/{exam_id}/{year}', [MarkController::class, 'print_view'])->name('marks.print');
+            Route::group(['middleware' => 'decodeRouteParams'], function () {
+                Route::get('year-selector/{student}', [MarkController::class, 'year_selector'])->name('marks.year_selector');
+                Route::post('selected/year/{student}', [MarkController::class, 'year_selected'])->name('marks.year_selected');
+                Route::get('show/{student}/{year}', [MarkController::class, 'show'])->name('marks.show');
+                Route::get('print/{student}/{exam_id}/{year}', [MarkController::class, 'print_view'])->name('marks.print');
+            });
         });
 
         /*************** Continuous Assessments *****************/
@@ -276,29 +277,30 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
 
             Route::get('/', [AssessmentController::class, 'index'])->name('assessments.index');
             Route::get('list', [AssessmentController::class, 'list'])->name('assessments.list');
-            Route::get('progressive', [AssessmentController::class, 'progressive'])->name('assessments.progressive'); // filters via query params
+            Route::get('progressive/{assessment?}/{class?}/{section?}', [AssessmentController::class, 'progressive'])->name('assessments.progressive'); // filters via query params
             Route::post('progressive/select', [AssessmentController::class, 'progressive_select'])->name('assessments.progressive_select');
-            Route::get('progressive/print/{exam}/{class}/{sec_id}', [AssessmentController::class, 'print_progressive'])->name('assessments.print_progressive');
-            Route::get('manage/{exam}/{class}/{subject}/{section?}', [AssessmentController::class, 'manage'])->name('assessments.manage');
-            Route::put('update/{exam}/{class}/{subject}/{section?}', [AssessmentController::class, 'update'])->name('assessments.update');
+            Route::get('progressive/print/{assessment?}/{class?}/{section?}', [AssessmentController::class, 'print_progressive'])->name('assessments.print_progressive');
+            Route::get('manage/{assessment}/{class}/{subject}/{section?}', [AssessmentController::class, 'manage'])->name('assessments.manage');
+            Route::put('update/{assessment}/{class}/{subject}/{section?}', [AssessmentController::class, 'update'])->name('assessments.update');
             Route::post('selector', [AssessmentController::class, 'selector'])->name('assessments.selector');
-            Route::get('bulk/{class?}/{section?}', [AssessmentController::class, 'bulk'])->name('assessments.bulk');
-            Route::post('bulk', [AssessmentController::class, 'bulk_select'])->name('assessments.bulk_select');
-            Route::get('print/{exam}/{class}/{subject}/{year}/{sec_id?}', [AssessmentController::class, 'print'])->name('assessments.print');
-            Route::get('print/cover/{student}', [AssessmentController::class, 'print_cover'])->name('assessments.print_cover');
+            Route::get('sheets/{class?}/{section?}', [AssessmentController::class, 'sheets'])->name('assessments.sheets');
+            Route::post('sheets/select', [AssessmentController::class, 'sheets_select'])->name('assessments.sheets_select');
+            Route::get('print/{assessment}/{class}/{subject}/{year}/{section?}', [AssessmentController::class, 'print'])->name('assessments.print');
+            Route::get('print/cover/{student}', [AssessmentController::class, 'print_cover'])->name('assessments.print_cover')->middleware('decodeRouteParams');
             Route::put('comment/{as_id}', [AssessmentController::class, 'comment_update'])->name('assessments.comment_update');
             Route::put('skills/{skill}/{as_id}', [AssessmentController::class, 'skills_update'])->name('assessments.skills_update');
 
-            Route::get('show/{id}/{year}', [AssessmentController::class, 'show'])->name('assessments.show');
-            Route::get('selector/year/{id}', [AssessmentController::class, 'year_selector'])->name('assessments.year_selector');
-            Route::post('selected/year/{id}', [AssessmentController::class, 'year_selected'])->name('assessments.year_selected');
-            Route::get('detailed/print/{id}/{exam_id}/{year}', [AssessmentController::class, 'print_detailed'])->name('assessments.print_detailed');
-            Route::get('minimal/print/{id}/{exam_id}/{year}', [AssessmentController::class, 'print_minimal'])->name('assessments.print_minimal');
+            Route::group(['middleware' => 'decodeRouteParams'], function () {
+                Route::get('show/{student}/{year}', [AssessmentController::class, 'show'])->name('assessments.show');
+                Route::get('selector/year/{student}', [AssessmentController::class, 'year_selector'])->name('assessments.year_selector');
+                Route::post('selected/year/{student}', [AssessmentController::class, 'year_selected'])->name('assessments.year_selected');
+                Route::get('detailed/print/{student}/{assessment}/{year}', [AssessmentController::class, 'print_detailed'])->name('assessments.print_detailed');
+                Route::get('minimal/print/{student}/{assessment}/{year}', [AssessmentController::class, 'print_minimal'])->name('assessments.print_minimal');
+            });
         });
 
         // Exam states and publication actions
         Route::prefix('exams')->group(function () {
-            Route::post('update/edit-state', [ExamController::class, 'update_edit_state'])->name('exams.update_edit_state');
             Route::post('update/lock-state', [ExamController::class, 'update_lock_state'])->name('exams.update_lock_state');
             Route::post('{exam}/publish', [ExamController::class, 'publish'])->name('exams.publish');
             Route::post('announce', [ExamController::class, 'announce'])->name('exams.announce');
@@ -323,7 +325,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         });
 
         /*************** Core resources **************/
-        Route::resource('students', StudentRecordController::class);
+        Route::resource('students', StudentRecordController::class)->middleware('decodeRouteParams');
         Route::resource('books', BookController::class)->middleware('decodeRouteParams');
         Route::resource('book_requests', BookRequestController::class)->middleware('decodeRouteParams');
         Route::resource('users', UserController::class)->middleware('decodeRouteParams');
@@ -337,6 +339,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         Route::resource('divisions', DivisionController::class);
         Route::resource('messages', MessageController::class);
         Route::resource('notifications', NotificationController::class)->middleware('universal');
+        Route::resource('class_types', ClassTypeController::class);
 
         /************************ AJAX helper endpoints ****************************/
         Route::prefix('ajax')->group(function () {

@@ -56,13 +56,13 @@
                                 @if($user->primary_id)
                                 <tr>
                                     <td class="font-weight-bold">Primary ID</td>
-                                    <td class="break-all">{{ $user->primary_id ?? '-' }}</td>
+                                    <td class="break-all">{{ $user->primary_id ?? '—' }}</td>
                                 </tr>
                                 @endif
                                 @if($user->secondary_id)
                                 <tr>
                                     <td class="font-weight-bold">Secondary ID</td>
-                                    <td class="break-all">{{ $user->secondary_id ?? '-' }}</td>
+                                    <td class="break-all">{{ $user->secondary_id ?? '—' }}</td>
                                 </tr>
                                 @endif
                                 @if($user->username)
@@ -111,18 +111,13 @@
                                     <td class="font-weight-bold">Address</td>
                                     <td class="break-all">{{ $user->address }}</td>
                                 </tr>
-                                @if($user->hasRole(config('roles.default_roles.tenant.parent')))
+                                @if(isset($my_childrens) && $my_childrens->isNotEmpty())
                                 <tr>
-                                    <td class="font-weight-bold">Children</td>
+                                    <td class="font-weight-bold">My {{ $my_childrens->count() === 1 ? "Children" : "Childrens" }}</td>
                                     <td>
-                                        @php $my_childrens = Qs::findMyChildren($user->id) @endphp
-                                        @if($my_childrens->isNotEmpty())
                                         @foreach($my_childrens as $sr)
                                         <span><a href="{{ route('students.show', Qs::hash($sr->id)) }}">{{ $sr->user->name.' - '.$sr->my_class->name.' '.$sr->section->name }}</a></span><br>
                                         @endforeach
-                                        @else
-                                        None
-                                        @endif
                                     </td>
                                 </tr>
                                 <tr>
@@ -131,12 +126,12 @@
                                 </tr>
                                 @endif
 
-                                @if($user->hasRole(config('roles.default_roles.tenant.teacher')))
+                                @if(isset($sub_recs) && $sub_recs->isNotEmpty())
                                 <tr>
                                     <td class="font-weight-bold">My Subjects</td>
                                     <td>
-                                        @foreach(Qs::findTeacherSubjectRecs($user->id) as $sub_rec)
-                                        <span> - {{ $sub_rec->subject->name . " " . ("{$sub_rec->subject->my_class->name}") }}</span><br>
+                                        @foreach($sub_recs as $sub_rec)
+                                        <span> — {{ $sub_rec->subject->name . " " . ("{$sub_rec->subject->my_class->name}") }}</span><br>
                                         @endforeach
                                     </td>
                                 </tr>
@@ -146,61 +141,61 @@
                     </div>
 
                     {{--Staff Info--}}
-                    @if(isset($staff_rec) && $staff_rec != null && $user->id == auth()->id())
+                    @if(isset($staff_rec) && $staff_rec !== null && $user->id === auth()->id())
                     <div class="tab-pane fade" id="staff-info">
                         <table class="table table-bordered">
                             <tbody>
                                 <tr>
                                     <td class="font-weight-bold">Date of Employment</td>
-                                    <td class="break-all">{{ $staff_rec->emp_date ?? '-' }}</td>
+                                    <td class="break-all">{{ $staff_rec->emp_date ?? '—' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">Confirmation Date</td>
-                                    <td class="break-all">{{ $staff_rec->confirmation_date ?? '-' }}</td>
+                                    <td class="break-all">{{ $staff_rec->confirmation_date ?? '—' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">Licence Number</td>
-                                    <td class="break-all">{{ $staff_rec->licence_number ?? '-' }}</td>
+                                    <td class="break-all">{{ $staff_rec->licence_number ?? '—' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">File Number</td>
-                                    <td class="break-all">{{ $staff_rec->file_number ?? '-' }}</td>
+                                    <td class="break-all">{{ $staff_rec->file_number ?? '—' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">ZSSSF Number</td>
-                                    <td class="break-all">{{ $staff_rec->ss_number ?? '-' }}</td>
+                                    <td class="break-all">{{ $staff_rec->ss_number ?? '—' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">Employment Number</td>
-                                    <td class="break-all">{{ $staff_rec->emp_no ?? '-' }}</td>
+                                    <td class="break-all">{{ $staff_rec->emp_no ?? '—' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">TIN Number</td>
-                                    <td class="break-all">{{ $staff_rec->tin_number ?? '-' }}</td>
+                                    <td class="break-all">{{ $staff_rec->tin_number ?? '—' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">Bank Account</td>
-                                    <td class="break-all">{{ $staff_rec->bank_acc_no ?? '-' }} {{ $staff_rec->bank_name ?? '' }}</td>
+                                    <td class="break-all">{{ $staff_rec->bank_acc_no ?? '—' }} {{ $staff_rec->bank_name ?? '' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">Education Level</td>
-                                    <td class="break-all">{{ $staff_rec->education_level ?? '-' }}</td>
+                                    <td class="break-all">{{ $staff_rec->education_level ?? '—' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">College Attended</td>
-                                    <td class="break-all">{{ $staff_rec->college_attended ?? '-' }}</td>
+                                    <td class="break-all">{{ $staff_rec->college_attended ?? '—' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">Graduation Yaar</td>
-                                    <td class="break-all">{{ $staff_rec->year_graduated ?? '-' }}</td>
+                                    <td class="break-all">{{ $staff_rec->year_graduated ?? '—' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">Role</td>
-                                    <td class="break-all">{{ $staff_rec->role ?? '-' }}</td>
+                                    <td class="break-all">{{ $staff_rec->role ?? '—' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">Number of Periods</td>
-                                    <td class="break-all">{{ $staff_rec->no_of_periods ?? '-' }}</td>
+                                    <td class="break-all">{{ $staff_rec->no_of_periods ?? '—' }}</td>
                                 </tr>
                                 @if($staff_rec->subjects_studied)
                                 <tr>
@@ -218,7 +213,7 @@
     </div>
 </div>
 
-@if($user->hasRole(config('roles.default_roles.tenant.parent')))
+@if($user_is_parent)
 @include('pages/modals/parent_relative')
 @endif
 

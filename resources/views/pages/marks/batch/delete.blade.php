@@ -9,7 +9,7 @@
             <div class="alert alert-info border-0 alert-dismissible has-do-not-show-again-button" id="batch-delete-info">
                 <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
                 <span>
-                    If there are marks for a subject appearing where they should not; such as English marks in a tabulation sheet for a class or section that doesn’t study the subject, or for any other reason, you can use this operation to delete those marks.
+                    If there are marks for a subject appearing where they should not; such as English subject marks in a tabulation sheet for a class or section that doesn’t study the subject, or for any other reason, you can use this operation to delete those marks.
                 </span>
             </div>
         </div>

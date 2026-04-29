@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Models\Assessment;
 use App\Models\AssessmentRecord;
-use App\Models\Grade;
 use Illuminate\Support\Facades\DB;
 
 class AssessmentRepo
@@ -19,14 +18,9 @@ class AssessmentRepo
 
     /*********** Assessments ***************/
 
-    public function get()
+    public function getAssessmentsWithExam(array $where)
     {
-        return Assessment::with(['exam', 'record'])->get();
-    }
-
-    public function getAssessments($data)
-    {
-        return Assessment::where($data)->with('exam')->get()->whereNotNull('exam');
+        return Assessment::with('exam')->where($where)->get()->whereNotNull('exam');
     }
 
     public function isNotEmpty()
@@ -61,9 +55,9 @@ class AssessmentRepo
         return AssessmentRecord::firstOrCreate($data);
     }
 
-    public function getRecords($data)
+    public function getRecords($where, $with = ['grade'])
     {
-        return AssessmentRecord::where($data)->with(['grade', 'exam'])->get()->whereNotNull('exam')->whereNotNull('user')->unique('mark_id');
+        return AssessmentRecord::where($where)->with($with)->with(['exam', 'user'])->get()->whereNotNull('exam')->whereNotNull('user')->unique('mark_id');
     }
 
     public function getRecordById($id)
@@ -192,24 +186,6 @@ class AssessmentRepo
     public function getStudentsTotals($where, $tex)
     {
         return AssessmentRecord::where($where)->whereNotNull($tex)->orderBy($tex, 'DESC')->select($tex)->get()->pluck($tex);
-    }
-
-    public function getGrade($total, $class_type_id)
-    {
-        if ($total < 0 || $total === null) {
-            return null;
-        }
-
-        $grade = Grade::where('class_type_id', $class_type_id)->where('mark_from', '<=', $total)->where('mark_to', '>=', $total)->first();
-
-        return $grade ?: $this->getGrade2($total);
-    }
-
-    public function getGrade2($total)
-    {
-        $grades = Grade::whereNull('class_type_id')->get();
-
-        return $grades->isNotEmpty() ? $grades->where('mark_from', '<=', $total)->where('mark_to', '>=', $total)->first() : null;
     }
 
     public function getSubjectMark($exam, $class_id, $sub_id, $st_id, $year)

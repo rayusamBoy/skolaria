@@ -37,12 +37,12 @@ class TenancyExamCategoriesTableSeeder extends Seeder
             3 => 
             array (
                 'id' => 4,
-            'name' => 'Terminal (First Term Exam)',
+            'name' => 'Terminal',
             ),
             4 => 
             array (
                 'id' => 5,
-            'name' => 'Annual (Second Term Exam)',
+            'name' => 'Annual',
             ),
             5 => 
             array (

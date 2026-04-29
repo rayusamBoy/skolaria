@@ -20,7 +20,7 @@ class AssessmentSelector extends FormRequest
     public function rules()
     {
         return [
-            'exam_id' => 'required|exists:exams,id',
+            'assessment_id' => 'required|exists:assessments,id',
             'my_class_id' => 'required|exists:my_classes,id',
             'section_id' => 'sometimes|nullable|exists:sections,id',
             'subject_id' => 'required|exists:subjects,id',
@@ -29,11 +29,11 @@ class AssessmentSelector extends FormRequest
 
     public function attributes()
     {
-        return  [
-            'exam_id' => 'Exam',
-            'my_class_id' => 'Class',
-            'section_id' => 'Section',
-            'subject_id' => 'Subject',
+        return [
+            'assessment_id' => 'assessment',
+            'my_class_id' => 'class',
+            'section_id' => 'section',
+            'subject_id' => 'subject',
         ];
     }
 }

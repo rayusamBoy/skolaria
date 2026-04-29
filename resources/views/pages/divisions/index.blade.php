@@ -24,13 +24,14 @@
         </ul>
 
         <div class="tab-content">
+            {{-- Manage Divisions tab --}}
             <div class="tab-pane fade show active" id="all-divisions">
-                <table class="table datatable-button-html5-columns">
+                <table class="table datatable-button-html5-columns" id="manage-divisions-table">
                     <thead>
                         <tr>
                             <th>S/N</th>
                             <th>Name</th>
-                            <th>Division Type</th>
+                            <th>Class Type</th>
                             <th>Range</th>
                             <th>Remark</th>
                             <th class="text-center">Action</th>
@@ -55,12 +56,13 @@
                                     <div class="dropdown">
                                         <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
+                                            {{-- Edit --}}
                                             @can($tenant_permissions['divisions']['edit']['permission'])
                                             <a href="{{ route('divisions.edit', $dv->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
                                             @endcan
-
+                                            {{-- Delete --}}
                                             @can($tenant_permissions['divisions']['destroy']['permission'])
                                             <a id="division-delete-{{ $dv->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
@@ -80,6 +82,7 @@
                 </table>
             </div>
 
+            {{-- Create Divisions tab --}}
             @can($tenant_permissions['divisions']['store']['permission'])
             <div class="tab-pane fade" id="new-division">
                 <div class="row mb-3">
@@ -95,8 +98,9 @@
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <form method="post" action="{{ route('divisions.store') }}">
+                        <form method="post" action="{{ route('divisions.store') }}" class="ajax-store" data-reload="#manage-divisions-table">
                             @csrf
+                            {{-- Name --}}
                             <div class="form-group row">
                                 <label class="col-lg-3 col-form-label font-weight-semibold">
                                     Name <span class="text-danger">*</span>
@@ -105,10 +109,10 @@
                                     <input name="name" value="{{ old('name') }}" required type="text" class="form-control text-uppercase" placeholder="E.g. I">
                                 </div>
                             </div>
-
+                            {{-- Class Type --}}
                             <div class="form-group row">
                                 <label for="class_type_id" class="col-lg-3 col-form-label font-weight-semibold">
-                                    Division Type
+                                    Class Type
                                 </label>
                                 <div class="col-lg-9">
                                     <select name="class_type_id" id="class_type_id" class="form-control select">
@@ -121,7 +125,7 @@
                                     </select>
                                 </div>
                             </div>
-
+                            {{-- Points From & Points To --}}
                             <div class="form-group row">
                                 <label class="col-lg-3 col-form-label font-weight-semibold">
                                     Points From <span class="text-danger">*</span>
@@ -136,7 +140,7 @@
                                     <input name="points_to" type="number" min="0" max="100" value="{{ old('points_to') }}" required class="form-control" placeholder="0">
                                 </div>
                             </div>
-
+                            {{-- Remark --}}
                             <div class="form-group row">
                                 <label for="remark" class="col-lg-3 col-form-label font-weight-semibold">
                                     Remark
@@ -152,7 +156,7 @@
                                     </select>
                                 </div>
                             </div>
-
+                            {{-- Submit Button --}}
                             <div class="text-right">
                                 <button type="submit" class="btn btn-primary">
                                     Submit form <i class="material-symbols-rounded ml-2">send</i>

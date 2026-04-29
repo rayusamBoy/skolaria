@@ -1,19 +1,19 @@
 @extends('layouts.master')
 
-@section('page_title', 'Edit Book')
+@section('page_title', "Edit Book - {$book->name}")
 
 @section('content')
 
 <div class="card">
     <div class="card-header header-elements-inline">
-        <h6 class="card-title">Edit Book</h6>
+        <h6 class="card-title">Edit Book </h6>
         {!! Qs::getPanelOptions() !!}
     </div>
 
     <div class="card-body">
         <div class="row">
             <div class="col-12">
-                <form method="post" enctype="multipart/form-data" class="ajax-update" action="{{ route('books.update', $book->id) }}" data-fouc>
+                <form method="post" enctype="multipart/form-data" class="ajax-update" action="{{ route('books.update', Qs::hash($book->id)) }}" data-reload="#page-title">
                     @csrf @method('PUT')
                     <div class="row">
                         {{--Class--}}

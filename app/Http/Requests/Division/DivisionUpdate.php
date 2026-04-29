@@ -16,16 +16,8 @@ class DivisionUpdate extends FormRequest
     {
         return [
             'name' => 'required|string',
-            'points_from' => 'required|numeric',
-            'points_to' => 'required|numeric',
-        ];
-    }
-
-    public function attributes()
-    {
-        return  [
-            'points_from' => 'Points From',
-            'points_to' => 'Points To',
+            'points_from' => 'required|numeric|min:0',
+            'points_to' => 'required|numeric|gt:points_from|min:0',
         ];
     }
 }

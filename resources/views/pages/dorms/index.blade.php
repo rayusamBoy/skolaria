@@ -25,7 +25,7 @@
 
         <div class="tab-content">
             <div class="tab-pane fade show active" id="all-dorms">
-                <table class="table datatable-button-html5-columns">
+                <table class="table datatable-button-html5-columns" id="manage-dorms-table">
                     <thead>
                         <tr>
                             <th>S/N</th>
@@ -74,7 +74,7 @@
             <div class="tab-pane fade" id="new-dorm">
                 <div class="row">
                     <div class="col-md-6">
-                        <form class="ajax-store" method="post" action="{{ route('dorms.store') }}">
+                        <form class="ajax-store" method="post" action="{{ route('dorms.store') }}" data-reload="#manage-dorms-table">
                             @csrf
                             <div class="form-group row">
                                 <label class="col-lg-3 col-form-label font-weight-semibold">Name <span class="text-danger">*</span></label>

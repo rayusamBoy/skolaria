@@ -122,7 +122,7 @@
                         @if($s->record->first())
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td><span data-toggle="tooltip" title="{{ "Short Name: {$s->slug}, Is Core: " . ($s->core ? 'Yes' : 'No') }}">{{ $s->name }}</span></td>
+                            <td><span data-toggle="tooltip" title="{{ "Short Name: {$s->slug}, Is Core: " . ($s->is_core ? 'Yes' : 'No') }}">{{ $s->name }}</span></td>
                             <td>{{ $s->my_class->name }}</td>
                             <td>
                                 @foreach($s->record as $key => $rec)

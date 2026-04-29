@@ -5,7 +5,7 @@
 @pushOnce('css')
 <style>
     .page-content.app-cover {
-        background-image: url('{{ tenant_asset(Qs::getSetting("logo")) }}');
+        background-image: url("{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type' , 'logo')) }}");
         background-repeat: no-repeat;
         background-position: center;
         background-size: contain;

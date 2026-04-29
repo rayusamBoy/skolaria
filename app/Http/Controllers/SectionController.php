@@ -6,12 +6,17 @@ use App\Helpers\Qs;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Section\SectionCreate;
 use App\Http\Requests\Section\SectionUpdate;
+use App\Models\Section;
 use App\Repositories\MyClassRepo;
 use App\Repositories\UserRepo;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class SectionController extends Controller
 {
-    protected $my_class, $user;
+    protected MyClassRepo $my_class;
+    protected UserRepo $user;
 
     public function __construct(MyClassRepo $my_class, UserRepo $user)
     {
@@ -21,47 +26,62 @@ class SectionController extends Controller
         $this->user = $user;
     }
 
-    public function index()
+    /**
+     * Display a listing of sections.
+     */
+    public function index(): View
     {
-        $d['sections'] = $this->my_class->getAllSections();
-        $d['teachers'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.teacher')]);
+        $data['sections'] = $this->my_class->getAllSections();
+        $data['teachers'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.teacher')]);
 
-        return view('pages.sections.index', $d);
+        return view('pages.sections.index', $data);
     }
 
-    public function store(SectionCreate $req)
+    /**
+     * Store a newly created section.
+     */
+    public function store(SectionCreate $req): JsonResponse
     {
-        $data = $req->all();
-        $this->my_class->createSection($data);
+        $this->my_class->createSection($req->validated());
 
         return Qs::jsonStoreOk();
     }
 
-    public function edit($id)
+    /**
+     * Show form for editing the specified section.
+     */
+    public function edit(Section $section): View
     {
-        $d['s'] = $s = $this->my_class->findSection($id);
-        $d['teachers'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.teacher')]);
+        $data['s'] = $section;
+        $data['teachers'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.teacher')]);
 
-        return $s === null ? Qs::goWithDanger('sections.index') : view('pages.sections.edit', $d);
+        return view('pages.sections.edit', $data);
     }
 
-    public function update(SectionUpdate $req, $id)
+    /**
+     * Update the specified section.
+     */
+    public function update(SectionUpdate $req, Section $section): JsonResponse
     {
-        $data = $req->only(['name', 'teacher_id']);
-        $this->my_class->updateSection($id, $data);
+        $section->update($req->only(['name', 'teacher_id']));
 
         return Qs::jsonUpdateOk();
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified section.
+     */
+    public function destroy(Section $section): RedirectResponse
     {
-        if ($this->my_class->isActiveSection($id))
-            return back()->with('pop_warning', 'Every class must have a default section, You cannot delete It.');
+        if ($section->is_default) {
+            return back()->with('pop_warning', 'This is a default section, You cannot delete It.');
+        }
 
-        if ($this->my_class->sectionHasStudent($id))
-            return back()->with('pop_warning', 'This section has student(s) with it, you cannot delete it.');
+        if ($section->hasStudentRecord()) {
+            return back()->with('pop_warning', 'This section has student records, You cannot delete It.');
+        }
 
-        $this->my_class->deleteSection($id);
+        $section->delete();
 
         return back()->with('flash_success', __('msg.del_ok'));
     }

@@ -9,6 +9,20 @@
         <h6 class="card-title">Marks Converter</h6>
         {!! Qs::getPanelOptions() !!}
     </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-info border-0 alert-dismissible has-do-not-show-again-button" id="what-is-marks-converter">
+                <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+                <span>
+                    This tool is designed to help you convert exam marks from one scale to another.
+                    For example, if you have marks out of 60 and want to convert them to a scale of 100, simply enter the original and new scales, add the marks you wish to convert, and click the "Convert" button.
+                    The converted marks will be displayed next to the original marks for easy comparison and copy.
+                </span>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-md-12">
             <div class="alert alert-info border-0 alert-dismissible has-do-not-show-again-button" id="marks-converter-info">

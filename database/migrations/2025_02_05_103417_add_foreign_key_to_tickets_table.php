@@ -11,8 +11,9 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('tickets', function (Blueprint $table) {
-            $table->foreign('assigned_to', "tickets_ibfk_1")->references(['id'])->on('users')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreign('tenant_id', "tickets_ibfk_2")->references(['id'])->on('tenants')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign('category_id', "tickets_ibfk_1")->references(['id'])->on('ticket_categories')->onUpdate('cascade')->onDelete('restrict');
+            $table->foreign('assigned_to', "tickets_ibfk_2")->references(['id'])->on('users')->onUpdate('cascade')->onDelete('SET NULL');
+            $table->foreign('tenant_id', "tickets_ibfk_3")->references(['id'])->on('tenants')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 
@@ -24,6 +25,7 @@ return new class extends Migration {
         Schema::table('tickets', function (Blueprint $table) {
             $table->dropForeign("tickets_ibfk_1");
             $table->dropForeign("tickets_ibfk_2");
+            $table->dropForeign("tickets_ibfk_3");
         });
     }
 };

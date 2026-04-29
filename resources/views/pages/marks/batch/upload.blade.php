@@ -13,7 +13,7 @@
 
                         <div class="form-group">
                             <label class="d-block">Upload Template File: <span class="text-danger">*</span></label>
-                            <input value="{{ old('template') }}" accept=".xlsx" type="file" name="template" class="file-input-preview-none" data-show-caption="true" data-show-upload="true" data-fouc>
+                            <input value="{{ old('template') }}" accept=".xlsx" type="file" name="template" class="file-input-preview-none" data-show-caption="true" data-show-upload="true">
                             <span class="form-text text-muted">Accepted Files: xlsx, xlx</span>
                         </div>
 

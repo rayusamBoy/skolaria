@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Eloquent;
+use App\Traits\CentralDatabase;
+use Nnjeim\World\Models\State as StateModel;
 
-class State extends Eloquent
+class State extends StateModel
 {
-    //
+    use CentralDatabase;
 }

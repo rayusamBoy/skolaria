@@ -13,63 +13,107 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 
 class MarksImport implements ToCollection, WithHeadingRow, WithValidation
 {
-    protected $data, $marks_table;
+    protected array $data;
+    protected string $marks_table;
+    protected Collection $subjects;
+    protected array $subject_student_map = [];
+    protected array $existing_marks = [];
 
-    public function __construct($data)
+    public function __construct(array $data)
     {
         $this->data = $data;
         $this->marks_table = 'marks';
+        $this->subjects = Mk::getSubjects($this->data['my_class_id']);
     }
 
-    public function collection(Collection $rows)
+    /**
+     * Process the imported rows.
+     */
+    public function collection(Collection $rows): void
     {
-        $subjects = Mk::getSubjects($this->data['class_id']);
+        $this->preloadSubjectStudentMap();
+        $this->preloadExistingMarks();
+
+        $updates = [];
+
         foreach ($rows as $row) {
-            $s_data = $this->data['st_mark']->where('user.username', $row['admission_number'])->first(); // Get student record by student admission number
-            $sid = $s_data->user->id;
-            $sec_id = $s_data->section_id;
+            $student_mark = $this->data['st_mark']
+                ->where('user.username', $row['admission_number'])
+                ->first();
 
-            foreach ($subjects as $sub) {
-                // Get students ids. For the subject with only specific students who study it 
-                $students_ids = SubjectRecord::where(['subject_id' => $sub->id])->whereNotNull('students_ids')->value('students_ids');
+            if (!$student_mark) {
+                continue; // Skip if student not found
+            }
 
-                if ($students_ids != null) {
-                    if (\in_array($sid, $students_ids)) {
-                        // If the subject record has students ids, and current student id is in there, update
-                        $this->updateMark($row, $sid, $sec_id, $sub->id, $sub->name);
-                    } else {
-                        // Delete any mark that belong to student not taking the particular subject 
-                        // Useful if there was a mistake during subject assignment
-                        $this->deleteMark($sid, $sec_id, $sub->id);
-                    }
+            $student_id = $student_mark->user->id;
+            $section_id = $student_mark->section_id;
+
+            foreach ($this->subjects as $subject) {
+                $subject_key = $this->replaceSpaceWithUnderscore($subject->name);
+                $mark_value = $row[$subject_key] ?? null;
+
+                // Skip if no mark provided and not explicitly zero
+                if ($mark_value === null || $mark_value === '') {
+                    continue;
+                }
+
+                $should_update = $this->shouldUpdateMark($student_id, $subject->id);
+
+                if ($should_update) {
+                    $updates[] = $this->buildUpdateData($student_id, $section_id, $subject->id, $mark_value);
                 } else {
-                    $this->updateMark($row, $sid, $sec_id, $sub->id, $sub->name);
+                    $this->deleteMark($student_id, $section_id, $subject->id);
                 }
             }
         }
+
+        $this->performBatchUpdate($updates);
     }
 
-    public function updateMark($row, $sid, $sec_id, $sub_id, $sub_name)
+    /**
+     * Build update data for a single mark.
+     */
+    protected function buildUpdateData(int $student_id, int $section_id, int $subject_id, $mark_value): array
     {
-        $where = [
-            'student_id' => $sid,
-            'my_class_id' => $this->data['class_id'],
-            'section_id' => $sec_id,
-            'exam_id' => $this->data['exam_id'],
-            'year' => $this->data['year'],
-            'subject_id' => $sub_id,
+        return [
+            'where' => [
+                'student_id' => $student_id,
+                'my_class_id' => $this->data['my_class_id'],
+                'section_id' => $section_id,
+                'exam_id' => $this->data['exam_id'],
+                'year' => $this->data['year'],
+                'subject_id' => $subject_id,
+            ],
+            'values' => ['exm' => $mark_value],
         ];
-
-        $data = ['exm' => $row[$this->replaceSpaceWithUnderscore($sub_name)]];
-
-        return DB::table($this->marks_table)->where($where)->update($data);
     }
 
+    /**
+     * Perform batch update using a transaction for consistency.
+     */
+    protected function performBatchUpdate(array $updates): void
+    {
+        if (empty($updates)) {
+            return;
+        }
+
+        DB::transaction(function () use ($updates) {
+            foreach ($updates as $update) {
+                DB::table($this->marks_table)
+                    ->where($update['where'])
+                    ->update($update['values']);
+            }
+        });
+    }
+
+    /**
+     * Delete a mark.
+     */
     public function deleteMark($sid, $sec_id, $sub_id)
     {
         $where = [
             'student_id' => $sid,
-            'my_class_id' => $this->data['class_id'],
+            'my_class_id' => $this->data['my_class_id'],
             'section_id' => $sec_id,
             'exam_id' => $this->data['exam_id'],
             'year' => $this->data['year'],
@@ -79,51 +123,97 @@ class MarksImport implements ToCollection, WithHeadingRow, WithValidation
         return DB::table($this->marks_table)->where($where)->delete();
     }
 
-    public function replaceSpaceWithUnderscore($string)
+    /**
+     * Replace spaces with underscores for Excel column matching.
+     */
+    public function replaceSpaceWithUnderscore($string): string
     {
-        /**
-         * By default the heading keys are formatted with the Laravel str_slug() helper, ie., all spaces are converted to _
-         * We use this function to replace the underscore with space to match with the formatted heading keys
-         */
         return Str::slug(strtolower($string), '_');
     }
 
-    public function customValidationAttributes()
+    /**
+     * Custom validation attribute names.
+     */
+    public function customValidationAttributes(): array
     {
         $attributes = [];
-        // Associate the altered subject name (the one with replaced space with underscore) with the actual name (the one with the space) in the file.
-        foreach (Mk::getSubjects($this->data['class_id']) as $sub) {
-            $attr = [
-                $this->replaceSpaceWithUnderscore($sub->name) => $sub->name,
-            ];
-            $attributes = [...$attr, ...$attributes];
+        foreach ($this->subjects as $subject) {
+            $key = $this->replaceSpaceWithUnderscore($subject->name);
+            $attributes[$key] = $subject->name;
         }
 
         return $attributes;
     }
 
+    /**
+     * Validation rules.
+     */
     public function rules(): array
     {
-        $sub_rules = [];
-        // Validation rule for marks
-        foreach (Mk::getSubjects($this->data['class_id']) as $sub) {
-            $rule = [
-                '*.' . $this->replaceSpaceWithUnderscore($sub->name) => ['min:0', 'max:100', 'integer', 'nullable', 'sometimes'],
-            ];
-            $sub_rules = [...$rule, ...$sub_rules]; // Merge sub array rule to main array rules per each iteration.
+        $rules = ['*.admission_number' => ['required', 'string', 'exists:users,username']];
+
+        foreach ($this->subjects as $subject) {
+            $key = $this->replaceSpaceWithUnderscore($subject->name);
+            $rules["*.$key"] = ['nullable', 'integer', 'min:0', 'max:100'];
         }
 
-        // Validation rules for students admission number
-        $collection = [
-            '*.admission_number' => ['exists:users,username', 'string', 'required'],
-            ...$sub_rules
-        ];
-
-        return $collection;
+        return $rules;
     }
 
+    /**
+     * Heading row index.
+     */
     public function headingRow(): int
     {
         return 4;
+    }
+
+    // ----------------------------------------------------------------------
+    // Protected Helper Methods
+    // ----------------------------------------------------------------------
+
+    /**
+     * Preload subject-student mapping to avoid repeated DB queries.
+     */
+    protected function preloadSubjectStudentMap(): void
+    {
+        $records = SubjectRecord::whereIn('subject_id', $this->subjects->pluck('id'))
+            ->whereNotNull('students_ids')
+            ->get(['subject_id', 'students_ids']);
+
+        foreach ($records as $record) {
+            $this->subject_student_map[$record->subject_id] = $record->students_ids ?? [];
+        }
+    }
+
+    /**
+     * Preload existing marks for the entire exam/class to detect missing marks for deletion.
+     */
+    protected function preloadExistingMarks(): void
+    {
+        $marks = DB::table($this->marks_table)
+            ->where('my_class_id', $this->data['my_class_id'])
+            ->where('exam_id', $this->data['exam_id'])
+            ->where('year', $this->data['year'])
+            ->get(['student_id', 'section_id', 'subject_id']);
+
+        foreach ($marks as $mark) {
+            $key = "{$mark->student_id}_{$mark->section_id}_{$mark->subject_id}";
+            $this->existing_marks[$key] = true;
+        }
+    }
+
+    /**
+     * Determine if a mark should be updated (student is enrolled in subject).
+     */
+    protected function shouldUpdateMark(int $student_id, int $subject_id): bool
+    {
+        $allowed_students = $this->subject_student_map[$subject_id] ?? null;
+
+        if ($allowed_students === null) {
+            return true; // No restriction, all students take this subject
+        }
+
+        return \in_array($student_id, $allowed_students);
     }
 }

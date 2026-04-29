@@ -145,7 +145,7 @@
         <button class="btn btn-danger float-right" onclick="confirmOperation(this.id)" id="activity_log_clean" data-toggle="tooltip" title="Deletes all logs older than {{ config('activitylog.delete_records_older_than_days') }} days">
             Activity Log Clean
         </button>
-        <form method="post" id="item-confirm-operation-activity_log_clean" action="{{ route('activity_log.clean') }}" class="hidden ajax-update page-block">@csrf</form>
+        <form method="post" id="item-confirm-operation-activity_log_clean" action="{{ route('activity_log.clean') }}" class="hidden ajax-update">@csrf</form>
     </div>
     @endcan
 </div>

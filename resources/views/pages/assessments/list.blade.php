@@ -29,7 +29,7 @@
                             <th>Term</th>
                             <th>Session</th>
                             <td>Category</td>
-                            <td>Editable</td>
+                            <td>Locked</td>
                         </tr>
                     </thead>
                     <tbody>
@@ -37,10 +37,10 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $as->exam->name }} Assessment</td>
-                            <td>{{ 'Term ' . $as->exam->term }}</td>
+                            <td>{{ NUmber::spellOrdinal($as->exam->term) . 'Term ' }}</td>
                             <td>{{ $as->exam->year }}</td>
                             <td>{{ $as->exam->category->name }}</td>
-                            <td>{{ $as->exam->editable ? "Yes" : "No" }}</td>
+                            <td>{{ $as->exam->locked ? "Yes" : "No" }}</td>
                         </tr>
                         @endforeach
                     </tbody>

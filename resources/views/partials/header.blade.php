@@ -26,12 +26,12 @@
                 <a href="{{ route('statistics.index') }}" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary">query_stats</i><span class="d-none d-sm-block">Statistics</span></a>
                 @endcan
                 {{-- Invoices --}}
-                <a href="javascript:;" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary">calculate</i> <span class="d-none d-sm-block">Invoices</span></a>
+                {{-- <a href="javascript:;" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary">calculate</i> <span class="d-none d-sm-block">Invoices</span></a> --}}
                 {{-- Schedule --}}
                 @can($tenant_permissions['schedules']['index']['permission'])
                 <a href="{{ route('schedule.index') }}" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary">calendar_month</i> <span class="d-none d-sm-block">Schedule</span></a>
                 @endcan
-                <a href="{{ auth()->user()->canany(auth()->user()->canany(array_column($tenant_permissions['settings'], 'permission'))) ? route('settings.index') : '' }}" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary d-none d-sm-block">arrow_downward_alt</i> <span class="font-weight-semibold d-flex" id="current-session"><span class="d-none d-sm-block pr-1">Current Session:</span>{{ Qs::getCurrentSession() }}</span></a>
+                <a href="{{ auth()->user()->canany(array_column($tenant_permissions['settings'], 'permission')) ? route('settings.index') : '' }}" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary d-none d-sm-block">arrow_downward_alt</i> <span class="font-weight-semibold d-flex" id="current-session"><span class="d-none d-sm-block pr-1">Current Session:</span>{{ $settings->where('type', 'current_session')->value('description') }}</span></a>
                 @endif
             </div>
         </div>

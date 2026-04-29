@@ -63,12 +63,12 @@
                 {{-- Credential File --}}
                 <div class="col-lg-4">
                     <label>Upload Service Account Credential File:</label>
-                    <input accept=".json" type="file" name="service_account_credential_file" class="form-input-styled" data-fouc>
+                    <input accept=".json" type="file" name="service_account_credential_file" class="form-input-styled">
                     <span class="form-text text-muted">Accepted File: json, Max file size 2Mb</span>
 
                     @if(isset($credential_file) && is_file($credential_file))
                     <span class="display-i-on-hover float-right text-info">
-                        File Contents
+                        <span class="btn btn-sm">Hover to View File Contents</span>
                         <i class="float-right text-info display-none dropdown-menu position-absolute top-auto p-2">
                             <div>
                                 @php highlight_file($credential_file) @endphp
@@ -87,7 +87,9 @@
                 <a href="{{ route('settings.disable_analytics') }}" class="btn btn-danger">Disable Analytics</a>
                 @else
                 <button type="submit" class="btn btn-success">Submit form <i class="material-symbols-rounded ml-2">send</i></button>
+                @if(!$analytics_enabled)
                 <a href="{{ route('settings.enable_analytics') }}" class="btn btn-primary ml-2">Enable Analytics</a>
+                @endif
                 @endif
                 @else
                 <button type="submit" class="btn btn-success">Submit form <i class="material-symbols-rounded ml-2">send</i></button>

@@ -1,6 +1,6 @@
 <div class="col-lg-8 offset-lg-2 col-xl-6 offset-xl-3" id="message-{{ $message->id }}">
-    <li class="position-relative {{ $message->user->id == Auth::id() ? 'float-right' : 'float-left' }}">
-        @if ($message->user->id != Auth::id())
+    <li class="position-relative {{ $message->user->id == auth()->id() ? 'float-right' : 'float-left' }}">
+        @if ($message->user->id != auth()->id())
         <!-- Display user photo on the left followed by the message box -->
         <img src="{{ Usr::getTenancyAwarePhoto($message->user->photo) }}" alt="{{ $message->user->name }}" class="rounded-circle f-left">
 
@@ -18,15 +18,15 @@
         @endif
 
         {{-- The message box --}}
-        <div class="{{ $message->user->id == Auth::id() ? 'right' : 'left' }}">
+        <div class="{{ $message->user->id == auth()->id() ? 'right' : 'left' }}">
             <span class="media-body break-all">
-                <small class="media-heading" style="color: {{ $message->user->message_media_heading_color }}">{{ $message->user->id == Auth::id() ? 'Me' : $message->user->name . ' (' . $message->user->roles->pluck('name')->join(', ') . ')' }}</small>
+                <small class="media-heading" style="color: {{ $message->user->message_media_heading_color }}">{{ $message->user->id == auth()->id() ? 'Me' : $message->user->name . ' (' . $message->user->roles->pluck('name')->join(', ') . ')' }}</small>
                 <br>
                 @if ($message->deleted_at !== null)
                 <!-- If the message is deleted -->
-                @if ($message->deleted_by == Auth::id())
+                @if ($message->deleted_by == auth()->id())
                 <p class="text-muted"><i class="material-symbols-rounded font-size-sm pb-lg-1">block</i><i> You deleted this message.</i></p>
-                @elseif ($message->deleted_by != Auth::id())
+                @elseif ($message->deleted_by != auth()->id())
                 <!-- If the message was deleted by someone else -->
                 @if ($message->deletor->roles->pluck('name')->contains(config('roles.default_roles.tenant.superadmin')) && $message->user_id != $message->deleted_by)
                 <p class="text-muted"><i class="material-symbols-rounded font-size-sm pb-lg-1">block</i><i> This message was deleted by super admin {{ $message->deletor->name }}.</i></p>
@@ -45,7 +45,7 @@
             </span>
         </div>
 
-        @if ($message->user->id == Auth::id())
+        @if ($message->user->id == auth()->id())
         @if ($message->deleted_at == null)
         <!-- Allow user to delete own message -->
         <button data-toggle="popover" data-placement="left" data-html="true" class="material-symbols-rounded position-absolute left-neg-p5rem text-info-400 opacity-75 opacity-100-on-hover border-0 outline-0 action-btn" data-content='

@@ -22,6 +22,13 @@ class TicketLabel extends Model
      */
     public function tickets()
     {
-        return $this->belongsToMany(Ticket::class);
+        return $this->hasManyThrough(
+            Ticket::class,
+            TicketHasLabel::class,
+            'ticket_label_id',
+            'id',
+            'id',
+            'ticket_id'
+        );
     }
 }

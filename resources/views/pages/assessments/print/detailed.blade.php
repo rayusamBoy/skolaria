@@ -16,14 +16,14 @@
                     <td><img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'logo')) }}" style="max-height : 100px;"></td>
 
                     <td style="text-align: center; ">
-                        <strong><span style="color: #1b0c80; font-size: 25px;">{{ strtoupper(Qs::getSetting('system_name')) }}</span></strong><br />
+                        <strong><span style="color: #1b0c80; font-size: 25px;">{{ strtoupper($settings->firstWhere('type' , 'system_name')->description) }}</span></strong><br />
                         {{-- <strong><span style="color: #1b0c80; font-size: 20px;">MINNA, NIGER STATE</span></strong><br/>--}}
                         <strong><span style="color: #000; font-size: 15px;"><i>{{ ucwords($settings->firstWhere('type', 'address')->description) }}</i></span></strong>
                         <br />
                         <strong><span style="color: #000; font-size: 15px;"> ASSESSMENT SHEET REPORT {{ '('.strtoupper($class_type->name).')' }}</span></strong>
                     </td>
                     <td style="width: 100px; height: 100px; float: left;">
-                        <img src="{{ tenant_asset($sr->user->photo) }}" alt="..." width="100" height="100">
+                        <img src="{{ Usr::getTenancyAwarePhoto($sr->user->photo) }}" alt="..." width="100" height="100">
                     </td>
                 </tr>
             </table>

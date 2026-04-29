@@ -18,17 +18,11 @@
             <td>{{ $loop->iteration }}</td>
             <td>{{ $sub->name }}</td>
             @foreach($subject_marks as $mk)
-            <td>
-                @if($ex->term === 1) {{ $mk->tex1 ?? '-' }}
-                @elseif ($ex->term === 2) {{ $mk->tex2 ?? '-' }}
-                @elseif ($ex->term === 3) {{ $mk->tex3 ?? '-' }}
-                @else {{ '-' }}
-                @endif
-            </td>
+            <td>{{ data_get($mk, "tex{$ex->term}", '—') }}</td>
             {{--Grade, Subject Position & Remarks--}}
-            <td>{{ $mk->grade ? $mk->grade->name : '-' }}</td>
-            <td>{!! $mk->grade ? Mk::getSuffix($mk->sub_pos) : '-' !!}</td>
-            <td>{{ $mk->grade ? $mk->grade->remark : '-' }}</td>
+            <td>{{ $mk->grade?->name ?? '—' }}</td>
+            <td>{!! $mk->grade ? Mk::getSuffix($mk->sub_pos) : '—' !!}</td>
+            <td>{{ $mk->grade?->remark ?? '—' }}</td>
             @endforeach
         </tr>
         @endif

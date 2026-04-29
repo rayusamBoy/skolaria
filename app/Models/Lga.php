@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Eloquent;
+use App\Traits\CentralDatabase;
+use Nnjeim\World\Models\City as CityModel;
 
-class Lga extends Eloquent
+class Lga extends CityModel
 {
-    //
+    use CentralDatabase;
 }

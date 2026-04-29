@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -31,7 +30,7 @@ return new class extends Migration
             $table->string('session');
             $table->tinyInteger('age')->nullable();
             $table->string('date_admitted')->nullable();
-            $table->tinyInteger('grad')->default(0);
+            $table->boolean('grad')->default(false);
             $table->string('grad_date')->nullable();
             $table->timestamps();
         });

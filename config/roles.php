@@ -1,11 +1,13 @@
 <?php
 
+use App\Enums\RoleKey;
+
 /*
 |--------------------------------------------------------------------------
 | Roles Configuration
 |--------------------------------------------------------------------------
 | This file defines the roles for both central and tenant contexts.
-| Constants are used for role keys and are used internally in the system. 
+| Enums constants are used for role keys and are used internally in the system. 
 | Changing the values (names) is safe, but keys should remain constant.
 |
 | Important: if you change the central root role name, make sure to update
@@ -13,24 +15,11 @@
 */
 
 // --------------------
-// Role Key Constants
-// --------------------
-// These constants prevent typos and keep role keys consistent across the app.
-const ROLE_ROOT = 'root';
-const ROLE_SUPERADMIN = 'superadmin';
-const ROLE_ADMIN = 'admin';
-const ROLE_TEACHER = 'teacher';
-const ROLE_ACCOUNTANT = 'accountant';
-const ROLE_LIBRARIAN = 'librarian';
-const ROLE_PARENT = 'parent';
-const ROLE_STUDENT = 'student';
-
-// --------------------
 // Central Roles
 // --------------------
-// Central roles are for the main system (non-tenant context).
+// Central roles are for the main system (central context).
 $centralRoot = [
-    ROLE_ROOT => 'Root', // The main superuser
+    RoleKey::ROOT->value => 'Root', // The main superuser
 ];
 
 // --------------------
@@ -38,23 +27,23 @@ $centralRoot = [
 // --------------------
 // Tenant roles are for individual tenants
 $tenantRoot = [
-    ROLE_SUPERADMIN => 'Super Admin', // Tenant superuser
+    RoleKey::SUPERADMIN->value => 'Super Admin', // Tenant superuser
 ];
 
 // Staff roles
 $tenantStaff = [
-    ROLE_SUPERADMIN => 'Super Admin',
-    ROLE_ADMIN => 'Admin',
-    ROLE_TEACHER => 'Teacher',
-    ROLE_ACCOUNTANT => 'Accountant',
-    ROLE_LIBRARIAN => 'Librarian',
+    RoleKey::SUPERADMIN->value => 'Super Admin',
+    RoleKey::ADMIN->value => 'Admin',
+    RoleKey::TEACHER->value => 'Teacher',
+    RoleKey::ACCOUNTANT->value => 'Accountant',
+    RoleKey::LIBRARIAN->value => 'Librarian',
 ];
 
 // Default roles
 $tenantDefault = [
     ...$tenantStaff,
-    ROLE_PARENT => 'Parent',
-    ROLE_STUDENT => 'Student'
+    RoleKey::PARENT->value => 'Parent',
+    RoleKey::STUDENT->value => 'Student'
 ];
 
 return [

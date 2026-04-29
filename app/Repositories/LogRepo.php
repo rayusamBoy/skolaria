@@ -9,9 +9,9 @@ class LogRepo
 {
     /*********** Activities ***************/
 
-    public function getActivites()
+    public function getActivites(array $with = ['user'], string $orderBy = 'id', string $direction = 'desc')
     {
-        return Activity::with('user')->get();
+        return Activity::with($with)->orderBy($orderBy, $direction)->get();
     }
 
     public function deleteActivityLog(int $log_id)
@@ -21,12 +21,12 @@ class LogRepo
 
     /*********** Login History ***************/
 
-    public function getLoginHistories()
+    public function getLoginHistories(array $with = ['user'], string $orderBy = 'id', string $direction = 'desc')
     {
-        return LoginHistory::with('user')->get();
+        return LoginHistory::with($with)->orderBy($orderBy, $direction)->get();
     }
 
-    public function updateLoginHist($where, $data)
+    public function updateLoginHist(array $where, array $data)
     {
         return LoginHistory::where($where)->update($data);
     }

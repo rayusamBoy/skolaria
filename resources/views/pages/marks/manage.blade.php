@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('page_title', 'Manage Marks')
+@section('page_title', 'Manage Exam Marks')
 
 @section('content')
 
@@ -11,10 +11,13 @@
     </div>
 
     <div class="card-body">
+        @can($tenant_permissions['marks']['selector']['permission'])
         @include('pages.marks.selector')
+        @endcan
     </div>
 </div>
 
+@if($selected)
 <div class="card w-fit">
     <div class="card-header">
         <h4 class="text-center">STUDENTS EXAM MARKS</h4>
@@ -23,7 +26,7 @@
                 <h6 class="card-title"><strong>Subject: </strong> {{ $m->subject->name }}</h6>
             </div>
             <div class="col-md-3">
-                <h6 class="card-title"><strong>Class: </strong> {{ $m->my_class->name }} {{ !isset($section_id_is_null) ? $m->section->name : '' }} </h6>
+                <h6 class="card-title"><strong>Class: </strong> {{ $m->my_class->name }} {{ $m->section?->name ?? '' }} </h6>
             </div>
             <div class="col-md-5">
                 <h6 class="card-title"><strong>Exam: </strong> {{ $m->exam->name . ' - ' . $m->year }}</h6>
@@ -31,7 +34,7 @@
         </div>
     </div>
 
-    @php $is_restricted = (!$exam->editable || $exam->locked) && !auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')); @endphp
+    @php $is_restricted = $exam->locked && auth()->user()->cannot($tenant_permissions['marks']['update']['permission']) @endphp
 
     <div class="card-body">
         @include('pages.marks.edit')
@@ -41,11 +44,12 @@
         @if($is_restricted)
         <p class="float-right badge p-3 mr-3 text-warning font-size-base">Opened In Read Only Mode</p>
         @else
-        <p class="float-right badge p-3 mr-3 text-info font-size-base">Autosave is on</p>
+        <p class="float-right badge p-3 mr-3 text-info font-size-base">Browser Autosave is On</p>
         @endif
     </div>
 </div>
-
-{{--Marks Manage End--}}
+@endif
 
 @endsection
+
+{{--Marks Manage End--}}

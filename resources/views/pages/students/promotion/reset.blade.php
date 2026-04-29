@@ -42,7 +42,7 @@
                 @foreach($promotions->sortBy('user.name') as $p)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ tenant_asset($p->user->photo) }}" alt="photo"></td>
+                    <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhoto($p->user->photo) }}" alt="photo"></td>
                     <td>{{ $p->user->name }}</td>
                     <td>{{ $p->fc->name.' '.$p->fs->name }}</td>
                     <td>{{ $p->tc->name.' '.$p->ts->name }}</td>

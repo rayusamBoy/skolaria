@@ -28,7 +28,7 @@
         <div class="tab-content">
             @can($central_permissions['central_users']['store']['permission'])
             <div class="tab-pane fade" id="new-user">
-                <form method="post" enctype="multipart/form-data" class="wizard-form steps-validation ajax-store" action="{{ route('central_users.store') }}" data-fouc>
+                <form method="post" enctype="multipart/form-data" class="wizard-form steps-validation ajax-store" action="{{ route('central_users.store') }}">
                     @csrf
 
                     {{-- PERSONAL DATA --}}
@@ -69,7 +69,7 @@
                                     <label for="permissions">Select Permission(s) (Optional):</label>
                                     <select class="form-control select" multiple="multiple" placeholder="Select Permission(s)" name="permissions[]" id="permissions">
                                         @foreach ($permissions as $perm)
-                                        <option value="{{ $perm->name }}">{{ $perm->name }}</option>
+                                        <option value="{{ $perm->name }}" title="{{ $perm->description ?? $perm->label ?? $perm->name }}">{{ $perm->label ?? $perm->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -112,7 +112,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="bg_id">Blood Group: </label>
-                                    <select class="select form-control" id="bg_id" name="bg_id" data-fouc data-placeholder="Choose..">
+                                    <select class="select form-control" id="bg_id" name="bg_id" data-placeholder="Choose..">
                                         <option value=""></option>
                                         @foreach ($blood_groups as $bg)
                                         <option @selected(old('bg_id')==$bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
@@ -131,7 +131,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="gender">Gender: <span class="text-danger">*</span></label>
-                                    <select class="select form-control" id="gender" name="gender" required data-fouc data-placeholder="Choose..">
+                                    <select class="select form-control" id="gender" name="gender" required data-placeholder="Choose..">
                                         <option value=""></option>
                                         @foreach (Usr::getGenders() as $gender)
                                         <option @selected(old('gender')==$gender) value="{{ $gender }}">{{ ucfirst($gender) }}</option>
@@ -212,7 +212,7 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="photo" class="d-block">Upload Passport Photo:</label>
-                                    <input value="{{ old('photo') }}" accept="image/*" type="file" name="photo" id="photo" class="form-input-styled" data-fouc>
+                                    <input value="{{ old('photo') }}" accept="image/*" type="file" name="photo" id="photo" class="form-input-styled">
                                     <span class="form-text text-muted">Accepted Images: jpeg, png. Max file size 2Mb</span>
                                 </div>
                             </div>
@@ -296,7 +296,7 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label for="education_level">Education Level: </label>
-                                    <select class="select-search form-control" id="education_level" name="education_level" data-fouc data-placeholder="Choose..">
+                                    <select class="select-search form-control" id="education_level" name="education_level" data-placeholder="Choose..">
                                         <option value=""></option>
                                         @foreach (Usr::getEducationLevels() as $lv)
                                         <option @selected(old('education_level')==$lv) value="{{ $lv }}">{{ $lv }}</option>
@@ -335,7 +335,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="role">Role: </label>
-                                    <select class="select form-control" id="role" name="role" data-fouc data-placeholder="Choose..">
+                                    <select class="select form-control" id="role" name="role" data-placeholder="Choose..">
                                         <option value=""></option>
                                         @foreach (Usr::getStaffRoles() as $role)
                                         <option @selected(old('role')==$role) value="{{ $role }}">{{ $role }}</option>
@@ -378,7 +378,7 @@
                         @foreach(Usr::getUsersByRoleNames([$role->name]) as $u)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ asset($u->photo) }}" alt="photo"></td>
+                            <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhoto($u->photo) }}" alt="photo"></td>
                             <td>{{ $u->name }}</td>
                             <td>{{ $u->username }}</td>
                             <td><a href="tel: {{ $u->phone }}">{{ $u->phone }}</a></td>

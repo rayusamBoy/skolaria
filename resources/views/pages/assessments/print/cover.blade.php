@@ -87,7 +87,7 @@
         <table class="photo" width="100%">
             <tr>
                 <td style="width: 120px; height: 120px; float: right;">
-                    <img src="{{ tenant_asset($student->user->photo) }}" alt="{{ $student->user->name }}" width="120" height="120">
+                    <img src="{{ Usr::getTenancyAwarePhoto($student->user->photo) }}" alt="{{ $student->user->name }}" width="120" height="120">
                 </td>
             </tr>
         </table>

@@ -38,7 +38,7 @@ class PromotionController extends Controller
             $d['tc'] = $tc;
             $d['ts'] = $ts;
 
-            $d['students'] = $sts = ($status == 1) ? $this->student->getRecord(['my_class_id' => $fc, 'section_id' => $fs, 'session' => $d['old_year']])->with('promotion')->get()->whereNotNull('user') : $this->student->getRecord2(['my_class_id' => $fc, 'section_id' => $fs, 'session' => $d['old_year']])->with('promotion')->get()->whereNotNull('user');
+            $d['students'] = $sts = ($status == 1) ? $this->student->whereRecord(['my_class_id' => $fc, 'section_id' => $fs, 'session' => $d['old_year']])->with('promotion')->get()->whereNotNull('user') : $this->student->whereGraduatesRecord(['my_class_id' => $fc, 'section_id' => $fs, 'session' => $d['old_year']])->with('promotion')->get()->whereNotNull('user');
 
             if ($sts->count() < 1)
                 return redirect()->route('students.promotion')->with('flash_success', __('msg.nstp'));
@@ -58,7 +58,7 @@ class PromotionController extends Controller
         $oy = Qs::getSetting('current_session');
         $old_yr = explode('-', $oy);
         $ny = ++$old_yr[0] . '-' . ++$old_yr[1];
-        $students = ($status == 1) ? $this->student->getRecord(['my_class_id' => $fc, 'section_id' => $fs, 'session' => $oy])->get()->whereNotNull('user')->sortBy('user.name') : $this->student->getRecord2(['my_class_id' => $fc, 'section_id' => $fs, 'session' => $oy])->get()->whereNotNull('user')->sortBy('user.name');
+        $students = ($status == 1) ? $this->student->whereRecord(['my_class_id' => $fc, 'section_id' => $fs, 'session' => $oy])->get()->whereNotNull('user')->sortBy('user.name') : $this->student->whereGraduatesRecord(['my_class_id' => $fc, 'section_id' => $fs, 'session' => $oy])->get()->whereNotNull('user')->sortBy('user.name');
 
         if ($students->count() < 1)
             return redirect()->route('students.promotion')->with('flash_danger', __('msg.srnf'));

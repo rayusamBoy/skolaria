@@ -9,6 +9,10 @@ class BookRequest extends Model
 {
     protected $fillable = ['book_id', 'borrower_id', 'user_id', 'start_date', 'end_date', 'returned', 'remarks'];
 
+    protected $casts = [
+        'returned' => 'boolean',
+    ];
+
     public function book()
     {
         return $this->belongsTo(Book::class);

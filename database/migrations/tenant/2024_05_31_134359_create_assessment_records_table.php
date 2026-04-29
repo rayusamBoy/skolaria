@@ -17,7 +17,6 @@ return new class extends Migration
             $table->unsignedInteger('subject_id')->index();
             $table->unsignedInteger('my_class_id')->index();
             $table->unsignedInteger('section_id')->index();
-            $table->unsignedInteger('exam_id')->index();
             $table->unsignedBigInteger('mark_id')->index();
             $table->unsignedInteger('assessment_id')->index();
             $table->integer('cw1')->nullable();

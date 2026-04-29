@@ -60,7 +60,7 @@
                                 <div class="mb-3">
                                     <img style="width: 100px" height="100px" src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type' , 'login_and_related_pages_bg')) }}" alt="">
                                 </div>
-                                <input id="login-and-related-pgs-bg-input" name="login_and_related_pages_bg" accept="image/*" type="file" class="file-input" data-show-caption="false" data-show-upload="false" data-fouc>
+                                <input id="login-and-related-pgs-bg-input" name="login_and_related_pages_bg" accept="image/*" type="file" class="file-input" data-show-caption="false" data-show-upload="false">
                             </div>
                         </div>
                     </div>
@@ -77,7 +77,7 @@
                                 <div class="form-check mb-auto mt-auto ml-1 mr-2">
                                     <label class="form-check-label">
                                         Preview
-                                        <input disabled type="checkbox" name="show_login_and_related_pgs_preview" class="form-input-styled" data-fouc>
+                                        <input disabled type="checkbox" name="show_login_and_related_pgs_preview" class="form-input-styled">
                                     </label>
                                 </div>
                             </div>

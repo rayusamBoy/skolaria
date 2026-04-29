@@ -1,12 +1,12 @@
 @if($user_as_participant->isNotEmpty())
 <!-- Message Form Input -->
 <form class="message ajax-store" action="{{ route('messages.update', $thread->id) }}" method="post">
-    @method('PUT') 
+    @method('PUT')
     @csrf
 
     <em id="message-textarea-actions-subtle-hint" class="text-info display-none float-right"><strong>Press Enter to send, Shift+Enter for new line.</strong></em>
     <div class="form-group">
-        <div id="message"></div>
+        <div id="message" class="overtype-editor"></div>
         <!-- Submit Form Input -->
         <button id="send-message-btn" type="submit" data-text=" " class="btn btn-sm float-right mb-3 mt-2"><i class="material-symbols-rounded">send</i></button>
     </div>

@@ -48,7 +48,7 @@
                         @foreach ($login_histories->whereIn('user.id', $role_scoped_users_ids) as $lh)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ asset($lh->user->photo) }}" alt="photo"></td>
+                            <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhoto($lh->user->photo) }}" alt="photo"></td>
                             <td>{{ $lh->user->name }}</td>
                             <td>{{ $lh->login_times }}</td>
                             <td>{{ Qs::fullDateTimeFormat($lh->created_at) }}</td>

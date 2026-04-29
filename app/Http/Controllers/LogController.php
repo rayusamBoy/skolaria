@@ -25,7 +25,7 @@ class LogController extends Controller
 
     public function index()
     {
-        $d['activities'] = $this->log->getActivites()->sortBy('id', SORT_REGULAR, TRUE);
+        $d['activities'] = $this->log->getActivites(['causer'])->sortBy('id', SORT_REGULAR, TRUE);
         $d['login_histories'] = $this->log->getLoginHistories()->sortBy('last_login', SORT_REGULAR, TRUE);
         $d['user_roles'] = $this->user->getRoles();
 

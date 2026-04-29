@@ -6,7 +6,6 @@ use App\Helpers\Usr;
 use App\Models\StaffRecord;
 use App\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class UserProfileUpdate extends FormRequest
@@ -19,7 +18,7 @@ class UserProfileUpdate extends FormRequest
 
     protected function getAuthUserId()
     {
-        return Auth::id();
+        return auth()->id();
     }
 
     /**

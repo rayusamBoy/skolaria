@@ -61,13 +61,13 @@
                                     @can($tenant_permissions['payments']['status']['permission'])
                                     <div class="dropdown-divider"></div>
 
-                                    <ul class="list-circle mb-0 pl-3">
+                                    <ul class="list-unstyled mb-0">
                                         <li>
-                                            <a href="{{ route('payments.status', [Qs::hash($s->user_id)]) }}" class="dropdown-item pl-2">All Payments</a>
+                                            <a href="{{ route('payments.status', [Qs::hash($s->user_id)]) }}" class="dropdown-item">&xrArr; <span class="pl-2">All Payments</span></a>
                                         </li>
 
                                         <li>
-                                            <a href="{{ route('payments.status', [Qs::hash($s->user_id), Qs::getCurrentSession()]) }}" class="dropdown-item pl-2">This Session's Payments</a>
+                                            <a href="{{ route('payments.status', [Qs::hash($s->user_id), $settings->firstWhere('type' , 'current_session')->description]) }}" class="dropdown-item">&xrArr; <span class="pl-2">{{ $settings->firstWhere('type' , 'current_session')->description }}</span></a>
                                         </li>
                                     </ul>
                                     @endcan

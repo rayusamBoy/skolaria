@@ -11,35 +11,30 @@ class StudentRepo
 {
     /*********** Student record ***************/
 
-    public function all()
+    public function getRecord(array $where = [], array $with = ['my_class', 'section', 'user'])
     {
-        return StudentRecord::with(['my_class', 'section', 'user'])->get();
+        return StudentRecord::where($where)->with($with)->get();
     }
 
-    public static function getRecordValue($id, $col_name)
+    public static function getRecordValue(array $where, string $col_name)
     {
-        return StudentRecord::where('id', $id)->value($col_name);
+        return StudentRecord::where($where)->value($col_name);
     }
 
-    public function findStudentsByClass($class_id)
+    public function findStudentsByClass($class_id, array $with = ['user'])
     {
         // Get all students by class except deleted ones. If user deleted, the user will return null, hence exclude null from the collection
-        return $this->activeStudents()->where(['my_class_id' => $class_id])->with(['my_class', 'user', 'my_parent'])->get()->whereNotNull('user')->sortBy('user.name');
+        return $this->activeStudents()->where(['my_class_id' => $class_id])->with($with)->get()->whereNotNull('user')->sortBy('user.name');
     }
 
     public function activeStudents()
     {
-        return StudentRecord::where(['grad' => 0]);
+        return StudentRecord::where('grad', false);
     }
 
-    public function getStudentsRecs()
+    public function promotedWhereGrad()
     {
-        return StudentRecord::where(['grad' => 0]);
-    }
-
-    public function gradStudents()
-    {
-        return Promotion::where(['grad' => 1]);
+        return Promotion::where('grad', true);
     }
 
     public function allActiveStudents()
@@ -49,12 +44,12 @@ class StudentRepo
 
     public function allGradOnlyStudents()
     {
-        return $this->gradStudents()->get();
+        return $this->promotedWhereGrad()->get();
     }
 
     public function allGradStudents()
     {
-        return $this->gradStudents()->with(['student', 'user', 'fc', 'tc', 'fs', 'ts'])->get()->sortBy('user.name');
+        return $this->promotedWhereGrad()->with(['student', 'user', 'fc', 'tc', 'fs', 'ts'])->get()->sortBy('user.name');
     }
 
     public function findStudentsBySection($sec_id)
@@ -62,12 +57,12 @@ class StudentRepo
         return $this->activeStudents()->where('section_id', $sec_id)->with(['user', 'my_class'])->get();
     }
 
-    public function createRecord($data)
+    public function createRecord(array $data)
     {
         return StudentRecord::create($data);
     }
 
-    public function updateRecord($value, array $data, $column = 'id')
+    public function updateRecord($value, array $data, string $column = 'id')
     {
         return StudentRecord::where($column, $value)->update($data);
     }
@@ -77,14 +72,14 @@ class StudentRepo
         return StudentRecord::updateOrCreate($where, $data);
     }
 
-    public function getRecord(array $where)
+    public function whereRecord(array $where, $with = ['user', 'my_parent'])
     {
-        return $this->activeStudents()->where($where)->with(['user', 'my_parent']);
+        return $this->activeStudents()->where($where)->with($with);
     }
 
-    public function getRecord2(array $where)
+    public function whereGraduatesRecord(array $where, array $with = ['user', 'my_parent'])
     {
-        return StudentRecord::where(['grad' => 1])->where($where)->with('user');
+        return StudentRecord::where('grad', true)->where($where)->with($with);
     }
 
     public function getRecordByUserIDs($ids)
@@ -102,9 +97,9 @@ class StudentRepo
         return $this->activeStudents()->with('user');
     }
 
-    public function getGradRecord($data = [])
+    public function getGradRecord(array $data = [])
     {
-        return $this->gradStudents()->where($data)->with('user');
+        return $this->promotedWhereGrad()->where($data)->with('user');
     }
 
     public function getAllDorms()
@@ -114,8 +109,8 @@ class StudentRepo
 
     public function exists($student_id)
     {
-        $exists_as_active = $this->getRecord(['user_id' => $student_id])->exists();
-        return $exists_as_active == true ? $exists_as_active : $this->getRecord2(['user_id' => $student_id])->exists();
+        $exists_as_active = $this->whereRecord(['user_id' => $student_id])->exists();
+        return $exists_as_active == true ? $exists_as_active : $this->whereGraduatesRecord(['user_id' => $student_id])->exists();
     }
 
     /************* Promotions *************/

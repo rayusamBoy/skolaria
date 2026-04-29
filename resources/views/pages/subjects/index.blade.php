@@ -12,6 +12,7 @@
 
     <div class="card-body">
         <ul class="nav nav-tabs nav-tabs-highlight">
+            {{-- Manage Subjects --}}
             <li class="nav-item dropdown">
                 <a href="javascript:;" class="nav-link active dropdown-toggle" data-toggle="dropdown">Manage Subjects</a>
                 <div class="dropdown-menu dropdown-menu-right">
@@ -20,11 +21,13 @@
                     @endforeach
                 </div>
             </li>
+            {{-- Create Subject --}}
             @can($tenant_permissions['subjects']['store']['permission'])
             <li class="nav-item"><a href="#new-subject" class="nav-link" data-toggle="tab">Add Subject</a></li>
             @endcan
         </ul>
 
+        {{-- Create Subject Tab --}}
         <div class="tab-content">
             @can($tenant_permissions['subjects']['store']['permission'])
             <div class="tab-pane fade" id="new-subject">
@@ -33,6 +36,7 @@
                     <div class="col-md-8">
                         <form class="ajax-store" method="post" action="{{ route('subjects.store') }}">
                             @csrf
+                            {{-- Class --}}
                             <div class="form-group row">
                                 <label for="my_class_id" class="col-lg-3 col-form-label font-weight-semibold">Select Class <span class="text-danger">*</span></label>
                                 <div class="col-lg-9">
@@ -44,7 +48,7 @@
                                     </select>
                                 </div>
                             </div>
-
+                            {{-- Name --}}
                             <div class="form-group row">
                                 <label for="name" class="col-lg-3 col-form-label font-weight-semibold">Name <span class="text-danger">*</span>
                                     <i class="material-symbols-rounded float-right text-info" data-toggle="tooltip" title="Choose option, search option, or type to add option">info</i>
@@ -55,18 +59,26 @@
                                     </select>
                                 </div>
                             </div>
-
+                            {{-- Slug --}}
                             <div class="form-group row">
                                 <label for="slug" class="col-lg-3 col-form-label font-weight-semibold">Short Name <span class="text-danger">*</span></label>
                                 <div class="col-lg-9">
                                     <input id="slug" required name="slug" value="{{ old('slug') }}" type="text" class="form-control" placeholder="Subject short name">
                                 </div>
                             </div>
-
+                            {{-- Credits --}}
                             <div class="form-group row">
-                                <label for="core" class="col-lg-3 col-form-label font-weight-semibold">Core Subject</label>
+                                <label for="credits" class="col-lg-3 col-form-label font-weight-semibold">Credits <span class="text-danger">*</span></label>
+                                <div class="col-lg-3">
+                                    <input name="credits" id="credits" min="0" required type="number" class="form-control" placeholder="E.g., 10">
+                                </div>
+                                <div class="col-lg-6 m-lg-auto"><span class="font-weight-bold font-italic text-info-800">{{ __('msg.credits_info') }}<i class="material-symbols-rounded float-right text-info" data-toggle="tooltip" title="GPA = Σ (Grade point × Subject credits) / Σ (Subject credits)">info</i></span></div>
+                            </div>
+                            {{-- Core Subject? --}}
+                            <div class="form-group row">
+                                <label for="is_core" class="col-lg-3 col-form-label font-weight-semibold">Core Subject?</label>
                                 <div class="col-lg-2">
-                                    <select class="form-control select" name="core" id="core">
+                                    <select class="form-control select" name="is_core" id="is_core">
                                         <option value="1">Yes</option>
                                         <option value="0">No</option>
                                     </select>
@@ -75,7 +87,7 @@
                                     <span class="font-weight-bold font-italic text-info-800">{{ __('msg.core_subject') }}</span>
                                 </div>
                             </div>
-
+                            {{-- Submit Button --}}
                             <div class="text-right">
                                 <button type="submit" class="btn btn-primary">Submit form <i class="material-symbols-rounded ml-2">send</i></button>
                             </div>
@@ -93,7 +105,8 @@
                             <th>S/N</th>
                             <th>Name</th>
                             <th>Short Name</th>
-                            <td>Core</td>
+                            <td>Is Core</td>
+                            <td>Credits</td>
                             <th>Class</th>
                             <th class="text-center">Action</th>
                         </tr>
@@ -104,20 +117,23 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $s->name }} </td>
                             <td>{{ $s->slug }} </td>
-                            <td>{{ $s->core === true ? 'Yes' : 'No' }}</td>
+                            <td>{{ $s->is_core === true ? 'Yes' : 'No' }}</td>
+                            <td>{{ $s->credits }}</td>
                             <td>{{ $s->my_class->name }}</td>
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
+                                            {{-- Edit --}}
                                             @can($tenant_permissions['subjects']['edit']['permission'])
                                             <a href="{{ route('subjects.edit', $s->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
                                             @endcan
+                                            {{-- Delete --}}
                                             @can($tenant_permissions['subjects']['destroy']['permission'])
-                                            <a id="{{ $s->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
+                                            <a id="{{ $s->id }}" onclick="confirmDelete(this.id)" href="javascript:;" @class($s->record->isNotEmpty() ? ['dropdown-item text-danger disabled'] : ['dropdown-item text-danger']) @if($s->record->isEmpty()) onclick="confirmDelete(this.id)" @else data-toggle="tooltip" title="{{ __('msg.subject_in_use') }}" @endif>
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
                                             <form method="post" id="item-delete-{{ $s->id }}" action="{{ route('subjects.destroy', [$s->id]) }}" class="hidden">

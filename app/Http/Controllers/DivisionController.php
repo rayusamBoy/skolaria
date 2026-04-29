@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Qs;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Division\DivisionCreate;
 use App\Http\Requests\Division\DivisionUpdate;
@@ -33,13 +34,12 @@ class DivisionController extends Controller
         $data = $req->all();
         $this->exam->createDivision($data);
 
-        return back()->with('flash_success', __('msg.store_ok'));
+        return Qs::jsonStoreOk();
     }
 
     public function edit($id)
     {
-        $d['class_types'] = $this->my_class->getTypes();
-        $d['dv'] = $this->exam->findDivision($id);
+        $d['dv'] = $this->exam->getDivision(['id' => $id], ['class_type'])->first();
 
         return view('pages.divisions.edit', $d);
     }
@@ -49,7 +49,7 @@ class DivisionController extends Controller
         $data = $req->all();
         $this->exam->updateDivision($id, $data);
 
-        return back()->with('flash_success', __('msg.update_ok'));
+        return Qs::jsonUpdateOk();
     }
 
     public function destroy($id)

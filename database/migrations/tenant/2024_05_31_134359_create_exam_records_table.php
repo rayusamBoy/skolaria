@@ -1,4 +1,4 @@
-<?php
+a<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->integer('class_pos')->nullable();
             $table->unsignedInteger('grade_id')->nullable()->index();
             $table->unsignedInteger('points')->nullable();
-            $table->decimal('gpa', 8, 1)->nullable();
+            $table->decimal('gpa')->nullable();
             $table->unsignedInteger('division_id')->nullable()->index();
             $table->string('af')->nullable();
             $table->string('ps')->nullable();

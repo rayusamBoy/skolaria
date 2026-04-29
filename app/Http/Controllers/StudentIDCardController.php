@@ -47,7 +47,7 @@ class StudentIDCardController extends Controller
 
         if ($req->filled(['my_class_id', 'issued_date', 'expire_date', 'id_theme'])) {
             // Exclude students with soft deleted user record
-            $d['students'] = $st = $this->student->getRecord(['my_class_id' => $req->my_class_id])->get()->whereNotNull('user')->sortBy('user.name');
+            $d['students'] = $st = $this->student->whereRecord(['my_class_id' => $req->my_class_id])->get()->whereNotNull('user')->sortBy('user.name');
             if ($st->count() < 1)
                 return Qs::goWithDanger('students.id_cards');
 
@@ -60,7 +60,7 @@ class StudentIDCardController extends Controller
 
     public function print_class($class_id, $issued, $expire, $theme, $phone, $class_from = NULL, $class_to = NULL, $motto, $brightness = 1, $website_link = NULL)
     {
-        $d['students'] = $this->student->getRecord(['my_class_id' => $class_id])->with('my_class')->get()->whereNotNull('user')->sortBy('user.name');
+        $d['students'] = $this->student->whereRecord(['my_class_id' => $class_id])->with('my_class')->get()->whereNotNull('user')->sortBy('user.name');
         $d['issued'] = $issued;
         $d['expire'] = $expire;
         $d["year_from"] = explode(",", $issued)[1];
@@ -96,7 +96,7 @@ class StudentIDCardController extends Controller
     private function getThemeFilesNames()
     {
         $id_card_theme_dir = Qs::getTenancyAwareIDCardsThemeDir();
-        $tenant_storage_dir = tenancy()->run(tenant(), fn() => storage_path("app/public"));
+        $tenant_storage_dir = tenancy()->run(tenant(), fn() => storage_path("app/public/"));
 
         $file_names_to_copy = ['0001.blade.php'];
         $dir_names_to_copy = ['backgrounds', 'others'];

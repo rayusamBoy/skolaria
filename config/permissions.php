@@ -92,7 +92,7 @@ return [
             'users' => [
                 'destroy' => [
                     'permission' => 'users.delete',
-                    'label' => 'Delete Users',
+                    'label' => 'Delete Users (including Students)',
                     'description' => 'Permanently remove user accounts.',
                 ],
                 'edit' => [
@@ -136,6 +136,7 @@ return [
                     'description' => 'Block or unblock user accounts.',
                 ],
             ],
+
             'roles' => [
                 'destroy' => [
                     'permission' => 'roles.delete',
@@ -163,6 +164,7 @@ return [
                     'description' => 'Save changes to roles.',
                 ],
             ],
+
             'analytics' => [
                 'fetch_data' => [
                     'permission' => 'analytics.fetch_data',
@@ -180,16 +182,17 @@ return [
                     'description' => 'View analytics reports.',
                 ],
             ],
+
             'assessments' => [
-                'bulk' => [
-                    'permission' => 'assessments.bulk',
-                    'label' => 'Bulk Manage Assessments',
-                    'description' => 'Perform bulk operations on assessments.',
+                'sheets' => [
+                    'permission' => 'assessments.sheets',
+                    'label' => 'Manage Assessmentsheets',
+                    'description' => 'Manage assessments sheets.',
                 ],
-                'bulk_select' => [
-                    'permission' => 'assessments.bulk_select',
-                    'label' => 'Bulk Select Assessments',
-                    'description' => 'Select multiple assessments for bulk actions.',
+                'sheets_select' => [
+                    'permission' => 'assessments.sheets_select',
+                    'label' => 'Select Assessmentsheets',
+                    'description' => 'Select assessment sheets.',
                 ],
                 'comment_update' => [
                     'permission' => 'assessments.comment_update',
@@ -277,6 +280,7 @@ return [
                     'description' => 'View assessments for a selected year.',
                 ],
             ],
+
             'book_requests' => [
                 'destroy' => [
                     'permission' => 'book_requests.delete',
@@ -304,6 +308,7 @@ return [
                     'description' => 'Save changes to book requests.',
                 ],
             ],
+
             'books' => [
                 'destroy' => [
                     'permission' => 'books.delete',
@@ -331,6 +336,7 @@ return [
                     'description' => 'Save changes to books.',
                 ],
             ],
+
             'divisions' => [
                 'destroy' => [
                     'permission' => 'divisions.delete',
@@ -358,6 +364,7 @@ return [
                     'description' => 'Save changes to divisions.',
                 ],
             ],
+
             'dorms' => [
                 'destroy' => [
                     'permission' => 'dorms.delete',
@@ -385,6 +392,7 @@ return [
                     'description' => 'Save changes to dormitories.',
                 ],
             ],
+
             'exams' => [
                 'announce' => [
                     'permission' => 'exams.announce',
@@ -421,17 +429,13 @@ return [
                     'label' => 'Update Exams',
                     'description' => 'Save changes to exams.',
                 ],
-                'update_edit_state' => [
-                    'permission' => 'exams.update.edit_state',
-                    'label' => 'Toggle Exam Editing',
-                    'description' => 'Allow or prevent editing of exams.',
-                ],
                 'update_lock_state' => [
                     'permission' => 'exams.update.lock_state',
                     'label' => 'Lock/Unlock Exams',
                     'description' => 'Lock or unlock exams for changes.',
                 ],
             ],
+
             'grades' => [
                 'destroy' => [
                     'permission' => 'grades.delete',
@@ -459,6 +463,7 @@ return [
                     'description' => 'Save changes to grades.',
                 ],
             ],
+
             'marks' => [
                 'batch' => [
                     'permission' => 'marks.batch',
@@ -485,15 +490,15 @@ return [
                     'label' => 'Batch Upload Marks',
                     'description' => 'Upload marks via batch file.',
                 ],
-                'bulk' => [
-                    'permission' => 'marks.bulk',
-                    'label' => 'Bulk Marks Actions',
-                    'description' => 'Perform bulk actions on marks.',
+                'sheets' => [
+                    'permission' => 'marks.sheets',
+                    'label' => 'Marks Sheets',
+                    'description' => 'View student marks sheets.',
                 ],
-                'bulk_select' => [
-                    'permission' => 'marks.bulk_select',
-                    'label' => 'Bulk Select Marks',
-                    'description' => 'Select marks for bulk operations.',
+                'sheets_select' => [
+                    'permission' => 'marks.sheets_select',
+                    'label' => 'Select Marks Sheets',
+                    'description' => 'Select student marksheets.',
                 ],
                 'comment_update' => [
                     'permission' => 'marks.comment_update',
@@ -504,11 +509,6 @@ return [
                     'permission' => 'marks.convert',
                     'label' => 'Convert Marks',
                     'description' => 'Convert marks between formats or grading systems.',
-                ],
-                'index' => [
-                    'permission' => 'marks.view',
-                    'label' => 'View Marks List',
-                    'description' => 'List all marks.',
                 ],
                 'manage' => [
                     'permission' => 'marks.manage',
@@ -525,15 +525,10 @@ return [
                     'label' => 'Print Marks View',
                     'description' => 'Print a formatted view of marks.',
                 ],
-                'select_year' => [
-                    'permission' => 'marks.select_year',
-                    'label' => 'Select Marks Year',
-                    'description' => 'Choose the academic year for marks.',
-                ],
                 'selector' => [
                     'permission' => 'marks.selector',
                     'label' => 'Marks Selector',
-                    'description' => 'Use the marks selection tool.',
+                    'description' => 'Fill manage marks form.',
                 ],
                 'show' => [
                     'permission' => 'marks.view',
@@ -571,6 +566,7 @@ return [
                     'description' => 'Access the year selection interface for marks.',
                 ],
             ],
+
             'messages' => [
                 'activate_all_participants' => [
                     'permission' => 'messages.activate_all_participants',
@@ -584,8 +580,8 @@ return [
                 ],
                 'destroy' => [
                     'permission' => 'messages.delete',
-                    'label' => 'Delete Messages',
-                    'description' => 'Remove messages.',
+                    'label' => 'Delete Messages Thread',
+                    'description' => 'Remove message threads.',
                 ],
                 'load_previous' => [
                     'permission' => 'messages.load_previous',
@@ -628,6 +624,7 @@ return [
                     'description' => 'Allow users to delete their own messages.',
                 ],
             ],
+
             'childrens' => [
                 'children' => [
                     'permission' => 'childrens.children',
@@ -635,9 +632,10 @@ return [
                     'description' => 'Access children information.',
                 ],
             ],
+
             'my_accounts' => [
-                'change_password' => [
-                    'permission' => 'my_accounts.change_password',
+                'change_pass' => [
+                    'permission' => 'my_accounts.change_pass',
                     'label' => 'Change Password',
                     'description' => 'Change own account password.',
                 ],
@@ -652,7 +650,7 @@ return [
                     'description' => 'Edit own profile information.',
                 ],
                 'update_preferences' => [
-                    'permission' => 'my_accounts.update_preferences',
+                    'permission' => 'my_accounts.update.preferences',
                     'label' => 'Update Preferences',
                     'description' => 'Change account preferences.',
                 ],
@@ -667,6 +665,7 @@ return [
                     'description' => 'Save profile changes.',
                 ],
             ],
+
             'my_classes' => [
                 'destroy' => [
                     'permission' => 'my_classes.delete',
@@ -694,6 +693,7 @@ return [
                     'description' => 'Save changes to personal classes.',
                 ],
             ],
+
             'notices' => [
                 'destroy' => [
                     'permission' => 'notices.delete',
@@ -726,6 +726,7 @@ return [
                     'description' => 'Update specific notice record.',
                 ],
             ],
+
             'notifications' => [
                 'destroy' => [
                     'permission' => 'notifications.delete',
@@ -753,6 +754,7 @@ return [
                     'description' => 'Change whether user receives notifications.',
                 ],
             ],
+
             'payments' => [
                 'create' => [
                     'permission' => 'payments.create',
@@ -830,6 +832,7 @@ return [
                     'description' => 'Save changes to payments.',
                 ],
             ],
+
             'pins' => [
                 'create' => [
                     'permission' => 'pins.create',
@@ -862,6 +865,7 @@ return [
                     'description' => 'Verify a PIN.',
                 ],
             ],
+
             'promotions' => [
                 'manage' => [
                     'permission' => 'promotions.manage',
@@ -899,16 +903,17 @@ return [
                     'description' => 'Select students for promotion.',
                 ],
             ],
+
             'query_builders' => [
                 'index' => [
                     'permission' => 'query_builders.view',
                     'label' => 'View Query Builders',
                     'description' => 'List query builder tools.',
                 ],
-                'print_staff_data' => [
-                    'permission' => 'query_builders.print_staff_data',
-                    'label' => 'Print Staff Data',
-                    'description' => 'Print staff data reports.',
+                'print_users_data' => [
+                    'permission' => 'query_builders.print_users_data',
+                    'label' => 'Print Users Data',
+                    'description' => 'Print user data reports.',
                 ],
                 'select' => [
                     'permission' => 'query_builders.select',
@@ -916,6 +921,7 @@ return [
                     'description' => 'Use query builder selection.',
                 ],
             ],
+
             'schedules' => [
                 'create_event' => [
                     'permission' => 'schedules.create.event',
@@ -943,6 +949,7 @@ return [
                     'description' => 'Save changes to events.',
                 ],
             ],
+
             'sections' => [
                 'destroy' => [
                     'permission' => 'sections.delete',
@@ -970,6 +977,35 @@ return [
                     'description' => 'Save changes to sections.',
                 ],
             ],
+
+            'class_types' => [
+                'destroy' => [
+                    'permission' => 'class_types.delete',
+                    'label' => 'Delete Class Types',
+                    'description' => 'Remove class types.',
+                ],
+                'edit' => [
+                    'permission' => 'class_types.update',
+                    'label' => 'Edit Class Types',
+                    'description' => 'Modify class type details.',
+                ],
+                'index' => [
+                    'permission' => 'class_types.view',
+                    'label' => 'View Class Types',
+                    'description' => 'List all class types.',
+                ],
+                'store' => [
+                    'permission' => 'class_types.store',
+                    'label' => 'Create Class Type',
+                    'description' => 'Add a new class type.',
+                ],
+                'update' => [
+                    'permission' => 'class_types.update',
+                    'label' => 'Update Class Types',
+                    'description' => 'Save changes to class types.',
+                ],
+            ],
+
             'settings' => [
                 'disable_analytics' => [
                     'permission' => 'settings.disable_analytics',
@@ -992,6 +1028,7 @@ return [
                     'description' => 'Save changes to settings.',
                 ],
             ],
+
             'soft_deletes' => [
                 'bin' => [
                     'permission' => 'soft_deletes.bin',
@@ -1054,6 +1091,7 @@ return [
                     'description' => 'Restore a soft-deleted user.',
                 ],
             ],
+
             'statistics' => [
                 'index' => [
                     'permission' => 'statistics.view',
@@ -1061,6 +1099,7 @@ return [
                     'description' => 'View statistical reports.',
                 ],
             ],
+
             'student_records' => [
                 'batch_store' => [
                     'permission' => 'student_records.batch_store',
@@ -1087,11 +1126,6 @@ return [
                     'label' => 'Create Student Record',
                     'description' => 'Add a new student record.',
                 ],
-                'destroy' => [
-                    'permission' => 'student_records.delete',
-                    'label' => 'Delete Student Record',
-                    'description' => 'Remove student record.',
-                ],
                 'edit' => [
                     'permission' => 'student_records.update',
                     'label' => 'Edit Student Record',
@@ -1102,15 +1136,15 @@ return [
                     'label' => 'Mark as Graduated',
                     'description' => 'Mark students as graduated.',
                 ],
+                'mark_not_graduated' => [
+                    'permission' => 'student_records.mark_not_graduated',
+                    'label' => 'Mark as Not Graduated',
+                    'description' => 'Remove graduation status.',
+                ],
                 'list_by_class' => [
                     'permission' => 'student_records.view.by_class',
                     'label' => 'View Students by Class',
                     'description' => 'List students filtered by class.',
-                ],
-                'not_graduated' => [
-                    'permission' => 'student_records.not_graduated',
-                    'label' => 'Mark as Not Graduated',
-                    'description' => 'Remove graduation status.',
                 ],
                 'reset_password' => [
                     'permission' => 'student_records.reset_password',
@@ -1143,6 +1177,7 @@ return [
                     'description' => 'Save changes to student records.',
                 ],
             ],
+
             'student_id_cards' => [
                 'index' => [
                     'permission' => 'student_id_cards.view',
@@ -1165,6 +1200,7 @@ return [
                     'description' => 'Print ID cards for selected students.',
                 ],
             ],
+
             'subjects' => [
                 'destroy' => [
                     'permission' => 'subjects.delete',
@@ -1192,7 +1228,7 @@ return [
                     'description' => 'List all subjects.',
                 ],
                 'index_record' => [
-                    'permission' => 'subjects.index.record',
+                    'permission' => 'subjects.view.record',
                     'label' => 'View Subject Records',
                     'description' => 'List subject records.',
                 ],
@@ -1217,6 +1253,7 @@ return [
                     'description' => 'Save changes to a subject record.',
                 ],
             ],
+
             'tickets' => [
                 'answer' => [
                     'permission' => 'tickets.answer',
@@ -1289,6 +1326,7 @@ return [
                     'description' => 'Modify ticket attributes.',
                 ],
             ],
+
             'time_tables' => [
                 'delete' => [
                     'permission' => 'time_tables.delete',
@@ -1371,6 +1409,7 @@ return [
                     'description' => 'Assign a time slot to a timetable.',
                 ],
             ],
+
             'logs' => [
                 'clean_activity_log' => [
                     'permission' => 'logs.clean_activity_log',
@@ -1399,6 +1438,10 @@ return [
                 ],
             ],
         ],
+
+        // ----------------------------------------------------------------------
+        // Central permissions
+        // ----------------------------------------------------------------------
         'central' => [
             'central_users' => [
                 'destroy' => [
@@ -1447,6 +1490,7 @@ return [
                     'description' => 'Block or unblock central user accounts.',
                 ],
             ],
+
             'roles' => [
                 'destroy' => [
                     'permission' => 'roles.delete',
@@ -1474,6 +1518,7 @@ return [
                     'description' => 'Save changes to central roles.',
                 ],
             ],
+
             'tickets' => [
                 'answer' => [
                     'permission' => 'tickets.answer',
@@ -1546,6 +1591,7 @@ return [
                     'description' => 'Modify central ticket attributes.',
                 ],
             ],
+
             'settings_non_tenancy' => [
                 'disable_analytics' => [
                     'permission' => 'settings_non_tenancy.disable_analytics',
@@ -1568,6 +1614,7 @@ return [
                     'description' => 'Save changes to central settings.',
                 ],
             ],
+
             'artisan_commands' => [
                 'clean_activity_logs' => [
                     'permission' => 'artisan_commands.clean_activity_logs',
@@ -1650,6 +1697,7 @@ return [
                     'description' => 'Run artisan view:clear.',
                 ],
             ],
+
             'central_logs' => [
                 'clean_activity_log' => [
                     'permission' => 'central_logs.clean_activity_log',
@@ -1677,6 +1725,7 @@ return [
                     'description' => 'Clear all central login history records.',
                 ],
             ],
+
             'tenants' => [
                 'destroy' => [
                     'permission' => 'tenants.delete',

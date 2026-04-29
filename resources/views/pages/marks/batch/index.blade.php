@@ -10,8 +10,8 @@
             <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
             <span>
                 <strong>Note:</strong>
-                You can create assessment records of students either here through downloading <strong>batch template</strong> or in <a href="{{ route('marks.index') }}">
-                    Manage Exam Marks</a> section only for the current session and current students class. Once the student has been promoted to the next session you will not be able to create the records for the current session anymore.
+                You can create assessment records of students either here through downloading <strong>batch template</strong> or in <a href="{{ route('marks.manage') }}">
+                Manage Exam Marks</a> section only for the current session and current students class. Once the student has been promoted to the next session you will not be able to create the records for the current session anymore.
             </span>
         </div>
     </div>

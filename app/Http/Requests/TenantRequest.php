@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Rules\Domain;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Stancl\Tenancy\Database\Models\Domain as DomainModel;
 
 class TenantRequest extends FormRequest
 {
@@ -36,7 +37,7 @@ class TenantRequest extends FormRequest
 
         $update = [
             'remarks' => 'sometimes|nullable|max:300',
-            'domain' => ['required', Rule::unique('domains', 'domain')->ignore($this->getRouteTenantIdParameter(), 'tenant_id'), new Domain],
+            'domain' => ['required', Rule::unique(DomainModel::class)->ignore($this->getRouteTenantIdParameter(), 'tenant_id'), new Domain],
         ];
 
         return $this->method() === 'POST' ? $store : $update;

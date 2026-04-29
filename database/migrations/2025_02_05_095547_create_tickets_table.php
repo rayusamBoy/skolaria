@@ -20,7 +20,6 @@ return new class extends Migration {
             $table->boolean('is_locked')->default(false);
             $table->boolean('is_archived')->default(false);
             $table->foreignId('category_id');
-            $table->string('labels_ids')->nullable();
             $table->unsignedBigInteger('assigned_to')->nullable();
             $table->timestamps();
         });

@@ -10,7 +10,7 @@
         <tr>
             <td><strong>RESULT SHEET FOR</strong> {!! strtoupper(Mk::getSuffix($ex->term)) !!} TERM</td>
             <td><strong>EXAM:</strong> {{ strtoupper($exr->exam->name) }} ({{ $ex->year }})</td>
-            <td><strong>AGE:</strong> {{ $sr->age ?: ($sr->user->dob ? date_diff(date_create($sr->user->dob), date_create('now'))->y . ' years' : '-') }}</td>
+            <td><strong>AGE:</strong> {{ $sr->age ?: ($sr->user->dob ? date_diff(date_create($sr->user->dob), date_create('now'))->y . ' years' : '—') }}</td>
         </tr>
     </tbody>
 </table>
@@ -33,10 +33,10 @@
         <tr>
             <td style="font-weight: bold">{{ $sub->name }}</td>
             @foreach($subject_marks as $mk)
-            <td>{{ $mk->$tex ?: '-'}}</td>
-            <td>{{ $mk->grade ? $mk->grade->name : '-' }}</td>
-            <td>{!! $mk->grade ? Mk::getSuffix($mk->sub_pos) : '-' !!}</td>
-            <td>{{ $mk->grade ? $mk->grade->remark : '-' }}</td>
+            <td>{{ $mk->$tex ?: '—'}}</td>
+            <td>{{ $mk->grade ? $mk->grade->name : '—' }}</td>
+            <td>{!! $mk->grade ? Mk::getSuffix($mk->sub_pos) : '—' !!}</td>
+            <td>{{ $mk->grade ? $mk->grade->remark : '—' }}</td>
             @endforeach
         </tr>
         @endif

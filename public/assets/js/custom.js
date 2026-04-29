@@ -13,29 +13,34 @@ $.ajaxSetup({
 
 /**
  *-------------------------------------------------------------
- * Initialize the float head plugin
+ * Initialize float thead plugin for tables with class "float-head"
  *-------------------------------------------------------------
  */
-$(() => $("table.float-head").floatThead());
+$(() => {
+    const $floatHeads = $("table.float-head");
 
-$("table.float-head").on(
-    "floatThead",
-    function (e, isFloated, $floatContainer) {
-        $("table tr.hide").toggle(!isFloated);
-    },
-);
+    $floatHeads.floatThead();
+
+    const observer = new ResizeObserver(() => {
+        $floatHeads.floatThead("reflow");
+    });
+
+    $floatHeads.each(function () {
+        observer.observe(this);
+    });
+});
 
 /**
  *-------------------------------------------------------------
  * Block UI method
  *-------------------------------------------------------------
  */
-const blockUI = (message = "Please wait...", textColor = "orange") =>
+const blockUI = () =>
     $.blockUI({
-        message: `<i class="mr-1 m-auto material-symbols-rounded spinner">progress_activity</i> <span class="align-middle">${message}</span>`,
+        message: `<i class="mr-1 m-auto material-symbols-rounded spinner">progress_activity</i> <span class="align-middle">please wait...</span>`,
         css: {
-            padding: "3px",
-            color: textColor,
+            padding: "3px 3px 8px 3px",
+            color: "var(--warning)",
             backgroundColor: "rgba(189, 189, 189, 0.05)",
             border: "none",
         },
@@ -49,6 +54,13 @@ const blockUI = (message = "Please wait...", textColor = "orange") =>
 const unblockUI = () => $.unblockUI();
 
 $(window).on("load", unblockUI);
+
+/**
+ *-------------------------------------------------------------
+ * Block and Unblock the UI for all ajax requests
+ *-------------------------------------------------------------
+ */
+$(document).ajaxStart(blockUI).ajaxStop(unblockUI);
 
 /**
  *-------------------------------------------------------------
@@ -101,20 +113,17 @@ $(document).ready(() => {
             .get()
             .flat(); // merge all permissions into one array
 
-        // Check if root role
-        const optionIsRootRole =
-            $selectedOptions.is('[data-all="true"]') ||
-            $selectedOptions.is('[data-all="1"]');
+        // If roles is parent (the one that includes permission with word 'children')
+        if (optionPermissions.some((p) => p.includes("children"))) {
+            // If is the only one selected
+            if ($selectedOptions.length === 1) {
+                $lastTab.hide();
+                $navigationBtns.hide();
+                $stepsLineSeparator.addClass("d-li-current-none");
+                $submitBtn.show();
+            }
 
-        if (
-            optionPermissions.some((p) => p.includes("children")) &&
-            !optionIsRootRole
-        ) {
-            $lastTab.hide();
             $parentData.show("150");
-            $navigationBtns.hide();
-            $submitBtn.show();
-            $stepsLineSeparator.addClass("d-li-current-none");
             $parentDataInputs.prop("disabled", false);
         } else {
             $lastTab.show();
@@ -419,9 +428,9 @@ const toggleElementDisabledState = (value, targetEl) => {
  * Validate students selection when creating or sending msgs
  *-------------------------------------------------------------
  */
-$(document).on("change", "select#user_types-ids", function () {
-    const activeStudents = 0;
-    const gradStudents = 1;
+$(document).on("change", "select#user_roles-ids", function () {
+    const activeStudents = "students_active";
+    const gradStudents = "students_graduated";
     const allStudents = "students";
     const values = $(this).val();
     let count = 0;
@@ -432,9 +441,9 @@ $(document).on("change", "select#user_types-ids", function () {
     });
 
     if (count > 1) {
-        $("#user_types-ids").val("").trigger("change");
+        $("#user_roles-ids").val("").trigger("change");
         pop({
-            msg: "Please, select only one option under students user type group.",
+            msg: "Please, select only one option under students user role group.",
             type: "info",
         });
     }
@@ -607,32 +616,33 @@ $(function () {
  *-------------------------------------------------------------
  */
 $(document).on("change", "select#class-type", function () {
+    const $numberFormatsDiv = $(".number-formats");
     const value = this.value;
-    $(".number-formats div").removeClass("d-flex").addClass("d-none");
-    $(`.number-format-${value}`).removeClass("d-none").addClass("d-flex");
+    $numberFormatsDiv.find(".text-info").hide();
+    $numberFormatsDiv.find(".div").removeClass("d-flex").addClass("d-none");
+    $numberFormatsDiv
+        .find(`.number-format-${value}`)
+        .removeClass("d-none")
+        .addClass("d-flex");
 });
 
 /**
  *-------------------------------------------------------------
- * Handle CA displaying on exam category change
+ * Handle Exam CA fields displaying
  *-------------------------------------------------------------
  */
-$(document).on("change", "select#category", function () {
-    const value = this.value;
-    const ids = $(this).data("summative_exm_cat_ids");
-    if (ids) {
-        const hasId = Object.values(ids).includes(parseInt(value, 10));
-        if (hasId)
-            $(".ca-setup")
-                .show(150)
-                .find("input[type='number']")
-                .attr("required", "required");
-        else
-            $(".ca-setup")
-                .hide(150)
-                .find("input[type='number']")
-                .removeAttr("required");
-    }
+$(document).on("change", "select#has_assessment", function () {
+    const value = parseInt(this.value, 10);
+    if (typeof value != undefined && value === 1)
+        $(".ca-setup")
+            .show(150)
+            .find("input[type='number']")
+            .attr("required", "required");
+    else
+        $(".ca-setup")
+            .hide(150)
+            .find("input[type='number']")
+            .removeAttr("required");
 });
 
 /**
@@ -728,7 +738,6 @@ $(document).on("click", ".refresh", function (e) {
  *-------------------------------------------------------------
  */
 (function ($) {
-    "use strict";
     const date = new Date();
     const today = date.getDate();
     const months = [
@@ -1751,32 +1760,6 @@ function rollbackUpdateExamLockAction(el) {
     reverseCheckBoxAction(el);
 }
 
-function updateExamEditState(exam_id, el) {
-    if (sessionStorage.getItem("update-exam-edit-ok") !== "false") {
-        const url = update_exam_edit_state_url;
-        const value = el.checked ? 1 : 0;
-        $.ajax({
-            method: "post",
-            data: { id: exam_id, editable: value },
-            url,
-            success: (resp) => {
-                if (!resp.ok) {
-                    if (resp.msg) sessionStorage.setItem("resp.msg", resp.msg);
-                    return rollbackUpdateExamEditAction(el);
-                }
-            },
-            error: () => rollbackUpdateExamEditAction(el),
-        });
-    } else {
-        removeItemFromSessionStorageAndFlashErrMsg("update-exam-edit-ok");
-    }
-}
-
-function rollbackUpdateExamEditAction(el) {
-    sessionStorage.setItem("update-exam-edit-ok", "false");
-    reverseCheckBoxAction(el);
-}
-
 function updateStaffDataEdtiState(user_id, el) {
     if (sessionStorage.getItem("update-staff-data-edit-ok") !== "false") {
         const url = toggle_staff_data_editing_url;
@@ -2098,18 +2081,9 @@ function clearForm($form) {
     $form[0].reset();
 }
 
-$(".print-this")
-    .addClass("position-relative")
-    .append(
-        '<button class="position-absolute btn btn-sm pb-1 pt-1 right-0 bottom-0 print-none this" type="button">Print</button>',
-    );
-$(".print-this button.this").on("click", function () {
+$(".print-this-btn").on("click", function () {
     const $parent = $(this).closest(".print-this");
-    if (
-        getPreferredTheme() === "dark" ||
-        (getPreferredTheme() === "auto" &&
-            window.matchMedia("(prefers-color-scheme: dark)").matches)
-    ) {
+    if (getResolvedTheme(getPreferredTheme()) === colorThemes[2]) {
         Modal.fire({
             text: "Please, print while in light color mode for best visual quality.",
             icon: "warning",
@@ -2130,11 +2104,11 @@ $(".print-this button.this").on("click", function () {
 });
 
 function printElement($element) {
-    blockUI("Preparing Print...");
-    if ($element.hasClass("card-collapsed"))
-        $element.removeClass("card-collapsed");
     $element.printThis({
         base: "https://jasonday.github.io/printThis/",
+        beforePrint: function () {
+            blockUI();
+        },
         afterPrint: function () {
             unblockUI();
         },
@@ -2226,6 +2200,7 @@ document.addEventListener("DOMContentLoaded", function () {
             type: "doughnut",
             data: { labels: labels, datasets: [{ data: data }] },
             options: {
+                animation: false,
                 responsive: true,
                 plugins: {
                     legend: { position: "bottom" },
@@ -2258,6 +2233,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 ],
             },
             options: {
+                animation: false,
                 responsive: true,
                 plugins: {
                     legend: { display: false },
@@ -2276,6 +2252,7 @@ document.addEventListener("DOMContentLoaded", function () {
             data: { labels: labels, datasets: [{ data: data }] },
             options: Object.assign(
                 {
+                    animation: false,
                     responsive: true,
                     plugins: { legend: { display: false }, tooltip: {} },
                     scales: { y: { beginAtZero: true } },
@@ -2335,18 +2312,26 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 });
 
+/**
+ *-------------------------------------------------------------
+ * Handle user optional additional permissions selection
+ * Applies to both central and tenant users - index and edit pages
+ *-------------------------------------------------------------
+ */
 $(function () {
     const $roles = $("#roles");
     const $perms = $("#permissions");
+    const usingSelect2 = $perms.hasClass("select");
 
-    const usingSelect2 = !!$perms.hasClass("select");
+    let originalPermOptions = [];
 
-    // All permission names (from Blade)
-    const allPerms = new Set(window.ALL_PERMISSIONS || []);
+    // Capture the initial options from the DOM
+    $perms.find("option").each(function () {
+        originalPermOptions.push($(this).clone()[0]);
+    });
 
-    // Map roleName -> array of permission names
+    // Role data maps
     const rolePermMap = {};
-    // Map roleName -> boolean (grants all)
     const roleAllMap = {};
     $roles.find("option").each(function () {
         const $opt = $(this);
@@ -2362,123 +2347,128 @@ $(function () {
             $opt.attr("data-all") === "1" || $opt.attr("data-all") === "true";
     });
 
-    // track manual selections (permissions the user explicitly chose)
+    // Track manually selected permissions (names)
     let manualSelected = new Set();
-
-    // backup of manualSelected while a root role is active (to restore after)
     let manualBackup = null;
     let hadRootBefore = false;
 
-    // compute union of permissions granted by selected roles.
-    // returns { set: Set<string>, grantsAll: boolean }
+    // Compute permissions forced by selected roles
     function getRoleGrantedPermissions() {
         const selectedRoles = $roles.val() || [];
-        const union = new Set();
+        const granted = new Set();
         let grantsAll = false;
+
         selectedRoles.forEach((role) => {
             if (roleAllMap[role]) {
                 grantsAll = true;
             } else {
-                (rolePermMap[role] || []).forEach((p) => union.add(p));
+                (rolePermMap[role] || []).forEach((p) => granted.add(p));
             }
         });
+
         if (grantsAll) {
-            // include all permissions
-            allPerms.forEach((p) => union.add(p));
+            // If any root role is selected, all permissions are granted
+            originalPermOptions.forEach((opt) => granted.add(opt.value));
         }
-        return { set: union, grantsAll };
+        return { granted, grantsAll };
     }
 
-    function refreshPermissionsUI() {
-        const { set: roleGranted, grantsAll } = getRoleGrantedPermissions();
+    // Rebuild the select options: show only permissions NOT granted by roles
+    function rebuildSelectOptions() {
+        const { granted } = getRoleGrantedPermissions();
 
-        $perms.find("option").each(function () {
-            const $opt = $(this);
-            const permName = $opt.val();
+        // Filter original options to those whose value is NOT in granted set
+        const availableOptions = originalPermOptions.filter(
+            (opt) => !granted.has(opt.value),
+        );
 
-            if (roleGranted.has(permName)) {
-                // forced: selected + disabled
+        // Clear current select
+        $perms.empty();
+
+        if (availableOptions.length === 0) {
+            // No optional permissions left
+            $perms.prop("disabled", true);
+            if (usingSelect2) $perms.trigger("change.select2");
+            return;
+        }
+
+        $perms.prop("disabled", false);
+
+        // Append the filtered options
+        availableOptions.forEach((opt) => {
+            const $opt = $(opt).clone();
+            // Preserve manual selection state
+            if (manualSelected.has(opt.value)) {
                 $opt.prop("selected", true);
-                $opt.prop("disabled", true);
-                $opt.attr("aria-disabled", "true");
-            } else {
-                // not forced by roles
-                $opt.prop("disabled", false);
-                $opt.removeAttr("aria-disabled");
-
-                // selected if user manually selected it
-                $opt.prop("selected", manualSelected.has(permName));
             }
+            $perms.append($opt);
         });
 
-        // refresh select2 or native select visuals
+        // Refresh Select2
         if (usingSelect2) {
-            $perms.trigger("change.select2"); // refresh
-        } else {
-            $perms.trigger("change");
+            $perms.trigger("change.select2");
         }
     }
 
-    // initialize manualSelected from current selected permissions that are not role-granted
-    function initManualSelected() {
-        manualSelected.clear();
-        const { set: roleGranted } = getRoleGrantedPermissions();
-        ($perms.val() || []).forEach((p) => {
-            if (!roleGranted.has(p)) manualSelected.add(p);
-        });
-    }
-
-    // When user changes permissions manually (only non-disabled options can change)
+    // Capture manual changes (user selects/deselects permissions)
     $perms.on("change", function () {
         const currentlySelected = new Set($perms.val() || []);
-        const { set: roleGranted, grantsAll } = getRoleGrantedPermissions();
+        const { granted } = getRoleGrantedPermissions();
 
-        // Recompute manualSelected = currentlySelected minus roleGranted
         manualSelected.clear();
         currentlySelected.forEach((p) => {
-            if (!roleGranted.has(p)) manualSelected.add(p);
+            if (!granted.has(p)) manualSelected.add(p);
         });
-
-        // no full UI refresh required here, but keep states consistent
-        refreshPermissionsUI();
+        // No rebuild needed here – the user changed selections manually
     });
 
-    // When roles change: handle root roles specially and refresh UI
+    // When roles change, update the permission dropdown
     $roles.on("change", function () {
-        const { set: roleGranted, grantsAll } = getRoleGrantedPermissions();
+        const { granted, grantsAll } = getRoleGrantedPermissions();
 
-        // If a root role is now selected and wasn't before, backup manual selections
+        // Handle root role activation/deactivation
         if (grantsAll && !hadRootBefore) {
-            manualBackup = new Set(manualSelected); // save user's manual choices
-            manualSelected.clear(); // forced all, so manual selection is irrelevant while root active
-        }
-
-        // If root role(s) were present before and now none, restore manual selections
-        if (!grantsAll && hadRootBefore) {
+            manualBackup = new Set(manualSelected);
+            manualSelected.clear();
+        } else if (!grantsAll && hadRootBefore) {
             if (manualBackup) {
-                // reapply backup (but still remove permissions that other selected roles force)
                 manualSelected = new Set(manualBackup);
                 manualBackup = null;
             }
         }
 
-        // Remove manualSelected entries that are now role-granted (they become forced)
+        // Remove any manual selections that are now granted by roles
         [...manualSelected].forEach((p) => {
-            if (roleGranted.has(p)) manualSelected.delete(p);
+            if (granted.has(p)) manualSelected.delete(p);
         });
 
         hadRootBefore = grantsAll;
-        refreshPermissionsUI();
+
+        // Rebuild the select (only non-granted permissions)
+        rebuildSelectOptions();
+
+        // Restore manual selections in the new options
+        $perms.val([...manualSelected]);
+        if (usingSelect2) $perms.trigger("change.select2");
     });
 
-    // Initial setup
-    initManualSelected();
-    refreshPermissionsUI();
+    // Initial setup: capture initial selected values
+    const initialSelected = $perms.val() || [];
+    const { granted } = getRoleGrantedPermissions();
+    manualSelected = new Set(initialSelected.filter((p) => !granted.has(p)));
+    rebuildSelectOptions();
+    $perms.val([...manualSelected]);
+    if (usingSelect2) $perms.trigger("change.select2");
 });
 
-const messageTicketEditor = document.getElementById("message-ticket-editor");
-if (messageTicketEditor) {
-    const [overType] = new OverType("#message-ticket-editor", {
+/**
+ *-------------------------------------------------------------
+ * Initialize overType markdown editors
+ *-------------------------------------------------------------
+ */
+const overtypeEditors = document.getElementsByClassName("overtype-editor");
+if (overtypeEditors.length > 0) {
+    OverType.initFromData(".overtype-editor", {
         placeholder: "Your message...",
         value: "",
         autoResize: true,
@@ -2486,10 +2476,8 @@ if (messageTicketEditor) {
             required: true,
             name: "message",
         },
-        showStats: true,
+        theme: getOvertypeTheme(),
         fontSize: "1rem",
-        theme: getOvertypeTheme() ?? "solar",
-        toolbar: true,
     });
 }
 
@@ -2502,3 +2490,65 @@ $(".deselect-all-group").click(function () {
     var group = $(this).data("group");
     $('input[data-group="' + group + '"]').prop("checked", false);
 });
+
+/**
+ *-------------------------------------------------------------
+ * Handle students block/unblock
+ *-------------------------------------------------------------
+ */
+$(document).on(
+    "click",
+    "#students-block-all-active, #students-block-all-grad",
+    function () {
+        confirmRequest($(this), "block");
+    },
+);
+$(document).on(
+    "click",
+    "#students-unblock-all-active, #students-unblock-all-grad",
+    function () {
+        confirmRequest($(this), "unblock");
+    },
+);
+
+function confirmRequest($this, type) {
+    const text =
+        type === "block"
+            ? "This will block students from accessing the system"
+            : "This will allow students to access the system";
+    Swal.fire({
+        title: "Are you sure?",
+        text,
+        showCancelButton: true,
+        reverseButtons: true,
+        cancelButtonText: "No, cancel",
+    }).then((res) => {
+        if (res.isConfirmed) ajaxProcessRequest($this, type);
+    });
+}
+
+function ajaxProcessRequest($this, type) {
+    let url = $this.attr("url");
+    let class_id = $this.val();
+
+    $.post(
+        url,
+        {
+            class_id,
+        },
+        (resp) => {
+            if (type === "block") {
+                $("label.form-switch input").attr("checked", "checked");
+            } else {
+                $("label.form-switch input").removeAttr("checked");
+            }
+            $this.prop("disabled", true);
+            $this.siblings("button").prop("disabled", false);
+
+            flash({
+                msg: resp.msg,
+                type: "success",
+            });
+        },
+    );
+}

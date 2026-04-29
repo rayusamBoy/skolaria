@@ -15,7 +15,7 @@ return new class extends Migration
             $table->increments('id');
             $table->string('name');
             $table->string('code')->unique();
-            $table->integer('subjects_considered');
+            $table->integer('minimum_subjects_required');
             $table->timestamps();
         });
     }

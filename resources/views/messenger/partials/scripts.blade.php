@@ -352,21 +352,4 @@
         return dotClasses[Math.floor(Math.random() * dotClasses.length)];
     }
 
-    /**
-     *-------------------------------------------------------------
-     * Initialize overtype markdown 
-     *-------------------------------------------------------------
-     */
-    const [overType] = new OverType('#message', {
-        placeholder: 'Type to add a message...',
-        value: '',
-        autoResize: true,
-        textareaProps: {
-            required: true,
-            name: 'message',
-        },
-        fontSize: '1rem',
-        theme: getOvertypeTheme() ?? 'solar',
-    });
-
 </script>

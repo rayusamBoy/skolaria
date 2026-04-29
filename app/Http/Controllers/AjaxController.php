@@ -11,90 +11,135 @@ use App\Repositories\StudentRepo;
 
 class AjaxController extends Controller
 {
-    protected $loc, $my_class, $student, $exam;
+    protected LocationRepo $loc;
+    protected MyClassRepo $my_class;
+    protected StudentRepo $student;
+    protected ExamRepo $exam;
 
-    public function __construct(LocationRepo $loc, MyClassRepo $my_class, StudentRepo $student, ExamRepo $exam)
-    {
+    public function __construct(
+        LocationRepo $loc,
+        MyClassRepo $my_class,
+        StudentRepo $student,
+        ExamRepo $exam
+    ) {
         $this->loc = $loc;
         $this->student = $student;
         $this->my_class = $my_class;
         $this->exam = $exam;
     }
 
-    public function get_table_columns($table_name)
+    /**
+     * Get columns of a given database table.
+     */
+    public function get_table_columns($table_name): array
     {
-        $columns = Qs::getTableCols($table_name);
-
-        return $columns;
+        return Qs::getTableCols($table_name);
     }
 
-    public function get_state($nal_id)
+    /**
+     * Get states by nationality ID.
+     */
+    public function get_state($nal_id): array
     {
         $lgas = $this->loc->getStateByNationalityID($nal_id);
 
-        return $lgas->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->all();
+        return $lgas->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
     }
 
-    public function get_lga($state_id)
+    /**
+     * Get LGAs by state ID.
+     */
+    public function get_lga($state_id): array
     {
         $lgas = $this->loc->getLGAs($state_id);
 
-        return $lgas->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->all();
+        return $lgas->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
     }
 
-    public function get_class_sections($class_id)
+    /**
+     * Get sections of a class.
+     */
+    public function get_class_sections($class_id): array
     {
         $sections = $this->my_class->getClassSections($class_id);
 
-        return $sections->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->all();
+        return $sections->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
     }
 
-    public function get_class_students($class_id)
+    /**
+     * Get students of a class.
+     */
+    public function get_class_students($class_id): array
     {
-        $students = $this->student->getRecord(['my_class_id' => $class_id])->get()->whereNotNull('user');
+        $students = $this->student->whereRecord(['my_class_id' => $class_id])->get()->whereNotNull('user');
 
-        return $students->map(fn($q) => ['id' => $q->user->id, 'name' => $q->user->name])->all();
+        return $students->map(fn($q) => ['id' => $q->user->id, 'name' => $q->user->name])->values()->all();
     }
 
-    public function get_pre_defined_subjects()
+    /**
+     * Get predefined subjects list.
+     */
+    public function get_pre_defined_subjects(): array
     {
-        $subjects = Usr::getPredefinedSubjects();
-
-        return $subjects;
+        return Usr::getPredefinedSubjects();
     }
 
-    public function get_teacher_class_sections($class_id)
+    /**
+     * Get class sections taught by the authenticated teacher.
+     */
+    public function get_teacher_class_sections($class_id): array
     {
         $sections = $this->my_class->getTeacherClassSections($class_id, auth()->id());
 
-        return $sections->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->all();
+        return $sections->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
     }
 
-    public function get_year_exams($year)
+    /**
+     * Get exams for a given year.
+     */
+    public function get_year_exams($year): array
     {
         $exams = $this->exam->getExam(['year' => $year], false);
 
-        return $exams->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->all();
+        return $exams->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
     }
 
-    public function get_subject_section_teacher($subject_id, $section_id)
+    /**
+     * Get teacher assigned to a subject and section.
+     */
+    public function get_subject_section_teacher($subject_id, $section_id): array
     {
-        $rec = $this->my_class->whereSubjectRecord(['subject_id' => $subject_id, 'section_id' => $section_id])->with('teacher')->get()->first();
+        $record = $this->my_class->whereSubjectRecord(['subject_id' => $subject_id, 'section_id' => $section_id])->with('teacher')->first();
 
-        return ['id' => Qs::hash($rec->teacher_id), 'name' => $rec->teacher->name];
+        if (!$record || !$record->teacher) {
+            return ['id' => null, 'name' => null];
+        }
+
+        return [
+            'id' => Qs::hash($record->teacher_id),
+            'name' => $record->teacher->name,
+        ];
     }
 
-    public function get_class_subjects($class_id)
+    /**
+     * Get subjects for a class, filtered by teacher role if applicable.
+     */
+    public function get_class_subjects($class_id): array
     {
         $session_key = 'route_is.subject_records.index';
-        $session_has_the_session_key = session()->has($session_key);\Log::debug('...' . $session_has_the_session_key);
-        $subjects = auth()->user()->hasRole(config('roles.default_roles.tenant.teacher')) && $session_has_the_session_key
+        $has_session_flag = session()->has($session_key);
+
+        $subjects = auth()->user()->hasRole(config('roles.default_roles.tenant.teacher')) && $has_session_flag
             ? $this->my_class->findSubjectByRecord(auth()->id(), $class_id)
             : $this->my_class->findSubjectByClass($class_id);
 
-        if ($session_has_the_session_key)
+        if ($has_session_flag) {
             session()->forget($session_key);
+        }
 
-        return $subjects->map(fn($q) => ['id' => $q->id ?? $q->subject->id, 'name' => $q->name ?? $q->subject->name])->all();
+        return $subjects->map(fn($q) => [
+            'id' => $q->id ?? $q->subject->id ?? null,
+            'name' => $q->name ?? $q->subject->name ?? null,
+        ])->values()->all();
     }
 }

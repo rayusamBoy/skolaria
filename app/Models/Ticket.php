@@ -18,11 +18,15 @@ class Ticket extends Model
         'department',
         'priority',
         'subject',
-        'labels_id',
         'category_id',
         'is_archived',
         'is_locked',
         'status',
+    ];
+
+    protected $casts = [
+        'is_archived' => 'boolean',
+        'is_locked' => 'boolean',
     ];
 
     /**
@@ -46,7 +50,7 @@ class Ticket extends Model
      */
     public function messages()
     {
-        return $this->hasMany(Message::class, 'ticket_id');
+        return $this->hasMany(Message::class, 'ticket_id')->connection;
     }
 
     /**
@@ -62,7 +66,14 @@ class Ticket extends Model
      */
     public function labels()
     {
-        return $this->belongsToMany(TicketLabel::class, 'label_ticket', 'ticket_id', 'label_id');
+        $this->hasManyThrough(
+            TicketLabel::class,
+            TicketHasLabel::class,
+            'ticket_id',
+            'id',
+            'id',
+            'ticket_label_id'
+        );
     }
 
     public function is_closed()

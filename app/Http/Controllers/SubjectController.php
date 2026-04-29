@@ -34,7 +34,7 @@ class SubjectController extends Controller
     public function index_record()
     {
         $d['teachers'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.teacher')]);
-        $d['subjects'] = $this->my_class->getAllSubjects();
+        $d['subjects'] = $this->my_class->getAllSubjects(['my_class', 'record', 'record.section', 'record.teacher']);
 
         return view('pages.subjects.records.index', $d);
     }
@@ -102,16 +102,21 @@ class SubjectController extends Controller
         return Mk::jsonUpdateOk();
     }
 
-    public function destroy($sub_id)
+    public function destroy($subject)
     {
-        $this->my_class->deleteSubject($sub_id);
+        $subject_has_records = $this->my_class->whereSubject(['id' => $subject])->with('record')->exists();
+        if ($subject_has_records) {
+            return back()->with('flash_warning', __('msg.subject_in_use'));
+        }
+
+        $this->my_class->deleteSubject($subject);
 
         return back()->with('flash_success', __('msg.del_ok'));
     }
 
-    public function delete_record($id)
+    public function delete_record($record)
     {
-        $this->my_class->deleteSubjectRecord(['id' => $id]); // Delete subject record
+        $this->my_class->deleteSubjectRecord(['id' => $record]); // Delete subject record
 
         return back()->with('flash_success', __('msg.del_ok'));
     }

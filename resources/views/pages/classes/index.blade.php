@@ -25,7 +25,7 @@
 
         <div class="tab-content">
             <div class="tab-pane fade show active" id="all-classes">
-                <table class="table datatable-button-html5-columns">
+                <table class="table datatable-button-html5-columns" id="manage-classes-table">
                     <thead>
                         <tr>
                             <th>S/N</th>
@@ -86,7 +86,7 @@
 
                 <div class="row">
                     <div class="col-md-6">
-                        <form class="ajax-store" method="post" action="{{ route('classes.store') }}">
+                        <form class="ajax-store" method="post" action="{{ route('classes.store') }}" data-reload="#manage-classes-table">
                             @csrf
                             <div class="form-group row">
                                 <label class="col-lg-3 col-form-label font-weight-semibold">Name <span class="text-danger">*</span></label>

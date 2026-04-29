@@ -1,17 +1,17 @@
 @extends('layouts.master')
 
-@section('page_title', 'Edit User')
+@section('page_title', "Edit User - {$user->name}")
 
 @section('content')
 
 <div class="card">
     <div class="card-header header-elements-inline">
-        <h6 id="ajax-title" class="card-title">Edit User Details - {{ $user->name }}</h6>
+        <h6 class="card-title">Edit User Details</h6>
         {!! Qs::getPanelOptions() !!}
     </div>
 
     <div class="card-body">
-        <form method="post" enctype="multipart/form-data" class="wizard-form steps-validation ajax-update" data-reload="#ajax-title" action="{{ route('users.update', Qs::hash($user->id)) }}" data-fouc>
+        <form method="post" enctype="multipart/form-data" class="wizard-form steps-validation ajax-update" data-reload="#page-title" action="{{ route('users.update', Qs::hash($user->id)) }}">
             @csrf @method('PUT')
             <h6>Personal Data</h6>
 
@@ -47,10 +47,10 @@
                     <div class="col-12">
                         {{-- PERMISSIONS --}}
                         <div class="form-group">
-                            <label for="permissions">Select Permission(s) (Optional):</label>
+                            <label for="permissions">Additional Permissions (Optional):</label>
                             <select class="form-control select" multiple="multiple" placeholder="Select Permission(s)" name="permissions[]" id="permissions">
                                 @foreach ($permissions as $perm)
-                                <option value="{{ $perm->name }}">{{ $perm->name }}</option>
+                                <option @selected($user->can($perm->name)) value="{{ $perm->name }}" title="{{ $perm->description ?? $perm->label ?? $perm->name }}">{{ $perm->label ?? $perm->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -82,7 +82,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="bg_id">Blood Group: </label>
-                            <select class="select form-control" id="bg_id" name="bg_id" data-fouc data-placeholder="Choose..">
+                            <select class="select form-control" id="bg_id" name="bg_id" data-placeholder="Choose..">
                                 <option value=""></option>
                                 @foreach($blood_groups as $bg)
                                 <option @selected($user->bg_id == $bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
@@ -97,7 +97,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="gender">Gender: <span class="text-danger">*</span></label>
-                            <select class="select form-control" id="gender" name="gender" required data-fouc data-placeholder="Choose..">
+                            <select class="select form-control" id="gender" name="gender" required data-placeholder="Choose..">
                                 <option value=""></option>
                                 @foreach (Usr::getGenders() as $gender)
                                 <option @selected($user->gender == $gender) value="{{ $gender }}">{{ ucfirst($gender) }}</option>
@@ -174,7 +174,7 @@
                 </div>
 
                 @php $p_relative = Qs::getParentRelative($user->id) @endphp
-                <div id="parent-data" @class($user->hasRole(config('roles.default_roles.tenant.parent')) ? '' : 'display-none')>
+                <div id="parent-data" @class($user->hasRole(config('roles.default_roles.tenant.parent')) ? [] : ['display-none'])>
                     <div class="row">
                         {{-- CLOSE RELATIVE NAME --}}
                         <div class="col-md-6">
@@ -221,7 +221,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="photo" class="d-block">Upload Passport Photo:</label>
-                            <input value="{{ old('photo') }}" accept="image/*" type="file" id="photo" name="photo" class="form-input-styled" data-fouc>
+                            <input value="{{ old('photo') }}" accept="image/*" type="file" id="photo" name="photo" class="form-input-styled">
                             <span class="form-text text-muted">Accepted Images: jpeg, png. Max file size 2Mb</span>
                         </div>
                     </div>
@@ -304,7 +304,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="education_level">Education Level: </label>
-                            <select class="select-search form-control" id="education_level" name="education_level" data-fouc data-placeholder="Choose..">
+                            <select class="select-search form-control" id="education_level" name="education_level" data-placeholder="Choose..">
                                 <option value=""></option>
                                 @foreach(Usr::getEducationLevels() as $lv)
                                 <option @selected(isset($staff_rec->education_level) && $staff_rec->education_level == $lv) value="{{ $lv }}">{{ $lv }}</option>
@@ -336,7 +336,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="role">Role: </label>
-                            <select class="select form-control" id="role" name="role" data-fouc data-placeholder="Choose..">
+                            <select class="select form-control" id="role" name="role" data-placeholder="Choose..">
                                 <option value=""></option>
                                 @foreach(Usr::getStaffRoles() as $role)
                                 <option @selected(isset($staff_rec->role) && $staff_rec->role == $role) value="{{ $role }}">{{ $role }}</option>
@@ -385,7 +385,7 @@
 @if($user->hasRole(config('roles.default_roles.tenant.parent')))
 <script>
     $(document).ready(function() {
-        // Trigger element change so that the listener can user role change.
+        // Trigger element change so that the listener can process user role change.
         $("select#roles").trigger('change');
     })
 

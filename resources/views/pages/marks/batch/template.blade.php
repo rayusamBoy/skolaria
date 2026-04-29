@@ -26,7 +26,7 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="my_class_id" class="col-form-label font-weight-bold">Class: <span class="text-danger">*</span></label>
-                                    <select required data-placeholder="Select Class" onchange="getClassSections(this.value)" id="my_class_id" name="my_class_id" class="form-control select">
+                                    <select required data-placeholder="Select Class" id="my_class_id" name="my_class_id" class="form-control select">
                                         <option selected disabled value="">Select Class</option>
                                         @foreach($my_classes as $c)
                                         <option value="{{ $c->id }}">{{ $c->name }}</option>
@@ -36,7 +36,7 @@
                             </div>
 
                             <div class="col-md-3">
-                                <label for="delete-old-section-exam-recs" class="col-form-label font-weight-semibold">Delete old section record</label>
+                                <label for="delete-old-section-exam-recs" class="col-form-label font-weight-semibold">Delete old student section record</label>
                                 <div class="form-group text-center">
                                     <select class="form-control select" name="delete_old_section_record" id="delete-old-section-exam-recs">
                                         <option value="1">Yes</option>

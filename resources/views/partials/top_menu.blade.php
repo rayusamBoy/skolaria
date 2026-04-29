@@ -120,7 +120,7 @@
                     {{-- Account Security --}}
                     <a href="{{ route('account_security.index') }}" class="dropdown-item {{ request()->routeIs('account_security.index') ? 'active' : '' }}"><i class="material-symbols-rounded">passkey</i> Account Security</a>
                     {{-- Accessibilty --}}
-                    <a href="javascript:;" class="dropdown-item"><i class="material-symbols-rounded">accessibility_new</i> Accessibility</a>
+                    {{-- <a href="javascript:;" class="dropdown-item"><i class="material-symbols-rounded">accessibility_new</i> Accessibility</a> --}}
                     {{-- Logout --}}
                     <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="dropdown-item text-warning">
                         <i class="material-symbols-rounded">logout</i>Logout

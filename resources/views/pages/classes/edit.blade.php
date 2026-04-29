@@ -25,7 +25,8 @@
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label font-weight-semibold">Class Type</label>
                         <div class="col-lg-9">
-                            <input class="form-control" disabled="disabled" value="{{ $c->class_type->name }}" title="Class Type" type="text">
+                            <input class="form-control" disabled value="{{ $c->class_type->name }}" title="Class Type" type="text">
+                            <input value="{{ $c->class_type_id }}" name="class_type_id" type="hidden">
                         </div>
                     </div>
 

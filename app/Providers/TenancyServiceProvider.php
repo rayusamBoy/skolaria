@@ -51,9 +51,6 @@ class TenancyServiceProvider extends ServiceProvider
                     // Your own jobs to prepare the tenant.
                     // Provision API keys, create S3 buckets, anything you want!
                 ])->send(function (Events\TenantCreated $event) {
-                    // Let the id be accessed in TenantController.
-                    // Cannot initialize there since the variable never initilized in try block incase an exception occurs
-                    session()->put("created_tenant_id", $event->tenant->id);
                     return $event->tenant;
                 })->shouldBeQueued(false),
 

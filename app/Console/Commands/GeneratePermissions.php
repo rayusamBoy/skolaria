@@ -74,7 +74,6 @@ class GeneratePermissions extends Command
             $filepath = $file->getRealPath();
             $skipByPath = false;
             foreach ($ignorePaths as $pat) {
-                \Log::debug("Checking ignore path pattern: {$pat} against file: {$filepath}");
                 if (str_starts_with($pat, '/') && str_ends_with($pat, '/')) {
                     if (@preg_match($pat, $filepath)) {
                         $skipByPath = true;

@@ -12,25 +12,41 @@ class DecodeRouteParamsMiddleware
     /**
      * List of route parameter names to decode.
      */
-    protected array $keysToDecode = ['payment', 'user', 'central_user', 'student', 'book', 'notice', 'tenant'];
+    protected const array KEYS_TO_DECODE = [
+        'payment',
+        'user',
+        'central_user',
+        'student',
+        'book',
+        'book_request',
+        'notice',
+        'tenant',
+    ];
 
     /**
      * Handle an incoming request.
-     * Decodes specified route parameters using Qs::decodeHash before the request is processed by the controller. 
-     * If decoding fails, it aborts with a 404 error.
      *
-     * @param  Closure(Request): (Response)  $next
+     * Decodes specified route parameters using Qs::decodeHash before the request
+     * is processed by the controller. If decoding fails, aborts with 404.
+     *
+     * @param  Request  $request
+     * @param  Closure(Request): Response  $next
+     * @return Response
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
-        $params = $request->route()->parameters();
-        foreach ($params as $key => $value) {
-            if (\in_array($key, $this->keysToDecode) && $value !== null) {
-                try {
-                    $request->route()->setParameter($key, Qs::decodeHash($value));
-                } catch (\Exception $e) {
-                    abort(404);
-                }
+        $route = $request->route();
+        $parameters = $route->parameters();
+
+        foreach (self::KEYS_TO_DECODE as $key) {
+            if (!\array_key_exists($key, $parameters) || $parameters[$key] === null) {
+                continue;
+            }
+
+            try {
+                $route->setParameter($key, Qs::decodeHash($parameters[$key]));
+            } catch (\Exception $e) {
+                abort(404);
             }
         }
 

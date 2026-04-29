@@ -29,7 +29,7 @@ $toClass = $my_classes->firstWhere('id', $tc);
 $toSection = $sections->firstWhere('id', $ts);
 @endphp
 
-<div class="card w-fit w-md-100">
+<div class="card w-fit wmin-100-pcnt">
     <div class="card-header header-elements-inline">
         <h6 class="card-title font-weight-bold">
             Promote Students From

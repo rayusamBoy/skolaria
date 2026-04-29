@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Eloquent\Model;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,5 +34,7 @@ class AppServiceProvider extends ServiceProvider
         Event::subscribe(TenantEventSubscriber::class);
         Paginator::useBootstrapFour();
         Gate::before(fn($user, string $ability) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()) ? true : null);
+
+        Model::preventLazyLoading(!app()->isProduction());
     }
 }

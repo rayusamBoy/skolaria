@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Qs;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Grade\GradeRequest;
+use App\Http\Requests\Grade\GradeCreate;
+use App\Http\Requests\Grade\GradeUpdate;
 use App\Repositories\ExamRepo;
 use App\Repositories\MyClassRepo;
 
@@ -27,28 +29,27 @@ class GradeController extends Controller
         return view('pages.grades.index', $d);
     }
 
-    public function store(GradeRequest $req)
+    public function store(GradeCreate $req)
     {
         $data = $req->all();
         $this->exam->createGrade($data);
 
-        return back()->with('flash_success', __('msg.store_ok'));
+        return Qs::jsonStoreOk();
     }
 
     public function edit($id)
     {
-        $d['class_types'] = $this->my_class->getTypes();
-        $d['gr'] = $this->exam->findGrade($id);
+        $d['gr'] = $this->exam->getGrade(['id' => $id], ['class_type'])->first();
 
         return view('pages.grades.edit', $d);
     }
 
-    public function update(GradeRequest $req, $id)
+    public function update(GradeUpdate $req, $id)
     {
         $data = $req->all();
         $this->exam->updateGrade($id, $data);
 
-        return back()->with('flash_success', __('msg.update_ok'));
+        return Qs::jsonUpdateOk();
     }
 
     public function destroy($id)

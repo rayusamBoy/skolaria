@@ -38,7 +38,7 @@
                         <label class="col-lg-3 col-form-label font-weight-semibold">Assign Permissions <span class="text-danger">*</span></label>
                         <div class="col-lg-9">
                             <div class="accordion" id="permissionsAccordion">
-                                @foreach($groupedPermissions as $group => $perms)
+                                @foreach($grouped_permissions as $group => $perms)
                                 <div class="card mb-2">
                                     <div class="card-header p-0" id="heading-{{ Str::slug($group) }}">
                                         <h2 class="mb-0">
@@ -122,7 +122,7 @@
                                             @endcan
                                             {{-- Delete --}}
                                             @if(!\in_array($role->name, Usr::getTenancyAwareDefaultRoles(), true) && auth()->user()->can($tenant_permissions['roles']['destroy']['permission']))
-                                            <a href="javascript:;" id="{{ $role->id }}" class="dropdown-item text-danger" onclick="confirmDelete(this.id)">
+                                            <a href="javascript:;" id="{{ $role->id }}" @class($role->users->isNotEmpty() ? ['dropdown-item text-danger disabled'] : ['dropdown-item text-danger']) @if($role->users->isEmpty()) onclick="confirmDelete(this.id)" @else data-toggle="tooltip" title="{{ __('msg.role_in_use') }}" @endif>
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
                                             <form method="POST" action="{{ route('roles.destroy', $role->id) }}" id="item-delete-{{ $role->id }}" class="d-none">

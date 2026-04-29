@@ -21,6 +21,7 @@ return
         'rnf' => 'Record not found.',
         'srnf' => 'Student record not found.',
         'ernf' => 'Exam record not found.',
+        'pernf' => 'Published exam record not found.',
         'arnf' => 'Assessment record not found.',
         'nstp' => 'There are no students to promote.',
         'pin_max' => 'PIN generation limit (1000) reached.',
@@ -55,6 +56,7 @@ return
         'close_ticket_before_archive' => 'Please close the ticket before archiving it.',
         'all_book_copies_issued' => 'All copies of this book are already issued.',
         'point_info' => 'This point will be used in calculating student division.',
-        'credit_info' => 'This weight calculates GPA, with the highest grade earning the most credit.',
+        'credits_info' => 'This weight calculates GPA.',
         'role_in_use' => 'This role is currently assigned to one or more users and cannot be deleted.',
+        'subject_in_use' => 'This subject is currently assigned to one or more records and cannot be deleted.',
     ];

@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Ticket;
 use App\Models\TicketCategory;
+use App\Models\TicketHasLabel;
 use App\Models\TicketLabel;
 use App\Models\TicketMessage;
 
@@ -81,5 +82,18 @@ class TicketRepo
     public function deleteLabelWhereNotIn(string $column, array $values)
     {
         return TicketLabel::whereNotIn($column, $values)->delete();
+    }
+
+    // TicketHasLabel
+    public function assignLabelsToTicket($ticket_id, array $label_ids)
+    {
+        $values = [];
+        foreach ($label_ids as $labelId) {
+            $values[] = [
+                'ticket_id' => $ticket_id,
+                'label_id' => $labelId,
+            ];
+        }
+        return TicketHasLabel::insert($values);
     }
 }

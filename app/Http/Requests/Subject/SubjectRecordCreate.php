@@ -3,7 +3,9 @@
 namespace App\Http\Requests\Subject;
 
 use App\Helpers\Qs;
+use App\Models\SubjectRecord;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SubjectRecordCreate extends FormRequest
 {
@@ -21,6 +23,9 @@ class SubjectRecordCreate extends FormRequest
     public function rules()
     {
         return [
+            'subject_id' => [
+                Rule::unique(SubjectRecord::class)->where(fn($query) => $query->where('subject_id', $this->subject_id)->where('section_id', $this->section_id)->where('teacher_id', $this->teacher_id))
+            ],
             'section_id' => 'nullable|prohibited_unless:students_ids,null',
             'students_ids' => 'nullable',
             'teacher_id' => 'required',
@@ -33,6 +38,13 @@ class SubjectRecordCreate extends FormRequest
             'teacher_id' => 'teacher',
             'section_id' => 'section',
             'students_ids' => 'students',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'subject_id.unique' => 'The record has already been taken for the selected subject, section and teacher.',
         ];
     }
 

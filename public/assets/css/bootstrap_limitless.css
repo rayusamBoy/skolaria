@@ -1679,9 +1679,9 @@ a:not([href]):not([tabindex]) {
 
 .dropdown-item.disabled,
 .dropdown-item:disabled {
-    color: #999;
-    background-color: transparent;
-    cursor: default;
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: none !important;
 }
 
 .dropdown-item.disabled > .badge,
@@ -3723,11 +3723,11 @@ hr {
 }
 
 [data-action="reload"]:after {
-    content: "\e9fb";
+    content: "\e5d5";
 }
 
 [data-action="remove"]:after {
-    content: "\f508";
+    content: "\e5cd";
 }
 
 [data-action="move"] {
@@ -3739,15 +3739,19 @@ hr {
 }
 
 [data-action="fullscreen"]:after {
-    content: "\e9f9";
+    content: "\e5d0";
 }
 
 [data-action="fullscreen"][data-fullscreen="active"]:after {
-    content: "\e9fa";
+    content: "\e5d1";
 }
 
 [data-action="modal"]:after {
-    content: "\e9eb";
+    content: "\f088";
+}
+
+[data-action="print"]:after {
+    content: "\e8ad";
 }
 
 .card-group-control .card-title > a {

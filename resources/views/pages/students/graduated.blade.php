@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div class="card">
+<div class="card w-fit wmin-100-pcnt">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Students Graduated</h6>
         {!! Qs::getPanelOptions() !!}
@@ -33,25 +33,30 @@
 
         <div class="tab-content">
 
-            {{-- Bulk Block/Unblock --}}
-            <div class="card mb-3">
-                <div class="card-body text-center">
-                    @can($tenant_permissions['student_records']['block_all_graduated']['permission'])
-                    <button id="students-block-all-grad" class="btn btn-danger">
-                        Block All Graduated Students
-                    </button>
-                    @endcan
-
-                    @can($tenant_permissions['student_records']['unblock_all_graduated']['permission'])
-                    <button id="students-unblock-all-grad" class="btn btn-success ml-2">
-                        Unblock All Graduated Students
-                    </button>
-                    @endcan
-                </div>
-            </div>
-
             {{-- All Graduates --}}
             <div class="tab-pane fade show active" id="all-students">
+                {{-- Bulk Block/Unblock --}}
+                @canany([$tenant_permissions['student_records']['block_all_graduated']['permission'], $tenant_permissions['student_records']['unblock_all_graduated']['permission']])
+                @php
+                $unique_blocked_values = $grad_students->pluck('user')->pluck('blocked')->unique();
+                @endphp
+                <div class="card mb-3">
+                    <div class="card-body text-center">
+                        @can($tenant_permissions['student_records']['block_all_graduated']['permission'])
+                        <button id="students-block-all-grad" @disabled($grad_students->isEmpty() || $unique_blocked_values->hasSole(fn($value, $key) => (bool) $value === true)) class="btn btn-danger">
+                            Block All Graduated Students
+                        </button>
+                        @endcan
+
+                        @can($tenant_permissions['student_records']['unblock_all_graduated']['permission'])
+                        <button id="students-unblock-all-grad" @disabled($grad_students->isEmpty() || $unique_blocked_values->hasSole(fn($value, $key) => (bool) $value === false)) class="btn btn-success ml-2">
+                            Unblock All Graduated Students
+                        </button>
+                        @endcan
+                    </div>
+                </div>
+                @endcanany
+
                 <table class="table datatable-button-html5-columns">
                     <thead>
                         <tr>
@@ -71,7 +76,7 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>
-                                <img src="{{ tenant_asset($gs->user->photo) }}" class="rounded-circle" style="width:40px;height:40px;" alt="photo">
+                                <img src="{{ Usr::getTenancyAwarePhoto($gs->user->photo) }}" class="rounded-circle" style="width:40px;height:40px;" alt="photo">
                             </td>
                             <td>{{ $gs->user->name }}</td>
                             <td>{{ $gs->student->adm_no }}</td>
@@ -102,29 +107,34 @@
                                             lists
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-left">
-
+                                            {{-- View --}}
                                             <a href="{{ route('students.show', Qs::hash($gs->student_id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">visibility</i> View
                                             </a>
+                                            {{-- Edit --}}
                                             <a href="{{ route('students.edit', Qs::hash($gs->student_id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
+                                            {{-- Reset Password --}}
                                             <a href="javascript:;" data-default_pass="student" data-href="{{ route('students.password.reset', Qs::hash($gs->student_id)) }}" class="dropdown-item needs-reset-pass-confirmation">
                                                 <i class="material-symbols-rounded">lock_reset</i> Reset Password
                                             </a>
+                                            {{-- Not Graduated --}}
                                             <a id="{{ Qs::hash($gs->student_id) }}" href="javascript:;" onclick="confirmReset(this.id)" class="dropdown-item">
                                                 <i class="material-symbols-rounded">close</i> Not Graduated
                                             </a>
-                                            <form id="item-reset-{{ Qs::hash($gs->student_id) }}" action="{{ route('st.not_graduated', [Qs::hash($gs->student_id), $gs->id]) }}" method="POST" class="hidden">
+                                            <form id="item-reset-{{ Qs::hash($gs->student_id) }}" action="{{ route('students.mark_not_graduated', [Qs::hash($gs->student_id), $gs->id]) }}" method="POST" class="hidden">
                                                 @csrf @method('PUT')
                                             </form>
+                                            {{-- Marksheet --}}
                                             <a target="_blank" href="{{ route('marks.year_selector', Qs::hash($gs->user_id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">bottom_sheets</i> Marksheet
                                             </a>
+                                            {{-- Delete --}}
                                             <a id="{{ Qs::hash($gs->user->id) }}" href="javascript:;" onclick="confirmDelete(this.id)" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
-                                            <form id="item-delete-{{ Qs::hash($gs->user->id) }}" action="{{ route('students.destroy', Qs::hash($gs->user->id)) }}" method="POST" class="hidden">
+                                            <form id="item-delete-{{ Qs::hash($gs->user->id) }}" action="{{ route('users.destroy', Qs::hash($gs->user->id)) }}" method="POST" class="hidden">
                                                 @csrf @method('DELETE')
                                             </form>
 
@@ -141,6 +151,8 @@
             {{-- By Class --}}
             @foreach($my_classes as $mc)
             <div class="tab-pane fade" id="c{{ $mc->id }}">
+                <strong class="status-styled">{{ $mc->name }}</strong>
+
                 <table class="table datatable-button-html5-columns">
                     <thead>
                         <tr>
@@ -158,7 +170,7 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>
-                                <img src="{{ tenant_asset($gs->user->photo) }}" class="rounded-circle" style="width:40px;height:40px;" alt="photo">
+                                <img src="{{ Usr::getTenancyAwarePhoto($gs->user->photo) }}" class="rounded-circle" style="width:40px;height:40px;" alt="photo">
                             </td>
                             <td>{{ $gs->user->name }}</td>
                             <td>{{ $gs->student->adm_no }}</td>
@@ -171,26 +183,30 @@
                                             lists
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-left">
-
+                                            {{-- View --}}
                                             <a href="{{ route('students.show', Qs::hash($gs->student_id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">visibility</i> View
                                             </a>
+                                            {{-- Edit --}}
                                             <a href="{{ route('students.edit', Qs::hash($gs->student_id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
+                                            {{-- Not Graduated --}}
                                             <a id="{{ Qs::hash($gs->student_id) }}" href="javascript:;" onclick="confirmReset(this.id)" class="dropdown-item">
                                                 <i class="material-symbols-rounded">close</i> Not Graduated
                                             </a>
-                                            <form id="item-reset-{{ Qs::hash($gs->student_id) }}" action="{{ route('st.not_graduated', [Qs::hash($gs->student_id), $gs->id]) }}" method="POST" class="hidden">
+                                            <form id="item-reset-{{ Qs::hash($gs->student_id) }}" action="{{ route('students.mark_not_graduated', [Qs::hash($gs->student_id), $gs->id]) }}" method="POST" class="hidden">
                                                 @csrf @method('PUT')
                                             </form>
+                                            {{-- Marksheet --}}
                                             <a target="_blank" href="{{ route('marks.year_selector', Qs::hash($gs->user_id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">bottom_sheets</i> Marksheet
                                             </a>
-                                            <a id="{{ Qs::hash($gs->student_id) }}" href="javascript:;" onclick="confirmDelete(this.id)" class="dropdown-item text-danger">
+                                            {{-- Delete --}}
+                                            <a id="{{ Qs::hash($gs->user->id) }}" href="javascript:;" onclick="confirmDelete(this.id)" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
-                                            <form id="item-delete-{{ Qs::hash($gs->student_id) }}" action="{{ route('students.destroy', Qs::hash($gs->student_id)) }}" method="POST" class="hidden">
+                                            <form id="item-delete-{{ Qs::hash($gs->user->id) }}" action="{{ route('users.destroy', Qs::hash($gs->user->id)) }}" method="POST" class="hidden">
                                                 @csrf @method('DELETE')
                                             </form>
 
@@ -210,72 +226,3 @@
 </div>
 
 @endsection
-
-
-@pushOnce('scripts')
-<script>
-    /* Block all graduated students */
-    $('#students-block-all-grad').on('click', function() {
-        let cid = $(this).val();
-        confirmRequest(cid, 'block');
-        return false;
-    });
-
-    /* Unblock all graduated students */
-    $('#students-unblock-all-grad').on('click', function() {
-        let cid = $(this).val();
-        confirmRequest(cid, "unblock")
-        return false;
-    });
-
-    function ajaxProcessRequest(class_id, type) {
-        if (type === "block")
-            var url = "{{ route('students.block_all_graduated') }}";
-        if (type === "unblock")
-            var url = "{{ route('students.unblock_all_graduated') }}";
-        $.ajax({
-            url: url, 
-            type: 'post', 
-            data: {
-                'class_id': class_id,
-                '_token': $('#csrf-token').attr('content')
-            }, 
-            success: function(resp) {
-                if (type === "block")
-                    $("label.form-switch input").attr("checked", "checked");
-                if (type === "unblock")
-                    $("label.form-switch input").removeAttr("checked");
-                flash({
-                    msg: resp.msg, 
-                    type: 'success'
-                });
-            }
-        });
-    }
-
-    function confirmRequest(class_id, type) {
-        if (type === "block")
-            var text = "This will block all graduated students from accessing the system";
-        if (type === "unblock")
-            var text = "This will allow all graduated student to access the system";
-        Swal.fire({
-            title: "Are you sure?", 
-            text: text, 
-            focusConfirm: false, 
-            returnFocus: false, 
-            reverseButtons: true, 
-            showCancelButton: true, 
-            cancelButtonText: "No, Cancel", 
-            customClass: {
-                cancelButton: "bg-secondary", 
-            }
-        }).then((result) => {
-            /* Read more about isConfirmed, isDenied below */
-            if (result.isConfirmed) {
-                return ajaxProcessRequest(class_id, type);
-            };
-        });
-    }
-
-</script>
-@endPushOnce

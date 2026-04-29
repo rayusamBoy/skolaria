@@ -63,11 +63,11 @@ class NoticeController extends Controller
     public function mark_as_viewed(NoticeSetAsViewed $req)
     {
         $ntc_id = $req->id;
-        $viewers_ids = json_decode($this->notice->getById($ntc_id)->value("viewers_ids"));
+        $viewers_ids = $this->notice->getById($ntc_id)->value("viewers_ids");
         // Push auth user id to viewers ids
         $viewers_ids[] = auth()->id();
         // Update the viewers ids
-        $this->notice->update($ntc_id, ["viewers_ids" => json_encode($viewers_ids)]);
+        $this->notice->update($ntc_id, ["viewers_ids" => $viewers_ids]);
 
         return Qs::json("updated");
     }

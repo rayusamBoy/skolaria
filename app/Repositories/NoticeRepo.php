@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\Notice;
-use Auth;
 
 class NoticeRepo
 {
@@ -11,17 +10,17 @@ class NoticeRepo
 
     public function all()
     {
-        return auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')) ? Notice::all() : Notice::all()->where("from_id", "!=", Auth::id());
+        return Notice::all();
     }
 
-    public function allOrOnlyMine()
+    public function allOrOnlyMine(array $with = ['user'])
     {
-        return auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')) ? Notice::all() : Notice::all()->where("from_id", Auth::id());
+        return auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')) ? Notice::with($with)->get() : Notice::with($with)->get()->where("from_id", auth()->id());
     }
 
     public function allExceptAuth()
     {
-        return auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')) ? Notice::with('user')->get() : Notice::with('user')->get()->where("from_id", "!=", Auth::id());
+        return auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')) ? Notice::with('user')->get() : Notice::with('user')->get()->where("from_id", "!=", auth()->id());
     }
 
     public function getIds()

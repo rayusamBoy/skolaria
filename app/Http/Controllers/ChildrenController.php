@@ -17,7 +17,7 @@ class ChildrenController extends Controller
 
     public function children()
     {
-        $data['students'] = $this->student->getRecord(['my_parent_id' => auth()->id()])->with(['my_class', 'section'])->get();
+        $data['students'] = $this->student->whereRecord(['my_parent_id' => auth()->id()])->with(['my_class', 'section'])->get();
 
         return view('pages.children', $data);
     }

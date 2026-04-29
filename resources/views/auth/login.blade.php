@@ -81,7 +81,7 @@
                                 <div class="form-group d-flex align-items-center">
                                     <div class="form-check mb-0">
                                         <label class="form-check-label">
-                                            <input type="checkbox" name="remember" class="form-input-styled" @checked(old('remember')) data-fouc>
+                                            <input type="checkbox" name="remember" class="form-input-styled" @checked(old('remember'))>
                                             <span class="text-info">Remember Me</span>
                                         </label>
                                     </div>

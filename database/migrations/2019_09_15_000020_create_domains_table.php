@@ -17,7 +17,7 @@ class CreateDomainsTable extends Migration
     {
         Schema::create('domains', function (Blueprint $table) {
             $table->increments('id')->unsigned();
-            $table->string('domain', 255)->unique();
+            $table->string('domain', 150)->unique();
             $table->unsignedBigInteger('tenant_id');
 
             $table->timestamps();

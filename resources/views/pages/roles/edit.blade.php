@@ -32,7 +32,7 @@
                 <label class="col-lg-3 col-form-label font-weight-semibold">Permissions</label>
                 <div class="col-lg-9">
                     <div class="accordion" id="permissionsAccordion">
-                        @foreach($groupedPermissions as $group => $perms)
+                        @foreach($grouped_permissions as $group => $perms)
                         <div class="card mb-2">
                             <div class="card-header p-0" id="heading-{{ Str::slug($group) }}">
                                 <h2 class="mb-0">

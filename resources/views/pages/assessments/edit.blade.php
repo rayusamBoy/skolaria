@@ -1,4 +1,4 @@
-<form class="ajax-update" action="{{ route('assessments.update', [$exam_id, $my_class_id, $subject_id, $section_id ?? null]) }}" method="post">
+<form class="ajax-update" action="{{ route('assessments.update', [$assessment_id, $my_class_id, $subject_id, $section_id ?? null]) }}" method="post">
     @csrf @method('put')
     <table class="table table-striped data-table assessments float-head">
         <thead>
@@ -96,6 +96,7 @@
                             <td class="p-0"><input data-html="true" data-toggle="tooltip" title="2nd Homework ({{ $exam->hw_denominator }})" min="0" max="{{ $exam->hw_denominator }}" class="{{ $is_restricted ? 'text-center cursor-not-allowed' : 'text-center' }}" name="hw_[{{ $asmnt->id }}][2]" value="{{ $asmnt->hw2 }}" type="number"></td>
                             <td class="p-0"><input data-html="true" data-toggle="tooltip" title="3rd Homework ({{ $exam->hw_denominator }})" min="0" max="{{ $exam->hw_denominator }}" class="{{ $is_restricted ? 'text-center cursor-not-allowed' : 'text-center' }}" name="hw_[{{ $asmnt->id }}][3]" value="{{ $asmnt->hw3 }}" type="number"></td>
                             <td class="p-0"><input data-html="true" data-toggle="tooltip" title="4th Homework ({{ $exam->hw_denominator }})" min="0" max="{{ $exam->hw_denominator }}" class="{{ $is_restricted ? 'text-center cursor-not-allowed' : 'text-center' }}" name="hw_[{{ $asmnt->id }}][4]" value="{{ $asmnt->hw4 }}" type="number"></td>
+                            <td class="p-0"><input data-html="true" data-toggle="tooltip" title="5th Homework ({{ $exam->hw_denominator }})" min="0" max="{{ $exam->hw_denominator }}" class="{{ $is_restricted ? 'text-center cursor-not-allowed' : 'text-center' }}" name="hw_[{{ $asmnt->id }}][5]" value="{{ $asmnt->hw5 }}" type="number"></td>
                         </tr>
                     </table>
                 </td>
@@ -116,13 +117,10 @@
         </tbody>
     </table>
 
-    {{-- Update Button --}}
     <div class="text-center mt-2">
-        <button type="submit" class="btn btn-sm btn-primary" id="update">Update Assessments <i class="material-symbols-rounded ml-2">send</i></button>
-    </div>
-
-    {{-- Print Button --}}
-    <div class="text-center mt-2">
-        <a target="_blank" href="{{ route('assessments.print', [$exam_id, $my_class_id, $subject_id, $year, $section_id ?? null]) }}" class="btn btn-sm btn-danger"><i class="material-symbols-rounded mr-2">print</i> Print Assessment Records</a>
+        {{-- Update Button --}}
+        <button type="submit" class="btn btn-sm btn-primary" id="update">Update <i class="material-symbols-rounded ml-2">save</i></button>
+        {{-- Print Button --}}
+        <a target="_blank" href="{{ route('assessments.print', [$assessment_id, $my_class_id, $subject_id, $year, $section_id ?? null]) }}" class="btn btn-sm btn-info"><i class="material-symbols-rounded mr-2">print</i> Print</a>
     </div>
 </form>

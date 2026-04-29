@@ -16,7 +16,6 @@ class Exam extends Eloquent
         'term',
         'year',
         'category_id',
-        'editable',
         'published',
         'locked',
         'class_type_id',
@@ -27,6 +26,11 @@ class Exam extends Eloquent
         'hw_denominator',
         'tt_denominator',
         'tdt_denominator',
+    ];
+
+    protected $casts = [
+        'published' => 'boolean',
+        'locked' => 'boolean',
     ];
 
     public function category()
@@ -42,6 +46,16 @@ class Exam extends Eloquent
     public function class_type()
     {
         return $this->belongsTo(ClassType::class);
+    }
+
+    public function assessment()
+    {
+        return $this->hasOneThrough(Assessment::class, ExamHasAssessment::class, 'exam_id', 'id', 'id', 'assessment_id');
+    }
+
+    public function scopeHasAssessment()
+    {
+        return $this->assessment()->exists();
     }
 
     public function getActivitylogOptions(): LogOptions

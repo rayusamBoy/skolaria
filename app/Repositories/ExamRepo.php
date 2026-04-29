@@ -7,6 +7,7 @@ use App\Models\Division;
 use App\Models\Exam;
 use App\Models\ExamAnnounce;
 use App\Models\ExamCategory;
+use App\Models\ExamHasAssessment;
 use App\Models\ExamNumberFormat;
 use App\Models\ExamRecord;
 use App\Models\Grade;
@@ -62,39 +63,39 @@ class ExamRepo
 
     /*********** Exam ***************/
 
-    public function onlyPublished()
+    public function onlyPublished($with = ['category'])
     {
-        return Exam::where('published', true)->orderByDesc('created_at')->orderBy('year', 'desc')->with('category')->get();
+        return Exam::where('published', true)->orderByDesc('created_at')->orderBy('year', 'desc')->with($with)->get();
     }
 
     public function getPublished(mixed $where)
     {
-        return Exam::where($where)->where('published', 1)->get();
+        return Exam::where($where)->where('published', true)->get();
     }
 
-    public function all()
+    public function all($with = ['category', 'class_type'])
     {
-        return (auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin'))) ? Exam::orderByDesc('created_at')->orderBy('year', 'desc')->with(['category', 'class_type'])->get() : $this->onlyPublished();
+        return auth()->user()->can(config('permissions.names.tenant.exams.publish.permission')) ? Exam::orderByDesc('created_at')->orderBy('year', 'desc')->with($with)->get() : $this->onlyPublished($with);
     }
 
-    public function getById(int $id, $only_published = true)
+    public function getById(int $id, $only_published = true, array $with = ['category', 'class_type'])
     {
-        return $only_published ? Exam::where('id', $id)->where('published', 1)->with(['category', 'class_type'])->first() : Exam::where('id', $id)->with(['category', 'class_type'])->first();
+        return $only_published ? Exam::where('id', $id)->where('published', true)->with($with)->first() : Exam::where('id', $id)->with($with)->first();
     }
 
-    public function getExam(array $data, bool $withoutLockedOnes = true)
+    public function getExam(array $where, bool $without_locked_ones = true, $with = [])
     {
-        return ($withoutLockedOnes === true) ? Exam::where($data)->latest()->where('locked', '<>', 1)->get() : Exam::where($data)->latest()->get();
+        return ($without_locked_ones === true) ? Exam::where($where)->latest()->where('locked', false)->with($with)->get() : Exam::where($where)->latest()->with($with)->get();
     }
 
     public function exists(int $exam_id)
     {
-        return Exam::whereId($exam_id)->exists();
+        return Exam::where('id', $exam_id)->exists();
     }
 
-    public function getTrashed()
+    public function getTrashed(array $with = ['category'])
     {
-        return Exam::onlyTrashed()->get();
+        return Exam::onlyTrashed()->with($with)->get();
     }
 
     public function examsExists()
@@ -129,12 +130,12 @@ class ExamRepo
 
     public function getPublishedOrderByLatest()
     {
-        return Exam::latest()->where('published', 1)->get();
+        return Exam::latest()->where('published', true)->get();
     }
 
     public function getPublishedExamsCount()
     {
-        return Exam::where('published', 1)->get()->count();
+        return Exam::where('published', true)->get()->count();
     }
 
     public function update(int $id, array $data)
@@ -145,11 +146,6 @@ class ExamRepo
     public function delete($id)
     {
         return Exam::destroy($id);
-    }
-
-    public function classTypeExmCategoryExists($cat_id, $class_type_id, $year)
-    {
-        return Exam::where(['category_id' => $cat_id, 'class_type_id' => $class_type_id])->where('year', $year)->exists();
     }
 
     public function restore(int $id)
@@ -164,7 +160,7 @@ class ExamRepo
 
     public function isLocked(int $id)
     {
-        return Exam::whereId($id)->value('locked') === 1;
+        return Exam::where('id', $id)->where('locked', true)->exists();
     }
 
     public function getYears()
@@ -207,14 +203,9 @@ class ExamRepo
         );
     }
 
-    public function getRecord($data)
+    public function getRecord(array $where, array $with = [])
     {
-        return ExamRecord::where($data)->get();
-    }
-
-    public function getRecordsWithRelations($with, $data)
-    {
-        return ExamRecord::where($data)->with($with)->get();
+        return ExamRecord::where($where)->with($with)->get();
     }
 
     public function getRecordsByStudentId($id)
@@ -278,9 +269,9 @@ class ExamRepo
         return Grade::orderBy('class_type_id')->orderBy('name')->get();
     }
 
-    public function getGrade($data)
+    public function getGrade($data, array $with = [])
     {
-        return Grade::where($data)->get();
+        return Grade::where($data)->with($with)->get();
     }
 
     public function findGrade($id)
@@ -288,12 +279,12 @@ class ExamRepo
         return Grade::find($id);
     }
 
-    public function createGrade($data)
+    public function createGrade(array $data)
     {
         return Grade::create($data);
     }
 
-    public function updateGrade($id, $data)
+    public function updateGrade($id, array $data)
     {
         return Grade::find($id)->update($data);
     }
@@ -305,7 +296,7 @@ class ExamRepo
 
     /*********** Marks ***************/
 
-    public function createMark($data)
+    public function createMark(array $data)
     {
         return Mark::firstOrCreate($data);
     }
@@ -315,7 +306,7 @@ class ExamRepo
         return Mark::destroy($id);
     }
 
-    public function deleteMark($where)
+    public function deleteMark(array $where)
     {
         return Mark::where($where)->delete();
     }
@@ -343,14 +334,9 @@ class ExamRepo
         return Mark::where('student_id', $student_id)->select('year')->distinct()->get();
     }
 
-    public function getMark(array $where)
+    public function getMark(array $where, array $with = ['grade', 'user', 'subject', 'section'])
     {
-        return Mark::where($where)->with(['grade', 'user', 'subject', 'section'])->get();
-    }
-
-    public function mark(array $where)
-    {
-        return Mark::where($where)->with(['grade', 'user', 'subject', 'section']);
+        return Mark::where($where)->with($with)->get();
     }
 
     public function getMarkByIds($ids)
@@ -370,7 +356,7 @@ class ExamRepo
 
     /*********** Skills ***************/
 
-    public function getSkill($where)
+    public function getSkill(array $where)
     {
         return Skill::where($where)->orderBy('name')->get();
     }
@@ -384,9 +370,9 @@ class ExamRepo
 
     /*********** Sections ***************/
 
-    public function getSections($data)
+    public function getSections(array $where)
     {
-        return Section::where($data)->get();
+        return Section::where($where)->get();
     }
 
     /*********** Divisions ***************/
@@ -396,9 +382,9 @@ class ExamRepo
         return Division::orderBy('class_type_id')->orderBy('name')->get();
     }
 
-    public function getDivision($data)
+    public function getDivision(array $where, array $with)
     {
-        return Division::where($data)->get();
+        return Division::where($where)->with($with)->get();
     }
 
     public function findDivision($id)
@@ -406,12 +392,12 @@ class ExamRepo
         return Division::find($id);
     }
 
-    public function createDivision($data)
+    public function createDivision(array $data)
     {
         return Division::create($data);
     }
 
-    public function updateDivision($id, $data)
+    public function updateDivision($id, array $data)
     {
         return Division::find($id)->update($data);
     }
@@ -426,5 +412,11 @@ class ExamRepo
     public function getClassTypes()
     {
         return ClassType::get();
+    }
+
+    /*********** Exam has Assessments ***************/
+    public function firstOrCreateExamHasAssessment(array $data)
+    {
+        return ExamHasAssessment::firstOrCreate($data);
     }
 }

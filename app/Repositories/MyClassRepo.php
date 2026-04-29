@@ -5,9 +5,9 @@ namespace App\Repositories;
 use App\Models\ClassType;
 use App\Models\MyClass;
 use App\Models\Section;
-use App\Models\StudentRecord;
 use App\Models\Subject;
 use App\Models\SubjectRecord;
+use Illuminate\Support\Collection;
 
 class MyClassRepo
 {
@@ -73,13 +73,6 @@ class MyClassRepo
         return MyClass::whereHas('student_record')->exists();
     }
 
-    /*********** Student record ***************/
-
-    public function sectionHasStudent($section_id)
-    {
-        return StudentRecord::where('section_id', $section_id)->exists();
-    }
-
     /*********** Class type ***************/
 
     public function getTypes()
@@ -95,6 +88,21 @@ class MyClassRepo
     public function findTypeByClass($class_id)
     {
         return ClassType::find($this->find($class_id)->class_type_id);
+    }
+
+    public function createType($data)
+    {
+        return ClassType::create($data);
+    }
+
+    public function updateType($id, $data)
+    {
+        return ClassType::find($id)->update($data);
+    }
+
+    public function deleteType($id)
+    {
+        return ClassType::destroy($id);
     }
 
     /************* Section *******************/
@@ -122,11 +130,6 @@ class MyClassRepo
     public function deleteSection(int $id)
     {
         return Section::destroy($id);
-    }
-
-    public function isActiveSection(int $section_id)
-    {
-        return Section::where(['id' => $section_id, 'active' => 1])->exists();
     }
 
     public function getAllSections()
@@ -179,9 +182,9 @@ class MyClassRepo
         })->where('my_class_id', $class_id)->get();
     }
 
-    public function getSubjectsByIDs($ids)
+    public function getSubjectsByIDs(array|Collection $ids, array $with = ['record'])
     {
-        return Subject::with('record')->whereIn('id', $ids)->orderBy('name')->get();
+        return Subject::with($with)->whereIn('id', $ids)->orderBy('name')->get();
     }
 
     public function updateSubject(int $id, array $data)
@@ -194,9 +197,9 @@ class MyClassRepo
         return Subject::destroy($id);
     }
 
-    public function getAllSubjects()
+    public function getAllSubjects(array $with = ['my_class', 'record'])
     {
-        return Subject::orderBy('name', 'asc')->with(['my_class', 'record'])->get();
+        return Subject::orderBy('name', 'asc')->with($with)->get();
     }
 
     public function getUniqueSubjectsNames()
@@ -206,13 +209,13 @@ class MyClassRepo
 
     public function getSubjectData($remove = [])
     {
-        $data = ['name', 'slug', 'my_class_id', 'core'];
+        $data = ['name', 'slug', 'my_class_id', 'is_core', 'credits'];
         return $remove ? array_values(array_diff($data, $remove)) : $data;
     }
 
     public function getSubjectRecordData($remove = [])
     {
-        $data = ['section_id', 'teacher_id', 'students_ids'];
+        $data = ['subject_id', 'section_id', 'teacher_id', 'students_ids'];
         return $remove ? array_values(array_diff($data, $remove)) : $data;
     }
 
@@ -228,14 +231,14 @@ class MyClassRepo
         return SubjectRecord::create($data);
     }
 
-    public function whereSubjectRecord(array $data)
+    public function whereSubjectRecord(array $where)
     {
-        return SubjectRecord::where($data);
+        return SubjectRecord::where($where);
     }
 
-    public function getSubjectRecord($data)
+    public function getSubjectRecord(array $where, array $with = ['subject'])
     {
-        return SubjectRecord::where($data)->with('subject')->get();
+        return $this->whereSubjectRecord($where)->with($with)->get();
     }
 
     public function findSubjectRecByTeacher($teacher_id, $order_by = 'id')

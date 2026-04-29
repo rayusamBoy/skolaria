@@ -44,7 +44,7 @@
         </div>
     </div>
 
-    @php $is_restricted = (!$exam->editable || $exam->locked) && auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')); @endphp
+    @php $is_restricted = $asmnt_records->first()->exam->locked && auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')); @endphp
 
     <div class="card-body">
         @include('pages.assessments.edit')
@@ -54,7 +54,7 @@
         @if($is_restricted)
         <p class="float-right badge p-3 mr-3 text-warning font-size-base">Opened In Read Only Mode</p>
         @else
-        <p class="float-right badge p-3 mr-3 text-info font-size-base">Autosave is on</p>
+        <p class="float-right badge p-3 mr-3 text-info font-size-base">Browser Autosave is On</p>
         @endif
     </div>
 </div>

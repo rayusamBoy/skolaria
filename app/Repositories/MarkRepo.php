@@ -9,9 +9,9 @@ class MarkRepo
 {
     /*********** Marks ***************/
 
-    public function getByIds($ids)
+    public function whereInStudentIdsWith($ids, array $with = ['subject', 'user'])
     {
-        return Mark::with(['subject', 'user'])->whereIn('student_id', $ids);
+        return Mark::with($with)->whereIn('student_id', $ids);
     }
 
     public function getById($id)
@@ -34,9 +34,7 @@ class MarkRepo
         $d = ['student_id' => $st_id, 'exam_id' => $exam->id, 'my_class_id' => $class_id, 'year' => $year];
 
         $tex = "tex{$exam->term}";
-        $mk = Mark::where($d);
-
-        return $mk->select($tex)->sum($tex);
+        return Mark::where($d)->select($tex)->sum($tex);
     }
 
     public function getExamTotalTermSection($exam, $st_id, $class_id, $section_id, $year)
@@ -44,9 +42,7 @@ class MarkRepo
         $d = ['student_id' => $st_id, 'exam_id' => $exam->id, 'my_class_id' => $class_id, 'section_id' => $section_id, 'year' => $year];
 
         $tex = "tex{$exam->term}";
-        $mk = Mark::where($d);
-
-        return $mk->select($tex)->sum($tex);
+        return Mark::where($d)->select($tex)->sum($tex);
     }
 
     public function getExamAvgTerm($exam, $st_id, $class_id, $sec_id, $year)
@@ -63,11 +59,11 @@ class MarkRepo
 
     public function getLimitedExamAvgTerm($exam, $st_id, $class_id, $sec_id, $year, $limit)
     {
-        $d = ['student_id' => $st_id, 'exam_id' => $exam->id, 'my_class_id' => $class_id, 'section_id' => $sec_id, 'year' => $year];
+        $where = ['student_id' => $st_id, 'exam_id' => $exam->id, 'my_class_id' => $class_id, 'section_id' => $sec_id, 'year' => $year];
 
         $tex = "tex{$exam->term}";
 
-        $avg = Mark::with('subject')->where($d)->where($tex, '>=', 0)->get()->where('subject.core', 1)->sortByDesc($tex)->take($limit)->avg($tex);
+        $avg = Mark::with('subject')->where($where)->where($tex, '>=', 0)->get()->where('subject.is_core')->sortByDesc($tex)->take($limit)->avg($tex);
 
         return round($avg, 1);
     }
@@ -157,14 +153,27 @@ class MarkRepo
         return ($searched == false) ? null : ($searched + 1);
     }
 
-    public function getExtractedSumOf($weight, $length, $offset = 0)
+    /**
+     * Sum the smallest values in an array.
+     *
+     * @param array<int|float> $weights  Numeric values to evaluate.
+     * @param int              $length   Number of smallest values to sum.
+     * @return int|float|null            The sum, or null if input is invalid/insufficient.
+     */
+    public function sumSmallestValues(array $weights, int $length): int|float|null
     {
-        sort($weight); // Sort points
-        $weight = array_filter($weight);
-        if (\count($weight) < $length) // If the points are not suffucient compared to subjects considered, return null
+        if ($length <= 0) {
             return null;
-        // Start from offset (default 0). Take only the sum of the first considered points
-        return array_sum(\array_slice($weight, $offset, $length));
+        }
+
+        if (\count($weights) < $length) {
+            return null;
+        }
+
+        $sorted = $weights;
+        sort($sorted);
+
+        return array_sum(\array_slice($sorted, 0, $length));
     }
 
     public function getRecordValue($data, $value)
@@ -198,27 +207,17 @@ class MarkRepo
 
     public function getGrade($total, $class_type_id)
     {
-        if ($total <= 0)
+        if ($total < 0)
             return null;
 
         $total = round($total);
-        $grades = Grade::where(['class_type_id' => $class_type_id])->get();
+        $grade = Grade::where('class_type_id', $class_type_id)->where('mark_from', '<=', $total)->where('mark_to', '>=', $total)->first();
 
-        if ($grades->isNotEmpty()) {
-            $gr = $grades->where('mark_from', '<=', $total)->where('mark_to', '>=', $total);
-            return $gr->first() ?: $this->getGrade2($total);
-        }
-
-        return $this->getGrade2($total);
+        return $grade ?? $this->getGrade2($total);
     }
 
     public function getGrade2($total)
     {
-        $grades = Grade::whereNull('class_type_id')->get();
-
-        if ($grades->isNotEmpty())
-            return $grades->where('mark_from', '<=', $total)->where('mark_to', '>=', $total)->first();
-
-        return null;
+        return Grade::whereNull('class_type_id')->where('mark_from', '<=', $total)->where('mark_to', '>=', $total)->first();
     }
 }

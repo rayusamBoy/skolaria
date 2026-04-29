@@ -21,7 +21,7 @@
             @foreach ($skills->where('skill_type', 'AF') as $af)
             <tr>
                 <td>{{ $af->name }}</td>
-                <td>{{ $asr->af ? explode(',', $asr->af)[$loop->index] : '-' }}</td>
+                <td>{{ $asr->af ? explode(',', $asr->af)[$loop->index] : '—' }}</td>
             </tr>
             @endforeach
         </tbody>
@@ -38,7 +38,7 @@
             @foreach ($skills->where('skill_type', 'PS') as $ps)
             <tr>
                 <td>{{ $ps->name }}</td>
-                <td>{{ $asr->ps ? explode(',', $asr->ps)[$loop->index] : '-' }}</td>
+                <td>{{ $asr->ps ? explode(',', $asr->ps)[$loop->index] : '—' }}</td>
             </tr>
             @endforeach
         </tbody>

@@ -78,19 +78,19 @@ class UserRepo
         return User::onlyTrashed()->where('id', $id)->first();
     }
 
-    public function all()
+    public function all($with = [])
     {
-        return User::all();
+        return $with ? User::with($with)->get() : User::all();
     }
 
-    public function getUsersByRoleNames(array $role_names)
+    public function getUsersByRoleNames(array $role_names, array $with = [])
     {
-        return User::role($role_names)->orderBy('name', 'asc')->get();
+        return User::role($role_names)->with($with)->orderBy('name', 'asc')->get();
     }
 
     public function getTrashed()
     {
-        return User::onlyTrashed()->get();
+        return User::with('roles')->onlyTrashed()->get();
     }
 
     public function where(array $where)
@@ -139,9 +139,9 @@ class UserRepo
         return ParentRelative::create($data);
     }
 
-    public function updateParentRelativeRec($where, $data)
+    public function updateOrCreateParentRelativeRec(array $attributes, array $values)
     {
-        return ParentRelative::where($where)->update($data);
+        return ParentRelative::updateOrCreate($attributes, $values);
     }
 
     /********** Notifications ********/

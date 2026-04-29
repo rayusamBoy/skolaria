@@ -11,10 +11,9 @@
 
 <body>
     <div class="container">
-        @if(Mk::isTerminalExam($exam->category_id) OR Mk::isAnnualExam($exam->category_id))
         {{--Background Logo--}}
         <div class="text-center">
-            <img src="{{ tenant_asset(Qs::getSetting('logo')) }}" />
+            <img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type' , 'logo')) }}" />
         </div>
         {{--Print Area--}}
         <div id="print" xmlns:margin-top="http://www.w3.org/1999/xhtml">
@@ -82,7 +81,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($assessments->sortBy('user.name')->sortBy('user.gender') as $mk)
+                        @foreach($assessments as $mk)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             {{--Course Work--}}
@@ -116,9 +115,9 @@
                             {{--Exam--}}
                             <td>{{ $mk->exm ?? '' }}</td>
                             {{--Total--}}
-                            <td>@php $tex = "tex{$exam->term}"; $mark = $mk->$tex; @endphp {{ $mark ?? '' }}</td>
+                            <td>{{ data_get($mk, "tex{$exam->term}", '') }}</td>
                             {{--Grade--}}
-                            <td>{{ $mk->grade->name ?? '' }}</td>
+                            <td>{{ $mk->grade?->name ?? '' }}</td>
                             {{--Position of each student of a particular section and subject--}}
                             <td>{{ $stds_texs->count() > 0 ? $stds_texs->search($mk->$tex) + 1 : '' }}</td>
                         </tr>
@@ -132,7 +131,6 @@
                 </div>
             </div>
         </div>
-        @endif
     </div>
 
     <script>

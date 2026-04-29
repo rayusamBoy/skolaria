@@ -37,7 +37,7 @@ class MyClassController extends Controller
         $s = [
             'my_class_id' => $mc->id,
             'name' => 'A',
-            'active' => 1,
+            'is_default' => true,
             'teacher_id' => NULL,
         ];
 

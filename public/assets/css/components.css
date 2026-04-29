@@ -1865,7 +1865,6 @@
 .wizard > .actions {
     position: relative;
     text-align: right;
-    padding: 1.25rem;
     padding-top: 0;
 }
 
@@ -5488,6 +5487,12 @@ div.go-to-bottom button {
     }
 }
 
+a.disabled {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.6;
+}
+
 .blockUI.custom {
     z-index: 1011;
     position: fixed;
@@ -7322,7 +7327,7 @@ and below; since some of the menu options are obscured by the data table footer.
 
 .dialog {
     z-index: 5;
-    background: rgba(1, 1, 1, 0.9);
+    background: var(--bg-primary);
     position: absolute;
     width: 50%;
     height: 500px;
@@ -7341,7 +7346,6 @@ and below; since some of the menu options are obscured by the data table footer.
 
 .dialog-header {
     margin: 20px;
-    color: #fff;
     text-align: center;
     font-size: 28px;
 }
@@ -7360,13 +7364,12 @@ and below; since some of the menu options are obscured by the data table footer.
     text-transform: uppercase;
     font-size: 13px;
     letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.9);
 }
 
 .input {
     border: none;
     background: none;
-    border-bottom: 1px rgba(255, 255, 255, 0.2) solid;
+    border-bottom: 3px solid var(--border-state);
     display: block;
     margin: 30px auto;
     width: 300px;
@@ -7374,7 +7377,6 @@ and below; since some of the menu options are obscured by the data table footer.
     -webkit-transition: border-color 250ms;
     -o-transition: border-color 250ms;
     transition: border-color 250ms;
-    color: #fff;
 }
 
 @media (max-width: 350px) {
@@ -7385,7 +7387,6 @@ and below; since some of the menu options are obscured by the data table footer.
 
 .input:focus {
     outline: none;
-    border-color: #fff;
 }
 
 .error-input {

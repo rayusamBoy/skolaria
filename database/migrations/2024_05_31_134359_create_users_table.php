@@ -38,7 +38,7 @@ return new class extends Migration {
             $table->json('preferences')->nullable();
             $table->timestamp('password_updated_at')->nullable();
             $table->string('twofa_secret_code', 100)->nullable();
-            $table->string('twofa_recovery_codes', 500)->nullable();
+            $table->json('twofa_recovery_codes')->nullable();
             $table->string('message_media_heading_color', 10)->default('inherit');
             $table->json('firebase_device_tokens')->nullable();
             $table->json('hidden_alert_ids')->nullable();

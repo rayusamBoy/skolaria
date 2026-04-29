@@ -89,21 +89,25 @@ Breadcrumbs::for('students.id_cards.manage', function (BreadcrumbTrail $trail) {
     $trail->push('Manage Students ID Cards', route('students.id_cards.manage'));
 });
 
-Breadcrumbs::for('students.show', function (BreadcrumbTrail $trail, $st_id) {
-    $class_id = StudentRepo::getRecordValue(Qs::decodeHash($st_id), 'my_class_id');
-    $trail->parent('students.list_by_class', $class_id);
-    $trail->push('Profile View', route('students.show', $st_id));
+Breadcrumbs::for('students.show', function (BreadcrumbTrail $trail, $student) {
+    $class_id = StudentRepo::getRecordValue(['id' => $student], 'my_class_id');
+    if (auth()->user()->hasExactRoles([config('roles.default_roles.tenant.parent')])) {
+        $trail->parent('parent.my_children');
+    } else {
+        $trail->parent('students.list_by_class', $class_id);
+    }
+    $trail->push('Profile View', route('students.show', $student));
 });
 
-Breadcrumbs::for('students.edit', function (BreadcrumbTrail $trail, $st_id) {
-    $class_id = StudentRepo::getRecordValue(Qs::decodeHash($st_id), 'my_class_id');
+Breadcrumbs::for('students.edit', function (BreadcrumbTrail $trail, $student) {
+    $class_id = StudentRepo::getRecordValue(['id' => $student], 'my_class_id');
     $trail->parent('students.list_by_class', $class_id);
-    $trail->push('Profile Edit', route('students.edit', $st_id));
+    $trail->push('Profile Edit', route('students.edit', $student));
 });
 
-Breadcrumbs::for('students.promotion', function (BreadcrumbTrail $trail, $st_id) {
+Breadcrumbs::for('students.promotion', function (BreadcrumbTrail $trail, $student) {
     $trail->parent('dashboard');
-    $trail->push('Promote Student', route('students.promotion', $st_id));
+    $trail->push('Promote Student', route('students.promotion', $student));
 });
 
 Breadcrumbs::for('students.promotion.manage', function (BreadcrumbTrail $trail) {
@@ -176,6 +180,17 @@ Breadcrumbs::for('sections.edit', function (BreadcrumbTrail $trail, $section) {
     $trail->push('Edit Section', route('sections.edit', $section));
 });
 
+// Class Types
+Breadcrumbs::for('class_types.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('dashboard');
+    $trail->push('Manage Class Types', route('class_types.index'));
+});
+
+Breadcrumbs::for('class_types.edit', function (BreadcrumbTrail $trail, $class_type) {
+    $trail->parent('class_types.index');
+    $trail->push('Edit Class Type', route('class_types.edit', $class_type));
+});
+
 // Subjects
 Breadcrumbs::for('subjects.index', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
@@ -231,11 +246,6 @@ Breadcrumbs::for('divisions.edit', function (BreadcrumbTrail $trail, $exam) {
 });
 
 // Marks
-Breadcrumbs::for('marks.index', function (BreadcrumbTrail $trail) {
-    $trail->parent('dashboard');
-    $trail->push('Manage Exam Marks', route('marks.index'));
-});
-
 Breadcrumbs::for('marks.tabulation', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
     $trail->push('Tabulation Sheet', route('marks.tabulation'));
@@ -251,25 +261,29 @@ Breadcrumbs::for('marks.manage', function (BreadcrumbTrail $trail, $exam, $class
     $trail->push('Manage Exam Marks', route('marks.selector', [$exam, $section, $subject, $class]));
 });
 
-Breadcrumbs::for('marks.bulk', function (BreadcrumbTrail $trail, $class, $section) {
+Breadcrumbs::for('marks.sheets', function (BreadcrumbTrail $trail, $class, $section) {
     $trail->parent('dashboard');
-    $trail->push('Select Student Marksheet', route('marks.bulk', [$class, $section]));
+    $trail->push('Select Student Marksheet', route('marks.sheets', [$class, $section]));
 });
 
-Breadcrumbs::for('marks.bulk_select', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('marks.sheets_select', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
-    $trail->push('Select Student Marksheet', route('marks.bulk_select'));
+    $trail->push('Select Student Marksheet', route('marks.sheets_select'));
 });
 
 Breadcrumbs::for('marks.year_selector', function (BreadcrumbTrail $trail, $id) {
-    $trail->parent('marks.bulk_select');
+    if (auth()->user()->hasExactRoles([config('roles.default_roles.tenant.parent')])) {
+        $trail->parent('parent.my_children');
+    } else {
+        $trail->parent('marks.sheets_select');
+    }
     $trail->push('Select Exam Year', route('marks.year_selector', $id));
 });
 
 Breadcrumbs::for('marks.show', function (BreadcrumbTrail $trail, $id, $year) {
     $sid = Qs::hash($id);
     $trail->parent('marks.year_selector', $sid);
-    $trail->push('Student Marksheet', route('marks.index', [$id, $year]));
+    $trail->push('Student Marksheet', route('marks.manage'));
 });
 
 Breadcrumbs::for('marks.convert', function (BreadcrumbTrail $trail) {
@@ -298,18 +312,22 @@ Breadcrumbs::for('assessments.progressive', function (BreadcrumbTrail $trail, $e
     $trail->push('Progressive Sheet', route('assessments.progressive', [$exam, $sec_id, $class]));
 });
 
-Breadcrumbs::for('assessments.bulk', function (BreadcrumbTrail $trail, $class, $section) {
+Breadcrumbs::for('assessments.sheets', function (BreadcrumbTrail $trail, $class, $section) {
     $trail->parent('dashboard');
-    $trail->push('Select Student Assessmentsheet', route('assessments.bulk', [$class, $section]));
+    $trail->push('Select Student Assessmentsheet', route('assessments.sheets', [$class, $section]));
 });
 
-Breadcrumbs::for('assessments.bulk_select', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('assessments.sheets_select', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
-    $trail->push('Select Student Assessmentsheet', route('assessments.bulk_select'));
+    $trail->push('Select Student Assessmentsheet', route('assessments.sheets_select'));
 });
 
 Breadcrumbs::for('assessments.year_selector', function (BreadcrumbTrail $trail, $id) {
-    $trail->parent('assessments.bulk_select');
+    if (auth()->user()->hasExactRoles([config('roles.default_roles.tenant.parent')])) {
+        $trail->parent('parent.my_children');
+    } else {
+        $trail->parent('assessments.sheets_select');
+    }
     $trail->push('Select Exam Year', route('assessments.year_selector', $id));
 });
 

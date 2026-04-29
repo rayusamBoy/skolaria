@@ -13,18 +13,31 @@ use App\Repositories\MyClassRepo;
 use App\Repositories\StudentRepo;
 use App\Repositories\UserRepo;
 use App\Rules\HasOrderedClassDescriptionSession;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request as HttpReq;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class StudentRecordController extends Controller
 {
-    protected $loc, $my_class, $user, $student, $students_batch_file_name_description;
+    protected LocationRepo $loc;
+    protected MyClassRepo $my_class;
+    protected UserRepo $user;
+    protected StudentRepo $student;
+    protected string $students_batch_file_name_description;
+    protected string $session;
 
-    public function __construct(LocationRepo $loc, MyClassRepo $my_class, UserRepo $user, StudentRepo $student)
-    {
+    public function __construct(
+        LocationRepo $loc,
+        MyClassRepo $my_class,
+        UserRepo $user,
+        StudentRepo $student,
+    ) {
         $this->permissionMap = config('permissions.names.tenant.student_records');
         parent::__construct();
         $this->loc = $loc;
@@ -32,18 +45,23 @@ class StudentRecordController extends Controller
         $this->user = $user;
         $this->student = $student;
         $this->students_batch_file_name_description = 'students batch add template';
+        $this->session = Usr::getCurrentSession();
     }
 
-    public function reset_password($st_id)
+    /**
+     * Reset a student's password to 'student'.
+     */
+    public function reset_password($st_id): RedirectResponse
     {
-        $st_id = Usr::decodeHash($st_id);
-        $data['password'] = Hash::make('student');
-        $this->user->update($st_id, $data);
+        $this->user->update($st_id, ['password' => Hash::make('student')]);
 
         return back()->with('flash_success', __('msg.p_reset'));
     }
 
-    public function create()
+    /**
+     * Show form to create a new student record.
+     */
+    public function create(): View
     {
         $data['parents'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.parent')]);
         $data['dorms'] = $this->student->getAllDorms();
@@ -53,59 +71,52 @@ class StudentRecordController extends Controller
         return view('pages.students.add', $data);
     }
 
-    public function store(StudentRecordCreate $req)
+    /**
+     * Store a new student record.
+     */
+    public function store(StudentRecordCreate $req): JsonResponse
     {
-        $data = $req->only(Usr::getUserRecord());
-        $sr = $req->only(Usr::getStudentData());
+        $user_data = $req->only(Usr::getUserRecord());
+        $student_data = $req->only(Usr::getStudentData());
 
-        $ct = $this->my_class->findTypeByClass($req->my_class_id)->code;
+        $class_type = $this->my_class->findTypeByClass($req->my_class_id);
+        $user_code = strtoupper(Str::random(10));
+        $adm_no = $req->adm_no ?: mt_rand(1000, 99999);
 
-        $data['user_role'] = $user_role = 'student';
-        $data['name'] = $name = strtoupper($req->name);
-        $data['code'] = $code = strtoupper(Str::random(10));
-        $data['password'] = Hash::make('student');
-        $data['photo'] = Usr::createAvatar($name, $code, $user_role);
-        $adm_no = $req->adm_no;
-        $data['username'] = strtoupper(Usr::getAppCode() . '/' . $ct . '/' . date('Y', strtotime($sr['date_admitted'])) . '/' . ($adm_no ?: mt_rand(1000, 99999)));
+        $role = config('roles.default_roles.tenant.student');
 
-        if ($req->hasFile('photo')) {
-            $photo = $req->file('photo');
-            $f = Usr::getFileMetaData($photo);
-            $f['name'] = 'photo.' . $f['ext'];
-            $f['path'] = $data['photo'] = Usr::getUploadPath('student') . $data['code'] . '/' . $f['name'];
-            $photo->storeAs($f['path']);
-        }
+        $user_data['user_role'] = $role;
+        $user_data['name'] = strtoupper($req->name);
+        $user_data['code'] = $user_code;
+        $user_data['password'] = Hash::make('student');
+        $user_data['username'] = $this->generateStudentUsername($class_type->code, $student_data['date_admitted'], $adm_no);
 
-        if ($req->hasFile('birth_certificate')) {
-            $birth_certificate = $req->file('birth_certificate');
-            $f = Usr::getFileMetaData($birth_certificate);
-            $f['name'] = 'birth_certificate.' . $f['ext'];
-            $f['path'] = $sr['birth_certificate'] = Usr::getUploadPath('student') . $data['code'] . '/' . $f['name'];
-            $birth_certificate->storeAs($f['path']);
-        }
+        // Handle file uploads
+        $this->handleFileUpload($req, 'photo', $user_data, $user_code, $role);
+        $this->handleFileUpload($req, 'birth_certificate', $student_data, $user_code, $role);
 
-        $user = $this->user->create($data);
+        $user = $this->user->create($user_data);
+        $user->assignRole($role);
 
-        $sr['user_id'] = $user->id;
-        $sr['adm_no'] = $user->username;
-        $sr['session'] = Usr::getSetting('current_session');
-        // Format string according to the enforced rule
-        $sr['house_no'] = strtoupper($sr['house_no']);
-        $sr['ps_name'] = ucfirst($sr['ps_name']);
-        $sr['ss_name'] = ucfirst($sr['ss_name']);
-        $sr['p_status'] = ucfirst($sr['p_status']);
+        $student_data['user_id'] = $user->id;
+        $student_data['adm_no'] = $user->username;
+        $student_data['session'] = $this->session;
+        $this->formatStudentDataFields($student_data);
 
-        $this->student->createRecord($sr);
+        $this->student->createRecord($student_data);
 
         return Usr::jsonStoreOk();
     }
 
-    public function batch_template(HttpReq $req)
+    /**
+     * Generate batch template Excel file.
+     */
+    public function batch_template(HttpReq $req): BinaryFileResponse
     {
-        $ur = self::getUserHeadings(false);
-        $sr = self::getStudentHeadings(false);
+        $user_headings = self::getUserHeadings(false);
+        $student_headings = self::getStudentHeadings(false);
 
-        $data['heading_names'] = [...$ur, ...$sr];
+        $data['heading_names'] = [...$user_headings, ...$student_headings];
         $data['class'] = $class = $this->my_class->find($req->my_class_id);
         $data['my_class_id'] = $req->my_class_id;
         $data['nationality'] = $this->loc->getNationality($req->nal_id);
@@ -122,28 +133,44 @@ class StudentRecordController extends Controller
         $data['year'] = $year = Usr::getCurrentSession();
 
         $delimiter = Usr::getDelimiter();
+        $filename = ucfirst(strtolower(str_replace(' ', '_', "{$class->name}{$delimiter}{$this->students_batch_file_name_description}{$delimiter}{$year}.xlsx")));
 
-        return Excel::download(new StudentsBatchAddExport($data), ucfirst(strtolower(str_replace(' ', '_', "{$class->name}{$delimiter}{$this->students_batch_file_name_description}{$delimiter}{$year}.xlsx"))));
+        return Excel::download(
+            new StudentsBatchAddExport($data),
+            $filename,
+            \Maatwebsite\Excel\Excel::XLSX,
+            [
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+                'Pragma' => 'no-cache',
+                'Expires' => '0',
+            ]
+        );
     }
 
-    public static function getUserHeadings($values_only = true)
+    /**
+     * Get user record headings.
+     */
+    public static function getUserHeadings(bool $values_only = true): array
     {
-        $ur = Usr::getUserRecord([], $values_only);
-        return $ur;
+        return Usr::getUserRecord([], $values_only);
     }
 
-    public static function getStudentHeadings($values_only = true)
+    /**
+     * Get student record headings.
+     */
+    public static function getStudentHeadings(bool $values_only = true): array
     {
-        $sr = Usr::getStudentData(['my_parent_id', 'age', 'birth_certificate'], $values_only);
-        return $sr;
+        return Usr::getStudentData(['my_parent_id', 'age', 'birth_certificate'], $values_only);
     }
 
-    public function batch_store(HttpReq $req)
+    /**
+     * Import batch student data from Excel.
+     */
+    public function batch_store(HttpReq $req): JsonResponse
     {
         $template = $req->file('template');
-        $f = Usr::getFileMetaData($template);
-        // Remove '.' and extension by replacing it with empty string
-        $name = str_replace('.' . $f['ext'], '', $f['name']);
+        $file_meta = Usr::getFileMetaData($template);
+        $name = str_replace('.' . $file_meta['ext'], '', $file_meta['name']);
         $req['template_name'] = $name;
 
         Validator::make($req->toArray(), [
@@ -151,34 +178,49 @@ class StudentRecordController extends Controller
             'template_name' => new HasOrderedClassDescriptionSession($this->students_batch_file_name_description),
         ], [], ['template' => 'students batch add template'])->validate();
 
-        if ($req->hasFile('template')) {
-            Excel::import(new StudentsBatchStoreImport(), request()->file('template'));
-            return Usr::jsonStoreOk();
-        }
+        Excel::import(new StudentsBatchStoreImport(), $template);
+
+        return Usr::jsonStoreOk();
     }
 
-    public function list_by_class($class_id)
+    /**
+     * List students by class ID.
+     */
+    public function list_by_class($class_id): View|RedirectResponse
     {
-        $data['my_class'] = $mc = $this->my_class->getMC(['id' => $class_id])->first();
-        $data['students'] = $this->student->findStudentsByClass($class_id);
+        $validator = Validator::make(['class_id' => $class_id], [
+            'class_id' => 'required|exists:my_classes,id',
+        ]);
+
+        if ($validator->fails()) {
+            return Usr::goWithDanger();
+        }
+
+        $data['class_id'] = $class_id;
+        $data['students'] = $this->student->findStudentsByClass($class_id, ['section', 'user', 'my_parent']);
         $data['sections'] = $this->my_class->getClassSections($class_id);
 
-        return $mc === null ? Usr::goWithDanger() : view('pages.students.list', $data);
+        return view('pages.students.list', $data);
     }
 
-    public function graduated()
+    /**
+     * Display graduated students.
+     */
+    public function graduated(): View
     {
         $data['grad_students'] = $this->student->allGradStudents()->whereNotNull('user');
 
         return view('pages.students.graduated', $data);
     }
 
-    public function not_graduated($sr_id, $prom_id)
+    /**
+     * Mark a student as not graduated and remove promotion record.
+     */
+    public function mark_not_graduated($sr_id, $prom_id)
     {
         $d['grad'] = 0;
         $d['grad_date'] = NULL;
-        $d['session'] = Usr::getSetting('current_session');
-        $sr_id = Usr::decodeHash($sr_id);
+        $d['session'] = $this->session;
 
         $this->student->updateRecord($sr_id, $d);
         $this->student->deletePromotion($prom_id);
@@ -186,30 +228,34 @@ class StudentRecordController extends Controller
         return back()->with('flash_success', __('msg.update_ok'));
     }
 
-    public function show($sr_id)
+    /**
+     * Show student record details.
+     */
+    public function show($student): View|RedirectResponse
     {
-        $sr_id = Usr::decodeHash($sr_id);
-        if (!$sr_id)
+        if (!$student) {
             return Usr::goWithDanger();
+        }
 
-        // Try getRecord for the active students, or getRecord2 for the graduated students.
-        $data['sr'] = $sr = $this->student->getRecord(['id' => $sr_id])->first() ?? $this->student->getRecord2(['id' => $sr_id])->first();
+        if ($this->isRestrictedStudentView($student)) {
+            return redirect()->route('dashboard')->with('pop_error', __('msg.denied'));
+        }
 
-        /* Prevent Other Students/Parents from viewing Profile of others */
-        //  if (auth()->id() != $sr->user_id && !Usr::userIsTeamSATCL() && !Usr::userIsMyChild($sr->user_id, auth()->id()))
-        if ($sr->user->hasRole(config('roles.default_roles.tenant.student')) && !(auth()->user()->hasRole(config('roles.default_roles.tenant.librarian')) or auth()->user()->hasRole(config('roles.default_roles.tenant.accountant'))))
-            return redirect(route('dashboard'))->with('pop_error', __('msg.denied'));
+        $data['sr'] = $this->findStudentRecord($student);
 
         return view('pages.students.show', $data);
     }
 
-    public function edit($sr_id)
+    /**
+     * Show form to edit a student record.
+     */
+    public function edit($student): View|RedirectResponse
     {
-        $sr_id = Usr::decodeHash($sr_id);
-        if (!$sr_id)
+        if (!$student) {
             return Usr::goWithDanger();
+        }
 
-        $data['sr'] = $sr = $this->student->getRecord(['id' => $sr_id])->first() ?? $this->student->getRecord2(['id' => $sr_id])->first();
+        $data['sr'] = $sr = $this->findStudentRecord($student);
         $data['parents'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.parent')]);
         $data['dorms'] = $this->student->getAllDorms();
         $data['states'] = $this->loc->getStates();
@@ -219,93 +265,156 @@ class StudentRecordController extends Controller
         return view('pages.students.edit', $data);
     }
 
-    public function update(StudentRecordUpdate $req, $sr_id)
+    /**
+     * Update a student record.
+     */
+    public function update(StudentRecordUpdate $req, $student): JsonResponse
     {
-        $sr_id = Usr::decodeHash($sr_id);
-        if (!$sr_id)
-            return Usr::goWithDanger();
-
-        $sr = $this->student->getRecord(['id' => $sr_id])->first() ?? $this->student->getRecord2(['id' => $sr_id])->first();
-        $d = $req->only(Usr::getUserRecord());
-        $d['name'] = strtoupper($req->name);
-        $d['username'] = $req->adm_no;
-
-        if ($req->hasFile('photo')) {
-            $photo = $req->file('photo');
-            $f = Usr::getFileMetaData($photo);
-            $f['name'] = 'photo.' . $f['ext'];
-            $f['path'] = $d['photo'] = Usr::getUploadPath('student') . $sr->user->code . '/' . $f['name'];
-            $photo->storeAs($f['path']);
+        if (!$student) {
+            return Usr::json(__('msg.srnf'), false);
         }
 
-        $this->user->update($sr->user->id, $d); // Update User Details
+        $sr = $this->findStudentRecord($student);
+        $user_code = $sr->user->code;
 
-        $srec = $req->only(Usr::getStudentData());
+        $user_data = $req->only(Usr::getUserRecord());
+        $user_data['name'] = strtoupper($req->name);
+        $user_data['username'] = $req->adm_no;
 
-        if ($req->hasFile('birth_certificate')) {
-            $birth_certificate = $req->file('birth_certificate');
-            $f = Usr::getFileMetaData($birth_certificate);
-            $f['name'] = 'birth_certificate.' . $f['ext'];
-            $f['path'] = $srec['birth_certificate'] = Usr::getUploadPath('student') . $sr->user->code . '/' . $f['name'];
-            $birth_certificate->storeAs($f['path']);
-        }
+        $this->handleFileUpload($req, 'photo', $user_data, $user_code, 'student');
+        $this->user->update($sr->user->id, $user_data);
 
-        // Format string according to the enforced rules
-        $srec['house_no'] = strtoupper($srec['house_no']);
-        $srec['ps_name'] = ucfirst($srec['ps_name']);
-        $srec['ss_name'] = ucfirst($srec['ss_name']);
-        $srec['p_status'] = ucfirst($srec['p_status']);
+        $student_data = $req->only(Usr::getStudentData());
+        $this->handleFileUpload($req, 'birth_certificate', $student_data, $user_code, 'student');
 
-        $srec['adm_no'] = $req->adm_no;
-        $this->student->updateRecord($sr_id, $srec); // Update Student Record
+        $this->formatStudentDataFields($student_data);
+        $student_data['adm_no'] = $req->adm_no;
 
-        /*** If Class/Section is Changed in Same Year, Delete Marks/ExamRecord of Previous Class/Section ****/
-        // Mk::deleteOldRecord($sr->user->id, $srec['my_class_id']);
+        $this->student->updateRecord($student, $student_data);
+
+        // Optional: Delete old marks if class/section changed
+        // Mk::deleteOldRecord($sr->user->id, $student_data['my_class_id']);
 
         return Usr::jsonUpdateOk();
     }
 
-    public function destroy($st_id)
+    /**
+     * Block all students in a class.
+     */
+    public function block_all_class(HttpReq $req): JsonResponse
     {
-        $st_id = Usr::decodeHash($st_id);
-        if (!$st_id)
-            return Usr::goWithDanger();
+        $student_ids = $this->getUserIdsByClass($req->class_id);
+        $this->user->updateByIds($student_ids, ['blocked' => 1]);
 
-        $sr = $this->student->getRecord(['user_id' => $st_id])->first();
-        $this->user->delete($sr->user->id);
-
-        return back()->with('flash_success', __('msg.del_ok'));
+        return Usr::json('Selected class students have been blocked successfully.');
     }
 
-    public function block_all_class(HttpReq $req)
+    /**
+     * Unblock all students in a class.
+     */
+    public function unblock_all_class(HttpReq $req): JsonResponse
     {
-        $students_ids = $this->student->getRecord(['my_class_id' => $req->class_id])->get()->pluck('user_id');
-        $this->user->updateByIds($students_ids, ['blocked' => 1]);
+        $student_ids = $this->getUserIdsByClass($req->class_id);
+        $this->user->updateByIds($student_ids, ['blocked' => 0]);
 
-        return Usr::json("Selected class sutdents have been Blocked successfully");
+        return Usr::json('Selected class students have been unblocked successfully.');
     }
 
-    public function unblock_all_class(HttpReq $req)
+    /**
+     * Block all graduated students.
+     */
+    public function block_all_graduated(): JsonResponse
     {
-        $students_ids = $this->student->getRecord(['my_class_id' => $req->class_id])->get()->pluck('user_id');
-        $this->user->updateByIds($students_ids, ['blocked' => 0]);
+        $student_ids = $this->student->allGradOnlyStudents()->pluck('user_id');
+        $this->user->updateByIds($student_ids, ['blocked' => 1]);
 
-        return Usr::json("Selected class sutdents have been Unblocked successfully");
+        return Usr::json('Graduated students have been blocked successfully.');
     }
 
-    public function block_all_graduated()
+    /**
+     * Unblock all graduated students.
+     */
+    public function unblock_all_graduated(): JsonResponse
     {
-        $students_ids = $this->student->allGradOnlyStudents()->pluck('user_id');
-        $this->user->updateByIds($students_ids, ['blocked' => 1]);
+        $student_ids = $this->student->allGradOnlyStudents()->pluck('user_id');
+        $this->user->updateByIds($student_ids, ['blocked' => 0]);
 
-        return Usr::json("Graduated sutdents have been Blocked successfully");
+        return Usr::json('Graduated students have been unblocked successfully.');
     }
 
-    public function unblock_all_graduated()
-    {
-        $students_ids = $this->student->allGradOnlyStudents()->pluck('user_id');
-        $this->user->updateByIds($students_ids, ['blocked' => 0]);
+    // ----------------------------------------------------------------------
+    // Protected Helper Methods
+    // ----------------------------------------------------------------------
 
-        return Usr::json("Graduated have been Unblocked successfully");
+    /**
+     * Generate student username based on app code, class code, admission year, and admission number.
+     */
+    protected function generateStudentUsername(string $class_code, string $date_admitted, $adm_no): string
+    {
+        $year = date('Y', strtotime($date_admitted));
+        return strtoupper(Usr::getAppCode() . '/' . $class_code . '/' . $year . '/' . $adm_no);
+    }
+
+    /**
+     * Handle file upload for user or student data.
+     */
+    protected function handleFileUpload(HttpReq $req, string $field, array &$data, string $user_code, string $role): void
+    {
+        if (!$req->hasFile($field)) {
+            return;
+        }
+
+        $file = $req->file($field);
+        $file_meta = Usr::getFileMetaData($file);
+        $file_meta['name'] = "$field." . $file_meta['ext'];
+        $file_meta['path'] = Usr::getUploadPath($role) . $user_code . '/' . $file_meta['name'];
+
+        $file->storeAs($file_meta['path']);
+        $data[$field] = $file_meta['path'];
+    }
+
+    /**
+     * Format student data fields according to business rules.
+     */
+    protected function formatStudentDataFields(array &$student_data): void
+    {
+        $student_data['house_no'] = strtoupper($student_data['house_no'] ?? '');
+        $student_data['ps_name'] = ucfirst($student_data['ps_name'] ?? '');
+        $student_data['ss_name'] = ucfirst($student_data['ss_name'] ?? '');
+        $student_data['p_status'] = ucfirst($student_data['p_status'] ?? '');
+    }
+
+    /**
+     * Find a student record by ID (active or graduated).
+     */
+    protected function findStudentRecord($id)
+    {
+        return $this->student->whereRecord(['id' => $id])->first()
+            ?? $this->student->whereGraduatesRecord(['id' => $id])->first();
+    }
+
+    /**
+     * Check if current user is restricted from viewing a student profile.
+     */
+    protected function isRestrictedStudentView($student): bool
+    {
+        $user = auth()->user();
+
+        if ($student != $user->id || $user->hasAnyRole(Usr::getTenancyAwareStaffRoles())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get student user IDs for a given class.
+     */
+    protected function getUserIdsByClass(int $class_id): array
+    {
+        return $this->student->whereRecord(['my_class_id' => $class_id])
+            ->get()
+            ->pluck('user_id')
+            ->toArray();
     }
 }

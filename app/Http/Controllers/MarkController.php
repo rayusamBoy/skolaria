@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\MarksExport;
 use App\Helpers\Mk;
+use App\Helpers\Usr;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Mark\MarkSelector;
 use App\Imports\MarksImport;
@@ -13,17 +14,30 @@ use App\Repositories\MarkRepo;
 use App\Repositories\MyClassRepo;
 use App\Repositories\StudentRepo;
 use App\Rules\HasOrderedClassExamSession;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 
 class MarkController extends Controller
 {
-    protected $my_class, $exam, $student, $year, $user, $mark, $assessment;
+    protected MyClassRepo $my_class;
+    protected ExamRepo $exam;
+    protected StudentRepo $student;
+    protected string $year;
+    protected MarkRepo $mark;
+    protected AssessmentRepo $assessment;
 
-    public function __construct(MyClassRepo $my_class, ExamRepo $exam, StudentRepo $student, MarkRepo $mark, AssessmentRepo $assessment)
-    {
+    public function __construct(
+        MyClassRepo $my_class,
+        ExamRepo $exam,
+        StudentRepo $student,
+        MarkRepo $mark,
+        AssessmentRepo $assessment
+    ) {
         $this->permissionMap = config('permissions.names.tenant.marks');
         parent::__construct();
         $this->exam = $exam;
@@ -34,392 +48,355 @@ class MarkController extends Controller
         $this->year = Mk::getCurrentSession();
     }
 
-    public function index()
+    /**
+     * Display year selector view.
+     */
+    public function year_selector($student): View|RedirectResponse
     {
-        $d['exams'] = $this->exam->getExam(['year' => $this->year]);
-        $d['sections'] = $this->my_class->getAllSections();
-        $d['subjects'] = $this->my_class->getAllSubjects();
-        $d['selected'] = false;
-
-        return view('pages.marks.index', $d);
+        return $this->verifyStudentExamYear($student);
     }
 
-    public function year_selector($student_id)
-    {
-        return $this->verifyStudentExamYear($student_id);
-    }
-
-    public function year_selected(Request $req, $student_id)
+    /**
+     * Handle year selection and redirect.
+     */
+    public function year_selected(Request $req, $student): RedirectResponse
     {
         $year = $req->year;
 
-        if (!$this->verifyStudentExamYear($student_id, $year))
+        if (!$this->verifyStudentExamYear($student, $year)) {
             return $this->noStudentRecord();
-
-        $student_id = Mk::hash($student_id);
-
-        if ($this->getExams($year)->isEmpty())
-            return redirect()->route('marks.year_selector', $student_id)->with("flash_info", "Oops! There are no published exam result(s) for the selected year - $year");
-
-        return redirect()->route('marks.show', [$student_id, $year]);
-    }
-
-    public function show($student_id, $year)
-    {
-        /* Prevent Other Students/Parents from viewing Result of others */
-        if (auth()->id() != $student_id && !Mk::userIsMyChild($student_id, auth()->id()))
-            return redirect(route('dashboard'))->with('pop_error', __('msg.denied'));
-
-        if (Mk::examIsLocked() && !auth()->user()->hasAnyRole([config('roles.default_roles.tenant.superadmin'), config('roles.default_roles.tenant.admin')])) {
-            Session::put('marks_url', route('marks.show', [Mk::hash($student_id), $year]));
-
-            if (!$this->checkPinVerified($student_id))
-                return redirect()->route('pins.enter', Mk::hash($student_id));
         }
 
-        if (!$this->verifyStudentExamYear($student_id, $year))
-            return $this->noStudentRecord();
+        $hashed_student = Mk::hash($student);
 
-        $wh = ['student_id' => $student_id, 'year' => $year];
-
-        $d['marks'] = $this->exam->getMark($wh);
-        $d['exam_records'] = $exr = $this->exam->getRecordsWithRelations(['section'], $wh);
-        $d['exams'] = $this->getExams($year);
-        $d['sr'] = $this->student->getRecord(['user_id' => $student_id])->latest()->first() ?? $this->student->getRecord2(['user_id' => $student_id])->latest()->first();
-        $d['my_class'] = $this->my_class->getMC(['id' => $exr->last()->my_class_id])->first();
-        $d['subjects'] = $this->my_class->getAllSubjects();
-        $d['year'] = $year;
-        $d['student_id'] = $student_id;
-        $d['skills'] = $this->exam->getSkillByClassType() ?: null;
-
-        return view('pages.marks.show.index', $d);
-    }
-
-    private function getExams($year)
-    {
-        $exams = $this->exam->getExam(['year' => $year], false);
-
-        return auth()->user()->hasAnyRole([config('roles.default_roles.tenant.superadmin'), config('roles.default_roles.tenant.admin')]) ? $exams : $exams->where('published', true);
-    }
-
-    public function print_view($student_id, $exam_id, $year)
-    {
-        /* Prevent Other Students/Parents from viewing Result of others */
-        if (auth()->id() != $student_id && !Mk::userIsMyChild($student_id, auth()->id()))
-            return redirect(route('dashboard'))->with('pop_error', __('msg.denied'));
-
-        if (Mk::examIsLocked() && !auth()->user()->hasAnyRole([config('roles.default_roles.tenant.superadmin'), config('roles.default_roles.tenant.admin')])) {
-            Session::put('marks_url', route('marks.show', [Mk::hash($student_id), $year]));
-
-            if (!$this->checkPinVerified($student_id))
-                return redirect()->route('pins.enter', Mk::hash($student_id));
+        if ($this->getExams($year)->isEmpty()) {
+            return redirect()
+                ->route('marks.year_selector', $hashed_student)
+                ->with('flash_info', __('msg.no_exams_for_year', ['year' => $year]));
         }
 
-        if (!$this->verifyStudentExamYear($student_id, $year))
-            return $this->noStudentRecord();
-
-        $wh = ['student_id' => $student_id, 'exam_id' => $exam_id, 'year' => $year];
-
-        $d['marks'] = $this->exam->getMark($wh);
-        $d['exr'] = $exr = $this->exam->getRecordsWithRelations(['section'], $wh)->first();
-        $d['my_class'] = $mc = $this->my_class->find($exr->my_class_id);
-        $d['section'] = $this->my_class->findSection($exr->section_id);
-        $d['ex'] = $exam = $this->exam->find($exam_id);
-        $d['tex'] = "tex{$exam->term}";
-        $d['sr'] = $this->student->getRecord(['user_id' => $student_id])->first() ?? $this->student->getRecord2(['user_id' => $student_id])->first();
-        $d['class_type'] = $this->my_class->findTypeByClass($mc->id);
-        $d['subjects'] = $this->my_class->findSubjectByClass($mc->id);
-        $d['ct'] = $d['class_type']->code;
-        $d['year'] = $year;
-        $d['student_id'] = $student_id;
-        $d['exam_id'] = $exam_id;
-        $d['skills'] = $this->exam->getSkillByClassType() ?: null;
-        $d['settings'] = Mk::getSettings();
-
-        return view('pages.marks.print.index', $d);
+        return redirect()->route('marks.show', [$hashed_student, $year]);
     }
 
-    public function selector(MarkSelector $req)
+    /**
+     * Show student's marks for a year.
+     */
+    public function show($student, $year): View|RedirectResponse
     {
-        $data = $req->only(['exam_id', 'my_class_id', 'section_id', 'subject_id']);
-        $d2 = $req->only(['exam_id', 'my_class_id', 'section_id']);
-        $d = $req->only(['my_class_id', 'section_id']);
-        $d['session'] = $data['year'] = $d2['year'] = $this->year;
-        $exam = $this->exam->find($req->exam_id);
+        $user = auth()->user();
+        $is_staff = $user->hasAnyRole(Usr::getTenancyAwareStaffRoles());
 
-        $class_type = $this->my_class->findTypeByClass($req->my_class_id);
-        // If the exam do not belong to the selected class
-        if ($exam->class_type_id != $class_type->id)
+        if (!$is_staff && $user->id != $student && !Mk::userIsMyChild($student, $user->id)) {
+            return redirect()->route('dashboard')->with('pop_error', __('msg.denied'));
+        }
+
+        if (Mk::examIsLocked() && !$user->hasAnyRole($this->getAdminRoles())) {
+            session()->put('marks_url', route('marks.show', [Mk::hash($student), $year]));
+
+            if (!$this->checkPinVerified($student)) {
+                return redirect()->route('pins.enter', Mk::hash($student));
+            }
+        }
+
+        if (!$this->verifyStudentExamYear($student, $year)) {
+            return $this->noStudentRecord();
+        }
+
+        $where = ['student_id' => $student, 'year' => $year];
+        $exam_records = $this->exam->getRecord($where, ['section', 'division', 'grade']);
+
+        if ($exam_records->isEmpty()) {
+            return $this->noStudentRecord();
+        }
+
+        $my_class = $this->my_class->getMC(['id' => $exam_records->value('my_class_id')])->first();
+
+        return view('pages.marks.show.index', [
+            'marks' => $this->exam->getMark($where, ['grade']),
+            'exam_records' => $exam_records,
+            'exams' => $this->getExams($year),
+            'sr' => $this->getStudentRecord($student),
+            'my_class' => $my_class,
+            'subjects' => $this->my_class->getAllSubjects(),
+            'year' => $year,
+            'student_id' => $student,
+            'skills' => $this->exam->getSkillByClassType(),
+        ]);
+    }
+
+    /**
+     * Show printable version of student's marks for a specific exam.
+     */
+    public function print_view($student, $exam_id, $year): View|RedirectResponse
+    {
+        $user = auth()->user();
+        $is_staff = $user->hasAnyRole(Usr::getTenancyAwareStaffRoles());
+
+        if (!$is_staff && $user->id != $student && !Mk::userIsMyChild($student, $user->id)) {
+            return redirect()->route('dashboard')->with('pop_error', __('msg.denied'));
+        }
+
+        if (Mk::examIsLocked() && !$user->hasAnyRole($this->getAdminRoles())) {
+            session()->put('marks_url', route('marks.show', [Mk::hash($student), $year]));
+
+            if (!$this->checkPinVerified($student)) {
+                return redirect()->route('pins.enter', Mk::hash($student));
+            }
+        }
+
+        if (!$this->verifyStudentExamYear($student, $year)) {
+            return $this->noStudentRecord();
+        }
+
+        $where = ['student_id' => $student, 'exam_id' => $exam_id, 'year' => $year];
+        $exam_record = $this->exam->getRecord($where, ['section'])->first();
+
+        if (!$exam_record) {
+            return $this->noStudentRecord();
+        }
+
+        $my_class = $this->my_class->find($exam_record->my_class_id);
+        $exam = $this->exam->find($exam_id);
+        $class_type = $this->my_class->findTypeByClass($my_class->id);
+
+        return view('pages.marks.print.index', [
+            'marks' => $this->exam->getMark($where, ['grade']),
+            'exr' => $exam_record,
+            'my_class' => $my_class,
+            'section' => $this->my_class->findSection($exam_record->section_id),
+            'ex' => $exam,
+            'tex' => "tex{$exam->term}",
+            'sr' => $this->getStudentRecord($student),
+            'class_type' => $class_type,
+            'subjects' => $this->my_class->findSubjectByClass($my_class->id),
+            'ct' => $class_type->code,
+            'year' => $year,
+            'student_id' => $student,
+            'exam_id' => $exam_id,
+            'skills' => $this->exam->getSkillByClassType(),
+        ]);
+    }
+
+    /**
+     * Initialize marks for a class/exam/subject combination.
+     */
+    public function selector(MarkSelector $req): RedirectResponse
+    {
+        $data = $req->validated();
+        $exam = $this->exam->find($data['exam_id'])->with('assessment')->first();
+        $class_type = $this->my_class->findTypeByClass($data['my_class_id']);
+
+        if ($exam->class_type_id != $class_type->id) {
             return back()->with('flash_danger', __('msg.invalid_exam_and_class'));
+        }
 
-        $sub_recs = $this->my_class->getSubjectRecord(['subject_id' => $req->subject_id])->where('subject.my_class_id', $req->my_class_id);
+        $students = $this->getStudentsForSubject(
+            $data['my_class_id'],
+            $data['section_id'],
+            $data['subject_id']
+        );
 
-        if ($req->section_id == null && $sub_recs->whereNull('section_id')->whereNotNull('students_ids')->isNotEmpty())
-            $students = $this->student->getRecordByUserIDs($sub_recs->value('students_ids'))->get();
-        elseif ($req->section_id == null && $sub_recs->whereNull('section_id')->whereNull('students_ids')->isNotEmpty() || $req->section_id != null && $sub_recs->whereNotNull('students_ids')->isNotEmpty())
+        if ($students->isEmpty()) {
             return back()->with('pop_error', __('msg.rnf'));
-        else
-            $students = $this->student->getRecord($d)->get();
+        }
 
-        if ($students->isEmpty())
-            return back()->with('pop_error', __('msg.rnf'));
+        $d2 = $req->only(['exam_id', 'my_class_id', 'section_id']);
+        $d2['year'] = $this->year;
 
-        foreach ($students as $s) {
-            $data['student_id'] = $d2['student_id'] = $s->user_id;
-            $data['section_id'] = $d2['section_id'] = $s->section_id;
+        foreach ($students as $student) {
+            $data['student_id'] = $d2['student_id'] = $student->user_id;
+            $data['section_id'] = $d2['section_id'] = $student->section_id;
+            $data['year'] = $this->year;
+
             $mark = $this->exam->createMark($data);
             $this->exam->createRecord($d2);
 
-            // If the exam is of type terminal or annual, create associated assessment records
-            if (Mk::isTerminalExam($exam->category_id) || Mk::isAnnualExam($exam->category_id)) {
-                $data['mark_id'] = $mark->id;
-                $data['assessment_id'] = $this->assessment->getAssessment(['exam_id' => $req->exam_id])->id;
-                $this->assessment->createRecord($data);
-                unset($data['mark_id'], $data['assessment_id']);
+            if ($exam->hasAssessment()) {
+                $this->createAssessmentRecord($mark->id, $exam->assessment->id, $data);
             }
         }
 
-        return redirect()->route('marks.manage', [$exam, $req->my_class_id, $req->subject_id, $req->section_id]);
+        return redirect()->route('marks.manage', [
+            $data['exam_id'],
+            $data['my_class_id'],
+            $data['subject_id'],
+            $data['section_id'],
+            true
+        ]);
     }
 
-    public function manage($exam_id, $class_id, $subject_id, $section_id = null)
+    /**
+     * Display marks management interface.
+     */
+    public function manage($exam_id = null, $class_id = null, $subject_id = null, $section_id = null, $selected = false): View
     {
-        $d = $section_id == null ? ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'subject_id' => $subject_id, 'year' => $this->year] : ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'section_id' => $section_id, 'subject_id' => $subject_id, 'year' => $this->year];
+        $data = [
+            'selected' => $selected,
+            'exams' => $this->exam->getExam(['year' => $this->year]),
+            'sections' => $this->my_class->getAllSections(),
+            'subjects' => $this->my_class->getAllSubjects(),
+        ];
 
-        $marks_created_at = $this->exam->getRecordValue($d, 'created_at');
-        $marks_updated_at = $this->exam->getRecordValue($d, 'updated_at');
+        if ($selected) {
+            $where = [
+                'exam_id' => $exam_id,
+                'my_class_id' => $class_id,
+                'subject_id' => $subject_id,
+                'year' => $this->year,
+            ];
 
-        $d['marks'] = $this->exam->getMark($d)->whereNotNull('user');
-        if ($d['marks']->isEmpty())
-            return $this->noStudentRecord();
+            if ($section_id !== null) {
+                $where['section_id'] = $section_id;
+            }
 
-        $d['m'] = $d['marks']->first();
-        $d['exams'] = $this->exam->getExam(['year' => $this->year]);
-        $d['exam'] = $this->exam->getById($exam_id, false);
-        $d['sections'] = $this->my_class->getAllSections();
-        $d['selected'] = true;
-        $d['class_type'] = $this->my_class->findTypeByClass($class_id);
-        $d['created_at'] = Mk::onlyDateFormat($marks_created_at);
-        $d['updated_at'] = Mk::onlyDateFormat($marks_updated_at);
-        $d['subjects'] = $this->my_class->getAllSubjects();
+            $marks = $this->exam->getMark($where, [
+                'user',
+                'user.student_record',
+                'exam',
+                'subject',
+                'my_class',
+                'section'
+            ])->whereNotNull('user');
 
-        if (auth()->user()->hasRole(config('roles.default_roles.tenant.teacher')))
-            $d['subjects'] = $this->my_class->findSubjectByRecord(auth()->id(), $class_id);
+            if ($marks->isEmpty()) {
+                return $this->noStudentRecord();
+            }
 
-        if ($section_id == null)
-            $d['section_id_is_null'] = false;
+            $first_mark = $marks->first();
+            $data = [...$where, ...$data];
+            $data['m'] = $first_mark;
+            $data['marks'] = $marks;
+            $data['exam'] = $this->exam->getById($exam_id, false);
+            $data['class_type'] = $this->my_class->findTypeByClass($class_id);
+            $data['created_at'] = Mk::onlyDateFormat($first_mark->created_at);
+            $data['updated_at'] = Mk::onlyDateFormat($first_mark->updated_at);
 
-        return view('pages.marks.manage', $d);
+            if (auth()->user()->hasRole(config('roles.default_roles.tenant.teacher'))) {
+                $data['subjects'] = $this->my_class->findSubjectByRecord(auth()->id(), $class_id);
+            }
+        }
+
+        return view('pages.marks.manage', $data);
     }
 
-    public function update(Request $req, $exam_id, $class_id, $subject_id, $section_id = null)
+    /**
+     * Update marks for a subject.
+     */
+    public function update(Request $req, $exam_id, $class_id, $subject_id, $section_id = null): JsonResponse
     {
         $exam = $this->exam->find($exam_id);
 
-        if ($this->exam->isLocked($exam_id) or Mk::isDisabled($exam->editable))
+        if ($exam->locked) {
             return Mk::jsonUpdateDenied();
-
-        switch ($section_id) {
-            case null:
-                $students_ids = $this->my_class->getSubjectRecord(['subject_id' => $subject_id, 'section_id' => null])->value('students_ids');
-                $p = ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'subject_id' => $subject_id, 'year' => $this->year];
-                $wh = ['my_class_id' => $class_id, 'exam_id' => $exam_id, 'year' => $this->year];
-                $marks = $this->exam->getMarkByIds($students_ids)->where($p)->get();
-                break;
-            default:
-                $p = ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'section_id' => $section_id, 'subject_id' => $subject_id, 'year' => $this->year];
-                $wh = ['my_class_id' => $class_id, 'section_id' => $section_id, 'exam_id' => $exam_id, 'year' => $this->year];
-                $marks = $this->exam->getMark($p)->whereNotNull('user');
-                break;
         }
-
-        $d = $d3 = $all_st_ids = $section_ids = [];
 
         $class_type = $this->my_class->findTypeByClass($class_id);
+        [$marks, $where] = $this->fetchMarksForUpdate($exam_id, $class_id, $subject_id, $section_id);
 
-        $mks = $req->all();
+        $form_data = $req->all();
 
-        /** Exam marks, total marks, grade, subject position **/
-        foreach ($marks as $mk) {
-            $all_st_ids[] = $mk->student_id;
-            $section_ids[$mk->student_id] = $mk->section_id;
+        // Update subject marks
+        $mark_updates = $this->buildSubjectMarkUpdates($marks, $form_data, $exam, $class_type->id, $class_id, $subject_id);
+        $this->exam->massUpdateMark($mark_updates);
 
-            $d['id'] = $mk->id;
-            $d['exm'] = $exm = $mks["exm_{$mk->id}"];
-            $d['exam_id'] = $exam_id;
-            $d["tex{$exam->term}"] = $total = $exm;
-
-            if ($total > 100)
-                $d["tex{$exam->term}"] = $d['exm'] = null;
-
-            $grade = $this->mark->getGrade($total, $class_type->id);
-            $d['grade_id'] = $grade?->id;
-            $d['sub_pos'] = $this->mark->getSubPos($mk->student_id, $exam, $class_id, $subject_id, $this->year);
-
-            $d_collection[] = $d;
+        // Update assessments
+        if ($exam->hasAssessment()) {
+            $assessment_updates = $this->buildAssessmentUpdates($marks, $form_data, $exam);
+            $this->assessment->massUpdateRecs($assessment_updates, ['mark_id']);
         }
 
-        $this->exam->massUpdateMark($d_collection);
+        // Recalculate student exam records
+        $student_ids = $marks->pluck('student_id')->unique()->toArray();
+        $exam_record_updates = $this->buildExamRecordUpdates(
+            $student_ids,
+            $exam,
+            $class_id,
+            $where,
+            $class_type,
+            $section_id ?: fn($st_id) => $marks->firstWhere('student_id', $st_id)->section_id ?? null
+        );
+        $this->exam->massUpdateExamRec($exam_record_updates, ['student_id', 'exam_id']);
 
-        /** Marks update ends */
-
-        /** Update Assessments records exam marks for terminal or annual exam */
-        if (Mk::isTerminalExam($exam->category_id) || Mk::isAnnualExam($exam->category_id)) {
-            foreach ($marks->sortBy('user.name') as $mk) {
-                $d2 = $d;
-                $d2['mark_id'] = $mk->id;
-                $d2["tex{$exam->term}"] = null;
-                $evaluated_val = $this->assessment->getValueOutOfQuantity($mks["exm_{$mk->id}"], $exam->tdt_denominator);
-                $d2['exm'] = ($evaluated_val == 0) ? null : $evaluated_val;
-
-                // Remove 'id's from data2 collection
-                unset($d2['id']);
-                $d2_collection[] = $d2;
-            }
-
-            $this->assessment->massUpdateRecs($d2_collection, ['mark_id']);
-        }
-
-        $sub_ids = $this->mark->getSubjectIDs($wh);
-        $subjects = $this->my_class->getSubjectsByIDs($sub_ids);
-        $marks2 = $this->exam->getMark($wh);
-
-        if (isset($class_id)) {
-            $class_type_id = $this->my_class->find($class_id)->class_type_id;
-            $subjects_considered = $this->my_class->findType($class_type_id)->value('subjects_considered');
-        }
-
-        /* Exam Record Update */
-        $points = [];
-        foreach (array_unique($all_st_ids) as $st_id) {
-            // Mass update Unique by's
-            $d3['student_id'] = $st_id;
-            $d3['exam_id'] = $exam_id;
-            // Data to update
-            $d3['total'] = $this->mark->getExamTotalTerm($exam, $st_id, $class_id, $this->year);
-            $d3['ave'] = $ave = $this->mark->getLimitedExamAvgTerm($exam, $st_id, $class_id, $section_id ?? $section_ids[$st_id], $this->year, $subjects_considered);
-            $d3['grade_id'] = $grade = $this->mark->getGrade($ave, $class_type->id)->id ?? null;
-            $d3['class_ave'] = $this->mark->getClassAvg($exam, $class_id, $this->year) ?? null;
-            // Position Section wise
-            $d3['pos'] = $this->exam->getStudentPos($st_id, $exam->id, $class_id, $this->year, $exam->exam_student_position_by_value, $section_id ?? $section_ids[$st_id]);
-            // Get all points
-            foreach ($subjects as $sub) {
-                $points[] = $marks2->where('student_id', $st_id)->where('subject_id', $sub->id)->first()->grade->point ?? null;
-                $grade_points[] = $marks2->where('student_id', $st_id)->where('subject_id', $sub->id)->where('subject.core', 1)->first()->grade->credit ?? null;
-            }
-
-            $d3['points'] = $total_points = $this->mark->getExtractedSumOf($points, $subjects_considered);
-            $d3['gpa'] = $this->mark->getExtractedSumOf($grade_points, $subjects_considered) / $subjects_considered;
-            $d3['division_id'] = Mk::getDivision($total_points, $class_type_id)->id ?? null;
-
-            $d3_collection[] = $d3;
-            unset($points);
-        }
-
-        $this->exam->massUpdateExamRec($d3_collection, ['student_id', 'exam_id']);
-        /*Exam Record End*/
-
-        foreach (array_unique($all_st_ids) as $st_id) {
-            $d4['student_id'] = $st_id;
-            $d4['exam_id'] = $exam->id;
-            $d4['my_class_id'] = $class_id;
-            // Position Class wise
-            $d4['class_pos'] = $this->exam->getStudentPos($st_id, $exam->id, $class_id, $this->year, $exam->exam_student_position_by_value);
-
-            $d4_collection[] = $d4;
-        }
-
-        $this->exam->massUpdateExamRec($d4_collection, ['student_id', 'exam_id', 'my_class_id']);
+        // Update class positions
+        $position_updates = $this->buildClassPositionUpdates($exam, $class_id, $student_ids);
+        $this->exam->massUpdateExamRec($position_updates, ['student_id', 'exam_id', 'my_class_id']);
 
         return Mk::jsonUpdateOk();
     }
 
-    public function batch()
+    /**
+     * Display batch operations page.
+     */
+    public function batch(): View
     {
-        $d['exams'] = $this->exam->getExam(['year' => $this->year]);
-        $d['selected'] = false;
-
-        return view('pages.marks.batch.index', $d);
+        return view('pages.marks.batch.index', [
+            'exams' => $this->exam->getExam(['year' => $this->year]),
+            'selected' => false,
+        ]);
     }
 
+    /**
+     * Generate Excel template for batch upload.
+     */
     public function batch_template(Request $req)
     {
-        set_time_limit(1800); // Extend excecution time from normal 1 minute to 30 minutes
+        set_time_limit(1800);
 
-        $data['class'] = $class = $this->my_class->find($req->my_class_id);
-        $data['exam'] = $exam = $this->exam->find($req->exam_id);
-        $data['class_type_id'] = $class_type_id = $class->class_type_id;
+        $class = $this->my_class->find($req->my_class_id);
+        $exam = $this->exam->find($req->exam_id);
 
-        // If the selected class's class type is not equal to the exam class type
-        if ($exam->class_type_id != $class_type_id)
+        if ($exam->class_type_id != $class->class_type_id) {
             return back()->with('flash_error', __('msg.invalid_exam_and_class'));
-
-        if (!$this->my_class->whereSubject(['my_class_id' => $class->id])->exists())
-            return back()->with('flash_error', __('msg.assign_subjects_to_class'));
-
-        $d = ['exam_id' => $exam->id, 'my_class_id' => $class->id, 'year' => $this->year];
-
-        $p = $this->student->getRecord(['my_class_id' => $req->my_class_id, 'session' => $this->year])->get();
-        if ($p->isEmpty())
-            return redirect()->back()->with('flash_danger', __('msg.srnf'));
-
-        $assessment_id = $this->assessment->getAssessment(['exam_id' => $req->exam_id])->id ?? null;
-
-        foreach ($this->my_class->getSections(['my_class_id' => $class->id]) as $sec) {
-
-            $subjects_with_recs = $this->my_class->getSubjectWithRecsWhereHas($sec->id, $class->id);
-
-            foreach ($p->where('section_id', $sec->id)->all() as $st_rec) {
-
-                foreach ($subjects_with_recs as $sub) {
-                    $students_ids = $this->my_class->whereSubjectRecord(['subject_id' => $sub->id])->whereNotNull('students_ids')->value('students_ids');
-
-                    if ($students_ids != null) {
-                        array_walk($students_ids, function (&$arr) { // note the reference (&)
-                            $arr = \intval($arr); // Convert each array value to integer
-                        });
-
-                        if (\in_array((int) $st_rec->user_id, $students_ids)) {
-                            $mk = $this->mark->firstOrCreate($st_rec->user_id, $class->id, $sec->id, $exam->id, $this->year, $sub->id);
-                            $this->exam->firstOrCreateExmRec($st_rec->user_id, $class->id, $sec->id, $exam->id, $this->year);
-                            if (Mk::isTerminalExam($exam->category_id) || Mk::isAnnualExam($exam->category_id))
-                                $this->assessment->firstOrCreateRec($st_rec->user_id, $class->id, $sec->id, $exam->id, $this->year, $sub->id, $mk->id, $assessment_id);
-                        }
-                    } else {
-                        $mk = $this->mark->firstOrCreate($st_rec->user_id, $class->id, $sec->id, $exam->id, $this->year, $sub->id);
-                        $this->exam->firstOrCreateExmRec($st_rec->user_id, $class->id, $sec->id, $exam->id, $this->year);
-                        if (Mk::isTerminalExam($exam->category_id) || Mk::isAnnualExam($exam->category_id))
-                            $this->assessment->firstOrCreateRec($st_rec->user_id, $class->id, $sec->id, $exam->id, $this->year, $sub->id, $mk->id, $assessment_id);
-                    }
-                }
-
-                $old_section_id = $this->exam->getRecord(['student_id' => $st_rec->user_id, 'exam_id' => $exam->id, 'my_class_id' => $class->id])->value('section_id');
-                // If there exists old student record for the particular exam, and class (ie., section changes for particular level)
-                if ($req->delete_old_section_record == 1 and $old_section_id != $st_rec->section_id) {
-                    // delete old marks and exam records
-                    $where = ['student_id' => $st_rec->user_id, 'exam_id' => $exam->id, 'my_class_id' => $class->id, 'section_id' => $old_section_id];
-                    $this->exam->deleteRecord($where);
-                    $this->exam->deleteMark($where);
-                }
-            }
         }
 
-        // Delay excecution of followed statement(s) until the database is approximated complete updated
-        sleep(30);
-        $data['marks'] = $this->exam->getMark($d);
-        $data['year'] = $this->year;
-        $data['subjects'] = Mk::getSubjects($class->id);
-        $delimiter = Mk::getDelimiter();
+        if (!$this->my_class->whereSubject(['my_class_id' => $class->id])->exists()) {
+            return back()->with('flash_error', __('msg.assign_subjects_to_class'));
+        }
 
-        return Excel::download(new MarksExport($data), ucfirst(strtolower(str_replace(' ', '_', "{$class->name}{$delimiter}{$exam->name}{$delimiter}{$exam->year}.xlsx"))));
+        $students = $this->student->whereRecord([
+            'my_class_id' => $req->my_class_id,
+            'session' => $this->year
+        ])->get();
+
+        if ($students->isEmpty()) {
+            return redirect()->back()->with('flash_danger', __('msg.srnf'));
+        }
+
+        $this->initializeBatchMarks($exam, $class, $students, (bool) $req->delete_old_section_record);
+
+        $data = [
+            'marks' => $this->exam->getMark(
+                ['exam_id' => $exam->id, 'my_class_id' => $class->id, 'year' => $this->year],
+                ['user', 'my_class', 'section', 'exam']
+            ),
+            'my_class_id' => $req->my_class_id,
+            'year' => $this->year,
+            'subjects' => Mk::getSubjects($class->id),
+        ];
+
+        $delimiter = Mk::getDelimiter();
+        $filename = str_replace(' ', '_', "{$class->name}{$delimiter}{$exam->name}{$delimiter}{$exam->year}.xlsx");
+
+        return Excel::download(
+            new MarksExport($data),
+            $filename,
+            \Maatwebsite\Excel\Excel::XLSX,
+            [
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+                'Pragma' => 'no-cache',
+                'Expires' => '0',
+            ]
+        );
     }
 
+    /**
+     * Handle uploaded marks Excel file.
+     */
     public function batch_upload(Request $req)
     {
         $template = $req->file('template');
-        $f = Mk::getFileMetaData($template);
-        // Remove '.' and extension by replacing it with empty string
-        $name = str_replace('.' . $f['ext'], '', $f['name']);
+        $file_meta = Mk::getFileMetaData($template);
+        $name = str_replace('.' . $file_meta['ext'], '', $file_meta['name']);
         $req['template_name'] = $name;
 
         Validator::make($req->toArray(), [
@@ -427,157 +404,97 @@ class MarkController extends Controller
             'template_name' => new HasOrderedClassExamSession,
         ], [], ['template' => 'marks template'])->validate();
 
-        if ($req->hasFile('template')) {
-            $delimiter = Mk::getDelimiter();
-            $exploded_name = explode($delimiter, $name);
-            $data['year'] = $year = "$exploded_name[2]-$exploded_name[3]";
-            // Get class_id and exam_id by class and exam names.
-            $class = $this->my_class->get(['name' => str_replace('_', ' ', $exploded_name[0])]);
-            $data['class_id'] = $class_id = $class->value('id');
-            $exam = $this->exam->getExam(['name' => str_replace('_', ' ', $exploded_name[1]), 'year' => $year]);
-            $data['exam_id'] = $exam_id = $exam->value('id');
-
-            if ($exam->value('class_type_id') != $class->value('class_type_id'))
-                return Mk::json(__('msg.invalid_exam_and_class'), false);
-
-            if (!$this->exam->exists((int) $exam_id))
-                return Mk::json(__('msg.ernf'), false);
-
-            $d = ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'year' => $year];
-            $data['st_mark'] = $this->exam->getMark($d);
-            $data['session'] = $this->year;
-
-            Excel::import(new MarksImport($data), request()->file('template'));
-            return Mk::jsonStoreOk();
+        if (!$req->hasFile('template')) {
+            return Mk::json(__('msg.file_required'), false);
         }
+
+        $delimiter = Mk::getDelimiter();
+        $exploded_name = explode($delimiter, $name);
+        $year = "$exploded_name[2]-$exploded_name[3]";
+
+        $class = $this->my_class->get(['name' => str_replace('_', ' ', $exploded_name[0])]);
+        $class_id = $class->value('id');
+
+        $exam = $this->exam->getExam(['name' => str_replace('_', ' ', $exploded_name[1]), 'year' => $year]);
+        $exam_id = $exam->value('id');
+
+        if ($exam->isEmpty()) {
+            return Mk::json(__('msg.ernf'), false);
+        }
+
+        if ($exam->value('class_type_id') != $class->value('class_type_id')) {
+            return Mk::json(__('msg.invalid_exam_and_class'), false);
+        }
+
+        $data = [
+            'exam_id' => $exam_id,
+            'my_class_id' => $class_id,
+            'year' => $year,
+            'session' => $this->year,
+            'st_mark' => $this->exam->getMark(['exam_id' => $exam_id, 'my_class_id' => $class_id, 'year' => $year], ['user']),
+        ];
+
+        Excel::import(new MarksImport($data), request()->file('template'));
+
+        return Mk::jsonStoreOk();
     }
 
-    public function batch_update(Request $req)
+    /**
+     * Perform batch recalculation of marks.
+     */
+    public function batch_update(Request $req): RedirectResponse
     {
-        set_time_limit(1800); // Extend excecution time from normal 1 minute to 30 minutes
+        set_time_limit(1800);
 
-        $exam_id = $req->exam_id;
-        $class_id = $req->my_class_id;
-        $d = $d3 = $all_st_ids = $section_ids = [];
-        $class_subjects = $this->my_class->whereSubject(['my_class_id' => $class_id])->get();
-        $class_sections = $this->my_class->getSections(['my_class_id' => $class_id]);
-        $class_type = $this->my_class->findTypeByClass($class_id);
-        $exam = $this->exam->find($exam_id);
+        $exam = $this->exam->find($req->exam_id);
+        $class_type = $this->my_class->findTypeByClass($req->my_class_id);
 
-        if ($exam->class_type_id != $class_type->id)
+        if ($exam->class_type_id != $class_type->id) {
             return back()->with('flash_error', __('msg.invalid_exam_and_class'));
+        }
 
-        if ($this->exam->getMark($req->only(['exam_id', 'my_class_id']))->isEmpty())
+        if ($this->exam->getMark($req->only(['exam_id', 'my_class_id']), [])->isEmpty()) {
             return back()->with('flash_info', __('msg.rnf'));
-
-        foreach ($class_sections as $sec) {
-            $wh = ['my_class_id' => $class_id, 'section_id' => $sec->id, 'exam_id' => $exam_id, 'year' => $this->year];
-            $p = ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'section_id' => $sec->id, 'year' => $this->year];
-
-            $marks_p = $this->exam->getMark($p);
-
-            foreach ($class_subjects as $sub) {
-                $marks = $marks_p->where('subject_id', $sub->id);
-
-                /** Total marks, grade, subject position **/
-                foreach ($marks as $mk) {
-                    $all_st_ids[] = $mk->student_id;
-                    $section_ids[$mk->student_id] = $mk->section_id;
-
-                    $d['id'] = $mk->id;
-                    $d["tex{$exam->term}"] = $total = $mk->exm;
-
-                    if ($total > 100)
-                        $d["tex{$exam->term}"] = $d['exm'] = null;
-
-                    $grade = $this->mark->getGrade($total, $class_type->id);
-                    $d['grade_id'] = $grade?->id;
-                    $d['sub_pos'] = $this->mark->getSubPos($mk->student_id, $exam, $class_id, $sub->id, $this->year);
-
-                    $d_collection[] = $d;
-                }
-
-                /** Marks update ends */
-
-                /** Update Assessments records exam marks for terminal or annual exam */
-                if (Mk::isTerminalExam($exam->category_id) || Mk::isAnnualExam($exam->category_id)) {
-                    foreach ($marks as $mk) {
-                        $d2 = $d;
-                        $d2['mark_id'] = $mk->id;
-                        $d2["tex{$exam->term}"] = null;
-                        $evaluated_val = $this->assessment->getValueOutOfQuantity($mk->exm, $exam->tdt_denominator);
-                        $d2['exm'] = ($evaluated_val == 0) ? null : $evaluated_val;
-
-                        // Remove 'id's from data2 collection
-                        unset($d2['id']);
-                        $d2_collection[] = $d2;
-                    }
-                }
-            }
-
-            $sub_ids = $this->mark->getSubjectIDs($wh);
-            $subjects = $this->my_class->getSubjectsByIDs($sub_ids);
-            $marks2 = $this->exam->getMark($wh);
-
-            if (isset($class_id)) {
-                $class_type_id = $this->my_class->find($class_id)->class_type_id;
-                $subjects_considered = $this->my_class->findType($class_type_id)->subjects_considered;
-            }
-
-            /** Exam Record Update */
-            $points = [];
-            foreach (array_unique($all_st_ids) as $st_id) {
-                // Mass update Unique by's
-                $d3['student_id'] = $st_id;
-                $d3['exam_id'] = $exam_id;
-                // Data to update
-                $d3['total'] = $this->mark->getExamTotalTerm($exam, $st_id, $class_id, $this->year);
-                $d3['ave'] = $ave = $this->mark->getLimitedExamAvgTerm($exam, $st_id, $class_id, $sec->id, $this->year, $subjects_considered);
-                $d3['grade_id'] = $grade = $this->mark->getGrade($ave, $class_type->id)->id ?? null;
-                $d3['class_ave'] = $this->mark->getClassAvg($exam, $class_id, $this->year) ?? null;
-                // Position Section wise
-                $d3['pos'] = $this->exam->getStudentPos($st_id, $exam->id, $class_id, $this->year, $exam->exam_student_position_by_value, $section_ids[$st_id]);
-                // Get all points
-                foreach ($subjects as $sub) {
-                    $points[] = $marks2->where('student_id', $st_id)->where('subject_id', $sub->id)->where('subject.core', 1)->first()->grade->point ?? null;
-                    $grade_points[] = $marks2->where('student_id', $st_id)->where('subject_id', $sub->id)->where('subject.core', 1)->first()->grade->credit ?? null;
-                }
-
-                $d3['points'] = $total_points = $this->mark->getExtractedSumOf($points, $subjects_considered);
-                $grade_points_sum_extracted = $this->mark->getExtractedSumOf($grade_points, $subjects_considered);
-                $d3['gpa'] = $grade_points_sum_extracted == null ? null : $grade_points_sum_extracted / $subjects_considered;
-                $d3['division_id'] = Mk::getDivision($total_points, $class_type_id)->id ?? null;
-
-                $d3_collection[] = $d3;
-                unset($points);
-                unset($grade_points);
-            }
-
-            /** Exam Record update ends */
         }
 
-        // Mass update the array collections
-        $this->exam->massUpdateMark($d_collection);
-        $this->exam->massUpdateExamRec($d3_collection, ['student_id', 'exam_id']);
-        if (Mk::isTerminalExam($exam->category_id) || Mk::isAnnualExam($exam->category_id))
-            $this->assessment->massUpdateRecs($d2_collection, ['mark_id']);
+        $class_subjects = $this->my_class->whereSubject(['my_class_id' => $req->my_class_id])->get();
+        $class_sections = $this->my_class->getSections(['my_class_id' => $req->my_class_id]);
 
-        foreach (array_unique($all_st_ids) as $st_id) {
-            $d4['student_id'] = $st_id;
-            $d4['exam_id'] = $exam->id;
-            $d4['my_class_id'] = $class_id;
-            // Position Class wise
-            $d4['class_pos'] = $this->exam->getStudentPos($st_id, $exam->id, $class_id, $this->year, $exam->exam_student_position_by_value);
+        $all_mark_updates = $all_assessment_updates = $all_exam_record_updates = [];
+        $all_student_ids = [];
 
-            $d4_collection[] = $d4;
+        foreach ($class_sections as $section) {
+            $section_result = $this->processSectionBatch(
+                $exam,
+                $req->my_class_id,
+                $section->id,
+                $class_type,
+                $class_subjects
+            );
+
+            $all_mark_updates = [...$all_mark_updates, ...$section_result['marks']];
+            $all_assessment_updates = [...$all_assessment_updates, ...$section_result['assessments']];
+            $all_exam_record_updates = [...$all_exam_record_updates, ...$section_result['exam_records']];
+            $all_student_ids = [...$all_student_ids, ...$section_result['student_ids']];
         }
 
-        $this->exam->massUpdateExamRec($d4_collection, ['student_id', 'exam_id', 'my_class_id']);
+        $this->exam->massUpdateMark($all_mark_updates);
+        $this->exam->massUpdateExamRec($all_exam_record_updates, ['student_id', 'exam_id']);
+
+        if ($exam->hasAssessment()) {
+            $this->assessment->massUpdateRecs($all_assessment_updates, ['mark_id']);
+        }
+
+        $position_updates = $this->buildClassPositionUpdates($exam, $req->my_class_id, array_unique($all_student_ids));
+        $this->exam->massUpdateExamRec($position_updates, ['student_id', 'exam_id', 'my_class_id']);
 
         return back()->with('flash_success', __('msg.update_ok'));
     }
 
-    public function batch_delete(Request $req)
+    /**
+     * Delete marks in batch.
+     */
+    public function batch_delete(Request $req): RedirectResponse
     {
         Validator::make($req->toArray(), [
             'exam_id' => 'required|integer',
@@ -586,274 +503,661 @@ class MarkController extends Controller
 
         $class_type = $this->my_class->findTypeByClass($req->my_class_id);
         $exam = $this->exam->find($req->exam_id);
-        if ($exam->class_type_id != $class_type->id)
+
+        if ($exam->class_type_id != $class_type->id) {
             return back()->with('flash_error', __('msg.invalid_exam_and_class'));
-
-        if ($req->section_id == null && $req->subject_id == null) {
-            $d = ['exam_id' => $req->exam_id, 'my_class_id' => $req->my_class_id, 'year' => $this->year];
-        } elseif ($req->section_id == null && $req->subject_id != null) {
-            $d = ['exam_id' => $req->exam_id, 'my_class_id' => $req->my_class_id, 'subject_id' => $req->subject_id, 'year' => $this->year];
-        } elseif ($req->section_id != null && $req->subject_id == null) {
-            $d = ['exam_id' => $req->exam_id, 'my_class_id' => $req->my_class_id, 'section_id' => $req->subject_id, 'year' => $this->year];
-        } else {
-            $d = ['exam_id' => $req->exam_id, 'my_class_id' => $req->my_class_id, 'subject_id' => $req->subject_id, 'section_id' => $req->section_id, 'year' => $this->year];
         }
 
-        $marks = $this->exam->getMark($d);
+        $where = $this->buildDeleteWhere($req);
+        $marks = $this->exam->getMark($where, []);
 
-        if ($marks->isEmpty())
+        if ($marks->isEmpty()) {
             return back()->with('flash_info', __('msg.rnf'));
-        else
-            $return_value = $this->exam->deleteMark($d);
-
-        return back()->with('flash_success', __('msg.delete_ok') . ' with ' . $return_value . ' affected records.');
-    }
-
-    public function comment_update(Request $req, $exam_id)
-    {
-        if ($this->exam->isLocked($exam_id))
-            return Mk::jsonUpdateDenied();
-
-        $d = auth()->user()->hasAnyRole([config('roles.default_roles.tenant.superadmin'), config('roles.default_roles.tenant.admin')]) ? $req->only(['t_comment', 'p_comment']) : $req->only(['t_comment']);
-
-        $this->exam->updateRecord(['exam_id' => $exam_id], $d);
-
-        return Mk::jsonUpdateOk();
-    }
-
-    public function skills_update(Request $req, $skill, $exr_id)
-    {
-        $d = [];
-        if ($skill == 'AF' || $skill == 'PS') {
-            $sk = strtolower($skill);
-            $d[$skill] = implode(',', $req->$sk);
         }
 
-        $this->exam->updateRecord(['id' => $exr_id], $d);
+        $affected = $this->exam->deleteMark($where);
+
+        return back()->with('flash_success', __('msg.delete_ok') . ' with ' . $affected . ' affected records.');
+    }
+
+    /**
+     * Update teacher/principal comments.
+     */
+    public function comment_update(Request $req, $exam_id): JsonResponse
+    {
+        if ($this->exam->isLocked($exam_id)) {
+            return Mk::jsonUpdateDenied();
+        }
+
+        $fields = auth()->user()->hasAnyRole($this->getAdminRoles())
+            ? $req->only(['t_comment', 'p_comment'])
+            : $req->only(['t_comment']);
+
+        $this->exam->updateRecord(['exam_id' => $exam_id], $fields);
 
         return Mk::jsonUpdateOk();
     }
 
-    public function bulk($class_id = null, $section_id = null)
+    /**
+     * Update skills assessment.
+     */
+    public function skills_update(Request $req, $skill, $exr_id): JsonResponse
     {
-        if (!$this->exam->examsExists())
-            return $this->noExamsRecord();
+        $updates = [];
+        if (\in_array($skill, ['AF', 'PS'])) {
+            $updates[$skill] = implode(',', $req->{strtolower($skill)});
+        }
 
-        $d['selected'] = false;
+        $this->exam->updateRecord(['id' => $exr_id], $updates);
+
+        return Mk::jsonUpdateOk();
+    }
+
+    /**
+     * Display mark sheets page.
+     */
+    public function sheets($class_id = null, $section_id = null): View|RedirectResponse
+    {
+        if (!$this->exam->examsExists()) {
+            return $this->noExamsRecord();
+        }
+
+        $data = ['selected' => false];
 
         if ($class_id && $section_id) {
-            $d['sections'] = $this->my_class->getAllSections()->where('my_class_id', $class_id);
-            $d['students'] = $st = $this->student->getRecord(['my_class_id' => $class_id, 'section_id' => $section_id])->get()->whereNotNull('user')->sortBy('user.name');
+            $data['sections'] = $this->my_class->getAllSections()->where('my_class_id', $class_id);
+            $data['students'] = $this->student->whereRecord([
+                'my_class_id' => $class_id,
+                'section_id' => $section_id
+            ])->get()->whereNotNull('user')->sortBy('user.name');
 
-            if ($st->isEmpty())
-                return redirect()->route('marks.bulk')->with('flash_danger', __('msg.srnf'));
+            if ($data['students']->isEmpty()) {
+                return redirect()->route('marks.sheets')->with('flash_danger', __('msg.srnf'));
+            }
 
-            $d['selected'] = true;
-            $d['my_class_id'] = $class_id;
-            $d['section_id'] = $section_id;
+            $data['selected'] = true;
+            $data['my_class_id'] = $class_id;
+            $data['section_id'] = $section_id;
         }
 
-        return view('pages.marks.bulk', $d);
+        return view('pages.marks.sheets', $data);
     }
 
-    public function bulk_select(Request $req)
+    /**
+     * Handle sheets selection redirect.
+     */
+    public function sheets_select(Request $req): RedirectResponse
     {
-        return redirect()->route('marks.bulk', [$req->my_class_id, $req->section_id]);
+        return redirect()->route('marks.sheets', [$req->my_class_id, $req->section_id]);
     }
 
-    public function select_year(Request $req)
+    /**
+     * Handle tabulation selection redirect.
+     */
+    public function tabulation_select(Request $req): RedirectResponse
     {
-        return Mk::goToRoute(['marks.tabulation', $req->year]);
-    }
-
-    public function tabulation_select(Request $req)
-    {
-        return redirect()->route('marks.tabulation', [$req->exam_id, $req->my_class_id, $req->section_id, $req->year]);
+        return redirect()->route('marks.tabulation', [
+            $req->exam_id,
+            $req->my_class_id,
+            $req->section_id,
+            $req->year
+        ]);
     }
 
     public function tabulation($exam_id = null, $class_id = null, $section_id = null, $year = null)
     {
-        set_time_limit(300); // Extend excecution time from normal 1 minute to 5 minutes
-
-        $d['years'] = $this->exam->getYears();
-        $d['selected'] = false;
-        $d['year'] = $year;
+        set_time_limit(300);
+        $data = [
+            'years' => $this->exam->getYears(),
+            'selected' => false,
+            'year' => $year,
+        ];
 
         if ($class_id && $exam_id) {
-            $class_type = $this->my_class->findTypeByClass($class_id);
-            $exam = $this->exam->find($exam_id);
-            if ($exam->class_type_id != $class_type->id)
-                return back()->with('flash_error', __('msg.invalid_exam_and_class'));
-
-            switch ($section_id) {
-                // If request is for all sections, ie., whole class
-                case "all":
-                    $wh = ['my_class_id' => $class_id, 'exam_id' => $exam_id, 'year' => $this->year];
-
-                    $sub_ids = $this->mark->getSubjectIDs($wh);
-                    $st_ids = $this->mark->getStudentIDs($wh);
-
-                    if (\count($sub_ids) < 1 or \count($st_ids) < 1)
-                        return Mk::goWithDanger('marks.tabulation', __('msg.srnf'));
-
-                    $d['exr'] = $exr = $this->exam->getRecord($wh);
-
-                    if ($exr->isEmpty())
-                        return Mk::goWithDanger('marks.tabulation', __('msg.ernf'));
-
-                    $d['exams'] = $this->exam->getExam(['year' => $year], false);
-                    $d['subjects'] = $this->my_class->getSubjectsByIDs($sub_ids);
-                    $d['students'] = $this->student->getRecordByUserIDs2($st_ids)->get()->whereNotNull('user')->sortBy('user.name');
-                    $d['sections'] = $this->my_class->getAllSections();
-                    $d['selected'] = TRUE;
-                    $d['section_id'] = $section_id;
-                    $d['exam_id'] = $exam_id;
-                    $d['marks'] = $this->exam->getMark($wh);
-                    $d['my_class'] = $this->my_class->find($class_id);
-                    $d['ex'] = $exam = $this->exam->find($exam_id);
-                    $d['tex'] = "tex{$exam->term}";
-                    $d['grades'] = $this->exam->getGrades();
-                    break;
-                default:
-                    $wh = ['my_class_id' => $class_id, 'section_id' => $section_id, 'exam_id' => $exam_id, 'year' => $year];
-
-                    $sub_ids = $this->mark->getSubjectIDs($wh);
-                    $st_ids = $this->mark->getStudentIDs($wh);
-
-                    if (\count($sub_ids) < 1 || \count($st_ids) < 1)
-                        return Mk::goWithDanger('marks.tabulation', __('msg.srnf'));
-
-                    $d['exr'] = $exr = $this->exam->getRecord($wh);
-
-                    if ($exr->isEmpty())
-                        return Mk::goWithDanger('marks.tabulation', __('msg.ernf'));
-
-                    $d['exams'] = $this->exam->getExam(['year' => $year], false);
-                    $d['subjects'] = $this->my_class->getSubjectsByIDs($sub_ids);
-                    $d['students'] = $this->student->getRecordByUserIDs($st_ids)->get()->whereNotNull('user')->sortBy('user.name');
-                    $d['sections'] = $this->my_class->getAllSections();
-                    $d['selected'] = TRUE;
-                    $d['section_id'] = $section_id;
-                    $d['exam_id'] = $exam_id;
-                    $d['marks'] = $mks = $this->exam->getMark($wh);
-                    $d['my_class'] = $mc = $this->my_class->find($class_id);
-                    $d['section'] = $this->my_class->findSection($section_id);
-                    $d['ex'] = $exam = $this->exam->find($exam_id);
-                    $d['tex'] = "tex{$exam->term}";
-                    $d['grades'] = $this->exam->getGrades()->pluck("name");
-                    break;
+            $tab_data = $this->getTabulationData($exam_id, $class_id, $section_id, $year);
+            if (isset($tab_data['error'])) {
+                return Mk::goWithDanger('marks.tabulation', $tab_data['error']);
             }
+
+            $data = [
+                ...$data,
+                ...$tab_data,
+                'selected' => true,
+                'exams' => $this->exam->getExam(['year' => $year], false),
+                'sections' => $this->my_class->getAllSections(),
+            ];
         }
 
-        if (isset($class_id))
-            $d['class_type_id'] = $this->my_class->find($class_id)->class_type_id;
-
-        return view('pages.marks.tabulation.index', $d);
+        return view('pages.marks.tabulation.index', $data);
     }
 
     public function print_tabulation($exam_id, $class_id, $section_id, $year)
     {
-        set_time_limit(300); // Extend excecution time from normal 1 minute to 5 minutes
-        $d['year'] = $year;
-
-        if ($class_id && $exam_id) {
-            $class_type = $this->my_class->findTypeByClass($class_id);
-            $exam = $this->exam->find($exam_id);
-            if ($exam->class_type_id != $class_type->id)
-                return back()->with('flash_error', __('msg.invalid_exam_and_class'));
-
-            switch ($section_id) {
-                case 'all':
-                    $wh = ['my_class_id' => $class_id, 'exam_id' => $exam_id, 'year' => $year];
-
-                    $sub_ids = $this->mark->getSubjectIDs($wh);
-                    $st_ids = $this->mark->getStudentIDs($wh);
-
-                    if (\count($sub_ids) < 1 or \count($st_ids) < 1)
-                        return Mk::goWithDanger('marks.tabulation', __('msg.srnf'));
-
-                    $d['subjects'] = $this->my_class->getSubjectsByIDs($sub_ids);
-                    $d['students'] = $this->student->getRecordByUserIDs($st_ids)->get()->whereNotNull('user')->sortBy('user.name');
-                    $d['sections'] = $this->my_class->getAllSections();
-                    $d['selected'] = TRUE;
-                    $d['my_class_id'] = $class_id;
-                    $d['section_id'] = $section_id;
-                    $d['exam_id'] = $exam_id;
-                    $d['marks'] = $mks = $this->exam->getMark($wh);
-                    $d['exr'] = $exr = $this->exam->getRecord($wh);
-                    $d['my_class'] = $mc = $this->my_class->find($class_id);
-                    $d['ex'] = $exam = $this->exam->find($exam_id);
-                    $d['tex'] = "tex{$exam->term}";
-                    $d['grades'] = $this->exam->getGrades();
-                    break;
-                default:
-                    $wh = ['my_class_id' => $class_id, 'section_id' => $section_id, 'exam_id' => $exam_id, 'year' => $year];
-
-                    $sub_ids = $this->mark->getSubjectIDs($wh);
-                    $st_ids = $this->mark->getStudentIDs($wh);
-
-                    if (\count($sub_ids) < 1 or \count($st_ids) < 1)
-                        return Mk::goWithDanger('marks.tabulation', __('msg.srnf'));
-
-                    $d['subjects'] = $this->my_class->getSubjectsByIDs($sub_ids);
-                    $d['students'] = $this->student->getRecordByUserIDs($st_ids)->get()->whereNotNull('user')->sortBy('user.name');
-                    $d['my_class_id'] = $class_id;
-                    $d['section_id'] = $section_id;
-                    $d['exam_id'] = $exam_id;
-                    $wh = ['exam_id' => $exam_id, 'my_class_id' => $class_id];
-                    $d['marks'] = $this->exam->getMark($wh);
-                    $d['exr'] = $this->exam->getRecord($wh);
-                    $d['my_class'] = $this->my_class->find($class_id);
-                    $d['section'] = $this->my_class->findSection($section_id);
-                    $d['ex'] = $exam = $this->exam->find($exam_id);
-                    $d['tex'] = "tex{$exam->term}";
-                    break;
-            }
+        set_time_limit(300);
+        $tab_data = $this->getTabulationData($exam_id, $class_id, $section_id, $year);
+        if (isset($tab_data['error'])) {
+            return Mk::goWithDanger('marks.tabulation', $tab_data['error']);
         }
 
-        if (isset($class_id))
-            $d['class_type_id'] = $this->my_class->find($class_id)->class_type_id;
+        $data = [
+            ...$tab_data,
+            'sections' => $section_id === 'all' ? $this->my_class->getAllSections() : null,
+            'grades' => $section_id === 'all' ? $this->exam->getGrades() : null
+        ];
 
-        $d['settings'] = Mk::getSettings();
-
-        return view('pages.marks.tabulation.print', $d);
+        return view('pages.marks.tabulation.print', $data);
     }
 
-    protected function verifyStudentExamYear($student_id, $year = null)
+    // ----------------------------------------------------------------------
+    // Protected Helper Methods
+    // ----------------------------------------------------------------------
+
+    /**
+     * Get exams for a year, filtered by publication status for non-admins.
+     */
+    protected function getExams($year): Collection
+    {
+        $exams = $this->exam->getExam(['year' => $year], false);
+
+        return auth()->user()->hasAnyRole($this->getAdminRoles())
+            ? $exams
+            : $exams->where('published', true);
+    }
+
+    /**
+     * Verify if a student has exam records for a given year.
+     */
+    protected function verifyStudentExamYear($student_id, $year = null): View|RedirectResponse|bool
     {
         $years = $this->exam->getStudentExamYears($student_id);
         $student_exists = $this->student->exists($student_id);
 
         if ($year === null) {
-            if ($student_exists && $years->isNotEmpty()) {
-                $d = ['years' => $years, 'student_id' => Mk::hash($student_id)];
-
-                return view('pages.marks.select_year', $d);
-            }
-
-            return $this->noStudentRecord();
+            return $student_exists && $years->isNotEmpty()
+                ? view('pages.marks.select_year', [
+                    'years' => $years,
+                    'student_id' => Mk::hash($student_id)
+                ])
+                : $this->noStudentRecord();
         }
 
-        return ($student_exists && $years->contains('year', $year)) ? true : false;
+        return $student_exists && $years->contains('year', $year);
     }
 
-    protected function noStudentRecord()
+    /**
+     * Redirect when no student record found.
+     */
+    protected function noStudentRecord(): RedirectResponse
     {
         return redirect()->route('dashboard')->with('flash_danger', __('msg.srnf'));
     }
 
-    protected function noExamsRecord()
+    /**
+     * Redirect when no exam record found.
+     */
+    protected function noExamsRecord(): RedirectResponse
     {
         return redirect()->route('dashboard')->with('flash_danger', __('msg.ernf'));
     }
 
-    protected function checkPinVerified($st_id)
+    /**
+     * Check if PIN has been verified for a student.
+     */
+    protected function checkPinVerified($st_id): bool
     {
-        return Session::has('pin_verified') && Session::get('pin_verified') == $st_id;
+        return session()->has('pin_verified') && session()->get('pin_verified') == $st_id;
     }
 
-    public function convert()
+    /**
+     * Get admin role IDs.
+     */
+    protected function getAdminRoles(): array
     {
-        return view("pages.marks.convert");
+        return [
+            config('roles.default_roles.tenant.superadmin'),
+            config('roles.default_roles.tenant.admin'),
+        ];
+    }
+
+    /**
+     * Get student record (latest).
+     */
+    protected function getStudentRecord($student_id)
+    {
+        return $this->student->whereRecord(['user_id' => $student_id])->latest()->first()
+            ?? $this->student->whereGraduatesRecord(['user_id' => $student_id])->latest()->first();
+    }
+
+    /**
+     * Get students eligible for a subject.
+     */
+    protected function getStudentsForSubject($class_id, $section_id, $subject_id): Collection
+    {
+        $sub_recs = $this->my_class->getSubjectRecord(['subject_id' => $subject_id])
+            ->where('subject.my_class_id', $class_id);
+
+        if ($section_id === null && $sub_recs->whereNull('section_id')->whereNotNull('students_ids')->isNotEmpty()) {
+            return $this->student->getRecordByUserIDs($sub_recs->value('students_ids'))->get();
+        }
+
+        if (
+            $section_id === null && $sub_recs->whereNull('section_id')->whereNull('students_ids')->isNotEmpty()
+            || $section_id !== null && $sub_recs->whereNotNull('students_ids')->isNotEmpty()
+        ) {
+            return collect(); // Will trigger error upstream
+        }
+
+        return $this->student->whereRecord([
+            'my_class_id' => $class_id,
+            'section_id' => $section_id
+        ])->get();
+    }
+
+    /**
+     * Create assessment record for terminal/annual exams.
+     */
+    protected function createAssessmentRecord($mark_id, $assessment_id, array $data): void
+    {
+        $data['mark_id'] = $mark_id;
+        $data['assessment_id'] = $assessment_id;
+        $this->assessment->createRecord($data);
+    }
+
+    /**
+     * Fetch marks for update operation.
+     */
+    protected function fetchMarksForUpdate($exam_id, $class_id, $subject_id, $section_id = null): array
+    {
+        $base = [
+            'exam_id' => $exam_id,
+            'my_class_id' => $class_id,
+            'subject_id' => $subject_id,
+            'year' => $this->year,
+        ];
+
+        if ($section_id === null) {
+            $students_ids = $this->my_class->getSubjectRecord([
+                'subject_id' => $subject_id,
+                'section_id' => null
+            ])->value('students_ids');
+
+            $marks = $this->exam->getMarkByIds($students_ids)->where($base)->get();
+            $where = [
+                'my_class_id' => $class_id,
+                'exam_id' => $exam_id,
+                'year' => $this->year
+            ];
+        } else {
+            $base['section_id'] = $section_id;
+            $marks = $this->exam->getMark($base, ['user'])->whereNotNull('user');
+            $where = $base;
+        }
+
+        unset($where['subject_id']);
+        return [$marks, $where];
+    }
+
+    /**
+     * Initialize batch marks for all students in class.
+     */
+    protected function initializeBatchMarks($exam, $class, $students, $delete_old_section_record): void
+    {
+        $assessment_id = $this->assessment->getAssessment(['exam_id' => $exam->id])->id ?? null;
+        $sections = $this->my_class->getSections(['my_class_id' => $class->id]);
+
+        foreach ($sections as $sec) {
+            $subjects_with_recs = $this->my_class->getSubjectWithRecsWhereHas($sec->id, $class->id);
+
+            foreach ($students->where('section_id', $sec->id) as $st_rec) {
+                foreach ($subjects_with_recs as $sub) {
+                    $students_ids = $this->my_class->whereSubjectRecord(['subject_id' => $sub->id])
+                        ->whereNotNull('students_ids')
+                        ->value('students_ids');
+
+                    $should_create = $students_ids === null || \in_array((int) $st_rec->user_id, array_map('intval', $students_ids));
+
+                    if ($should_create) {
+                        $mk = $this->mark->firstOrCreate(
+                            $st_rec->user_id,
+                            $class->id,
+                            $sec->id,
+                            $exam->id,
+                            $this->year,
+                            $sub->id
+                        );
+                        $this->exam->firstOrCreateExmRec(
+                            $st_rec->user_id,
+                            $class->id,
+                            $sec->id,
+                            $exam->id,
+                            $this->year
+                        );
+                        if ($exam->hasAssessment() && $assessment_id) {
+                            $this->assessment->firstOrCreateRec(
+                                $st_rec->user_id,
+                                $class->id,
+                                $sec->id,
+                                $exam->id,
+                                $this->year,
+                                $sub->id,
+                                $mk->id,
+                                $assessment_id
+                            );
+                        }
+                    }
+                }
+
+                if ($delete_old_section_record) {
+                    $old_section_id = $this->exam->getRecord([
+                        'student_id' => $st_rec->user_id,
+                        'exam_id' => $exam->id,
+                        'my_class_id' => $class->id
+                    ])->value('section_id');
+
+                    if ($old_section_id != $st_rec->section_id) {
+                        $where = [
+                            'student_id' => $st_rec->user_id,
+                            'exam_id' => $exam->id,
+                            'my_class_id' => $class->id,
+                            'section_id' => $old_section_id,
+                        ];
+                        $this->exam->deleteRecord($where);
+                        $this->exam->deleteMark($where);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Build where clause for batch delete.
+     */
+    protected function buildDeleteWhere(Request $req): array
+    {
+        $where = [
+            'exam_id' => $req->exam_id,
+            'my_class_id' => $req->my_class_id,
+            'year' => $this->year,
+        ];
+
+        if ($req->section_id !== null && $req->subject_id !== null) {
+            $where['section_id'] = $req->section_id;
+            $where['subject_id'] = $req->subject_id;
+        } elseif ($req->section_id === null && $req->subject_id !== null) {
+            $where['subject_id'] = $req->subject_id;
+        } elseif ($req->section_id !== null && $req->subject_id === null) {
+            $where['section_id'] = $req->section_id;
+        }
+
+        return $where;
+    }
+
+    // ----------------------------------------------------------------------
+    // Batch Processing Helper Methods
+    // ----------------------------------------------------------------------
+
+    private function processSectionBatch($exam, $class_id, $section_id, $class_type, $class_subjects): array
+    {
+        $p = ['exam_id' => $exam->id, 'my_class_id' => $class_id, 'section_id' => $section_id, 'year' => $this->year];
+        $wh = ['my_class_id' => $class_id, 'section_id' => $section_id, 'exam_id' => $exam->id, 'year' => $this->year];
+
+        $marks_p = $this->exam->getMark($p, []);
+
+        $mark_updates = $assessment_updates = [];
+        $student_ids = [];
+
+        foreach ($class_subjects as $sub) {
+            $marks = $marks_p->where('subject_id', $sub->id);
+
+            foreach ($marks as $mk) {
+                $student_ids[] = $mk->student_id;
+
+                $total = $mk->exm;
+                $grade = $this->mark->getGrade($total, $class_type->id);
+
+                $mark_updates[] = [
+                    'id' => $mk->id,
+                    "tex{$exam->term}" => $total > 100 ? null : $total,
+                    'exm' => $total > 100 ? null : $total,
+                    'grade_id' => $grade?->id,
+                    'sub_pos' => $this->mark->getSubPos($mk->student_id, $exam, $class_id, $sub->id, $this->year),
+                ];
+
+                if ($exam->hasAssessment()) {
+                    $evaluated_val = $this->assessment->getValueOutOfQuantity($mk->exm, $exam->tdt_denominator);
+                    $assessment_updates[] = [
+                        'mark_id' => $mk->id,
+                        "tex{$exam->term}" => null,
+                        'exm' => ($evaluated_val == 0) ? null : $evaluated_val,
+                    ];
+                }
+            }
+        }
+
+        $exam_record_updates = $this->buildExamRecordUpdates(
+            array_unique($student_ids),
+            $exam,
+            $class_id,
+            $wh,
+            $class_type,
+            $section_id
+        );
+
+        return [
+            'marks' => $mark_updates,
+            'assessments' => $assessment_updates,
+            'exam_records' => $exam_record_updates,
+            'student_ids' => $student_ids,
+        ];
+    }
+
+    private function buildSubjectMarkUpdates($marks, $form_data, $exam, $class_type_id, $class_id, $subject_id): array
+    {
+        $updates = [];
+        foreach ($marks as $mk) {
+            $exm = $form_data["exm_{$mk->id}"];
+            $total = $exm;
+            $grade = $this->mark->getGrade($total, $class_type_id);
+
+            $updates[] = [
+                'id' => $mk->id,
+                'exm' => $total > 100 ? null : $exm,
+                "tex{$exam->term}" => $total > 100 ? null : $total,
+                'grade_id' => $grade?->id,
+                'sub_pos' => $this->mark->getSubPos($mk->student_id, $exam, $class_id, $subject_id, $this->year),
+            ];
+        }
+        return $updates;
+    }
+
+    private function buildAssessmentUpdates($marks, $form_data, $exam): array
+    {
+        $updates = [];
+        foreach ($marks as $mk) {
+            $evaluated_val = $this->assessment->getValueOutOfQuantity(
+                $form_data["exm_{$mk->id}"],
+                $exam->tdt_denominator
+            );
+            $updates[] = [
+                'mark_id' => $mk->id,
+                "tex{$exam->term}" => null,
+                'exm' => ($evaluated_val == 0) ? null : $evaluated_val,
+            ];
+        }
+        return $updates;
+    }
+
+    private function buildExamRecordUpdates(array $student_ids, $exam, $class_id, $whereConditions, $class_type, $section_identifier): array
+    {
+        $sub_ids = $this->mark->getSubjectIDs($whereConditions);
+        $subjects = $this->my_class->getSubjectsByIDs($sub_ids, []);
+        $subjects_count = $subjects->count();
+        $marks = $this->exam->getMark($whereConditions, ['subject', 'grade']);
+
+        $class_type_id = $class_type->id;
+        $minimum_subjects_required = (int) $this->my_class->findType($class_type_id)->minimum_subjects_required;
+
+        $updates = [];
+        foreach ($student_ids as $st_id) {
+            $section_id = is_callable($section_identifier) ? $section_identifier($st_id) : $section_identifier;
+
+            if ($subjects_count < $minimum_subjects_required && $minimum_subjects_required !== 0) {
+                $ave = $points_sum = $total_credits = 0;
+            } else {
+                $ave = $this->mark->getLimitedExamAvgTerm(
+                    $exam,
+                    $st_id,
+                    $class_id,
+                    $section_id,
+                    $this->year,
+                    $minimum_subjects_required
+                );
+                $grade = $this->mark->getGrade($ave, $class_type_id);
+
+                $credits_point = $credits = [];
+                foreach ($subjects as $sub) {
+                    $mark = $marks->where('student_id', $st_id)
+                        ->where('subject_id', $sub->id)
+                        ->where('subject.is_core', true)
+                        ->first();
+                    if ($mark?->grade) {
+                        $credits_point[] = $mark->grade->point * $mark->subject->credits;
+                    }
+                    $credits[] = $sub->credits;
+                }
+
+                $total_credits = $this->mark->sumSmallestValues($credits, $minimum_subjects_required);
+                $total_credits_point = $this->mark->sumSmallestValues($credits_point, $minimum_subjects_required);
+
+                $points_sum = $this->mark->sumSmallestValues(
+                    $marks->where('student_id', $st_id)->pluck('grade')->pluck('point')->toArray(),
+                    $minimum_subjects_required
+                );
+            }
+
+            $updates[] = [
+                'student_id' => $st_id,
+                'exam_id' => $exam->id,
+                'total' => $this->mark->getExamTotalTerm($exam, $st_id, $class_id, $this->year),
+                'ave' => $ave,
+                'grade_id' => $grade->id ?? null,
+                'class_ave' => $this->mark->getClassAvg($exam, $class_id, $this->year) ?? null,
+                'pos' => $this->exam->getStudentPos($st_id, $exam->id, $class_id, $this->year, $exam->exam_student_position_by_value, $section_id),
+                'points' => $points_sum,
+                'gpa' => ($total_credits > 0) ? round($total_credits_point / $total_credits, 2) : 0,
+                'division_id' => Mk::getDivision($points_sum, $class_type_id)->id ?? null,
+            ];
+        }
+
+        return $updates;
+    }
+
+    /**
+     * Fetch and prepare all data needed for tabulation (display and print).
+     */
+    protected function getTabulationData($exam_id, $class_id, $section_id, $year): array
+    {
+        $my_class = $this->my_class->find($class_id);
+        $exam = $this->exam->find($exam_id);
+
+        $where = [
+            'my_class_id' => $class_id,
+            'exam_id' => $exam_id,
+            'year' => $year,
+        ];
+
+        if ($section_id !== 'all') {
+            $where['section_id'] = $section_id;
+        }
+
+        $sub_ids = $this->mark->getSubjectIDs($where);
+        $st_ids = $this->mark->getStudentIDs($where);
+
+        if (\count($sub_ids) < 1 || \count($st_ids) < 1) {
+            return ['error' => __('msg.srnf')];
+        }
+
+        $exam_records = $this->exam->getRecord($where, ['grade', 'division'])->keyBy('student_id');
+        if ($exam_records->isEmpty()) {
+            return ['error' => __('msg.ernf')];
+        }
+
+        $subjects = $this->my_class->getSubjectsByIDs($sub_ids);
+        $marks_collection = $this->exam->getMark($where, ['grade', 'subject'])->keyBy(
+            fn($item) => "{$item->student_id}_{$item->subject_id}"
+        );
+
+        $students = $this->student->getRecordByUserIDs2($st_ids)
+            ->get()
+            ->whereNotNull('user')
+            ->sortBy('user.name');
+
+        $tex = "tex{$exam->term}";
+        $students_data = [];
+
+        foreach ($students as $s) {
+            $student_id = $s->user_id;
+            $record = $exam_records[$student_id] ?? null;
+            $total = $record->total ?? 0;
+
+            $row = [
+                'user' => $s->user,
+                'gender' => $s->user->gender,
+                'total' => $total,
+                'ave' => $record->ave ?? null,
+                'grade' => $record->grade->name ?? null,
+                'points' => $record->points ?? null,
+                'division' => $record->division->name ?? null,
+                'gpa' => $record->gpa ?? null,
+                'pos' => $section_id !== 'all' ? ($record->pos ?? null) : ($record->class_pos ?? null),
+                'sub_marks' => [],
+            ];
+
+            foreach ($subjects as $sub) {
+                $key = "{$student_id}_{$sub->id}";
+                $mark = $marks_collection[$key] ?? null;
+                $row['sub_marks'][$sub->id] = [
+                    'mark' => $mark->$tex ?? null,
+                    'grade' => $mark->grade->name ?? null,
+                ];
+            }
+
+            $students_data[] = $row;
+        }
+
+        return [
+            'my_class' => $my_class,
+            'section' => $section_id !== 'all' ? $this->my_class->findSection($section_id) : null,
+            'ex' => $exam,
+            'tex' => $tex,
+            'subjects' => $subjects,
+            'students_data' => $students_data,
+            'class_type_id' => $my_class->class_type_id,
+            'year' => $year,
+            'exam_id' => $exam_id,
+            'section_id' => $section_id,
+        ];
+    }
+
+    private function buildClassPositionUpdates($exam, $class_id, array $student_ids): array
+    {
+        $updates = [];
+        foreach ($student_ids as $st_id) {
+            $updates[] = [
+                'student_id' => $st_id,
+                'exam_id' => $exam->id,
+                'my_class_id' => $class_id,
+                'class_pos' => $this->exam->getStudentPos($st_id, $exam->id, $class_id, $this->year, $exam->exam_student_position_by_value),
+            ];
+        }
+        return $updates;
+    }
+
+    /**
+     * Conversion view.
+     */
+    public function convert(): View
+    {
+        return view('pages.marks.convert');
     }
 }

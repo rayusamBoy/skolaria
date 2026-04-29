@@ -1,18 +1,17 @@
 @extends('layouts.master')
 
-@section('page_title', 'Edit Student')
+@section('page_title', "Edit Student - {$sr->user->name}")
 
 @section('content')
 
 <div class="card">
     <div class="card-header header-elements-inline">
-        <h6 id="ajax-title" class="card-title">Please fill The form Below To Edit record of {{ $sr->user->name }}</h6>
-
+        <h6 class="card-title">Please fill The form Below</h6>
         {!! Qs::getPanelOptions() !!}
     </div>
 
     <div class="card-body">
-        <form method="post" enctype="multipart/form-data" class="wizard-form steps-validation ajax-update" data-reload="#ajax-title" action="{{ route('students.update', Qs::hash($sr->id)) }}" data-fouc>
+        <form method="post" enctype="multipart/form-data" class="wizard-form steps-validation ajax-update" data-reload="#page-title" action="{{ route('students.update', Qs::hash($sr->id)) }}">
             @csrf @method('PUT')
 
             <input type="hidden" name="user_id" value="{{ Qs::hash($sr->user->id) }}">
@@ -46,7 +45,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="gender">Gender: <span class="text-danger">*</span></label>
-                            <select class="select form-control" id="gender" name="gender" required data-fouc data-placeholder="Choose..">
+                            <select class="select form-control" id="gender" name="gender" required data-placeholder="Choose..">
                                 <option value=""></option>
                                 @foreach(Usr::getGenders() as $gender)
                                 <option @selected($sr->user->gender == $gender) value="{{ $gender }}">{{ $gender }}</option>
@@ -94,7 +93,7 @@
                         <div class="form-group">
                             <label for="state_id">State: <span class="text-danger">*</span></label>
                             <select onchange="getLGA(this.value)" required data-placeholder="Choose.." class="select-search form-control" name="state_id" id="state_id">
-                                @foreach($states->where('nationality_id', $sr->user->nal_id) as $st)
+                                @foreach($states->where('country_id', $sr->user->nal_id) as $st)
                                 <option @selected($sr->user->state_id == $st->id) value="{{ $st->id }}">{{ $st->name }}</option>
                                 @endforeach
                             </select>
@@ -158,7 +157,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="bg_id">Blood Group:</label>
-                            <select class="select form-control" id="bg_id" name="bg_id" data-fouc data-placeholder="Choose..">
+                            <select class="select form-control" id="bg_id" name="bg_id" data-placeholder="Choose..">
                                 <option value=""></option>
                                 @foreach(Usr::getBloodGroups() as $bg)
                                 <option @selected($sr->user->bg_id == $bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
@@ -177,7 +176,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="photo" class="d-block">Upload Passport Photo:</label>
-                            <input value="{{ old('photo') }}" id="photo" accept="image/*" type="file" name="photo" class="form-input-styled" data-fouc>
+                            <input value="{{ old('photo') }}" id="photo" accept="image/*" type="file" name="photo" class="form-input-styled">
                             <span class="form-text text-muted">Accepted Images: jpeg, png. Max file size 2Mb</span>
                         </div>
                     </div>
@@ -201,7 +200,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="birth_certificate" class="d-block">Upload Birth Certificate:</label>
-                            <input value="{{ old('birth_certificate') }}" id="birth_certificate" accept=".pdf, .jpg, .jpeg, .png" type="file" name="birth_certificate" class="form-input-styled" data-fouc>
+                            <input value="{{ old('birth_certificate') }}" id="birth_certificate" accept=".pdf, .jpg, .jpeg, .png" type="file" name="birth_certificate" class="form-input-styled">
                             <span class="form-text text-muted">Accepted Images: pdf, png, jpg, jpeg. Max file size 2Mb</span>
                         </div>
                     </div>
@@ -261,7 +260,7 @@
                             <select data-placeholder="Choose..." name="my_parent_id" id="my_parent_id" class="select-search form-control">
                                 <option value=" ">None</option>
                                 @foreach($parents as $p)
-                                <option @selected(Qs::hash($sr->my_parent_id) == Qs::hash($p->id)) value="{{ Qs::hash($p->id) }}">{{ $p->name }}</option>
+                                <option @selected($sr->my_parent_id == $p->id) value="{{ Qs::hash($p->id) }}">{{ $p->name }}</option>
                                 @endforeach
                             </select>
                         </div>

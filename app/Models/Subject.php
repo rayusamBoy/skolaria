@@ -6,10 +6,10 @@ use Eloquent;
 
 class Subject extends Eloquent
 {
-    protected $fillable = ['name', 'my_class_id', 'slug', 'core'];
+    protected $fillable = ['name', 'my_class_id', 'slug', 'is_core', 'credits'];
 
     protected $casts = [
-        'core' => 'boolean'
+        'is_core' => 'boolean'
     ];
 
     public function my_class()

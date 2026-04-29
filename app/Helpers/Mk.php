@@ -14,6 +14,8 @@ use App\Models\SubjectRecord;
 use App\Models\TimeTable;
 use App\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Mk extends Qs
 {
@@ -43,9 +45,9 @@ class Mk extends Qs
     }
 
     // Base method for marks - must be used for all the functions rendering content in marks tabulation view - for consistent, uniform rendering
-    public static function getDistinctMrksSbjcts($data)
+    public static function getDistinctMrksSbjcts(array $where)
     {
-        return Mark::where($data)->select('subject_id')->distinct()->orderBy('subject_id')->get();
+        return Mark::where($where)->with('subject')->get()->pluck('subject')->unique();
     }
 
     public static function getGrades($class_type_id)
@@ -53,142 +55,136 @@ class Mk extends Qs
         return Grade::where('class_type_id', $class_type_id)->orderBy('name')->get();
     }
 
-    public static function renderSubsPerformanceSummary($section_id, $exam_id, $my_class)
+    /**
+     * Renders the subject performance summary for a given section, exam, and class.
+     */
+    public static function renderSubsPerformanceSummary(int|string $section_id, int $exam_id, Collection|Model $my_class): string
     {
         $collection = '';
         $all_avg_sum = [];
-        $all_grd_count = $all_total = 0;
         $grades = self::getGrades($my_class->class_type_id);
 
-        switch ($section_id) {
-            case "all":
-                $marks_all_subjects = self::getDistinctMrksSbjcts(["my_class_id" => $my_class->id, "exam_id" => $exam_id]);
-                // Get all subject exam sums - for finding subject rank
-                foreach ($marks_all_subjects as $mark) {
-                    $p = Mark::where(['subject_id' => $mark->subject->id, 'my_class_id' => $my_class->id, 'exam_id' => $exam_id]);
-                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count($sids));
-                    $q = Mark::whereIn('student_id', $sids);
+        // Base query
+        $base_conditions = [
+            'my_class_id' => $my_class->id,
+            'exam_id' => $exam_id,
+        ];
+        if ($section_id !== 'all') {
+            $base_conditions['section_id'] = $section_id;
+        }
 
-                    $avg_sum = $q->where(['subject_id' => $mark->subject->id, 'exam_id' => $exam_id, 'my_class_id' => $my_class->id])->avg('exm');
-                    $all_avg_sum[] = (int) $avg_sum;
-                }
+        $marks_subjects = self::getDistinctMrksSbjcts($base_conditions);
 
-                // Sort the array in reverse order
-                rsort($all_avg_sum);
-                $all_avg_sum_flipped = array_flip($all_avg_sum); // Flip the array so that we search the exm_sum to get the rank / position
+        // Compute average exam sums for ranking
+        foreach ($marks_subjects as $subject) {
+            $p = Mark::where([...$base_conditions, 'subject_id' => $subject->id]);
+            $sids = $p->pluck('student_id');
+            $reg = $sids->isNotEmpty()
+                ? $sids->count()
+                : (($sids = SubjectRecord::where('subject_id', $subject->id)->get()->value('students_ids')) !== null
+                    ?: \count($sids ?? []));
 
-                foreach ($marks_all_subjects as $mark) {
-                    $p = Mark::where(['subject_id' => $mark->subject->id, 'my_class_id' => $my_class->id, 'exam_id' => $exam_id]);
-                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count($sids));
-                    $q = Mark::whereIn('student_id', $sids);
+            $avg_sum = (int) Mark::where([...$base_conditions, 'subject_id' => $subject->id])
+                ->whereIn('student_id', $sids)
+                ->avg('exm');
 
-                    $sat = $q->where(['exam_id' => $exam_id, 'subject_id' => $mark->subject->id])->whereNotNull('exm')->count();
-                    $s = $q->where(['subject_id' => $mark->subject->id, 'exam_id' => $exam_id, 'my_class_id' => $my_class->id]);
-                    $avg_sum = $s->avg('exm');
-                    $avg = $sat == 0 ? $sat : round($s->sum('exm') / $sat, 1);
+            $all_avg_sum[] = $avg_sum;
+        }
 
-                    $collection .=
-                        '<tr>
-                            <td class="text-center">' . $mark->subject->slug . '</td>
-                            <td class="text-center">' . $mark->subject->name . '</td>
-                            <td class="text-center">' . $reg . '</td>
-                            <td class="text-center">' . $sat . '</td>
-                            <td class="text-center">' . $reg - $sat . '</td>
-                            <td class="text-center">' . $avg . '</td>
-                            <td class="text-green float-left pl-2">' . self::getGrade($avg, true) . '</td>
-                            <td><table style="border-collapse: collapse;">
-                        <tr>';
+        rsort($all_avg_sum);
+        $all_avg_sum_flipped = array_flip($all_avg_sum);
 
-                    foreach ($grades as $grd) {
-                        $r = $p->get()->where('grade_id', $grd->id);
+        // Render each subject row
+        foreach ($marks_subjects as $subject) {
+            $p = Mark::where([...$base_conditions, 'subject_id' => $subject->id]);
+            $sids = $p->pluck('student_id');
+            $reg = $sids->isNotEmpty()
+                ? $sids->count()
+                : (($sids = SubjectRecord::where('subject_id', $subject->id)->get()->value('students_ids')) !== null
+                    ?: \count($sids ?? []));
 
-                        $collection .= "<td class=\"w-1pcnt unstyled text-center\"><strong>{$grd->name}</strong>: " . \sprintf("%02d", $grd_cnt = $r->count()) . '</td>';
-                        // GPA = sum of (grade_count times grade_credit for all grades) divide by sum of all grade_count only. 
-                        $all_grd_count += $grd_cnt;
+            // Sat count and average score
+            $sQuery = Mark::where([...$base_conditions, 'subject_id' => $subject->id])
+                ->whereIn('student_id', $sids);
 
-                        $product = $grd_cnt * $grd->credit;
-                        $all_total += $product;
-                    }
-                    $collection .= '</tr></table></td><td class="text-center">' . ($all_grd_count == 0 ? $all_grd_count : round($all_total / $all_grd_count, 1)) . '</td><td class="text-center">' . Mk::getSuffix((int) $all_avg_sum_flipped[(int) $avg_sum] + 1) . '</td></tr>';
-                    // Re-initialize variables to zero before next iteration - avoid data re-addition
-                    $all_total = $all_grd_count = 0;
-                }
-                break;
-            default:
-                $marks_per_section = self::getDistinctMrksSbjcts(["my_class_id" => $my_class->id, "exam_id" => $exam_id, 'section_id' => $section_id]);
-                // Get all subject exam sums - for finding subject rank
-                foreach ($marks_per_section as $mark) {
-                    $p = Mark::where(['subject_id' => $mark->subject->id, 'my_class_id' => $my_class->id, 'exam_id' => $exam_id, 'section_id' => $section_id]);
-                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count($sids));
-                    $q = Mark::whereIn('student_id', $sids);
+            $sat = (clone $sQuery)->whereNotNull('exm')->count();
+            $avg_sum = (int) $sQuery->avg('exm');
+            $avg = $sat == 0 ? $sat : round($sQuery->sum('exm') / $sat, 1);
 
-                    $avg_sum = $q->where(['subject_id' => $mark->subject->id, 'exam_id' => $exam_id, 'my_class_id' => $my_class->id, 'section_id' => $section_id])->avg('exm');
-                    $all_avg_sum[] = (int) $avg_sum;
-                }
+            // Grade distribution
+            $grade_counts = Mark::where([...$base_conditions, 'subject_id' => $subject->id])
+                ->whereIn('student_id', $sids)
+                ->select('grade_id', DB::raw('COUNT(*) as count'))
+                ->groupBy('grade_id')
+                ->pluck('count', 'grade_id')
+                ->toArray();
 
-                // Sort the array in reverse order
-                rsort($all_avg_sum);
-                $all_avg_sum_flipped = array_flip($all_avg_sum); // Flip the array so that we search the exm_sum to get the rank / position (the key)
+            // Start table row
+            $collection .=
+                '<tr>
+                    <td class="text-center">' . $subject->slug . '</td>
+                    <td class="text-center">' . $subject->name . '</td>
+                    <td class="text-center">' . $reg . '</td>
+                    <td class="text-center">' . $sat . '</td>
+                    <td class="text-center">' . $reg - $sat . '</td>
+                    <td class="text-center">' . $avg . '</td>
+                    <td class="text-center">' . Mk::getSuffix($all_avg_sum_flipped[$avg_sum] + 1) . '</td>
+                    <td class="text-green text-center">' . self::getGrade($avg, true) . '</td>
+                    <td><table style="border-collapse: collapse;">
+                <tr>';
 
-                foreach ($marks_per_section as $mark) {
-                    $p = Mark::where(['subject_id' => $mark->subject->id, 'my_class_id' => $my_class->id, 'exam_id' => $exam_id, 'section_id' => $section_id]);
-                    $reg = (($sids = $p->pluck('student_id')) != null) ? $sids->count() : (($sids = SubjectRecord::where('subject_id', $mark->subject->id)->get()->value('students_ids')) != null ?: \count($sids));
-                    $q = Mark::whereIn('student_id', $sids);
+            $total_grade_points = 0;
+            $total_count = 0;
 
-                    $sat = $q->where(['exam_id' => $exam_id, 'subject_id' => $mark->subject->id, 'section_id' => $section_id])->whereNotNull('exm')->count();
-                    $s = $q->where(['subject_id' => $mark->subject->id, 'exam_id' => $exam_id, 'my_class_id' => $my_class->id, 'section_id' => $section_id]);
-                    $avg_sum = $s->avg('exm');
-                    $avg = $sat == 0 ? $sat : round($s->sum('exm') / $sat, 1);
-                    $collection .=
-                        '<tr>
-                            <td class="text-center">' . $mark->subject->slug . '</td>
-                            <td class="text-center">' . $mark->subject->name . '</td>
-                            <td class="text-center">' . $reg . '</td>
-                            <td class="text-center">' . $sat . '</td>
-                            <td class="text-center">' . $reg - $sat . '</td>
-                            <td class="text-center">' . $avg . '</td>
-                            <td class="text-green float-left pl-2">' . self::getGrade($avg, true) . '</td>
-                            <td><table style="border-collapse: collapse;">
-                        <tr>';
+            foreach ($grades as $grd) {
+                $count = $grade_counts[$grd->id] ?? 0;
+                $collection .= "<td class='w-1pcnt unstyled text-center'><strong>{$grd->name}</strong>: " . \sprintf("%02d", $count) . '</td>';
 
-                    foreach ($grades as $grd) {
-                        $r = $p->get()->where('grade_id', $grd->id);
+                // GPA = Σ (point × credits) / Σ (credits)
+                // In the context of one subject, the credits are constant across all students taking it. Therefore:
+                // Σ (point × credits) = credits × Σ (point × count)
+                // GPA = (credits × Σ (point × count)) / (credits × total_count) = Σ (point × count) / total_count
+                $total_grade_points += $grd->point * $count;
+                $total_count += $count;
+            }
 
-                        $collection .= "<td class='w-1pcnt unstyled text-center'><strong>{$grd->name}</strong>: " . \sprintf("%02d", $grd_cnt = $r->count()) . '</td>';
+            // GPA = average grade point for the subject (credits cancel out)
+            $gpa = $total_count > 0 ? round($total_grade_points / $total_count, 2) : 0;
 
-                        $all_grd_count += $grd_cnt;
-
-                        $product = $grd_cnt * $grd->credit;
-                        $all_total += $product;
-                    }
-
-                    $collection .= '</tr></table></td><td class="text-center">' . ($all_grd_count == 0 ? $all_grd_count : round($all_total / $all_grd_count, 1)) . '</td><td class="text-center">' . Mk::getSuffix((int) $all_avg_sum_flipped[(int) $avg_sum] + 1) . '</td></tr>';
-                    $all_total = $all_grd_count = 0;
-                }
-                break;
+            $collection .= "</tr></table></td><td class='text-center'>$gpa</td></tr>";
         }
 
         return $collection;
     }
     /** GRADES SUMMARY ENDS **/
 
-    /** GPA */
-    public static function getGPA($exam_id, $my_class_id, $class_type_id, $section_id, $precicion = 1)
+    /**
+     * Calculate GPA for a given exam, class, class type, and section.
+     */
+    public static function getGPA(int $exam_id, int|null $my_class_id, int $class_type_id, mixed $section_id, int $precision = 2)
     {
-        $all_grds_cnt = $all_prods = 0;
-        foreach (Grade::where('class_type_id', $class_type_id)->get() as $grd) {
+        $query = Mark::where('marks.exam_id', $exam_id)
+            ->join('subjects', 'marks.subject_id', '=', 'subjects.id')
+            ->join('grades', 'marks.grade_id', '=', 'grades.id')
+            ->where('grades.class_type_id', $class_type_id);
 
-            $grd_cnt = $my_class_id == null
-                ? Mark::where(['exam_id' => $exam_id, 'grade_id' => $grd->id])->get()->count()
-                : (($section_id == null || $section_id == "all")
-                    ? Mark::where(['exam_id' => $exam_id, 'my_class_id' => $my_class_id, 'grade_id' => $grd->id])->get()->count()
-                    : Mark::where(['exam_id' => $exam_id, 'my_class_id' => $my_class_id, 'grade_id' => $grd->id, 'section_id' => $section_id])->get()->count());
-
-            $all_grds_cnt += $grd_cnt;
-            $prod = $grd_cnt * $grd->credit;
-            $all_prods += $prod;
+        if ($my_class_id) {
+            $query->where('marks.my_class_id', $my_class_id);
+            if ($section_id && $section_id !== 'all') {
+                $query->where('marks.section_id', $section_id);
+            }
         }
-        return ($all_grds_cnt == 0) ? $all_grds_cnt : round($all_prods / $all_grds_cnt, $precicion);
+
+        // Calculate weighted sum (credits * point) and total credits
+        $weighted_sum = $query->sum(DB::raw('subjects.credits * grades.point'));
+        $total_credits = $query->sum('subjects.credits');
+
+        // Avoid division by zero
+        if ($total_credits == 0) {
+            return 0.00;
+        }
+
+        return round($weighted_sum / $total_credits, $precision);
     }
 
     /** DIVISION SUMMARY */
@@ -245,7 +241,7 @@ class Mk extends Qs
      * @param int $number The number to add the ordinal suffix to.
      * @return string|null The number with the ordinal suffix, or null if the input number is less than 1.
      */
-    public static function getSuffix($number)
+    public static function getSuffix(int $number)
     {
         if ($number < 1)
             return null;
@@ -264,7 +260,7 @@ class Mk extends Qs
         $tex = "tex$term";
         $sub_total = Mark::where($d)->select($tex)->where($tex, '>', 0)->first();
 
-        return $sub_total ? $sub_total->{$tex} : '-';
+        return $sub_total ? $sub_total->{$tex} : '—';
     }
 
     public static function countDistinctions(Collection $marks)
@@ -362,42 +358,6 @@ class Mk extends Qs
         return $divisions;
     }
 
-    // The ids corresponds to exam categories in 'exam_categories' table
-    public static function getTerminalExamCategoryId()
-    {
-        return 4;
-    }
-
-    public static function getAnnualExamCategoryId()
-    {
-        return 5;
-    }
-
-    public static function isTerminalExam(int $category_id): bool
-    {
-        return $category_id === self::getTerminalExamCategoryId();
-    }
-
-    public static function isAnnualExam(int $category_id): bool
-    {
-        return $category_id === self::getAnnualExamCategoryId();
-    }
-
-    public static function getSummativeExamCategoryIds(): array
-    {
-        return [self::getTerminalExamCategoryId(), self::getAnnualExamCategoryId()];
-    }
-
-    public static function isEnabled(int $value): bool
-    {
-        return $value === 1;
-    }
-
-    public static function isDisabled(int $value): bool
-    {
-        return $value === 0;
-    }
-
     public static function getSectionCount($exam_id, $class_id, $section_id)
     {
         return ExamRecord::where(['exam_id' => $exam_id, 'my_class_id' => $class_id, 'section_id' => $section_id])->count();
@@ -417,7 +377,7 @@ class Mk extends Qs
      * @return bool
      * @static
      */
-    public static function deleteOldRecord($st_id, $class_id)
+    public static function deleteOldRecord(int $st_id, int $class_id)
     {
         $d = ['student_id' => $st_id, 'year' => self::getCurrentSession()];
 
@@ -455,28 +415,6 @@ class Mk extends Qs
         return null;
     }
 
-    public static function jsonResponse($title, $message)
-    {
-        return response()->json([
-            $title => $message
-        ]);
-    }
-
-    public static function getAllMksTotal($students, $exam_id, $my_class_id)
-    {
-        $all_mks = [];
-        foreach ($students as $s) {
-            $all_mks[] = ExamRecord::where(['student_id' => $s->user_id, 'exam_id' => $exam_id, 'my_class_id' => $my_class_id])->value('total');
-        }
-
-        rsort($all_mks);
-        $filtered_mks = array_filter($all_mks, fn($mk) => $mk != null);
-
-        $flipped_mks = array_flip($filtered_mks);
-
-        return $flipped_mks;
-    }
-
     public static function getGrade($marks_avg, $with_remark = false)
     {
         $marks_avg = round((int) $marks_avg);
@@ -487,7 +425,7 @@ class Mk extends Qs
 
     public static function renderGrades($class_type_id)
     {
-        $grades_name = $marks_from = $marks_to = $points = $credits = '';
+        $grades_name = $marks_from = $marks_to = $points = '';
         $grades = ($class_type_id == 1) ? Grade::where('class_type_id', 1)->orderBy('name')->get() : ($class_type_id == 2 ? Grade::where('class_type_id', 2)->orderBy('name')->get() : Grade::where('class_type_id', 3)->orderBy('name')->get());
 
         foreach ($grades as $grade) {
@@ -495,17 +433,15 @@ class Mk extends Qs
             $marks_from .= "<td class='text-center'>{$grade->mark_from}</td>";
             $marks_to .= "<td class='text-center'>{$grade->mark_to}</td>";
             $points .= "<td class='text-center'>{$grade->point}</td>";
-            $credits .= "<td class='text-center'>{$grade->credit}</td>";
         }
 
         $a = '<table class="table-styled float-head"><thead><tr><th class="text-center">Grade</th>';
         $b = '</tr></thead><tbody><tr><td class="text-center">Mark From</td>';
         $c = '</tr><tr><td class="text-center">Mark To</td>';
         $d = '</tr><tr><td class="text-center">Point</td>';
-        $e = '</tr><tr><td class="text-center">Credit</td>';
         $f = '</tr></tbody></table>';
 
-        $collection = "$a$grades_name$b$marks_from$c$marks_to$d$points$e$credits$f";
+        $collection = "$a$grades_name$b$marks_from$c$marks_to$d$points$f";
         return $collection;
     }
 

@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Exam;
 
-use App\Helpers\Mk;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ExamUpdate extends FormRequest
@@ -36,10 +35,10 @@ class ExamUpdate extends FormRequest
             'exam_denominator' => 'required|integer|max:100|min:0',
             'exam_student_position_by_value' => 'required|string',
             'ca_student_position_by_value' => 'sometimes|string',
-            'cw_denominator' => 'nullable|integer|required_if:category_id,' . Mk::getAnnualExamCategoryId() . ',' . Mk::getTerminalExamCategoryId(),
-            'hw_denominator' => 'nullable|integer|required_if:category_id,' . Mk::getAnnualExamCategoryId() . ',' . Mk::getTerminalExamCategoryId(),
-            'tt_denominator' => 'nullable|integer|gt:cw_denominator|gt:hw_denominator|required_if:category_id,' . Mk::getAnnualExamCategoryId() . ',' . Mk::getTerminalExamCategoryId(),
-            'tdt_denominator' => 'nullable|integer|gt:tt_denominator|required_if:category_id,' . Mk::getAnnualExamCategoryId() . ',' . Mk::getTerminalExamCategoryId(),
+            'cw_denominator' => 'nullable|integer|required_if:has_assessment,1',
+            'hw_denominator' => 'nullable|integer|required_if:has_assessment,1',
+            'tt_denominator' => 'nullable|integer|gt:cw_denominator|gt:hw_denominator|required_if:has_assessment,1',
+            'tdt_denominator' => 'nullable|integer|gt:tt_denominator|required_if:has_assessment,1',
             // Runtime added attribute (not from request).
             'maximum_exam_ca_denominator' => 'required|integer|max:100',
         ];

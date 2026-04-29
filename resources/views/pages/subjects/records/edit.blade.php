@@ -6,14 +6,14 @@
 
 <div class="card">
     <div class="card-header header-elements-inline">
-        <h6 class="card-title">Edit Subject Record - {{ $sub_rec->subject->my_class->name }}</h6>
+        <h6 class="card-title">Edit Subject Record</h6>
         {!! Qs::getPanelOptions() !!}
     </div>
 
     <div class="card-body">
         <div class="row">
             <div class="col-md-8">
-                <form class="ajax-update" method="post" action="{{ route('subject_records.update', $sub_rec->id) }}">
+                <form class="ajax-update" method="post" action="{{ route('subject_records.update', $sub_rec->id) }}" data-reload="#page-title">
                     @csrf @method('PUT')
 
                     <input type="hidden" name="subject_id" value="{{ $sub_rec->subject_id }}">
@@ -21,7 +21,7 @@
                     <div class="form-group row">
                         <label for="my_class_id" class="col-lg-3 col-form-label font-weight-semibold">Class</label>
                         <div class="col-lg-9">
-                            <input type="text" class="form-control" disabled value="{{ $sub_rec->subject->my_class->name }}">
+                            <input type="text" class="form-control" readonly value="{{ $sub_rec->subject->my_class->name }}">
                         </div>
                     </div>
 
@@ -63,11 +63,11 @@
                     </div>
 
                     <div class="form-group row">
-                        <label for="core" class="col-lg-3 col-form-label font-weight-semibold">Core Subject</label>
+                        <label for="is_core" class="col-lg-3 col-form-label font-weight-semibold">Core Subject?</label>
                         <div class="col-lg-2">
-                            <select disabled class="form-control select" name="core" id="core">
-                                <option @selected($sub_rec->subject->core == 1)>Yes</option>
-                                <option @selected($sub_rec->subject->core == 0)>No</option>
+                            <select disabled class="form-control select" name="is_core" id="is_core">
+                                <option @selected($sub_rec->subject->is_core)>Yes</option>
+                                <option @selected(!$sub_rec->subject->is_core)>No</option>
                             </select>
                         </div>
                         <div class="col-lg-7 m-lg-auto">

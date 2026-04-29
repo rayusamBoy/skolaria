@@ -6,7 +6,6 @@ use App\Helpers\Qs;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Book\BookCreate;
 use App\Http\Requests\Book\BookUpdate;
-use App\Models\Book;
 use App\Repositories\BookRepo;
 use App\Repositories\MyClassRepo;
 
@@ -56,10 +55,10 @@ class BookController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(BookUpdate $request, $book_id)
+    public function update(BookUpdate $request, $book)
     {
         $data = $request->all();
-        $this->book->update($book_id, $data);
+        $this->book->update($book, $data);
 
         return Qs::jsonUpdateOk();
     }

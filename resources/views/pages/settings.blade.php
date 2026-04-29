@@ -150,7 +150,7 @@
                                 <div class="mb-3">
                                     <img style="width:100px;height:100px" src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'logo')) }}">
                                 </div>
-                                <input id="logo" name="logo" type="file" accept="image/*" class="file-input" data-show-caption="false" data-show-upload="false" data-fouc>
+                                <input id="logo" name="logo" type="file" accept="image/*" class="file-input" data-show-caption="false" data-show-upload="false">
                             </div>
                         </div>
                         {{-- Login Background --}}
@@ -162,7 +162,7 @@
                                 <div class="mb-3">
                                     <img id="login-and-related-pgs-bg" style="width: 100px; height: 100px" src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'login_and_related_pages_bg')) }}">
                                 </div>
-                                <input id="login-and-related-pgs-bg-input" name="login_and_related_pages_bg" type="file" accept="image/*" class="file-input" data-show-caption="false" data-show-upload="false" data-fouc>
+                                <input id="login-and-related-pgs-bg-input" name="login_and_related_pages_bg" type="file" accept="image/*" class="file-input" data-show-caption="false" data-show-upload="false">
                             </div>
                         </div>
                     </div>
@@ -179,7 +179,7 @@
                                 <div class="form-check mb-auto mt-auto ml-1 mr-2">
                                     <label class="form-check-label">
                                         Preview
-                                        <input disabled type="checkbox" name="show_login_and_related_pgs_preview" class="form-input-styled" data-fouc>
+                                        <input disabled type="checkbox" name="show_login_and_related_pgs_preview" class="form-input-styled">
                                     </label>
                                 </div>
                             </div>

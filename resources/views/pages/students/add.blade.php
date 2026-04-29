@@ -11,7 +11,7 @@
     </div>
 
     <div class="card-body">
-        <form id="ajax-reg" method="post" enctype="multipart/form-data" class="wizard-form steps-validation" action="{{ route('students.store') }}" data-fouc>
+        <form id="ajax-reg" method="post" enctype="multipart/form-data" class="wizard-form steps-validation" action="{{ route('students.store') }}">
             @csrf
 
             <h6>Personal data</h6>
@@ -43,7 +43,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="gender">Gender: <span class="text-danger">*</span></label>
-                            <select class="select form-control" id="gender" name="gender" required data-fouc data-placeholder="Choose..">
+                            <select class="select form-control" id="gender" name="gender" required data-placeholder="Choose..">
                                 <option value=""></option>
                                 @foreach(Usr::getGenders() as $gender)
                                 <option @selected(old('gender')==$gender) value="{{ $gender }}">{{ $gender }}</option>
@@ -147,7 +147,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="bg_id">Blood Group:</label>
-                            <select class="select form-control" id="bg_id" name="bg_id" data-fouc data-placeholder="Choose..">
+                            <select class="select form-control" id="bg_id" name="bg_id" data-placeholder="Choose..">
                                 <option value=""></option>
                                 @foreach(Usr::getBloodGroups() as $bg)
                                 <option @selected(old('bg_id')==$bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
@@ -166,7 +166,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="photo" class="d-block">Upload Passport Photo:</label>
-                            <input value="{{ old('photo') }}" id="photo" accept="image/*" type="file" name="photo" class="form-input-styled" data-fouc>
+                            <input value="{{ old('photo') }}" id="photo" accept="image/*" type="file" name="photo" class="form-input-styled">
                             <span class="form-text text-muted">Accepted Images: jpeg, png. Max file size 2Mb</span>
                         </div>
                     </div>
@@ -190,7 +190,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="birth_certificate" class="d-block">Upload Birth Certificate:</label>
-                            <input value="{{ old('birth_certificate') }}" id="birth_certificate" accept=".pdf, .jpg, .jpeg, .png" type="file" name="birth_certificate" class="form-input-styled" data-fouc>
+                            <input value="{{ old('birth_certificate') }}" id="birth_certificate" accept=".pdf, .jpg, .jpeg, .png" type="file" name="birth_certificate" class="form-input-styled">
                             <span class="form-text text-muted">Accepted Files: pdf, png, jpg, jpeg. Max file size 2Mb</span>
                         </div>
                     </div>

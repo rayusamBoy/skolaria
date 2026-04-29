@@ -2,360 +2,382 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\MessageDeleted;
 use App\Events\MessageArrived;
+use App\Events\MessageDeleted;
 use App\Helpers\Usr;
 use App\Http\Controllers\Controller;
-use App\Models\Message;
 use App\Models\StudentRecord;
-use App\Models\Thread;
 use App\Notifications\NewMessageArrived;
+use App\Repositories\MessageRepo;
+use App\Repositories\ThreadRepo;
 use App\Repositories\UserRepo;
 use App\User;
 use Carbon\Carbon;
 use Cmgmyr\Messenger\Models\Participant;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 use Throwable;
 
 class MessageController extends Controller
 {
-    protected $extra_messages_to_count, $user;
-    public function __construct(UserRepo $user)
+    protected int $extra_messages_to_count;
+    protected UserRepo $user;
+    protected ThreadRepo $thread;
+    protected MessageRepo $message;
+
+    public function __construct(UserRepo $user, ThreadRepo $thread, MessageRepo $message)
     {
         $this->extra_messages_to_count = 5;
         $this->user = $user;
+        $this->thread = $thread;
+        $this->message = $message;
     }
 
     /**
-     * Show all of the message threads to the user.
-     *
-     * @return mixed
+     * Show all message threads for the authenticated user.
      */
-    public function index()
+    public function index(): View
     {
-        // All threads, ignore deleted/archived participants
-        $threads = Thread::getAllLatest()->get();
-
-        // All threads that user is participating in
-        // $threads = Thread::forUser(auth()->id())->latest('updated_at')->get();
-
-        // All threads that user is participating in, with new messages
-        // $threads = Thread::forUserWithNewMessages(auth()->id())->latest('updated_at')->get();
-
-        $users = self::get_users();
+        $threads = $this->thread->getAllLatest()->get();
+        $users = $this->getUsersExceptAuth();
         $user_roles = $this->user->getRoles();
 
         return view('messenger.index', compact('threads', 'users', 'user_roles'));
     }
 
     /**
-     * Shows a message thread.
-     *
-     * @param $id
-     * @return mixed
+     * Display a specific message thread.
      */
-    public function show($id)
+    public function show($id): View|RedirectResponse
     {
         $id = Usr::decodeHash($id);
 
         try {
-            $thread = Thread::withTrashed()->findOrFail($id);
+            $thread = $this->thread->findWithTrashedOrFail($id);
         } catch (ModelNotFoundException $e) {
             return redirect()->route('messages.index')->with('flash_error', 'The thread was not found.');
         }
 
-        // show current user in list if not a current participant
-        // $users = User::whereNotIn('id', $thread->participantsUserIds())->get();
-
-        // don't show the current user in list
         $user_id = auth()->id();
-        $users = User::whereNotIn('id', $thread->participantsUserIds($user_id))->with(['roles'])->get();
+        $users = User::whereNotIn('id', $this->thread->getParticipantUserIds($id, $user_id))
+            ->with(['roles'])
+            ->get();
         $extra_messages_to_count = $this->extra_messages_to_count;
-        $unread_messages_count = $thread->userUnreadMessagesCount($user_id);
+        $unread_messages_count = $this->thread->getUserUnreadMessagesCount($id, $user_id);
+        $user_as_participant = Participant::where(['thread_id' => $id, 'user_id' => $user_id])->get();
 
-        $user_as_participant = Participant::where(['thread_id' => $thread->id, 'user_id' => $user_id])->get();
+        $this->thread->markAsRead($id, $user_id);
 
-        $thread->markAsRead($user_id);
-
-        return view('messenger.show', compact('thread', 'users', 'user_as_participant', 'extra_messages_to_count', 'unread_messages_count'));
+        return view('messenger.show', compact(
+            'thread',
+            'users',
+            'user_as_participant',
+            'extra_messages_to_count',
+            'unread_messages_count'
+        ));
     }
 
     /**
      * Get all users except the authenticated one.
-     *
-     * @return mixed
      */
     public function get_users()
     {
-        $users = User::where('id', '!=', auth()->id())->get();
-
-        return $users;
+        return User::where('id', '!=', auth()->id())->get();
     }
 
     /**
-     * Creates a new message thread.
-     *
-     * @return mixed
+     * Show form to create a new message thread.
      */
-    public function create()
+    public function create(): View
     {
-        $users = User::where('id', '!=', auth()->id())->get();
-
+        $users = $this->getUsersExceptAuth();
         return view('messenger.create', compact('users'));
     }
 
     /**
-     * Stores a new message thread.
-     *
-     * @return mixed
+     * Store a newly created message thread.
      */
-    public function store()
+    public function store(Request $request): RedirectResponse
     {
-        $input = Request::all();
+        $input = $request->all();
 
         Validator::make($input, [
             'subject' => 'required|string|min:3|max:300',
             'message' => 'required|string|min:2|max:500',
             'recipients' => 'required_without:user_roles|array',
-            'user_roles' => 'required_without:recipients|array'
+            'user_roles' => 'required_without:recipients|array',
         ])->validate();
 
-        $thread = Thread::create([
-            'subject' => $input['subject'],
-        ]);
+        $thread = $this->thread->create(['subject' => $input['subject']]);
 
-        // Message
-        Message::create([
+        $this->message->create([
             'thread_id' => $thread->id,
             'user_id' => auth()->id(),
             'body' => $input['message'],
         ]);
 
-        // Sender
         Participant::create([
             'thread_id' => $thread->id,
             'user_id' => auth()->id(),
             'last_read' => new Carbon(),
         ]);
 
-        // Recipients - individuals
-        if (Request::has('recipients')) {
-            $thread->addParticipant($input['recipients']);
+        if ($request->has('recipients')) {
+            $this->thread->addParticipants($thread->id, $input['recipients']);
         }
 
-        // Recipients - by user role(s)
-        if (Request::has('user_roles')) {
-            foreach ($input['user_roles'] as $role) {
-                // If active students
-                $ids = match ($role) {
-                    'students_active' => StudentRecord::where('grad', 0)->with('user')->get()->where('user.user_type', 'student')->pluck('user_id')->toArray(),
-                    'students_graduated' => StudentRecord::where('grad', 1)->with('user')->get()->where('user.user_type', 'student')->pluck('user_id')->toArray(),
-                    default => User::whereHas('roles', function ($query) use ($role) {
-                            $query->where('name', $role);
-                        })->get()->pluck('id')->toArray(),
-                };
-
-                $thread->addParticipant($ids);
-            }
+        if ($request->has('user_roles')) {
+            $this->addParticipantsByRole($thread, $input['user_roles']);
         }
 
         return redirect()->route('messages.index')->with('flash_success', __('msg.msg_thread_created'));
     }
 
     /**
-     * Adds a new message to a current thread.
-     *
-     * @param $id
-     * @return mixed
+     * Add a new message to an existing thread.
      */
-    public function update($id)
+    public function update(Request $request, $id): JsonResponse
     {
-        $input = Request::all();
+        $input = $request->all();
 
         Validator::make($input, [
             'message' => 'required|string|min:2|max:500',
-            'recipients' => 'sometimes|array'
+            'recipients' => 'sometimes|array',
         ])->validate();
 
         try {
-            $thread = Thread::findOrFail($id);
+            $thread = $this->thread->findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return Usr::json('The thread was not found.', false);
         }
 
         try {
-            // Message
-            $message = Message::create([
-                'thread_id' => $thread->id,
-                'user_id' => auth()->id(),
-                'body' => Request::input('message'),
-            ]);
-
-            // Add replier as a participant
-            $participant = Participant::firstOrCreate([
-                'thread_id' => $thread->id,
-                'user_id' => auth()->id(),
-            ]);
-
-            $participant->last_read = new Carbon();
-            $participant->save();
-
-            // Recipients
-            if (Request::has('recipients'))
-                $thread->addParticipant($input['recipients']);
+            $message = $this->createMessageAndUpdateParticipant($thread, $input);
         } catch (Throwable $e) {
-            // Rollback the created message.
-            $message->deleteMessageForever($message->id);
             Log::error("Error in MessageController@update while creating a message: " . $e->getMessage());
-            return Usr::json(null, false, ['msg' => "Something went wrong. Cannot create a message.", 'ok' => false, 'complete' => true]);
+            return Usr::json(null, false, [
+                'msg' => 'Something went wrong. Cannot create a message.',
+                'ok' => false,
+                'complete' => true,
+            ]);
         }
 
         try {
-            $message = Message::with(['user', 'deletor', 'deletor.roles', 'user.roles'])->find($message->id);
-            $users = Participant::where('thread_id', $thread->id)->with('user')->get()->where('user.id', '<>', auth()->id())->whereNotNull('user')->pluck('user');
-            // Update user photo path to full asset url
-            $message['user']['photo'] = Usr::getTenancyAwarePhoto($message['user']['photo']);
-
-            Notification::sendNow($users, new NewMessageArrived($message));
-            broadcast(new MessageArrived($message));
-
+            $this->broadcastNewMessage($message, $thread);
             return Usr::jsonWithMsgOnly('scrollToBtn');
         } catch (Throwable $e) {
-            $message->deleteMessageForever($message->id);
+            $this->message->deleteMessageForever($message->id);
             Log::error("Error in MessageController@update while sending a message: " . $e->getMessage());
-            return Usr::json(null, false, ['msg' => "Something went wrong. Cannot send a message.", 'ok' => false, 'complete' => true]);
+            return Usr::json(null, false, [
+                'msg' => 'Something went wrong. Cannot send a message.',
+                'ok' => false,
+                'complete' => true,
+            ]);
         }
     }
 
     /**
-     * Update participant last read.
-     *
-     * @param int $thread_id
-     * @return mixed
+     * Update participant's last read timestamp.
      */
-    public function update_participant_last_read(int $thread_id)
+    public function update_participant_last_read(int $thread_id): JsonResponse
     {
-        $thread = Thread::withTrashed()->findOrFail($thread_id);
-        $thread->markAsRead(auth()->id());
+        $this->thread->markAsRead($thread_id, auth()->id());
         return Usr::jsonUpdateOk();
     }
 
     /**
      * Delete a message thread.
-     *
-     * @param $id
-     * @return mixed
      */
-    public function destroy($id)
+    public function destroy($id): RedirectResponse
     {
         try {
-            $thread = Thread::findOrFail($id);
+            $this->thread->findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return back()->with('flash_error', 'The thread was not found.');
         }
 
-        $thread->destroy($id);
+        $this->thread->destroy($id);
         return redirect()->route('messages.index')->with('flash_success', __('msg.del_ok'));
     }
 
     /**
-     * Remove Participant.
-     *
-     * @param int $thread_id
-     * @param int $participant_id
-     * @return mixed
+     * Remove a participant from a thread.
      */
-    public function remove_participant(int $thread_id, int $participant_id)
+    public function remove_participant(int $thread_id, int $participant_id): RedirectResponse
     {
         $thread_id = Usr::decodeHash($thread_id);
         $participant_id = Usr::decodeHash($participant_id);
 
         try {
-            $thread = Thread::findOrFail($thread_id);
+            $thread = $this->thread->findOrFail($thread_id);
         } catch (ModelNotFoundException $e) {
-            if (Thread::onlyTrashed()->find($thread_id)->exists())
+            if ($this->thread->exists($thread_id)) {
                 return redirect()->back()->with('flash_info', 'You must restore the thread first to remove the participant.');
+            }
             return redirect()->back()->with('flash_error', 'The thread was not found.');
         }
 
-        $thread->removeParticipantByUserId($participant_id, $thread_id);
+        $this->thread->removeParticipantByUserId($thread_id, $participant_id);
         return redirect()->back()->with('flash_success', 'Participant has been removed.');
     }
 
     /**
-     * Delete a user creted message.
-     *
-     * @param int $msg_id
-     * @return mixed
+     * Soft-delete a user-created message.
      */
-    public function user_delete(int $msg_id)
+    public function user_delete(int $msg_id): JsonResponse
     {
         try {
-            $message = Message::findOrFail($msg_id);
+            $message = $this->message->findOrFail($msg_id);
         } catch (ModelNotFoundException $e) {
-            return Usr::json('The message was not found.', FALSE);
+            return Usr::json('The message was not found.', false);
         }
 
         try {
-            $message->updateMessage($msg_id, ['deleted_by' => auth()->id()]);
-            $message->deleteMessage($msg_id);
-            $message = Message::onlyTrashed()->with(['user', 'deletor', 'deletor.roles', 'user.roles'])->find($message->id);
-            // Update user photo path to full asset url
-            $message['user']['photo'] = Usr::getTenancyAwarePhoto($message['user']['photo']);
+            $this->message->update($msg_id, ['deleted_by' => auth()->id()]);
+            $this->message->deleteMessage($msg_id);
 
-            broadcast(new MessageDeleted($message));
+            $deleted_message = $this->message->getTrashedWithRelations($msg_id);
+            $deleted_message['user']['photo'] = Usr::getTenancyAwarePhoto($deleted_message['user']['photo']);
+
+            broadcast(new MessageDeleted($deleted_message));
             return Usr::jsonWithMsgOnly('complete');
         } catch (Throwable $e) {
-            // Roll back message actions.
-            $message->updateMessage($msg_id, ['deleted_by' => NULL]);
-            $message->restoreDeletedMessage($msg_id);
+            $this->message->update($msg_id, ['deleted_by' => null]);
+            $this->message->restore($msg_id);
 
-            return Usr::json(null, TRUE, ['ok' => FALSE, 'msg' => "Sorry, something went wrong. Can't delete a message.", 'complete' => true]);
+            return Usr::json(null, true, [
+                'ok' => false,
+                'msg' => "Sorry, something went wrong. Can't delete a message.",
+                'complete' => true,
+            ]);
         }
     }
 
     /**
-     * Delete a user creted message.
-     *
-     * @param int $thread_id
-     * @param int $participant_id
-     * @return mixed
+     * Activate all participants in a thread.
      */
-    public function activate_all_participants(int $thread_id)
+    public function activate_all_participants(int $thread_id): RedirectResponse
     {
         $thread_id = Usr::decodeHash($thread_id);
 
         try {
-            $thread = Thread::findOrFail($thread_id);
+            $thread = $this->thread->findOrFail($thread_id);
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('flash_error', 'The thread was not found.');
         }
 
-        $thread->activateAllParticipants();
-        return redirect()->back()->with('flash_success', 'Participants have been activated succussfully.');
+        $this->thread->activateAllParticipants($thread_id);
+        return redirect()->back()->with('flash_success', 'Participants have been activated successfully.');
     }
 
     /**
-     * Load previous messages.
-     *
-     * @param int $thread_id
-     * @param int $current_first_msg_id_in_view
-     * @return mixed
+     * Load previous messages via AJAX.
      */
-    public function load_previous(int $thread_id, int $current_first_msg_id_in_view)
+    public function load_previous(int $thread_id, int $current_first_msg_id_in_view): JsonResponse
     {
-        $messages_string = '';
-        $messages = Message::withTrashed()->with(['user', 'deletor', 'deletor.roles'])->where('thread_id', $thread_id)->where('id', '<', $current_first_msg_id_in_view)->get()->take(-$this->extra_messages_to_count);
+        $messages = $this->message->getMessagesBeforeId(
+            $thread_id,
+            $current_first_msg_id_in_view,
+            $this->extra_messages_to_count
+        );
 
-        foreach ($messages as $message) {
-            $data['message'] = $message;
-            $messages_string .= view('messenger.partials.messages', $data)->render();
+        $messages_html = '';
+        foreach ($messages as $msg) {
+            $messages_html .= view('messenger.partials.messages', ['message' => $msg])->render();
         }
 
-        return Usr::json($messages_string);
+        return Usr::json($messages_html);
+    }
+
+    // ----------------------------------------------------------------------
+    // Protected Helper Methods
+    // ----------------------------------------------------------------------
+
+    /**
+     * Get all users except the authenticated one.
+     */
+    protected function getUsersExceptAuth()
+    {
+        return User::where('id', '!=', auth()->id())->get();
+    }
+
+    /**
+     * Add participants to thread based on role names.
+     */
+    protected function addParticipantsByRole($thread, array $roles): void
+    {
+        foreach ($roles as $role) {
+            $user_ids = match ($role) {
+                'students_active' => StudentRecord::where('grad', 0)
+                    ->with('user')
+                    ->get()
+                    ->where('user.user_type', 'student')
+                    ->pluck('user_id')
+                    ->toArray(),
+                'students_graduated' => StudentRecord::where('grad', 1)
+                    ->with('user')
+                    ->get()
+                    ->where('user.user_type', 'student')
+                    ->pluck('user_id')
+                    ->toArray(),
+                default => User::whereHas('roles', fn($q) => $q->where('name', $role))
+                    ->pluck('id')
+                    ->toArray(),
+            };
+
+            if (!empty($user_ids)) {
+                $this->thread->addParticipants($thread->id, $user_ids);
+            }
+        }
+    }
+
+    /**
+     * Create a new message and update/add participant.
+     */
+    protected function createMessageAndUpdateParticipant($thread, array $input)
+    {
+        $message = $this->message->create([
+            'thread_id' => $thread->id,
+            'user_id' => auth()->id(),
+            'body' => $input['message'],
+        ]);
+
+        $participant = Participant::firstOrCreate([
+            'thread_id' => $thread->id,
+            'user_id' => auth()->id(),
+        ]);
+        $participant->last_read = new Carbon();
+        $participant->save();
+
+        if (isset($input['recipients'])) {
+            $this->thread->addParticipants($thread->id, $input['recipients']);
+        }
+
+        return $message;
+    }
+
+    /**
+     * Broadcast new message and send notifications.
+     */
+    protected function broadcastNewMessage($message, $thread): void
+    {
+        $message->load(['user', 'deletor', 'deletor.roles', 'user.roles']);
+        $message['user']['photo'] = Usr::getTenancyAwarePhoto($message['user']['photo']);
+        $message['body'] = Usr::parsedown($message['body']);
+
+        $recipients = Participant::where('thread_id', $thread->id)
+            ->with('user')
+            ->get()
+            ->pluck('user')
+            ->filter(fn($u) => $u && $u->id !== auth()->id());
+
+        Notification::sendNow($recipients, new NewMessageArrived($message));
+        broadcast(new MessageArrived($message));
     }
 }

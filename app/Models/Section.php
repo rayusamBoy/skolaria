@@ -7,7 +7,11 @@ use Eloquent;
 
 class Section extends Eloquent
 {
-    protected $fillable = ['name', 'my_class_id', 'active', 'teacher_id'];
+    protected $fillable = ['name', 'my_class_id', 'is_default', 'teacher_id'];
+
+    protected $casts = [
+        'is_default' => 'boolean',
+    ];
 
     public function my_class()
     {
@@ -22,5 +26,10 @@ class Section extends Eloquent
     public function student_record()
     {
         return $this->hasMany(StudentRecord::class);
+    }
+
+    public function scopeHasStudentRecord($q)
+    {
+        return $this->student_record()->exists();
     }
 }

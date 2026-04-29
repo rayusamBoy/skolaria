@@ -3,29 +3,37 @@
 namespace App\Exports;
 
 use App\Helpers\Mk;
+use Dompdf\Css\Color;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithProperties;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use PhpOffice\PhpSpreadsheet\Style\Protection;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class MarksExport implements FromView, ShouldAutoSize, WithStyles, WithProperties
 {
-    protected $data;
+    protected array $data;
+    // S/N, ADMISSION NUMBER, FULL NAME, GENDER, SECTION
+    protected const int INITIAL_COLS = 5;
+    // Title and subject name rows         
+    protected const int HEADER_ROWS = 4;
+    protected const string SHEET_PASSWORD = 'AllahKnowsBest';
 
-    public function __construct($data)
+    public function __construct(array $data)
     {
         $this->data = $data;
     }
 
     public function properties(): array
     {
+        $system_name = Mk::getSystemName();
         return [
-            'creator' => Mk::getSystemName(),
-            'lastModifiedBy' => Mk::getSystemName(),
+            'creator' => $system_name,
+            'lastModifiedBy' => $system_name,
             'title' => 'Marks Export',
             'description' => 'Excel marks export template for students marks',
             'subject' => 'Marks',
@@ -36,16 +44,31 @@ class MarksExport implements FromView, ShouldAutoSize, WithStyles, WithPropertie
 
     public function styles(Worksheet $sheet)
     {
-        $number_of_initial_cols = 4; // 4 - S/N, ADMISSION NUMBER, FULL NAME, and SECTION
-        $titles_and_subject_names_initial_rows = 4;
-        $start_data_row = $titles_and_subject_names_initial_rows + 1;
+        $subjects_count = Mk::getSubjects($this->data['my_class_id'])->count();
+        $student_count = $this->data['marks']->unique('user.id')->whereNotNull('user')->count();
 
-        $sub_count = Mk::getSubjects($this->data['class']->id)->count();
-        $end_col_index = $sub_count + $number_of_initial_cols;
-        $start_data_col = $col_index = $number_of_initial_cols + 1; // The column the data will be populated from
-        $end_data_row = $this->data['marks']->unique('user.id')->whereNotNull('user')->count() + $titles_and_subject_names_initial_rows; // Plus the first four rows
+        $start_data_col = self::INITIAL_COLS + 1;
+        $end_col_index = self::INITIAL_COLS + $subjects_count;
+        $start_data_row = self::HEADER_ROWS + 1;
+        $end_data_row = self::HEADER_ROWS + $student_count;
 
-        $validation = $sheet->getParent()->getActiveSheet()->getCell([$col_index, 5])->getDataValidation();
+        $this->applyDataValidation($sheet, $start_data_col, $end_col_index, $start_data_row, $end_data_row);
+        $this->applyProtection($sheet, $start_data_col, $end_col_index, $start_data_row, $end_data_row);
+        $this->applyHeaderStyles($sheet, $end_col_index);
+    }
+
+    /**
+     * Apply decimal validation (0–100) to all mark entry cells.
+     */
+    protected function applyDataValidation(
+        Worksheet $sheet,
+        int $start_col,
+        int $end_col,
+        int $start_row,
+        int $end_row
+    ): void {
+        // Create validation template
+        $validation = $sheet->getCell([$start_col, $start_row])->getDataValidation();
         $validation->setType(DataValidation::TYPE_DECIMAL);
         $validation->setErrorStyle(DataValidation::STYLE_STOP);
         $validation->setAllowBlank(true);
@@ -58,32 +81,73 @@ class MarksExport implements FromView, ShouldAutoSize, WithStyles, WithPropertie
         $validation->setFormula1(0);
         $validation->setFormula2(100);
 
-        for ($col = $start_data_col; $col <= $end_col_index; $col++) {
-            for ($row = $start_data_row; $row <= $end_data_row; $row++) {
-                $sheet->getParent()->getActiveSheet()->getCell([$col, $row])->setDataValidation(clone $validation);
-            }
-        }
+        // Build range string (e.g., "E5:G20")
+        $range = Coordinate::stringFromColumnIndex($start_col) . $start_row . ':' .
+            Coordinate::stringFromColumnIndex($end_col) . $end_row;
 
-        // Enable worksheet protection
-        $sheet->getParent()->getActiveSheet()->getProtection()->setSheet(true);
+        $sheet->setDataValidation($range, clone $validation);
+    }
 
-        // Set password
-        $sheet->getProtection()->setPassword('AllahKnowsBest');
+    /**
+     * Protect the sheet but leave mark entry cells unlocked.
+     */
+    protected function applyProtection(
+        Worksheet $sheet,
+        int $start_col,
+        int $end_col,
+        int $start_row,
+        int $end_row
+    ): void {
+        $sheet->getProtection()->setSheet(true);
+        $sheet->getProtection()->setPassword(self::SHEET_PASSWORD);
 
-        // Lock all cells then unlock the specified cell
-        $sheet->getParent()->getActiveSheet()
-            ->getStyle([$start_data_col, $start_data_row, $end_col_index, $end_data_row])
+        // Unlock the mark entry range
+        $sheet->getStyle([$start_col, $start_row, $end_col, $end_row])
             ->getProtection()
             ->setLocked(Protection::PROTECTION_UNPROTECTED);
+    }
 
-        // Set bg color and font color for heading data
-        $headers_arr_range = [1, 1, $end_col_index, $titles_and_subject_names_initial_rows];
-        $sheet->getStyle($headers_arr_range)->getFill()->applyFromArray(['fillType' => 'solid', 'color' => ['rgb' => '171717']]);
-        $sheet->getStyle($headers_arr_range)->getFont()->applyFromArray(['color' => ['rgb' => 'FFFFFF']]);
+    /**
+     * Apply background and font colors to header rows.
+     */
+    protected function applyHeaderStyles(Worksheet $sheet, int $end_col): void
+    {
+        [$texts_color, $bg_color] = $this->getHeaderColors();
+
+        $header_range = [1, 1, $end_col, self::HEADER_ROWS];
+        $sheet->getStyle($header_range)
+            ->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()
+            ->setRGB($bg_color);
+
+        $sheet->getStyle($header_range)
+            ->getFont()
+            ->getColor()
+            ->setRGB($texts_color);
+    }
+
+    /**
+     * Retrieve text and background colors from system settings.
+     */
+    protected function getHeaderColors(): array
+    {
+        $colors = Mk::getSetting('login_and_related_pgs_txts_and_bg_colors');
+
+        if ($colors === null) {
+            return ['ffffff', '171717']; // default white text, dark gray background
+        }
+
+        $exploded = explode(Mk::getDelimiter(), $colors);
+        $text_color = substr(str_replace('#', '', Color::parse($exploded[0])['hex'] ?? ''), 0, 6) ?? 'ffffff';
+        $bg_color = substr(str_replace('#', '', Color::parse($exploded[1])['hex'] ?? ''), 0, 6) ?? '171717';
+
+        return [$text_color, $bg_color];
     }
 
     public function view(): View
     {
+        $this->data['initial_cols'] = self::INITIAL_COLS;
         return view('pages.marks.batch.table', $this->data);
     }
 }

@@ -20,15 +20,14 @@
 
         <div class="tab-content">
             <div class="tab-pane fade show active" id="all-grades">
-                <table class="table datatable-button-html5-columns">
+                <table class="table datatable-button-html5-columns" id="manage-grades-table">
                     <thead>
                         <tr>
                             <th>S/N</th>
                             <th>Name</th>
-                            <th>Grade Type</th>
+                            <th>Class Type</th>
                             <th>Range</th>
                             <th>Point</th>
-                            <td>Credit</td>
                             <th>Remark</th>
                             <th class="text-center">Action</th>
                         </tr>
@@ -41,7 +40,6 @@
                             <td>{{ $gr->class_type_id ? $class_types->where('id', $gr->class_type_id)->first()->name : 'Not Applicable'}}</td>
                             <td>{{ "{$gr->mark_from} - {$gr->mark_to}" }}</td>
                             <td>{{ $gr->point }}</td>
-                            <td>{{ $gr->credit }}</td>
                             <td>{{ $gr->remark }}</td>
                             <td class="text-center">
                                 <div class="list-icons">
@@ -49,9 +47,11 @@
                                         <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
 
                                         <div class="dropdown-menu dropdown-menu-left">
+                                            {{-- Edit --}}
                                             @can($tenant_permissions['grades']['edit']['permission'])
                                             <a href="{{ route('grades.edit', $gr->id) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
                                             @endcan
+                                            {{-- Delete --}}
                                             @can($tenant_permissions['grades']['destroy']['permission'])
                                             <a id="{{ $gr->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                             <form method="post" id="item-delete-{{ $gr->id }}" action="{{ route('grades.destroy', $gr->id) }}" class="hidden">@csrf @method('delete')</form>
@@ -78,17 +78,18 @@
                 </div>
                 <div class="row">
                     <div class="col-md-10">
-                        <form method="post" action="{{ route('grades.store') }}">
+                        <form method="post" action="{{ route('grades.store') }}" class="ajax-store" data-reload="#manage-grades-table">
                             @csrf
+                            {{-- Name --}}
                             <div class="form-group row">
                                 <label for="name" class="col-lg-3 col-form-label font-weight-semibold">Name <span class="text-danger">*</span></label>
                                 <div class="col-lg-9">
                                     <input name="name" id="name" value="{{ old('name') }}" required type="text" class="form-control text-uppercase" placeholder="E.g., A">
                                 </div>
                             </div>
-
+                            {{-- Class Type --}}
                             <div class="form-group row">
-                                <label for="class_type_id" class="col-lg-3 col-form-label font-weight-semibold">Grade Type</label>
+                                <label for="class_type_id" class="col-lg-3 col-form-label font-weight-semibold">Class Type</label>
                                 <div class="col-lg-9">
                                     <select class="form-control select" name="class_type_id" id="class_type_id">
                                         <option value="">Not Applicable</option>
@@ -98,21 +99,21 @@
                                     </select>
                                 </div>
                             </div>
-
+                            {{-- Mark From --}}
                             <div class="form-group row">
                                 <label for="mark_from" class="col-lg-3 col-form-label font-weight-semibold">Mark From <span class="text-danger">*</span></label>
                                 <div class="col-lg-3">
                                     <input min="0" max="100" id="mark_from" name="mark_from" value="{{ old('mark_from') }}" required type="number" class="form-control" placeholder="E.g., 0">
                                 </div>
                             </div>
-
+                            {{-- Mark To --}}
                             <div class="form-group row">
                                 <label for="mark_to" class="col-lg-3 col-form-label font-weight-semibold">Mark To <span class="text-danger">*</span></label>
                                 <div class="col-lg-3">
                                     <input min="0" max="100" id="mark_to" name="mark_to" value="{{ old('mark_to') }}" required type="number" class="form-control" placeholder="E.g., 35">
                                 </div>
                             </div>
-
+                            {{-- Point --}}
                             <div class="form-group row">
                                 <label for="point" class="col-lg-3 col-form-label font-weight-semibold">Point <span class="text-danger">*</span>
                                     <i class="material-symbols-rounded float-right text-info" data-toggle="tooltip" title="Sample points: 1 → A, 2 → B, 3 → C, 4 → D, 5 → F">info</i>
@@ -122,17 +123,8 @@
                                 </div>
                                 <div class="col-lg-6 m-lg-auto"><span class="font-weight-bold font-italic text-info-800">{{ __('msg.point_info') }}</span></div>
                             </div>
-
-                            <div class="form-group row">
-                                <label for="credit" class="col-lg-3 col-form-label font-weight-semibold">Credit <span class="text-danger">*</span>
-                                    <i class="material-symbols-rounded float-right text-info" data-toggle="tooltip" title="Sample credits: 5 → A, 4 → B, 3 → C, 2 → D, 1 → E, 0 → F">info</i>
-                                </label>
-                                <div class="col-lg-3">
-                                    <input name="credit" id="credit" min="0" required type="number" class="form-control" placeholder="E.g., 5">
-                                </div>
-                                <div class="col-lg-6 m-lg-auto"><span class="font-weight-bold font-italic text-info-800">{{ __('msg.credit_info') }}</span></div>
-                            </div>
-
+     
+                            {{-- Remark --}}
                             <div class="form-group row">
                                 <label for="remark" class="col-lg-3 col-form-label font-weight-semibold">Remark</label>
                                 <div class="col-lg-9">
@@ -144,7 +136,7 @@
                                     </select>
                                 </div>
                             </div>
-
+                            {{-- Submit Button --}}
                             <div class="text-right">
                                 <button type="submit" class="btn btn-primary">Submit form <i class="material-symbols-rounded ml-2">send</i></button>
                             </div>

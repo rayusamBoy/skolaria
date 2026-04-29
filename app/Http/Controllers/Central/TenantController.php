@@ -13,7 +13,9 @@ use Stancl\Tenancy\Resolvers\DomainTenantResolver;
 
 class TenantController extends Controller
 {
-    protected $tenant, $user;
+    protected TenantRepo $tenant;
+    protected UserRepo $user;
+
     public function __construct(TenantRepo $tenant, UserRepo $user)
     {
         $this->permissionMap = config('permissions.names.central.tenants');
@@ -47,20 +49,12 @@ class TenantController extends Controller
     {
         set_time_limit(600); // Set time limit for this method to 10 minutes.
         $data = $request->except(['_token', '_method', 'domain']);
-        $cleaning_error = $creation_error = $domain_error = $tenant = null;
+        $creation_error = $domain_error = $tenant = null;
 
         try {
             $tenant = $this->tenant->create($data);
         } catch (\Throwable $t) {
             $creation_error = $t->getMessage();
-            if (session()->has("created_tenant_id")) {
-                try {
-                    $this->tenant->delete(session()->get("created_tenant_id"));
-                } catch (\Throwable $t) {
-                    $cleaning_error = $t->getMessage();
-                }
-                session()->forget("created_tenant_id");
-            }
         }
 
         if ($tenant) {
@@ -70,7 +64,7 @@ class TenantController extends Controller
                 $domain_error = $t->getMessage();
             }
         } else {
-            $domain_error = "Tenant creation failed, so domain creation skipped.";
+            $domain_error = "Tenant creation did not complete successfully, so domain creation skipped.";
         }
 
         $errors = [];
@@ -79,15 +73,11 @@ class TenantController extends Controller
             $errors['tenant_creation_error'] = $creation_error;
         }
 
-        if ($cleaning_error) {
-            $errors['tenant_cleaning_error'] = $cleaning_error;
-        }
-
         if ($domain_error) {
             $errors['domain_creation_error'] = $domain_error;
         }
 
-        if ($creation_error || $cleaning_error || $domain_error) {
+        if ($creation_error || $domain_error) {
             Log::error("Errors during tenant creation process: ", $errors);
             return Qs::json(null, null, ['msg' => implode(", ", $errors), 'ok' => false, 'pop' => true, 'pop_timer' => 0]);
         }
@@ -112,14 +102,14 @@ class TenantController extends Controller
     {
         $tenant = $this->tenant->find($tenant);
 
-        $data = $request->only(['account_status', 'payment_status', 'remarks']);
+        $data = $request->only(['account_status', 'payment_status', 'remarks', 'name']);
         $data['updated_at'] = Carbon::now();
 
         // Handle domain update if provided
-        if ($request->has('domain') && $request->domain !== $tenant->domain) {
+        if ($request->has('domain') && $request->domain) {
             // Invalidate the cached domain for this tenant
             app(DomainTenantResolver::class)->invalidateCache($tenant);
-            $this->tenant->updateDomain(['tenant_id' => $tenant->id], ['domain' => $request->domain]);
+            $this->tenant->updateOrCreateDomain(['tenant_id' => $tenant->id], ['domain' => $request->domain]);
             $data['domain'] = $request->domain;
         }
 

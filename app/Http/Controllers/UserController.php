@@ -10,239 +10,417 @@ use App\Http\Requests\UserStaffDataEditState;
 use App\Repositories\LocationRepo;
 use App\Repositories\MyClassRepo;
 use App\Repositories\PermissionRepo;
+use App\Repositories\StudentRepo;
 use App\Repositories\UserRepo;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    protected $user, $loc, $my_class, $permission;
+    protected UserRepo $user;
+    protected StudentRepo $student;
+    protected LocationRepo $loc;
+    protected MyClassRepo $my_class;
+    protected PermissionRepo $permission;
 
-    public function __construct(UserRepo $user, LocationRepo $loc, MyClassRepo $my_class, PermissionRepo $permission)
-    {
+    public function __construct(
+        UserRepo $user,
+        StudentRepo $student,
+        LocationRepo $loc,
+        MyClassRepo $my_class,
+        PermissionRepo $permission
+    ) {
         $this->permissionMap = config('permissions.names.tenant.users');
         parent::__construct();
         $this->user = $user;
+        $this->student = $student;
         $this->loc = $loc;
         $this->my_class = $my_class;
         $this->permission = $permission;
     }
 
-    public function index()
+    /**
+     * Display list of tenant users.
+     */
+    public function index(): View
     {
-        $except_role = config('roles.default_roles.tenant.student');
-        $except_roles = (array) Usr::userIsHead() ? [$except_role] : [$except_role, config('roles.default_roles.tenant.superadmin')];
+        $data['nationals'] = $this->loc->getAllNationals();
+        $data['blood_groups'] = $this->user->getBloodGroups();
+        $data['roles'] = $this->permission->getRoles($this->getExcludedRoles());
+        $data['permissions'] = $this->permission->getPermissions();
 
-        $d['nationals'] = $this->loc->getAllNationals();
-        $d['blood_groups'] = $this->user->getBloodGroups();
-        $d['roles'] = $this->permission->getRoles($except_roles);
-        $d['permissions'] = $this->permission->getPermissions();
-
-        return view('pages.users.index', $d);
+        return view('pages.users.index', $data);
     }
 
-    public function edit($user)
+    /**
+     * Show form to edit a user.
+     */
+    public function edit($user): View
     {
-        $except_role = config('roles.default_roles.tenant.student');
-        $except_roles = (array) Usr::userIsHead() ? [$except_role] : [$except_role, config('roles.default_roles.tenant.superadmin')];
+        $roles = $this->permission->getRoles($this->getExcludedRoles());
 
-        $d['roles'] = $roles = $this->permission->getRoles($except_roles);
-        $d['permissions'] = $this->permission->getPermissions();
-        $d['user'] = $this->user->find($user);
-        $d['staff_rec'] = $this->user->getStaffRecord(['user_id' => $user])->first();
-        $d['users'] = $this->user->getUsersByRoleNames($roles->pluck('name')->toArray());
-        $d['blood_groups'] = $this->user->getBloodGroups();
-        $d['nationals'] = $this->loc->getAllNationals();
+        $data['roles'] = $roles;
+        $data['permissions'] = $this->permission->getPermissions();
+        $data['user'] = $this->user->find($user);
+        $data['staff_rec'] = $this->user->getStaffRecord(['user_id' => $user])->first();
+        $data['users'] = $this->user->getUsersByRoleNames($roles->pluck('name')->toArray());
+        $data['blood_groups'] = $this->user->getBloodGroups();
+        $data['nationals'] = $this->loc->getAllNationals();
 
-        return view('pages.users.edit', $d);
+        return view('pages.users.edit', $data);
     }
 
-    public function reset_password($user)
+    /**
+     * Reset a user's password to 'user'.
+     */
+    public function reset_password($user): RedirectResponse
     {
-        // Redirect if Making Changes to Head
-        if (Usr::userIsHead($user) && !Usr::userIsHead())
+        if ($this->cannotModifyHeadUser($user)) {
             return back()->with('flash_danger', __('msg.denied'));
+        }
 
-        $data['password'] = Hash::make('user');
-        $data['password_updated_at'] = NULL;
-
-        $this->user->update($user, $data);
+        $this->user->update($user, [
+            'password' => Hash::make('user'),
+            'password_updated_at' => null,
+        ]);
 
         return back()->with('flash_success', __('msg.pu_reset'));
     }
 
-    public function store(UserRequest $req)
+    /**
+     * Store a new user.
+     */
+    public function store(UserRequest $req): JsonResponse
     {
         $role_names = $req->roles;
-        $except = ['_token', '_method'];
-        $data = $req->except([...Usr::getStaffRecord(), ...Usr::getParentRelativeRecord(), ...$except]);
-        $user_is_staff = \count(array_intersect($role_names, Usr::getStaff())) > 0;
-        $emp_date = $req->emp_date ?: now();
-        $staff_id = Usr::getAppCode() . '/STAFF/' . date('Y/m', strtotime($emp_date)) . '/' . mt_rand(1000, 9999);
         $last_role_name = strtolower(last($role_names));
-        $pass = $req->password ?: $last_role_name;
+        $user_is_staff = $this->hasStaffRole($role_names);
 
-        $data['name'] = $name = ucwords(strtolower($req->name));
-        $data['code'] = $code = strtoupper(Str::random(10));
-        $data['dob'] = $req->dob;
-        $data['username'] = $uname = $user_is_staff ? $staff_id : $req->username;
-        $data['work'] = $req->work ?? null;
-        $data['password'] = Hash::make($pass);
-        $data['message_media_heading_color'] = Usr::getUserMediaHeadingColor($name); // Use a unique text color based on the name
+        $user_data = $this->prepareUserData($req, $last_role_name, $user_is_staff);
+        $user_data['password'] = Hash::make($req->password ?: $last_role_name);
 
-        if ($req->hasFile('photo')) {
-            $photo = $req->file('photo');
-            $f = Usr::getFileMetaData($photo);
-            $f['name'] = 'photo.' . $f['ext'];
-            $f['path'] = $data['photo'] = Usr::getUploadPath($last_role_name) . $data['code'] . '/' . $f['name'];
-            $photo->storeAs($f['path']);
-        } else {
-            $data['photo'] = Usr::createAvatar($name, $code, $last_role_name);
+        // Validate username/email presence
+        if (empty($user_data['username']) && empty($req->email)) {
+            return Usr::json(__('msg.user_invalid'), false);
         }
 
-        /* Ensure that both username and Email are not blank */
-        if (!$uname && !$req->email)
-            return Usr::json(__('msg.user_invalid'), FALSE);
-
-        $user = $this->user->create($data); // Create User
+        $user = $this->user->create($user_data);
         $user->syncRoles($role_names);
 
-        if ($req->has('permissions') AND $req->filled('permissions')) {
+        if ($req->filled('permissions')) {
             $user->syncPermissions($req->permissions);
         }
 
         if ($user_is_staff) {
-            $d2 = $req->only(Usr::getStaffRecord());
-            $d2['user_id'] = $user->id;
-            $d2['code'] = $staff_id;
-
-            $this->user->createStaffRecord($d2);
+            $this->createStaffRecord($user->id, $req);
         }
 
         if ($user->hasRole(config('roles.default_roles.tenant.parent'))) {
-            $d3 = $req->only(Usr::getParentRelativeRecord(['name2']));
-            $d3['user_id'] = $user->id;
-            // Use name2 from the request (removed above) as name
-            $d3['name'] = ucwords(strtolower($req->name2));
-            $d3['relation'] = $req->relation;
-
-            $this->user->createParentRelativeRecord($d3);
+            $this->createParentRecord($user->id, $req);
         }
 
         return Usr::json(__('msg.store_ok') . " Default password: $last_role_name");
     }
 
-    public function update(UserRequest $req, $user_id)
+    /**
+     * Update an existing user.
+     */
+    public function update(UserRequest $req, $user_id): JsonResponse
     {
-        // Redirect if Making Changes to Head
-        if (Usr::userIsHead($user_id) && !Usr::userIsHead())
+        if ($this->cannotModifyHeadUser($user_id)) {
             return Usr::json(__('msg.denied'), false);
+        }
 
         $user = $this->user->find($user_id);
         $role_names = $req->roles;
         $last_role_name = strtolower(last($role_names));
 
-        $user_was_staff = \count(array_intersect($user->roles->pluck('name')->toArray(), Usr::getStaff())) > 0;
-        $user_is_staff = \count(array_intersect($role_names, Usr::getStaff())) > 0;
+        $user_was_staff = $this->hasStaffRole($user->roles->pluck('name')->toArray());
+        $user_is_staff = $this->hasStaffRole($role_names);
         $user_is_parent = $user->hasRole(config('roles.default_roles.tenant.parent'));
 
-        $except = [...Usr::getStaffRecord(), ...Usr::getParentRelativeRecord(), '_token', '_method', 'roles'];
-        $data = $req->except($except);
+        $user_data = $this->prepareUserData($req, $last_role_name, $user_is_staff, $user->code);
+        $user_data['work'] = $user_is_parent ? $req->work : null;
 
-        $data['name'] = $name = ucwords(strtolower($req->name));
-        $data['work'] = $user_is_parent ? $req->work : NULL;
-        $data['message_media_heading_color'] = Usr::getUserMediaHeadingColor($name); // Use a unique text color based on the name
+        $this->handlePhotoUpload($req, $user_data, $user->code, $last_role_name);
+        $user->update($user_data);
 
-        if ($req->hasFile('photo')) {
-            $photo = $req->file('photo');
-            $f = Usr::getFileMetaData($photo);
-            $f['name'] = 'photo.' . $f['ext'];
-            $f['path'] = $data['photo'] = Usr::getUploadPath($last_role_name) . $user->code . '/' . $f['name'];
-            $photo->storeAs($f['path']);
-        }
-
-        $user->update($data);
-        $user->syncRoles($req->roles);
-        if ($req->has('permissions') AND $req->filled('permissions')) {
+        $user->syncRoles($role_names);
+        if ($req->filled('permissions')) {
             $user->syncPermissions($req->permissions);
         }
 
-        if ($user_was_staff) {
-            if ($user_is_staff) {
-                $d2 = $req->only(Usr::getStaffRecord());
-                $d2['code'] = $user->code;
-                $this->user->updateStaffRecord(['user_id' => $user->id], $d2);
-            } else
-                $this->user->deleteStaffRecord(['user_id' => $user->id]);
-        } elseif ($user_is_staff) {
-            $d2 = $req->only(Usr::getStaffRecord());
-            $d2['code'] = $user->code;
-            $this->user->updateStaffRecord(['user_id' => $user->id], $d2);
-        }
-
-        if ($user_is_parent) {
-            $d3 = $req->only(Usr::getParentRelativeRecord(['user_id', 'name2']));
-            $d3['name'] = ucwords(strtolower($req->name2));
-            $d3['relation'] = $req->relation;
-            $this->user->updateParentRelativeRec(['user_id' => $user->id], $d3);
-        }
+        $this->handleStaffRecordTransition($user->id, $user_was_staff, $user_is_staff, $req);
+        $this->handleParentRecordUpdate($user->id, $user_is_parent, $req);
 
         return Usr::jsonUpdateOk();
     }
 
-    public function show($user_id)
+    /**
+     * Show user details.
+     */
+    public function show($user_id): View|RedirectResponse
     {
-        if (!$user_id)
+        if (!$user_id) {
             return back();
+        }
 
-        $data['user'] = $user = $this->user->find($user_id);
+        if ($this->isRestrictedView($user_id)) {
+            return back()->with('pop_error', __('msg.denied'));
+        }
 
-        $user_is_staff = \count(array_diff($user->roles->pluck('name')->toArray(), Usr::getStaff())) > 0;
-        if ($user_is_staff) {
-            $data['staff_rec'] = $this->user->getStaffRecord(['user_id' => $user->id])->first() ?: null;
+        $user = $this->user->find($user_id);
+        $user_is_parent = $user->hasRole(config('roles.default_roles.tenant.parent'));
+        $data['user_is_parent'] = $user_is_parent;
+        $data['user'] = $user;
+
+        if ($this->hasStaffRole($user->roles->pluck('name')->toArray())) {
+            $data['staff_rec'] = $this->user->getStaffRecord(['user_id' => $user->id])->first();
+        }
+
+        if ($user_is_parent) {
+            $data['my_childrens'] = $this->student->getRecord(['my_parent_id' => $user->id], ['user', 'my_class']);
+        }
+
+        if ($user->hasRole(config('roles.default_roles.tenant.teacher'))) {
+            $data['sub_recs'] = $this->my_class->getSubjectRecord(['teacher_id' => $user->id]);
         }
 
         return view('pages.users.show', $data);
     }
 
-    public function destroy($user_id)
+    /**
+     * Delete a user.
+     */
+    public function destroy($user): RedirectResponse
     {
-        // Redirect if Making Changes to Heads
-        if (Usr::userIsHead($user_id))
+        if (Usr::userIsHead($user)) {
             return back()->with('pop_error', __('msg.denied'));
+        }
 
-        $user = $this->user->find($user_id);
+        $user = $this->user->find($user);
 
-        if ($user->hasRole(config('roles.default_roles.tenant.teacher')) && $this->userTeachesSubject($user->id))
+        if ($user->hasRole(config('roles.default_roles.tenant.teacher')) && $this->userTeachesSubject($user->id)) {
             return back()->with('pop_error', __('msg.del_teacher'));
+        }
 
         $user->delete();
 
         return back()->with('flash_success', __('msg.del_ok'));
     }
 
-    protected function userTeachesSubject($user_id)
+    /**
+     * Toggle staff data editing permission.
+     */
+    public function toggle_staff_data_editing(UserStaffDataEditState $req): JsonResponse
     {
-        $subjects = $this->my_class->findSubjectRecByTeacher($user_id);
+        $this->user->updateStaffRecord(
+            ['user_id' => $req->id],
+            $req->only('staff_data_edit')
+        );
 
-        return $subjects->isNotEmpty();
+        return Usr::json('ok');
     }
 
-    public function toggle_staff_data_editing(UserStaffDataEditState $req)
+    /**
+     * Toggle user blocked status.
+     */
+    public function toggle_user_block(UserBlockedState $req): JsonResponse
     {
-        $where = ['user_id' => $req->id];
-        $data = $req->only("staff_data_edit");
-        $this->user->updateStaffRecord($where, $data);
+        $this->user->update($req->id, $req->only('blocked'));
 
-        return Usr::json("ok");
+        return Usr::json('ok');
     }
 
-    public function toggle_user_block(UserBlockedState $req)
-    {
-        $user_id = $req->id;
-        $data = $req->only("blocked");
-        $this->user->update($user_id, $data);
+    // ----------------------------------------------------------------------
+    // Protected Helper Methods
+    // ----------------------------------------------------------------------
 
-        return Usr::json("ok");
+    /**
+     * Get roles excluded from selection based on current user's permissions.
+     */
+    protected function getExcludedRoles(): array
+    {
+        $except_role = config('roles.default_roles.tenant.student');
+        $except_roles = [$except_role];
+
+        if (!Usr::userIsHead()) {
+            $except_roles[] = config('roles.default_roles.tenant.superadmin');
+        }
+
+        return $except_roles;
+    }
+
+    /**
+     * Check if current user is allowed to modify a head user.
+     */
+    protected function cannotModifyHeadUser($user_id): bool
+    {
+        return Usr::userIsHead($user_id) && !Usr::userIsHead();
+    }
+
+    /**
+     * Check if current user is restricted from viewing a profile.
+     */
+    protected function isRestrictedView($user_id): bool
+    {
+        $user = auth()->user();
+
+        if ($user_id != $user->id || $user->hasAnyRole(Usr::getTenancyAwareStaffRoles())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Determine if any of the given roles are staff roles.
+     */
+    protected function hasStaffRole(array $roles): bool
+    {
+        return \count(array_intersect($roles, Usr::getStaff())) > 0;
+    }
+
+    /**
+     * Prepare common user data for create/update.
+     */
+    protected function prepareUserData(
+        UserRequest $req,
+        string $last_role_name,
+        bool $user_is_staff,
+        ?string $existing_code = null
+    ): array {
+        $exclude = [
+            ...Usr::getStaffRecord(),
+            ...Usr::getParentRelativeRecord(),
+            '_token',
+            '_method'
+        ];
+
+        $data = $req->except($exclude);
+
+        $data['name'] = $name = ucwords(strtolower($req->name));
+        $data['message_media_heading_color'] = Usr::getUserMediaHeadingColor($name);
+        $data['dob'] = $req->dob;
+
+        if ($existing_code === null) {
+            // New user
+            $data['code'] = strtoupper(Str::random(10));
+            $data['username'] = $user_is_staff
+                ? $this->generateStaffId($req->emp_date)
+                : $req->username;
+            $this->handlePhotoUpload($req, $data, $data['code'], $last_role_name);
+        } else {
+            // Existing user (update)
+            $data['code'] = $existing_code;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Generate a unique staff ID.
+     */
+    protected function generateStaffId($emp_date = null): string
+    {
+        $date = $emp_date ?: now();
+        return Usr::getAppCode() . '/STAFF/' . date('Y/m', strtotime($date)) . '/' . mt_rand(1000, 9999);
+    }
+
+    /**
+     * Handle photo upload or avatar generation.
+     */
+    protected function handlePhotoUpload(
+        UserRequest $req,
+        array &$data,
+        string $user_code,
+        string $last_role_name
+    ): void {
+        if ($req->hasFile('photo')) {
+            $photo = $req->file('photo');
+            $file_meta = Usr::getFileMetaData($photo);
+            $file_meta['name'] = 'photo.' . $file_meta['ext'];
+            $file_meta['path'] = Usr::getUploadPath($last_role_name) . $user_code . '/' . $file_meta['name'];
+            $photo->storeAs($file_meta['path']);
+            $data['photo'] = $file_meta['path'];
+        } elseif ($req->route()->getActionMethod() === 'store') {
+            $data['photo'] = Usr::createAvatar($data['name'], $user_code, $last_role_name);
+        }
+    }
+
+    /**
+     * Create a staff record for a user.
+     */
+    protected function createStaffRecord(int $user_id, UserRequest $req): void
+    {
+        $staff_data = $req->only(Usr::getStaffRecord());
+        $staff_data['user_id'] = $user_id;
+        $staff_data['code'] = $this->generateStaffId($req->emp_date);
+
+        $this->user->createStaffRecord($staff_data);
+    }
+
+    /**
+     * Create a parent relative record.
+     */
+    protected function createParentRecord(int $user_id, UserRequest $req): void
+    {
+        $parent_data = $req->only(Usr::getParentRelativeRecord(['name2']));
+        $parent_data['user_id'] = $user_id;
+        $parent_data['name'] = ucwords(strtolower($req->name2));
+        $parent_data['relation'] = $req->relation;
+
+        $this->user->createParentRelativeRecord($parent_data);
+    }
+
+    /**
+     * Handle staff record creation, update, or deletion during user update.
+     */
+    protected function handleStaffRecordTransition(
+        int $user_id,
+        bool $was_staff,
+        bool $is_staff,
+        UserRequest $req
+    ): void {
+        if ($was_staff) {
+            if ($is_staff) {
+                $staff_data = $req->only(Usr::getStaffRecord());
+                $this->user->updateStaffRecord(['user_id' => $user_id], $staff_data);
+            } else {
+                $this->user->deleteStaffRecord(['user_id' => $user_id]);
+            }
+        } elseif ($is_staff) {
+            $staff_data = $req->only(Usr::getStaffRecord());
+            $staff_data['user_id'] = $user_id;
+            $staff_data['code'] = $this->generateStaffId($req->emp_date);
+            $this->user->createStaffRecord($staff_data);
+        }
+    }
+
+    /**
+     * Update or create parent relative record if user is a parent.
+     */
+    protected function handleParentRecordUpdate(int $user_id, bool $is_parent, UserRequest $req): void
+    {
+        if (!$is_parent) {
+            return;
+        }
+
+        $parent_data = $req->only(Usr::getParentRelativeRecord(['user_id', 'name2']));
+        $parent_data['name'] = ucwords(strtolower($req->name2));
+        $parent_data['relation'] = $req->relation;
+
+        $this->user->updateOrCreateParentRelativeRec(['user_id' => $user_id], $parent_data);
+    }
+
+    /**
+     * Check if a teacher teaches any subject.
+     */
+    protected function userTeachesSubject($user_id): bool
+    {
+        return $this->my_class->findSubjectRecByTeacher($user_id)->isNotEmpty();
     }
 }

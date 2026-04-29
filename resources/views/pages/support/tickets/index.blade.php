@@ -35,7 +35,7 @@
                     <div class="form-group row">
                         <div class="col-lg-3">
                             <label for="department">Department <span class="text-danger">*</span></label>
-                            <select id="department" name="department" class="form-control select" required data-fouc>
+                            <select id="department" name="department" class="form-control select" required>
                                 @foreach($departments as $department)
                                 <option value="{{ $department }}">{{ ucfirst($department) }}</option>
                                 @endforeach
@@ -43,7 +43,7 @@
                         </div>
                         <div class="col-lg-2">
                             <label for="priority">Priority <span class="text-danger">*</span></label>
-                            <select id="priority" name="priority" class="form-control select" required data-fouc>
+                            <select id="priority" name="priority" class="form-control select" required>
                                 @foreach($priorities as $prs)
                                 <option value="{{ $prs }}">{{ ucfirst($prs) }}</option>
                                 @endforeach
@@ -51,7 +51,7 @@
                         </div>
                         <div class="col-lg-3">
                             <label for="category">Category <span class="text-danger">*</span></label>
-                            <select id="category" data-placeholder="Select Category" name="category_id" class="form-control select" required data-fouc>
+                            <select id="category" data-placeholder="Select Category" name="category_id" class="form-control select" required>
                                 <option value=""></option>
                                 @foreach ($categories as $cat)
                                 <option value="{{ $cat->id }}" title="{{ $cat->description }}">{{ ucfirst($cat->name) }}</option>
@@ -60,7 +60,7 @@
                         </div>
                         <div class="col-lg-4">
                             <label for="label">Labels</label>
-                            <select id="label" data-placeholder="Select Labels" name="labels_ids[]" class="form-control select" multiple="multiple" data-fouc>
+                            <select id="label" data-placeholder="Select Labels" name="labels_ids[]" class="form-control select" multiple="multiple">
                                 <option value=""></option>
                                 @foreach($labels as $lbl)
                                 <option value="{{ $lbl->id }}" title="{{ $lbl->description }}">{{ ucfirst($lbl->name) }}</option>
@@ -86,15 +86,12 @@
                             <label class="mt-3">Message <span class="text-danger">*</span></label>
                             <div class="form-group row">
                                 <div class="col-12">
-                                    <div id="message-ticket-editor"></div>
+                                    <div class="overtype-editor" data-ot-toolbar="true" data-ot-show-stats="true"></div>
                                 </div>
                             </div>
                             <div class="form-group row float-right">
                                 <div class="col-6">
                                     <button type="submit" class="btn btn-sm btn-success">Submit<span class="material-symbols-rounded ml-2 pb-2px">send</span></button>
-                                </div>
-                                <div class="col-6">
-                                    <button type="button" class="btn btn-sm btn-warning cancel-editor">Cancel<span class="material-symbols-rounded ml-2 pb-2px">cancel</span></button>
                                 </div>
                             </div>
                         </div>

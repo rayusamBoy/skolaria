@@ -17,7 +17,7 @@
 
 @section('content')
 
-@if($payments->isEmpty() && $users->isEmpty() && $my_classes->isEmpty() && $exams->isEmpty() && $threads->isEmpty())
+@if($payments->isEmpty() && $users->isEmpty() && $trashed_my_classes->isEmpty() && $exams->isEmpty() && $threads->isEmpty())
 <div class="text-center">
     <img src="{{ asset('global_assets/icons/bin-empty-2.gif') }}" alt="Bin empty gif"></img>
     <h6 class="text-muted mt-2">The bin is empty.</h6>
@@ -132,7 +132,7 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>
-                                <img class="rounded-circle" style="height:40px;width:40px;" src="{{ str_starts_with($user->photo,'global_assets')?asset($user->photo):tenant_asset($user->photo) }}">
+                                <img class="rounded-circle" style="height:40px;width:40px;" src="{{ Usr::getTenancyAwarePhoto($user->photo) }}">
                             </td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->username }}</td>
@@ -141,7 +141,7 @@
                             @php $s_recs = Usr::getStudentRecordByUserId($user->id,['my_class','section']) @endphp
                             <td class="text-center">{{ $s_recs->first()->my_class->name }} - {{ $s_recs->first()->section->name }}</td>
                             @else
-                            <td>{{ $user->email ?? $user->phone ?? $user->phone2 ?? '-' }}</td>
+                            <td>{{ $user->email ?? $user->phone ?? $user->phone2 ?? '—' }}</td>
                             @endif
                             <td>{{ Qs::onlyDateFormat($user->deleted_at) }}</td>
                             <td class="text-center">
@@ -182,7 +182,7 @@
 @endif
 
 {{-- My Classes --}}
-@if($my_classes->isNotEmpty())
+@if($trashed_my_classes->isNotEmpty())
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Classes</h6>
@@ -201,7 +201,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($my_classes as $c)
+                    @foreach($trashed_my_classes as $c)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $c->name }}</td>
@@ -325,7 +325,7 @@
                         <th>Subject</th>
                         <th>Creator</th>
                         <th>Latest Message</th>
-                        <th>Participants</th>
+                        <th># Participants</th>
                         <th>Created At</th>
                         <th>Deleted At</th>
                         <th class="text-center">Action</th>
@@ -337,13 +337,8 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $thread->subject }}</td>
                         <td>{{ $thread->creator()->name }}</td>
-                        <td>{{ $thread->getLatestMessageAttribute()->body ?? '' }}</td>
-                        @include('pages/modals/subject_assigned_students')
-                        <td>
-                            <a href="javascript:;" data-toggle="modal" data-target="#thread-participants-{{ $thread->id }}">
-                                View Participants
-                            </a>
-                        </td>
+                        <td>{!! Qs::parsedown($thread->getLatestMessageAttribute()->body) ?? '' !!}</td>
+                        <td>{{ count($thread->participantsArray()) }}</td>
                         <td>{{ $thread->created_at }}</td>
                         <td>{{ $thread->deleted_at }}</td>
                         <td class="text-center">
@@ -387,7 +382,7 @@
 $model_names_to_remove = [];
 if($payments->isEmpty()) $model_names_to_remove[] = 'payments';
 if($users->isEmpty()) $model_names_to_remove[] = 'users';
-if($my_classes->isEmpty()) $model_names_to_remove[] = 'my_classes';
+if($trashed_my_classes->isEmpty()) $model_names_to_remove[] = 'my_classes';
 if($exams->isEmpty()) $model_names_to_remove[] = 'exams';
 if($threads->isEmpty()) $model_names_to_remove[] = 'threads';
 @endphp

@@ -126,7 +126,7 @@
 @endif
 
 {{-- Users with 2fa enabled --}}
-@if(isset($users_with_2fa_enabled) && Qs::userIsHead())
+@if(isset($users_with_2fa_enabled) && auth()->user()->hasAnyRole([config('roles.root_roles.central.root'), config('roles.root_roles.tenant.superadmin'), config('roles.default_roles.tenant.admin')]))
 @if($users_with_2fa_enabled->isNotEmpty())
 
 <div class="card card-collapsed">
@@ -145,10 +145,12 @@
                             <th>Photo</th>
                             <th>Name</th>
                             <th>Username</th>
-                            <th>Usertype</th>
+                            <th>Role(s)</th>
                             <th>Phone</th>
                             <th>Email</th>
+                            @if(Qs::userIsHead())
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -158,20 +160,23 @@
                             <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhoto($user->photo) }}" alt="photo"></td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->username }}</td>
-                            <td>{{ ucwords(str_replace('_', ' ',$user->role)) }}</td>
+                            <td>{{ $user->roles->pluck('name')->join(', ') }}</td>
+
                             @if($user->hasRole(config('roles.default_roles.tenant.student')))
                             @php $s_recs = Usr::getStudentRecordByUserId($user->id, ['my_class', 'section']) @endphp
                             <td class="text-center" colspan="2">{{ $s_recs->first()->my_class->name . ' - ' . $s_recs->first()->section->name }}</td>
-
                             @else
-                            <td>{{ $user->phone ?? '-' }}</td>
-                            <td>{{ $user->email ?? '-' }}</td>
+                            <td>{{ $user->phone ?? '—' }}</td>
+                            <td>{{ $user->email ?? '—' }}</td>
                             @endif
+
+                            @if(Qs::userIsHead())
                             <td class="text-center">
                                 {{-- Deactivate --}}
-                                <a id="{{ $user->id }}" onclick="confirmOperation(this.id)" href="javascript:;" class="btn btn-danger"> Deactivate</a>
+                                <a id="{{ $user->id }}" onclick="confirmOperation(this.id)" href="javascript:;" class="btn btn-sm btn-danger"> Deactivate</a>
                                 <form method="post" id="item-confirm-operation-{{ $user->id }}" action="{{ route('two_factor.null_secret_code', $user->id) }}" class="hidden">@csrf @method('patch')</form>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>

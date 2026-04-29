@@ -19,19 +19,13 @@
             <h3 style="text-align: center;"><strong>ASSESSMENTS MARKS</strong></h3>
             <div>
                 <h3 style="float: left;"><strong>{{ strtoupper($sr->my_class->name) }}</strong></h3>
-                <h3 style="float: right;"><strong>YEAR: {{ $ex->year }}</strong></h3>
+                <h3 style="float: right;"><strong>YEAR: {{ $asr->exam->year }}</strong></h3>
             </div>
 
-            @if($ex->term == 1)
-            @php $term = "FIRST"; $term_ends = Qs::getSetting("term_ends") @endphp
-            @elseif($ex->term == 2)
-            @php $term = "SECOND"; $term_begins = Qs::getSetting("term_begins") @endphp
-            @endif
-
-            <h3 style="text-align: center;"><strong> {{ $term }} TERM REPORT</strong></h3>
+            <h3 style="text-align: center;"><strong> {{ Number::spellOrdinal($asr->exam->term) }} TERM REPORT</strong></h3>
             <div style="display: flow-root;">
-                <em style="float: left;">Term Begins: <span style="text-decoration: underline;">{{ $term_begins ?? '' }}</span></em>
-                <em style="float: right;">Term Ends: <span style="text-decoration: underline;">{{ $term_ends ?? '' }}</span></em>
+                <em style="float: left;">Term Begins: <span style="text-decoration: underline;">{{ $settings->firstWhere('type', 'term_begins')->description ?? '' }}</span></em>
+                <em style="float: right;">Term Ends: <span style="text-decoration: underline;">{{ $settings->firstWhere('type', 'term_ends')->description ?? '' }}</span></em>
             </div>
         </div>
         {{--Body--}}
@@ -64,17 +58,11 @@
                     {{--If the record for a particular subject exists--}}
                     @if($assessments_records->where('subject_id', $sub->id)->first())
                     @foreach($assessments_records->where('subject_id', $sub->id) as $as)
-                    <td>
-                        @if($ex->term === 1) {{ $as->tex1 }}
-                        @elseif ($ex->term === 2) {{ $as->tex2 }}
-                        @elseif ($ex->term === 3) {{ $as->tex3 }}
-                        @else {{ '-' }}
-                        @endif
-                    </td>
+                    <td>{{ data_get($as, $tex, '—') }}</td>
                     @endforeach
-                    {{--If not show '-'--}}
+                    {{--If not show 'dash'--}}
                     @else
-                    <td>-</td>
+                    <td>—</td>
                     @endif
                     @endforeach
 
@@ -87,11 +75,11 @@
                     @foreach($subjects as $sub)
                     @if($assessments_records->where('subject_id', $sub->id)->first())
                     @foreach($assessments_records->where('subject_id', $sub->id) as $as)
-                    <td>{{ $as->grade->name ?? '-' }}</td>
+                    <td>{{ $as->grade->name ?? '—' }}</td>
                     @endforeach
 
                     @else
-                    <td>-</td>
+                    <td>&mdash;</td>
                     @endif
                     @endforeach
 
@@ -104,15 +92,15 @@
                     @foreach($subjects as $sub)
                     @if($assessments_records->where('subject_id', $sub->id)->first())
                     @foreach($assessments_records->where('subject_id', $sub->id) as $as)
-                    <td>{{ $as->sub_pos ?? "-" }}</td>
+                    <td>{{ $as->sub_pos ?? "—" }}</td>
                     @endforeach
                     @else
-                    <td>-</td>
+                    <td>—</td>
                     @endif
                     @endforeach
 
                     <td></td>
-                    <td>{{ $assessments_records->first()->pos }} / {{ Mk::getSectionCount($ex->id, $my_class->id, $sr->section->id) }}</td>
+                    <td>{{ $assessments_records->first()->pos }} / {{ Mk::getSectionCount($asr->exam->id, $my_class->id, $sr->section->id) }}</td>
                 </tr>
             </tbody>
         </table>

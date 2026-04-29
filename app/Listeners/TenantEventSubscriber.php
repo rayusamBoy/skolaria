@@ -140,7 +140,7 @@ class TenantEventSubscriber
     {
         if (app()->runningInConsole())
             return;
-        
+
         $config = $this->map()[\get_class($event)] ?? null;
 
         if (!$config) {

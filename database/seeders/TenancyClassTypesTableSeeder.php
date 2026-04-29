@@ -23,7 +23,7 @@ class TenancyClassTypesTableSeeder extends Seeder
             array (
                 'name' => 'Primary',
                 'code' => 'PE',
-                'subjects_considered' => 7,
+                'minimum_subjects_required' => 7,
                 'created_at' => now(),
                 'updated_at' => now(),
             ),
@@ -31,7 +31,7 @@ class TenancyClassTypesTableSeeder extends Seeder
             array (
                 'name' => 'Secondary',
                 'code' => 'SE',
-                'subjects_considered' => 7,
+                'minimum_subjects_required' => 7,
                 'created_at' => now(),
                 'updated_at' => now(),
             ),
@@ -39,7 +39,7 @@ class TenancyClassTypesTableSeeder extends Seeder
             array (
                 'name' => 'Tertiary (Advance)',
                 'code' => 'ASE',
-                'subjects_considered' => 3,
+                'minimum_subjects_required' => 3,
                 'created_at' => now(),
                 'updated_at' => now(),
             ),

@@ -1,6 +1,5 @@
 @php
-$plus = 4; // Plus 4 - S/N, ADMISSION NUMBER, FULL NAME, and SECTION
-$sub_count = $subjects->count() + $plus;
+$sub_count = $subjects->count() + $initial_cols;
 @endphp
 
 <table>
@@ -20,6 +19,7 @@ $sub_count = $subjects->count() + $plus;
             <th style="text-align: center"><strong>S/N</strong></th>
             <th><strong>ADMISSION NUMBER</strong></th>
             <th><strong>FULL NAME</strong></th>
+            <th><strong>GENDER</strong></th>
             <th style="text-align: center"><strong>SECTION</strong></th>
 
             @foreach($subjects as $sub)
@@ -32,9 +32,10 @@ $sub_count = $subjects->count() + $plus;
         @foreach($marks->unique('user.id')->whereNotNull('user')->sortBy('user.name')->sortBy('user.gender') as $mk)
         <tr>
             <td style="text-align: center">{{ sprintf("%03d", $loop->iteration) }}</td>
-            <td>{{ $mk->user->username }} </td>
-            <td>{{ $mk->user->name }} </td>
-            <td style="text-align: center">{{ $mk->section->name }} </td>
+            <td>{{ $mk->user->username }}</td>
+            <td>{{ $mk->user->name }}</td>
+            <td>{{ $mk->user->gender }}</td>
+            <td style="text-align: center">{{ $mk->section->name }}</td>
 
             @foreach($subjects as $sub)
             <td style="text-align: center">{{ $marks->where('subject_id', $sub->id)->where('student_id', $mk->user->id)->value('exm') }}</td>

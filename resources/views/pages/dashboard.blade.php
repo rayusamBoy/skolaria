@@ -11,8 +11,8 @@
 <div class="card-columns">
 
     <!-- Active Students -->
-    <div class="card card-body bg-info-300 has-bg-image">
-        <div class="media cursor-pointer" data-toggle="modal" data-target="#students-number">
+    <div class="card card-body bg-teal-300">
+        <div class="media">
             <div class="media-body">
                 <div class="row align-items-center">
                     <div class="col-5">
@@ -27,11 +27,16 @@
                     </div>
                 </div>
             </div>
+            @if(auth()->user()->hasAnyRole(Usr::getTenancyAwareStaffRoles()))
+            <div class="ml-3 align-self-center d-md-block cursor-pointer" data-toggle="modal" data-target="#students-number">
+                <em class="btn btn-sm">VIEW BREAKDOWN</em>
+            </div>
+            @endif
         </div>
     </div>
 
     <!-- Graduated Students -->
-    <div class="card card-body bg-purple-300 has-bg-image">
+    <div class="card card-body bg-slate-800">
         <div class="media">
             <div class="media-body">
                 <div class="row align-items-center">
@@ -51,7 +56,7 @@
     </div>
 
     <!-- Overall Students -->
-    <div class="card card-body bg-purple-400 has-bg-image">
+    <div class="card card-body bg-slate-600">
         <div class="media">
             <div class="media-body">
                 <div class="row align-items-center">
@@ -88,7 +93,7 @@
                     </div>
                 </div>
             </div>
-            <div class="ml-3 align-self-center d-none d-md-block">
+            <div class="ml-3 align-self-center">
                 <i class="material-symbols-rounded symbol-3x opacity-75">group</i>
             </div>
         </div>
@@ -105,7 +110,7 @@
                     </div>
                 </div>
             </div>
-            <div class="ml-3 align-self-center d-none d-md-block">
+            <div class="ml-3 align-self-center">
                 <i class="material-symbols-rounded symbol-3x opacity-75">group</i>
             </div>
         </div>
@@ -126,7 +131,7 @@
                     </div>
                 </div>
             </div>
-            <div class="ml-3 align-self-center d-none d-md-block">
+            <div class="ml-3 align-self-center">
                 <i class="material-symbols-rounded symbol-3x opacity-75">library_books</i>
             </div>
         </div>
@@ -182,17 +187,17 @@
     <div class="card card-body bg-orange-400 has-bg-image">
         <div class="media">
             <div class="media-body">
-                <h3 class="mb-0 counter">{{ $classes_count }}</h3>
+                <h3 class="mb-0 counter">{{ $my_classes->count() }}</h3>
                 <span class="text-capitalize font-size-xs">Total Classes</span>
             </div>
             <div class="ml-3 align-self-center">
-                <i class="material-symbols-rounded symbol-3x opacity-75">domain</i>
+                <i class="material-symbols-rounded symbol-3x opacity-75">class</i>
             </div>
         </div>
     </div>
 
     <!-- Results Declared -->
-    <div class="card card-body bg-primary-400 has-bg-image">
+    <div class="card card-body bg-success-400 has-bg-image">
         <div class="media">
             <div class="media-body">
                 <h3 class="mb-0 counter">{{ $exams_count }}</h3>
@@ -218,7 +223,7 @@
     </div>
 
     <!-- Total Books -->
-    <div class="card card-body bg-violet-400 has-bg-image">
+    <div class="card card-body bg-violet-800 has-bg-image">
         <div class="media">
             <div class="media-body">
                 <h3 class="mb-0 counter">{{ $books_count }}</h3>
@@ -231,7 +236,7 @@
     </div>
 
     <!-- Total Book Requests -->
-    <div class="card card-body bg-warning-400 has-bg-image">
+    <div class="card card-body bg-violet-400 has-bg-image">
         <div class="media">
             <div class="media-body ml-2">
                 <div class="row">
@@ -257,29 +262,58 @@
 <!-- Reports section (larger charts) -->
 <div class="row">
     <div class="col-md-6">
-        <div class="card">
+        <div class="card card-collapsed print-this">
+            <div class="card-header header-elements-inline">
+                <h6 class="card-title">Gender Distribution (Students)</h6>
+                <div class="header-elements pt-0 print-none">
+                    <div class="list-icons">
+                        <a class="list-icons-item print-this-btn" href="javascript:;" data-action="print"></a>
+                        <a class="list-icons-item disabled" data-action="fullscreen"></a>
+                        <a class="list-icons-item" data-action="collapse"></a>
+                    </div>
+                </div>
+            </div>
             <div class="card-body">
-                <h5>Gender Distribution (Students)</h5>
                 <canvas id="chart-gender" width="400" height="240" aria-label="Gender distribution" role="img"></canvas>
             </div>
         </div>
     </div>
 
     <div class="col-md-6">
-        <div class="card">
+        <div class="card card-collapsed print-this">
+            <div class="card-header header-elements-inline">
+                <h6 class="card-title">Payments (Last 12 months)</h6>
+                <div class="header-elements pt-0 print-none">
+                    <div class="list-icons">
+                        <a class="list-icons-item print-this-btn" href="javascript:;" data-action="print"></a>
+                        <a class="list-icons-item disabled" data-action="fullscreen"></a>
+                        <a class="list-icons-item" data-action="collapse"></a>
+                    </div>
+                </div>
+            </div>
             <div class="card-body">
-                <h5>Payments (Last 12 months)</h5>
                 <canvas id="chart-payments" width="400" height="240" aria-label="Payments trend" role="img"></canvas>
             </div>
         </div>
     </div>
+</div>
 
+<div class="row">
     <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <h5>Students per Class</h5>
-                <canvas id="chart-students-per-class" width="800" height="240" aria-label="Students per class" role="img"></canvas>
+        <div class="card card-collapsed print-this">
+            <div class="card-header header-elements-inline">
+                <h6 class="card-title">Students per Class</h6>
+                <div class="header-elements pt-0 print-none">
+                    <div class="list-icons">
+                        <a class="list-icons-item print-this-btn" href="javascript:;" data-action="print"></a>
+                        <a class="list-icons-item disabled" data-action="fullscreen"></a>
+                        <a class="list-icons-item" data-action="collapse"></a>
+                    </div>
+                </div>
             </div>
+           <div class="card-body">
+                <canvas id="chart-students-per-class" width="800" height="240" aria-label="Students per class" role="img"></canvas>
+           </div>
         </div>
     </div>
 </div>
@@ -292,7 +326,9 @@
                 <h6 class="card-title">Notices<sup class="badge badge-default notices-badge">{{ $unviewed_count }}</sup></h6>
                 <div class="header-elements">
                     <div class="list-icons">
+                        @can($tenant_permissions['notices']['index']['permission'])
                         <a class="btn btn-link list-icons-item" href="{{ route('notices.index') }}">Manage</a>
+                        @endcan
                         <a class="list-icons-item" data-action="collapse"></a>
                         <a class="list-icons-item" data-action="remove"></a>
                     </div>
@@ -305,7 +341,7 @@
     </div>
 </div>
 
-@include('pages.modals.students_number')
+@includeWhen(auth()->user()->can($tenant_permissions['notices']['index']['permission']), 'pages.modals.students_number_breakdown')
 
 @endsection
 

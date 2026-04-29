@@ -1,5 +1,5 @@
-@if($thread->hasParticipant(Auth::id()) || auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
-@php $unread = $thread->userUnreadMessagesCount(Auth::id()) @endphp
+@if($thread->hasParticipant(auth()->id()) || auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
+@php $unread = $thread->userUnreadMessagesCount(auth()->id()) @endphp
 <div class="{{ $unread == 0 ? 'card card-collapsed' : 'card' }}">
     <div class="card-header header-elements-inline">
         <h6 class="media-heading card-title">
@@ -9,7 +9,7 @@
         {!! Qs::getPanelOptions() !!}
     </div>
     @php
-    $class = $thread->isUnread(Auth::id()) ? 'alert-info' : '';
+    $class = $thread->isUnread(auth()->id()) ? 'alert-info' : '';
     @endphp
 
     <div class="media alert {{ $class }} border-none">
@@ -34,7 +34,7 @@
     </div>
 </div>
 
-@elseif($thread->isDirtyParticipant(Auth::id()))
+@elseif($thread->isDirtyParticipant(auth()->id()))
 <p>Sorry, you are no longer a participant of the thread with the subject: <strong>{{ $thread->subject }}</strong>.</p>
 
 @else

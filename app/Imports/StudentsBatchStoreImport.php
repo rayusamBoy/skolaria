@@ -25,7 +25,20 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollection, WithHeadingRow, WithValidation, SkipsEmptyRows, WithCustomValueBinder
 {
-    protected $location, $dorm, $my_class, $session, $user_parameters, $student_parameters, $student_record_request, $parameters_columns_to_hide_and_populate, $user, $student;
+    protected LocationRepo $location;
+    protected DormRepo $dorm;
+    protected MyClassRepo $my_class;
+    protected UserRepo $user;
+    protected StudentRepo $student;
+    protected StudentRecordCreate $student_record_request;
+    protected string $session;
+    protected array $user_parameters;
+    protected array $student_parameters;
+    protected array $all_parameters;
+    protected array $parameters_columns_to_hide_and_populate;
+    protected array $date_columns;
+    protected array $rules_cache;
+
     public function __construct()
     {
         $this->session = Usr::getCurrentSession();
@@ -35,55 +48,59 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
         $this->location = new LocationRepo();
         $this->dorm = new DormRepo();
         $this->student_record_request = new StudentRecordCreate();
+
         $this->user_parameters = StudentRecordController::getUserHeadings(false);
         $this->student_parameters = StudentRecordController::getStudentHeadings(false);
+        $this->all_parameters = [...$this->user_parameters, ...$this->student_parameters];
         $this->parameters_columns_to_hide_and_populate = ['state_id', 'nal_id', 'my_class_id'];
+
+        // Precompute date columns (letters) for bindValue
+        $this->date_columns = $this->buildDateColumns();
+        $this->rules_cache = $this->student_record_request->rules();
     }
 
+    /**
+     * Convert Excel date values to PHP dates for date columns.
+     */
     public function bindValue(Cell $cell, $value)
     {
-        $date_columns = [];
-
-        $date_parameters = array_keys(array_filter($this->student_record_request->rules(), fn($rule) => \is_array($rule) ? \in_array(['date', 'date_format'], $rule) : str_contains($rule, 'date')));
-
-        foreach ($date_parameters as $date_parameter) {
-            $date_columns[] = $this->mapHeadingToLetter($date_parameter);
-        }
-
-        // If the value is empty and is a part of date column convert the excel serialized date to php date
-        if (!empty($value) && \in_array($cell->getColumn(), $date_columns)) {
-            $cell->setValueExplicit(Date::excelToDateTimeObject($value)->format(Usr::getDateFormat()), DataType::TYPE_STRING);
+        if (!empty($value) && \in_array($cell->getColumn(), $this->date_columns)) {
+            $cell->setValueExplicit(
+                Date::excelToDateTimeObject($value)->format(Usr::getDateFormat()),
+                DataType::TYPE_STRING
+            );
             return true;
         }
 
-        // else return default behavior
         return parent::bindValue($cell, $value);
     }
 
-    public function isEmptyWhen(array $row)
+    /**
+     * Determine whether a row should be skipped.
+     */
+    public function isEmptyWhen(array $row): bool
     {
-        $when = false;
-        $attributes = [...$this->user_parameters, ...$this->student_parameters];
-
-        foreach ($attributes as $name => $attribute) {
-            // Skip user representative heading row; Just we will check the first column if it contains the name.
-            // Some heading names have * at the end; that's why we use str_contains instead of == or ===.
-            // Order matter; this will always counted as the first data row, so we will check it first before all
-            $when = str_contains($row[$attribute], $name);
-            break;
+        // 1. Is it the heading row (value contains the heading name itself)?
+        foreach ($this->all_parameters as $attribute) {
+            if (str_contains($row[$attribute] ?? '', $attribute)) {
+                return true;
+            }
+            break; // Only check the first attribute (name)
         }
-        // Skip all rows that has only hidden populated parameters; Let's check if are the only values that exist
-        $non_null_row_values = array_keys(array_filter($row, fn($value) => $value != NULL));
-        // If the condition is true already, just return it. Else if the difference is 0; that means the arrays are the same
-        return $when ?: \count(array_diff($non_null_row_values, $this->parameters_columns_to_hide_and_populate)) === 0;
+
+        // 2. Does the row contain only auto‑populated hidden parameters?
+        $non_null = array_keys(array_filter($row, fn($value) => $value != null));
+        return \count(array_diff($non_null, $this->parameters_columns_to_hide_and_populate)) === 0;
     }
 
-    public function collection(Collection $rows)
+    /**
+     * Process the imported rows and create student records.
+     */
+    public function collection(Collection $rows): void
     {
-        $data = $sr = [];
-
-        $my_class_id = array_column($rows->toArray(), 'my_class_id')[0];
-        $state_id = array_column($rows->toArray(), 'state_id')[0];
+        $first = $rows->first();
+        $my_class_id = $first['my_class_id'];
+        $state_id = $first['state_id'];
 
         $blood_groups = Usr::getBloodGroups();
         $lgas = $this->location->getLgas($state_id);
@@ -96,59 +113,115 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
             $row['section_id'] = $sections->where('name', $row['section_id'])->value('id');
             $row['dorm_id'] = $dorms->where('name', $row['dorm_id'])->value('id');
 
-            foreach ($this->user_parameters as $param) {
-                $data[$param] = $row[$param];
-            }
+            $user_data = $this->extractUserData($row);
+            $student_data = $this->extractStudentData($row, $user_data['username']);
 
-            $data['user_role'] = $user_role = 'student';
-            $data['name'] = $name = strtoupper($row['name']);
-            $data['code'] = $code = strtoupper(Str::random(10));
-            $data['password'] = Hash::make('student');
-            $data['photo'] = Usr::createAvatar($name, $code, $user_role);
+            $user = $this->user->create($user_data);
+            $user->assignRole(config('roles.default_roles.tenant.student'));
 
-            $adm_no = $row['adm_no'];
-            $ct = $this->my_class->findTypeByClass($row['my_class_id'])->code;
-            $data['username'] = strtoupper(Usr::getAppCode() . '/' . $ct . '/' . date('Y', strtotime($row['date_admitted'])) . '/' . ($adm_no ?: mt_rand(1000, 99999)));
-
-            $user = $this->user->create($data);
-
-            foreach ($this->student_parameters as $param) {
-                $sr[$param] = $row[$param];
-            }
-
-            $sr['user_id'] = $user->id;
-            $sr['adm_no'] = $user->username;
-            $sr['session'] = $this->session;
-            // Format string according to the enforced rule
-            $sr['house_no'] = strtoupper($sr['house_no']);
-            $sr['ps_name'] = ucfirst($sr['ps_name']);
-            $sr['ss_name'] = ucfirst($sr['ss_name']);
-            $sr['p_status'] = ucfirst($sr['p_status']);
-
-            $this->student->createRecord($sr);
+            $student_data['user_id'] = $user->id;
+            $this->student->createRecord($student_data);
         }
     }
 
-    public function customValidationAttributes()
+    /**
+     * Validation attribute names.
+     */
+    public function customValidationAttributes(): array
     {
-        $attributes = [...$this->user_parameters, ...$this->student_parameters];
-        return array_flip($attributes);
+        return array_flip($this->all_parameters);
     }
 
+    /**
+     * Validation rules.
+     */
     public function rules(): array
     {
-        return $this->student_record_request->rules();
+        return $this->rules_cache;
     }
 
+    /**
+     * Heading row index (0‑based, Excel row 4).
+     */
     public function headingRow(): int
     {
-        // Hidden row; visible heading is row 5
         return 4;
     }
 
-    private function mapHeadingToLetter($heading_param)
+    // ----------------------------------------------------------------------
+    // Protected Helper Methods
+    // ----------------------------------------------------------------------
+
+    /**
+     * Extract user‑related data from a row.
+     */
+    protected function extractUserData(array $row): array
     {
-        $all_headings = array_values([...$this->user_parameters, ...$this->student_parameters]);
-        return Usr::numberToLetter(array_search($heading_param, $all_headings) + 1);
+        $data = [];
+        foreach ($this->user_parameters as $param) {
+            $data[$param] = $row[$param];
+        }
+
+        $name = strtoupper($row['name']);
+        $code = strtoupper(Str::random(10));
+        $user_role = config('roles.default_roles.tenant.student');
+
+        $data['user_role'] = $user_role;
+        $data['name'] = $name;
+        $data['code'] = $code;
+        $data['password'] = Hash::make('student');
+        $data['photo'] = Usr::createAvatar($name, $code, $user_role);
+
+        $ct = $this->my_class->findTypeByClass($row['my_class_id'])->code;
+        $adm_no = $row['adm_no'];
+        $data['username'] = strtoupper(
+            Usr::getAppCode() . '/' . $ct . '/' . date('Y', strtotime($row['date_admitted'])) . '/' . ($adm_no ?: mt_rand(1000, 99999))
+        );
+
+        return $data;
+    }
+
+    /**
+     * Extract student‑related data from a row.
+     */
+    protected function extractStudentData(array $row, string $username): array
+    {
+        $sr = [];
+        foreach ($this->student_parameters as $param) {
+            $sr[$param] = $row[$param];
+        }
+
+        $sr['adm_no'] = $username;
+        $sr['session'] = $this->session;
+        $sr['house_no'] = strtoupper($sr['house_no'] ?? '');
+        $sr['ps_name'] = ucfirst($sr['ps_name'] ?? '');
+        $sr['ss_name'] = ucfirst($sr['ss_name'] ?? '');
+        $sr['p_status'] = ucfirst($sr['p_status'] ?? '');
+
+        return $sr;
+    }
+
+    /**
+     * Build the list of column letters that contain dates.
+     */
+    protected function buildDateColumns(): array
+    {
+        $date_params = array_keys(array_filter(
+            $this->rules_cache,
+            fn($rule) =>
+            \is_array($rule) ? \in_array('date', $rule) || \in_array('date_format', $rule) : str_contains($rule, 'date')
+        ));
+
+        return array_map(fn($param) => $this->mapHeadingToLetter($param), $date_params);
+    }
+
+    /**
+     * Map a heading name to its Excel column letter.
+     */
+    private function mapHeadingToLetter(string $heading_param): string
+    {
+        $all = array_values($this->all_parameters);
+        $index = array_search($heading_param, $all);
+        return Usr::numberToLetter(($index !== false ? $index : 0) + 1);
     }
 }

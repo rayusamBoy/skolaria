@@ -16,9 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->unsignedInteger('category_id')->index();
             $table->unsignedInteger('class_type_id')->index();
-            $table->unsignedInteger('editable')->default(0)->index();
-            $table->unsignedInteger('locked')->default(0);
-            $table->unsignedInteger('published')->default(0);
+            $table->boolean('locked')->default(true);
+            $table->boolean('published')->default(false);
             $table->tinyInteger('term');
             $table->string('year', 40);
             $table->unsignedInteger('exam_denominator')->default(100);

@@ -5,6 +5,7 @@
             <tr class="text-center">
                 <th>S/N</th>
                 <th>NAME</th>
+                <th>GENDER</th>
                 <th>ADMISSION NO</th>
                 <th>EXAM ({{ $exam->exam_denominator }})</th>
             </tr>
@@ -14,6 +15,7 @@
             <tr>
                 <td class="text-center">{{ $loop->iteration }}</td>
                 <td>{{ $mk->user->name }}</td>
+                <td class="text-center">{{ substr($mk->user->gender, 0, 1) }}</td>
                 <td class="text-center">{{ $mk->user->student_record->adm_no }}</td>
                 <td class="text-center"><input @readonly($is_restricted) title="EXAM" min="0" max="{{ $mk->exam->exam_denominator }}" class="{{ $is_restricted ? 'text-center form-control form-control-sm cursor-not-allowed' : 'text-center form-control form-control-sm' }}" name="exm_{{ $mk->id }}" value="{{ $mk->exm }}" type="number"></td>
             </tr>
@@ -22,6 +24,6 @@
     </table>
     {{-- Update Button --}}
     <div class="text-center mt-2">
-        <button type="submit" class="btn btn-primary" id="update">Update Marks <i class="material-symbols-rounded ml-2">send</i></button>
+        <button type="submit" class="btn btn-primary" @disabled($is_restricted) id="update">Update Marks <i class="material-symbols-rounded ml-2">send</i></button>
     </div>
 </form>

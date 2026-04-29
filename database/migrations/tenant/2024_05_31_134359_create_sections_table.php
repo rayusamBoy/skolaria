@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name', 100);
             $table->unsignedInteger('my_class_id')->index();
             $table->unsignedBigInteger('teacher_id')->nullable()->index();
-            $table->tinyInteger('active')->default(0);
+            $table->boolean('is_default')->default(false);
             $table->timestamps();
 
             $table->unique(['name', 'my_class_id']);

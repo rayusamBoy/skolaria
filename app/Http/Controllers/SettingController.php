@@ -77,13 +77,13 @@ class SettingController extends Controller
 
     public function enable_analytics()
     {
-        $this->setting->update('analytics_enabled', 1);
+        $this->setting->update('analytics_enabled', true);
         return back()->with('flash_success', __('msg.update_ok'));
     }
 
     public function disable_analytics()
     {
-        $this->setting->update('analytics_enabled', 0);
+        $this->setting->update('analytics_enabled', false);
         return back()->with('flash_success', __('msg.update_ok'));
     }
 

@@ -66,11 +66,11 @@ class BookRequestController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(BookRequestUpdate $request, $book_req_id)
+    public function update(BookRequestUpdate $request, $book_request)
     {
         $data = $request->all();
         $book_id = $data["book_id"];
-        $this->book->updateRequest($book_req_id, $data);
+        $this->book->updateRequest($book_request, $data);
 
         $book = $this->book->find($book_id);
 

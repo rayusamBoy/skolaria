@@ -1,8 +1,12 @@
+@php
+$my_class = $my_classes->where('id', $class_id)->first();
+@endphp
+
 @extends('layouts.master')
-@section('page_title', "Student Information - {$my_class->name}")
+@section('page_title', "Student Information - {$my_class->name} (" . $my_class->class_type->name . ")")
 
 @section('content')
-<div class="card">
+<div class="card w-fit wmin-100-pcnt">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Students List</h6>
         {!! Qs::getPanelOptions() !!}
@@ -31,27 +35,30 @@
 
         <div class="tab-content">
 
-            {{-- Block / Unblock All --}}
-            @canany([$tenant_permissions['student_records']['block_all_class']['permission'], $tenant_permissions['student_records']['unblock_all_class']['permission']])
-            <div class="card mb-3">
-                <div class="card-body text-center">
-                    @can($tenant_permissions['student_records']['block_all_class']['permission'])
-                    <button id="students-block-all-active" value="{{ $my_class->id }}" class="btn btn-danger">
-                        Block All {{ $my_class->name }} Students
-                    </button>
-                    @endcan
-
-                    @can($tenant_permissions['student_records']['unblock_all_class']['permission'])
-                    <button id="students-unblock-all-active" value="{{ $my_class->id }}" class="btn btn-success ml-2">
-                        Unblock All {{ $my_class->name }} Students
-                    </button>
-                    @endcan
-                </div>
-            </div>
-            @endcanany
-
             {{-- All students --}}
             <div class="tab-pane fade show active" id="all-students">
+                {{-- Block / Unblock All --}}
+                @canany([$tenant_permissions['student_records']['block_all_class']['permission'], $tenant_permissions['student_records']['unblock_all_class']['permission']])
+                @php
+                $unique_blocked_values = $students->pluck('user')->pluck('blocked')->unique();
+                @endphp
+                <div class="card mb-3">
+                    <div class="card-body text-center">
+                        @can($tenant_permissions['student_records']['block_all_class']['permission'])
+                        <button id="students-block-all-active" @disabled($students->isEmpty() || $unique_blocked_values->hasSole(fn($value, $key) => (bool) $value === true)) value="{{ $my_class->id }}" url="{{ route('students.block_all_class') }}" class="btn btn-danger">
+                            Block All {{ $my_class->name }} Students
+                        </button>
+                        @endcan
+
+                        @can($tenant_permissions['student_records']['unblock_all_class']['permission'])
+                        <button id="students-unblock-all-active" @disabled($students->isEmpty() || $unique_blocked_values->hasSole(fn($value, $key) => (bool) $value === false)) value="{{ $my_class->id }}" url="{{ route('students.unblock_all_class') }}" class="btn btn-success">
+                            Unblock All {{ $my_class->name }} Students
+                        </button>
+                        @endcan
+                    </div>
+                </div>
+                @endcanany
+
                 <table class="table datatable-button-html5-columns">
                     <thead>
                         <tr>
@@ -135,11 +142,11 @@
                                             </a>
                                             @endcan
                                             {{-- Delete --}}
-                                            @can($tenant_permissions['student_records']['destroy']['permission'])
+                                            @can($tenant_permissions['users']['destroy']['permission'])
                                             <a id="{{ Qs::hash($s->user->id) }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i>Delete
                                             </a>
-                                            <form method="post" id="item-delete-{{ Qs::hash($s->user->id) }}" action="{{ route('students.destroy', Qs::hash($s->user->id)) }}" class="hidden">
+                                            <form method="post" id="item-delete-{{ Qs::hash($s->user->id) }}" action="{{ route('users.destroy', Qs::hash($s->user->id)) }}" class="hidden">
                                                 @csrf @method('delete')
                                             </form>
                                             @endcan
@@ -156,9 +163,8 @@
             {{-- By section --}}
             @foreach($sections as $se)
             <div class="tab-pane fade" id="s{{ $se->id }}">
-                <strong class="status-styled">
-                    {{ "{$my_class->name} {$se->name}" }}
-                </strong>
+                <strong class="status-styled">{{ "{$my_class->name} {$se->name}" }}</strong>
+
                 <table class="table datatable-button-html5-columns">
                     <thead>
                         <tr>
@@ -228,11 +234,11 @@
                                             </a>
                                             @endcan
                                             {{-- Delete --}}
-                                            @can($tenant_permissions['student_records']['destroy']['permission'])
+                                            @can($tenant_permissions['users']['destroy']['permission'])
                                             <a id="{{ Qs::hash($sr->user->id) }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i>Delete
                                             </a>
-                                            <form method="post" id="item-delete-{{ Qs::hash($sr->user->id) }}" action="{{ route('students.destroy', Qs::hash($sr->user->id)) }}" class="hidden">
+                                            <form method="post" id="item-delete-{{ Qs::hash($sr->user->id) }}" action="{{ route('users.destroy', Qs::hash($sr->user->id)) }}" class="hidden">
                                                 @csrf @method('delete')
                                             </form>
                                             @endcan
@@ -252,54 +258,3 @@
 </div>
 
 @endsection
-
-@pushOnce('scripts')
-<script>
-    // Block all / Unblock all JS…
-    $('#students-block-all-active').on('click', function() {
-        let cid = $(this).val();
-        confirmRequest(cid, 'block');
-        return false;
-    });
-    $('#students-unblock-all-active').on('click', function() {
-        let cid = $(this).val();
-        confirmRequest(cid, 'unblock');
-        return false;
-    });
-
-    function confirmRequest(class_id, type) {
-        const text = type === 'block' ?
-            'This will block selected students from accessing the system' :
-            'This will allow selected students to access the system';
-        Swal.fire({
-            title: 'Are you sure?', 
-            tex, 
-            showCancelButton: true, 
-            reverseButtons: true, 
-            cancelButtonText: 'No, cancel'
-        }).then((res) => {
-            if (res.isConfirmed) ajaxProcessRequest(class_id, type);
-        });
-    }
-
-    function ajaxProcessRequest(class_id, type) {
-        let url = type === 'block' ?
-            "{{ route('students.block_all_class') }}" :
-            "{{ route('students.unblock_all_class') }}";
-        $.post(url, {
-            class_id, 
-            _token: $('meta[name="csrf-token"]').attr('content')
-        }, resp => {
-            if (type === 'block')
-                $("label.form-switch input").attr("checked", "checked");
-            else
-                $("label.form-switch input").removeAttr("checked");
-            flash({
-                msg: resp.msg, 
-                type: 'success'
-            });
-        });
-    }
-
-</script>
-@endPushOnce

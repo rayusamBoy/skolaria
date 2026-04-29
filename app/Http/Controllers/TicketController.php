@@ -125,7 +125,7 @@ class TicketController extends Controller
         $ticket_data = $request->only(['department', 'priority', 'subject', 'category_id']);
         $ticket_data['tenant_id'] = tenant()?->getTenantKey();
         $ticket_data['user_id'] = auth()->id();
-        $ticket_data['labels_ids'] = serialize($request->labels_ids);
+        $labels_ids = $request->labels_ids ?? [];
 
         try {
             $ticket = $this->ticket->createTicket($ticket_data);
@@ -133,6 +133,10 @@ class TicketController extends Controller
             $is_from_tenant = Usr::tenancyInitialized();
             $message_data = ['ticket_id' => $ticket->id, 'user_id' => auth()->id(), 'body' => $request->message, 'is_from_tenant' => $is_from_tenant];
             $this->ticket->createMessage($message_data);
+
+            if ($request->filled('labels_ids')) {
+                $this->ticket->assignLabelsToTicket($ticket->id, $labels_ids);
+            }
         } catch (\Exception $e) {
             $this->ticket->deleteTicket($ticket->id);
             return back()->with('flash_error', __('msg.store_error'));

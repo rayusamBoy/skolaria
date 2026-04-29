@@ -21,10 +21,10 @@ class Usr extends Qs
         return $with_trashed ? User::withTrashed()->whereIn("id", $ids)->get() : User::whereIn("id", $ids)->get();
     }
 
-    public static function getUsersByRoleNames(array $role_names)
+    public static function getUsersByRoleNames(array $role_names, array $with = [])
     {
         $userRepo = new UserRepo();
-        return $userRepo->getUsersByRoleNames($role_names);
+        return $userRepo->getUsersByRoleNames($role_names, $with);
     }
 
     public static function getEducationLevels()
@@ -154,11 +154,6 @@ class Usr extends Qs
         ];
     }
 
-    public static function getClassesByClassType($id)
-    {
-        return MyClass::orderBy('name', 'asc')->where('class_type_id', $id)->with(['class_type', 'section'])->get();
-    }
-
     public static function getAllClassesOrdered($order_by = "name")
     {
         return once(fn() => MyClass::with(['class_type', 'section'])->orderBy($order_by)->get());
@@ -190,7 +185,7 @@ class Usr extends Qs
     }
 
     // Students Classes
-    public static function renderClasses($id, Collection $class_collection)
+    public static function renderClasses(Collection $class_collection)
     {
         $collection = '';
         foreach ($class_collection as $class) {
@@ -200,7 +195,7 @@ class Usr extends Qs
     }
 
     // Class Sections
-    public static function renderClassSections($id, Collection $class_collection)
+    public static function renderClassSections(Collection $class_collection)
     {
         $collection = '';
         foreach ($class_collection as $class) {
@@ -212,7 +207,7 @@ class Usr extends Qs
     }
 
     // Total Male Students per Section ie., A, B, and C
-    public static function renderMaleCountPerSection($id, Collection $class_collection)
+    public static function renderMaleCountPerSection(Collection $class_collection)
     {
         $collection = $counts = '';
         foreach ($class_collection as $class) {
@@ -226,7 +221,7 @@ class Usr extends Qs
     }
 
     // Total Female Students per Section ie., A, B, and C
-    public static function renderFemaleCountPerSection($id, Collection $class_collection)
+    public static function renderFemaleCountPerSection(Collection $class_collection)
     {
         $collection = $counts = '';
         foreach ($class_collection as $class) {
@@ -240,7 +235,7 @@ class Usr extends Qs
     }
 
     // Total Students (Male and Female) per Section
-    public static function renderTotalPerSection($id, $class_collection)
+    public static function renderTotalPerSection(Collection $class_collection)
     {
         $collection = $counts = '';
         foreach ($class_collection as $class) {
@@ -254,7 +249,7 @@ class Usr extends Qs
     }
 
     // Total Students (Male and Female) per Class
-    public static function renderTotalPerClass($id, Collection $class_collection)
+    public static function renderTotalPerClass(Collection $class_collection)
     {
         $counts = '';
         foreach ($class_collection as $class) {
@@ -263,25 +258,24 @@ class Usr extends Qs
         return $counts;
     }
 
-    public static function renderTable($id)
+    public static function renderTable($class_collection)
     {
-        $class_collection = self::getClassesByClassType($id);
         if ($class_collection->count() <= 0)
             return 'No record found.';
 
         return
             '<table class="table table-sm table-responsive text-center">
                 <thead>
-                    <tr><th>Class</th>' . self::renderClasses($id, $class_collection) . ' </tr>
-                    <tr><th>Section</th>' . self::renderClassSections($id, $class_collection) . '</tr>
+                    <tr><th>Class</th>' . self::renderClasses($class_collection) . ' </tr>
+                    <tr><th>Section</th>' . self::renderClassSections($class_collection) . '</tr>
                 </thead>
                 <tbody>
-                    <tr><td>Male</td>' . self::renderMaleCountPerSection($id, $class_collection) . '</tr>
-                    <tr><td>Female</td>' . self::renderFemaleCountPerSection($id, $class_collection) . '</tr>
+                    <tr><td>Male</td>' . self::renderMaleCountPerSection($class_collection) . '</tr>
+                    <tr><td>Female</td>' . self::renderFemaleCountPerSection($class_collection) . '</tr>
                 </tbody>
                 <tfoot>
-                    <tr><td>Total per Section</td>' . self::renderTotalPerSection($id, $class_collection) . '</tr>
-                    <tr><td>Total per Class</td>' . self::renderTotalPerClass($id, $class_collection) . ' </tr>
+                    <tr><td>Total per Section</td>' . self::renderTotalPerSection($class_collection) . '</tr>
+                    <tr><td>Total per Class</td>' . self::renderTotalPerClass($class_collection) . ' </tr>
                 </tfoot>
             </table>';
     }
@@ -360,9 +354,32 @@ class Usr extends Qs
         return $remove ? array_values(array_diff($statuses, $remove)) : $statuses;
     }
 
+    /**
+     * Get tenancy-aware asset URL for a photo with cache busting.
+     * Appends file modification timestamp as query parameter for Workbox caching.
+     *
+     * @param string $url Relative URL of the photo asset (e.g., "uploads/avatars/photo.jpg")
+     * @return string
+     */
     public static function getTenancyAwarePhoto(string $url): string
     {
-        return self::tenancyInitialized() ? (str_contains($url, 'global_assets') ? asset($url) : tenant_asset($url)) : asset($url);
+        $base_url = self::tenancyInitialized()
+            ? (str_contains($url, 'global_assets') ? asset($url) : tenant_asset($url))
+            : asset($url);
+
+        $is_tenant_asset = self::tenancyInitialized() && !str_contains($url, 'global_assets');
+        $cache_key = $is_tenant_asset
+            ? "asset_version_tenant_" . tenant('id') . "_{$url}"
+            : "asset_version_global_{$url}";
+
+        $ttl = 60 * 10; // 10 minutes
+        $version = cache()->remember($cache_key, $ttl, function () use ($url, $is_tenant_asset) {
+            $file_path = ($is_tenant_asset) ? Storage::disk('public')->path($url) : public_path(ltrim($url, '/'));
+
+            return file_exists($file_path) ? filemtime($file_path) : config('app.version', '1.0.0');
+        });
+
+        return "$base_url?$version";
     }
 
     public static function getStudentExamNumberPlaceholder()
@@ -415,6 +432,18 @@ class Usr extends Qs
                 self::tenancyInitialized()
                 ? 'roles.default_roles.tenant'
                 : 'roles.default_roles.central',
+                []
+            )
+        );
+    }
+
+    public static function getTenancyAwareStaffRoles()
+    {
+        return array_values(
+            config(
+                self::tenancyInitialized()
+                ? 'roles.staff_roles.tenant'
+                : 'roles.staff_roles.central',
                 []
             )
         );

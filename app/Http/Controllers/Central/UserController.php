@@ -10,15 +10,25 @@ use App\Repositories\LocationRepo;
 use App\Repositories\MyClassRepo;
 use App\Repositories\PermissionRepo;
 use App\Repositories\UserRepo;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    protected $user, $loc, $my_class, $permission;
+    protected UserRepo $user;
+    protected LocationRepo $loc;
+    protected MyClassRepo $my_class;
+    protected PermissionRepo $permission;
 
-    public function __construct(UserRepo $user, LocationRepo $loc, MyClassRepo $my_class, PermissionRepo $permission)
-    {
+    public function __construct(
+        UserRepo $user,
+        LocationRepo $loc,
+        MyClassRepo $my_class,
+        PermissionRepo $permission
+    ) {
         $this->permissionMap = config('permissions.names.central.central_users');
         parent::__construct();
         $this->user = $user;
@@ -27,133 +37,120 @@ class UserController extends Controller
         $this->permission = $permission;
     }
 
-    public function index()
+    /**
+     * Display list of central users.
+     */
+    public function index(): View
     {
-        $d['nationals'] = $this->loc->getAllNationals();
-        $d['blood_groups'] = $this->user->getBloodGroups();
-        $d['roles'] = $this->permission->getRoles();
-        $d['permissions'] = $this->permission->getPermissions();
+        $data['nationals'] = $this->loc->getAllNationals();
+        $data['blood_groups'] = $this->user->getBloodGroups();
+        $data['roles'] = $this->permission->getRoles();
+        $data['permissions'] = $this->permission->getPermissions();
 
-        return view('pages.central.users.index', $d);
+        return view('pages.central.users.index', $data);
     }
 
-    public function edit($central_user)
+    /**
+     * Show form to edit a central user.
+     */
+    public function edit($central_user): View
     {
-        $except_role = config('roles.default_roles.tenant.student');
-        $except_roles = (array) Usr::userIsHead() ? [$except_role] : [$except_role, config('roles.default_roles.tenant.superadmin')];
-        $d['roles'] = $roles = $this->permission->getRoles($except_roles);
-        $d['permissions'] = $this->permission->getPermissions();
-        $d['user'] = $this->user->find($central_user);
-        $d['staff_rec'] = $this->user->getStaffRecord(['user_id' => $central_user])->first();
-        $d['users'] = $this->user->getUsersByRoleNames($roles->pluck('name')->toArray());
-        $d['blood_groups'] = $this->user->getBloodGroups();
-        $d['nationals'] = $this->loc->getAllNationals();
+        $except_roles = $this->getExcludedRolesForEditing();
 
-        return view('pages.central.users.edit', $d);
+        $data['roles'] = $roles = $this->permission->getRoles($except_roles);
+        $data['permissions'] = $this->permission->getPermissions();
+        $data['user'] = $this->user->find($central_user);
+        $data['staff_rec'] = $this->user->getStaffRecord(['user_id' => $central_user])->first();
+        $data['users'] = $this->user->getUsersByRoleNames($roles->pluck('name')->toArray());
+        $data['blood_groups'] = $this->user->getBloodGroups();
+        $data['nationals'] = $this->loc->getAllNationals();
+
+        return view('pages.central.users.edit', $data);
     }
 
-    public function reset_password($user_id)
+    /**
+     * Reset a user's password to default 'user'.
+     */
+    public function reset_password($user_id): RedirectResponse
     {
-        // Redirect if Making Changes to Head
-        if (Usr::userIsHead($user_id) && !Usr::userIsHead())
+        if ($this->cannotModifyHeadUser($user_id)) {
             return back()->with('flash_danger', __('msg.denied'));
+        }
 
-        $data['password'] = Hash::make('user');
-        $data['password_updated_at'] = null;
-        $this->user->update($user_id, $data);
+        $this->user->update($user_id, [
+            'password' => Hash::make('user'),
+            'password_updated_at' => null,
+        ]);
 
         return back()->with('flash_success', __('msg.pu_reset'));
     }
 
-    public function store(UserRequest $req)
+    /**
+     * Store a new central user.
+     */
+    public function store(UserRequest $req): JsonResponse
     {
         $role_names = $req->roles;
-        $except = ['_token', '_method'];
-        $data = $req->except([...Usr::getStaffRecord(), ...Usr::getParentRelativeRecord(), ...$except]);
-        $emp_date = $req->emp_date ?? now();
-        $staff_id = Usr::getAppCode() . '/STAFF/' . date('Y/m', strtotime($emp_date)) . '/' . mt_rand(1000, 9999);
         $last_role_name = strtolower(last($role_names));
-        $pass = $req->password ?: $last_role_name;
+        $staff_id = $this->generateStaffId($req->emp_date);
+        $username = $req->username ?? $staff_id;
 
-        $data['name'] = $name = ucwords(strtolower($req->name));
-        $data['code'] = $code = strtoupper(Str::random(10));
-        $data['dob'] = $req->dob;
-        $data['username'] = $uname = $req->username ?? $staff_id;
-        $data['password'] = Hash::make($pass);
-        $data['message_media_heading_color'] = Usr::getUserMediaHeadingColor($name); // Use a unique text color based on the name
-
-        if ($req->hasFile('photo')) {
-            $photo = $req->file('photo');
-            $f = Usr::getFileMetaData($photo);
-            $f['name'] = 'photo.' . $f['ext'];
-            $f['path'] = $photo->storeAs(Usr::getUploadPath($last_role_name) . $data['code'], $f['name']);
-            $data['photo'] = 'storage/' . $f['path'];
-        } else {
-            $data['photo'] = "storage/" . Usr::createAvatar($name, $code, $last_role_name);
+        // Validate username/email presence
+        if (!$username && !$req->email) {
+            return Usr::json(__('msg.user_invalid'), false);
         }
 
-        /* Ensure that both username and Email are not blank */
-        if (!$uname && !$req->email)
-            return Usr::json(__('msg.user_invalid'), FALSE);
+        $user_data = $this->prepareUserData($req, $last_role_name, $username, $staff_id);
+        $user = $this->user->create($user_data);
 
-        $user = $this->user->create($data); // Create User
+        // Sync roles and permissions
         $user->syncRoles($role_names);
+        $this->syncPermissionsIfProvided($user, $req);
 
-        if ($req->has('permissions') AND $req->filled('permissions')) {
-            $user->syncPermissions($req->permissions);
-        }
-
-        /* Create staff record */
-        $d2 = $req->only(Usr::getStaffRecord());
-        $d2['user_id'] = $user->id;
-        $d2['code'] = $staff_id;
-
-        $this->user->createStaffRecord($d2);
+        // Create staff record
+        $this->createStaffRecord($user->id, $req, $staff_id);
 
         return Usr::jsonStoreOk();
     }
 
-    public function update(UserRequest $req, $user_id)
+    /**
+     * Update an existing central user.
+     */
+    public function update(UserRequest $req, $user_id): JsonResponse
     {
-        // Redirect if Making Changes to Head
-        if (Usr::userIsHead($user_id) && !Usr::userIsHead())
+        if ($this->cannotModifyHeadUser($user_id)) {
             return Usr::json(__('msg.denied'), false);
+        }
 
         $user = $this->user->find($user_id);
-        $except = [...Usr::getStaffRecord(), '_token', '_method', 'roles'];
-        $data = $req->except($except);
         $role_names = $req->roles;
         $last_role_name = strtolower(last($role_names));
 
-        $data['name'] = $name = ucwords(strtolower($req->name));
-        $data['message_media_heading_color'] = Usr::getUserMediaHeadingColor($name); // Use a unique text color based on the name
+        $user_data = $this->prepareUserData($req, $last_role_name);
+        $this->handlePhotoUpload($req, $user_data, $user->code, $last_role_name);
 
-        if ($req->hasFile('photo')) {
-            $photo = $req->file('photo');
-            $f = Usr::getFileMetaData($photo);
-            $f['name'] = 'photo.' . $f['ext'];
-            $f['path'] = $photo->storeAs(Usr::getUploadPath($last_role_name) . $user->code, $f['name']);
-            $data['photo'] = 'storage/' . $f['path'];
-        }
+        $user->update($user_data);
+        $user->syncRoles($role_names);
+        $this->syncPermissionsIfProvided($user, $req);
 
-        $user->update($data);   /* Update user record */
-        $user->syncRoles($req->roles);
-        if ($req->has('permissions') AND $req->filled('permissions')) {
-            $user->syncPermissions($req->permissions);
-        }
-
-        /* Update staff record */
-        $d2 = $req->only(Usr::getStaffRecord());
-        $d2['code'] = $user->code;
-        $this->user->updateStaffRecord(['user_id' => $user->id], $d2);
+        // Update staff record
+        $this->updateStaffRecord($user->id, $req);
 
         return Usr::jsonUpdateOk();
     }
 
-    public function show($user_id)
+    /**
+     * Show details of a specific user.
+     */
+    public function show($user_id): View|RedirectResponse
     {
-        if (!$user_id)
+        if (!$user_id) {
             return back();
+        }
+
+        if ($this->isRestrictedView($user_id)) {
+            return back()->with('pop_error', __('msg.denied'));
+        }
 
         $data['user'] = $this->user->find($user_id);
         $data['staff_rec'] = $this->user->getStaffRecord(where: ['user_id' => $user_id])->first() ?: null;
@@ -161,23 +158,161 @@ class UserController extends Controller
         return view('pages.central.users.show', $data);
     }
 
-    public function destroy($user_id)
+    /**
+     * Permanently delete a user.
+     */
+    public function destroy($user_id): RedirectResponse
     {
-        $user = $this->user->find($$user_id);
-
+        $user = $this->user->find($user_id);
         $this->user->forceDelete($user->id);
-        // Delete user's photo(s) from storage if exists
+
         Usr::deleteUserPhotoDirs($user->roles->pluck('name'), $user->code);
 
         return back()->with('flash_success', __('msg.del_ok'));
     }
 
-    public function toggle_user_block(UserBlockedState $req)
+    /**
+     * Toggle blocked status of a user.
+     */
+    public function toggle_user_block(UserBlockedState $req): JsonResponse
     {
-        $user_id = $req->id;
-        $data = $req->only("blocked");
-        $this->user->update($user_id, $data);
+        $this->user->update($req->id, $req->only('blocked'));
 
-        return Usr::json("ok");
+        return Usr::json('ok');
+    }
+
+    // ----------------------------------------------------------------------
+    // Protected Helper Methods
+    // ----------------------------------------------------------------------
+
+    /**
+     * Determine roles to exclude when editing based on current user's permissions.
+     */
+    protected function getExcludedRolesForEditing(): array
+    {
+        $except_role = config('roles.default_roles.tenant.student');
+        $except_roles = [$except_role];
+
+        if (!Usr::userIsHead()) {
+            $except_roles[] = config('roles.default_roles.tenant.superadmin');
+        }
+
+        return $except_roles;
+    }
+
+    /**
+     * Check if current user is not allowed to modify a head user.
+     */
+    protected function cannotModifyHeadUser($user_id): bool
+    {
+        return Usr::userIsHead($user_id) && !Usr::userIsHead();
+    }
+
+    /**
+     * Check if current user is restricted from viewing a profile.
+     */
+    protected function isRestrictedView($user_id): bool
+    {
+        $user = auth()->user();
+
+        if ($user_id != $user->id || $user->hasAnyRole(Usr::getTenancyAwareStaffRoles())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Generate a unique staff ID based on employment date.
+     */
+    protected function generateStaffId($emp_date = null): string
+    {
+        $date = $emp_date ?? now();
+        return Usr::getAppCode() . '/STAFF/' . date('Y/m', strtotime($date)) . '/' . mt_rand(1000, 9999);
+    }
+
+    /**
+     * Prepare common user data for create/update.
+     */
+    protected function prepareUserData(UserRequest $req, string $last_role_name, ?string $username = null, ?string $staff_id = null): array
+    {
+        $data = $req->except([
+            ...Usr::getStaffRecord(),
+            ...Usr::getParentRelativeRecord(),
+            '_token',
+            '_method',
+            'roles'
+        ]);
+
+        $name = ucwords(strtolower($req->name));
+
+        $data['name'] = $name;
+        $data['message_media_heading_color'] = Usr::getUserMediaHeadingColor($name);
+        $data['dob'] = $req->dob;
+
+        if ($username !== null) {
+            $data['username'] = $username;
+        }
+
+        // For store operation only
+        if ($staff_id !== null) {
+            $data['code'] = strtoupper(Str::random(10));
+            $password = $req->password ?: $last_role_name;
+            $data['password'] = Hash::make($password);
+            $this->handlePhotoUpload($req, $data, $data['code'], $last_role_name);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Handle photo upload or avatar generation.
+     */
+    protected function handlePhotoUpload(UserRequest $req, array &$data, string $user_code, string $last_role_name): void
+    {
+        if ($req->hasFile('photo')) {
+            $photo = $req->file('photo');
+            $file_meta = Usr::getFileMetaData($photo);
+            $file_meta['name'] = 'photo.' . $file_meta['ext'];
+            $file_meta['path'] = $photo->storeAs(
+                Usr::getUploadPath($last_role_name) . $user_code,
+                $file_meta['name']
+            );
+            $data['photo'] = 'storage/' . $file_meta['path'];
+        } elseif ($req->route()->getActionMethod() === 'store') {
+            // Only generate avatar if the request is for creating a new user.
+            $data['photo'] = 'storage/' . Usr::createAvatar($data['name'], $user_code, $last_role_name);
+        }
+    }
+
+    /**
+     * Sync user permissions if provided in request.
+     */
+    protected function syncPermissionsIfProvided($user, UserRequest $req): void
+    {
+        if ($req->filled('permissions')) {
+            $user->syncPermissions($req->permissions);
+        }
+    }
+
+    /**
+     * Create a staff record for a new user.
+     */
+    protected function createStaffRecord(int $user_id, UserRequest $req, string $staff_id): void
+    {
+        $staff_data = $req->only(Usr::getStaffRecord());
+        $staff_data['user_id'] = $user_id;
+        $staff_data['code'] = $staff_id;
+
+        $this->user->createStaffRecord($staff_data);
+    }
+
+    /**
+     * Update an existing staff record.
+     */
+    protected function updateStaffRecord(int $user_id, UserRequest $req): void
+    {
+        $staff_data = $req->only(Usr::getStaffRecord());
+        $this->user->updateStaffRecord(['user_id' => $user_id], $staff_data);
     }
 }

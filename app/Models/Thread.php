@@ -21,13 +21,13 @@ class Thread extends OriginalThread
     }
 
     /**
-     * Messages relationship with trashed.
+     * Messages relationship with trashed with user.
      *
      * @codeCoverageIgnore
      */
     public function messagesWithTrashed()
     {
-        return $this->hasMany(Models::classname(Message::class), 'thread_id', 'id')->orderBy('created_at')->withTrashed();
+        return $this->hasMany(Models::classname(Message::class), 'thread_id', 'id')->orderBy('created_at')->with('user')->withTrashed();
     }
 
     /**

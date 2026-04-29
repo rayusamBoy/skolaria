@@ -164,7 +164,7 @@
                 <tbody>
                     @foreach($students as $s)
                     <tr>
-                        <td><input type="checkbox" name="students_ids[]" value="{{ $s->user->id }}" class="form-input-styled text-center st-id-checkbox" data-fouc></td>
+                        <td><input type="checkbox" name="students_ids[]" value="{{ $s->user->id }}" class="form-input-styled text-center st-id-checkbox"></td>
                         <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhoto($s->user->photo) }}" alt="photo"></td>
                         <td>{{ $s->user->name }}</td>
                         <td>{{ $s->adm_no }}</td>

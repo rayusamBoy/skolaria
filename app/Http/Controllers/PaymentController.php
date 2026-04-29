@@ -71,7 +71,7 @@ class PaymentController extends Controller
         $inv = $year ? $this->pay->getAllMyPR($st_id, $year) : $this->pay->getAllMyPR($st_id);
         $pr = $inv->get()->whereNotnull('payment');
 
-        $d['sr'] = $this->student->getRecord(['user_id' => $st_id])->first();
+        $d['sr'] = $this->student->whereRecord(['user_id' => $st_id])->first();
         $d['uncleared'] = $pr->where('paid', 0);
         $d['cleared'] = $pr->where('paid', 1);
         $d['year'] = $year;
@@ -91,7 +91,7 @@ class PaymentController extends Controller
         $inv = $year ? $this->pay->getAllMyPR($st_id, $year) : $this->pay->getAllMyPR($st_id);
         $pr = $inv->get()->whereNotnull('payment');
 
-        $d['sr'] = $this->student->getRecord(['user_id' => $st_id])->first();
+        $d['sr'] = $this->student->whereRecord(['user_id' => $st_id])->first();
         $d['uncleared'] = $pr->where('paid', 0);
         $d['cleared'] = $pr->where('paid', 1);
 
@@ -109,7 +109,7 @@ class PaymentController extends Controller
             return back()->with('flash_danger', __('msg.rnf'));
         }
 
-        $d['sr'] = $this->student->getRecord(['user_id' => $pr->student_id])->first();
+        $d['sr'] = $this->student->whereRecord(['user_id' => $pr->student_id])->first();
         $d['receipts'] = $pr->receipt;
         $d['payment'] = $pr->payment;
         $d['settings'] = Qs::getSettings();
@@ -141,7 +141,7 @@ class PaymentController extends Controller
         $d2['year'] = $this->year;
 
         $receipt = $this->pay->createReceipt($d2);
-        $st_rec = $this->student->getRecord(['user_id' => $pr->student_id])->with(['my_parent', 'user'])->get();
+        $st_rec = $this->student->whereRecord(['user_id' => $pr->student_id])->with(['my_parent', 'user'])->get();
         $parent = $st_rec->pluck('my_parent')->first();
 
         if ($parent) {
@@ -157,7 +157,7 @@ class PaymentController extends Controller
         $d['selected'] = false;
 
         if ($class_id) {
-            $d['students'] = $st = $this->student->getRecord(['my_class_id' => $class_id])->get()->whereNotnull('user')->sortBy('user.name');
+            $d['students'] = $st = $this->student->whereRecord(['my_class_id' => $class_id])->get()->whereNotnull('user')->sortBy('user.name');
             if ($st->count() < 1)
                 return Qs::goWithDanger('payments.manage');
 
@@ -179,7 +179,7 @@ class PaymentController extends Controller
         $pay1 = $this->pay->getPayment(['my_class_id' => $class_id, 'year' => $this->year])->get();
         $pay2 = $this->pay->getGeneralPayment(['year' => $this->year])->get();
         $payments = $pay2->count() ? $pay1->merge($pay2) : $pay1;
-        $students = $this->student->getRecord($wh)->get();
+        $students = $this->student->whereRecord($wh)->get();
 
         if ($payments->count() && $students->count()) {
             foreach ($payments as $p) {

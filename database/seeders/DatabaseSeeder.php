@@ -12,13 +12,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Universal seeders
-        $this->call(NationalitiesTableSeeder::class);
-        $this->call(StatesTableSeeder::class);
-        $this->call(LgasTableSeeder::class);
-        $this->call(BloodGroupsTableSeeder::class);
-        $this->call(LanguagesTableSeeder::class);
-        $this->call(TimezonesTableSeeder::class);
+        activity()->disableLogging();
+
         // Tenancy specific seeders
         $this->call(TenancyExamCategoriesTableSeeder::class);
         $this->call(TenancySkillsTableSeeder::class);
@@ -32,5 +27,7 @@ class DatabaseSeeder extends Seeder
         $this->call(TenancySectionsTableSeeder::class);
         $this->call(TenancyStudentRecordsTableSeeder::class);
         $this->call(ParentRelativesTableSeeder::class);
+
+        activity()->enableLogging();
     }
 }

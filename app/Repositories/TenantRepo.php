@@ -36,9 +36,9 @@ class TenantRepo
 
     /*********** Domain ***************/
 
-    public function updateDomain(array $where, array $data)
+    public function updateOrCreateDomain(array $attributes, array $values)
     {
-        return Domain::where($where)->update($data);
+        return Domain::updateOrCreate($attributes, $values);
     }
 
     public function deleteDomain(array $where)

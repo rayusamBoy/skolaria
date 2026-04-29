@@ -27,7 +27,7 @@
         {{-- Manage exam tab --}}
         <div class="tab-content">
             <div class="{{ session('announce_exam') || $errors->any() ? 'tab-pane fade show' : 'tab-pane fade show active' }}" id="all-exams">
-                <table class="table datatable-button-html5-columns">
+                <table class="table datatable-button-html5-columns" id="manage-exams-table">
                     <thead>
                         <tr>
                             <th>S/N</th>
@@ -36,7 +36,6 @@
                             <th>Session</th>
                             <th>Category</th>
                             <th>Class Type</th>
-                            <th>Editable</th>
                             <th>Locked</th>
                             <th class="text-center">Action</th>
                         </tr>
@@ -45,17 +44,11 @@
                         @foreach ($exams as $ex)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $ex->name }}@if($ex->published) <span class="badge bg-success">Published</span> @endif</td>
-                            <td>{{ "Term {$ex->term}" }}</td>
+                            <td>{{ $ex->name }}@if($ex->published) <span class="badge bg-success">published</span> @endif @if($ex->hasAssessment()) <span class="badge bg-info">has assessment</span> @endif</td>
+                            <td>{{ Number::spellOrdinal($ex->term) . "Term" }}</td>
                             <td>{{ $ex->year }}</td>
                             <td>{{ $ex->category->name }}</td>
-                            <td>{{ $ex->class_type->name }}</td>
-
-                            @if (auth()->user()->can($tenant_permissions['exams']['update_edit_state']['permission']))
-                            <td><label class="form-switch m-0"><input id="checkbox-exam-edit-{{ $ex->id }}" onchange="updateExamEditState({{ $ex->id }}, this)" type="checkbox" @checked($ex->editable)><i></i></label></td>
-                            @else
-                            <td><label class="form-switch disabled m-0"><input type="checkbox" @checked($ex->editable)><i></i></label></td>
-                            @endif
+                            <td>{{ $class_types->where('id', $ex->class_type_id)->first()->name }}</td>
 
                             @if(auth()->user()->can($tenant_permissions['exams']['update_lock_state']['permission']))
                             <td><label class="form-switch m-0"><input id="checkbox-exam-lock-{{ $ex->id }}" onchange="updateExamLockState({{ $ex->id }}, this)" type="checkbox" @checked($ex->locked)><i></i></label></td>
@@ -70,13 +63,13 @@
 
                                         <div class="dropdown-menu dropdown-menu-left">
                                             {{-- Edit --}}
-                                            @can($tenant_permissions['exams']['store']['permission'])
+                                            @if(auth()->user()->can($tenant_permissions['exams']['store']['permission']) && !$ex->locked)
                                             <a href="{{ route('exams.edit', $ex->id) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
-                                            @endcan
+                                            @endif
                                             {{-- Publish --}}
                                             @if (!$ex->published && auth()->user()->can($tenant_permissions['exams']['publish']['permission']))
                                             <a id="{{ $ex->id }}" onclick="confirmPublish(this.id)" href="javascript:;" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> Publish</a>
-                                            <form method="get" id="item-publish-{{ $ex->id }}" action="{{ route('exams.publish', $ex->id) }}" class="hidden">@csrf @method('get')</form>
+                                            <form method="post" id="item-publish-{{ $ex->id }}" action="{{ route('exams.publish', $ex->id) }}" class="hidden">@csrf</form>
                                             @endif
                                             {{-- Delete --}}
                                             @can($tenant_permissions['exams']['destroy']['permission'])
@@ -103,7 +96,7 @@
                     <div class="col-md-12">
                         <div class="alert alert-info border-0 alert-dismissible has-do-not-show-again-button" id="exam-alert-info">
                             <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
-                            <span>You are creating an Exam for the Current Session <strong>{{ Qs::getCurrentSession() }}</strong>.</span>
+                            <span>You are creating an Exam for the Current Session <strong>{{ $current_session }}</strong>.</span>
                             <span>
                                 You may set the format for the exam number to be generated. Structure the number however you like. Use <strong>{{ Usr::getStudentExamNumberPlaceholder() }}</strong> character where the students numbers
                                 need to be generated automatically ie., <strong>{{ Usr::getStudentExamNumberPlaceholder() }} (1 digit), {{ str_repeat(Usr::getStudentExamNumberPlaceholder(), 2) }} (2 digit) etc.</strong>, while other characters will remain constant. Allowed characters are both cases letters, slashes, dash and numbers.
@@ -112,66 +105,67 @@
                         </div>
                     </div>
                 </div>
-                <form method="post" action="{{ route('exams.store') }}">
+                <form method="post" action="{{ route('exams.store') }}" class="ajax-store" data-reload="#manage-exams-table">
                     <div class="row">
                         <div class="col-md-7">
                             @csrf
+                            {{-- Name --}}
                             <div class="form-group row">
                                 <label class="col-lg-3 col-form-label font-weight-semibold">Name <span class="text-danger">*</span></label>
                                 <div class="col-lg-9">
-                                    <input name="name" value="{{ old('name') }}" required type="text" class="form-control" placeholder="Name of Exam">
+                                    <input name="name" required type="text" class="form-control" placeholder="Name of Exam">
                                 </div>
                             </div>
-
+                            {{-- Category --}}
                             <div class="form-group row">
                                 <label for="category" class="col-lg-3 col-form-label font-weight-semibold">Category <span class="text-danger">*</span></label>
                                 <div class="col-lg-9">
-                                    <select data-placeholder="Select" data-summative_exm_cat_ids="{{ json_encode(Mk::getSummativeExamCategoryIds()) }}" class="form-control select-search" name="category_id" id="category">
+                                    <select data-placeholder="Select" class="form-control select-search" name="category_id" id="category">
                                         <option selected disabled value="">Select</option>
                                         @foreach ($exams_cat as $category)
-                                        <option @selected(old('category_id')==$category->id) value="{{ $category->id }}">{{ $category->name }}</option>
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
-
+                            {{-- Class Type --}}
                             <div class="form-group row">
                                 <label for="class-type" class="col-lg-3 col-form-label font-weight-semibold">Class Type <span class="text-danger">*</span></label>
                                 <div class="col-lg-9">
                                     <select data-placeholder="Select" class="form-control select-search" name="class_type_id" id="class-type">
                                         <option selected disabled value="">Select</option>
                                         @foreach ($class_types as $ct)
-                                        <option @selected(old('class_type_id')==$ct->id) value="{{ $ct->id }}">{{ $ct->name }}</option>
+                                        <option value="{{ $ct->id }}">{{ $ct->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
-
+                            {{-- Term --}}
                             <div class="form-group row">
                                 <label for="term" class="col-lg-3 col-form-label font-weight-semibold">Term <span class="text-danger">*</span></label>
                                 <div class="col-lg-9">
                                     <select data-placeholder="Select" class="form-control select" name="term" id="term">
                                         <option selected disabled value="">Select</option>
-                                        <option @selected(old('term')==1) value="1">First Term</option>
-                                        <option @selected(old('term')==2) value="2">Second Term</option>
+                                        <option value="1">First Term</option>
+                                        <option selected value="2">Second Term</option>
                                     </select>
                                 </div>
                             </div>
-
+                            {{-- Exam Denominator --}}
                             <div class="form-group row">
                                 <label class="col-lg-7 col-form-label font-weight-semibold">Exam Denominator <span class="text-danger">*</span></label>
                                 <div class="col-lg-5">
-                                    <input name="exam_denominator" min="0" max="100" value="{{ old('exm_denominator') ?? 100 }}" required type="number" class="form-control">
+                                    <input name="exam_denominator" min="0" max="100" value="100" required type="number" class="form-control">
                                 </div>
                             </div>
-
+                            {{-- Exam Denominator By Value --}}
                             <div class="form-group row">
                                 <label class="col-lg-5 col-form-label font-weight-semibold">Calculate Exam Student Position By <span class="text-danger">*</span></label>
                                 <div class="col-lg-7">
                                     @foreach (Mk::getStudentExamPositionByValues() as $key => $value)
                                     <div class="d-flex mb-2">
-                                        <span><input type="radio" id="exm-pos-by-{{ $key }}" name="exam_student_position_by_value" value="{{ $key }}" class="form-input-styled text-center" data-fouc></span>
-                                        <label @checked(old("exam_student_position_by_value")==$key) for="exm-pos-by-{{ $key }}" class="ml-2 w-50 m-auto-0">{{ $value }}</label>
+                                        <span><input type="radio" id="exm-pos-by-{{ $key }}" name="exam_student_position_by_value" value="{{ $key }}" class="form-input-styled text-center"></span>
+                                        <label for="exm-pos-by-{{ $key }}" class="ml-2 w-50 m-auto-0">{{ $value }}</label>
                                     </div>
                                     @endforeach
                                 </div>
@@ -179,42 +173,62 @@
                         </div>
 
                         <div class="col-md-5">
-                            <div class="ca-setup {{ !in_array(old('category_id'), Mk::getSummativeExamCategoryIds()) ? 'display-none' : '' }}">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="alert alert-warning border-0">
+                                        <span>
+                                            Set whether this exam includes Assessments (CA) before publishing. After publishing, the exam cannot be edited, so this choice cannot be changed.
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            {{-- Has Continous Assessment (CA)? --}}
+                            <div class="form-group row">
+                                <label for="has_assessment" class="col-lg-8 col-form-label font-weight-semibold">Has Continous Assessment (CA)? <span class="text-danger">*</span></label>
+                                <div class="col-lg-4">
+                                    <select class="form-control select" name="has_assessment" id="has_assessment">
+                                        <option value="1">Yes</option>
+                                        <option selected value="0">No</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="ca-setup display-none">
                                 <strong>Exam CA setup</strong>
+                                {{-- Class Work Denominator --}}
                                 <div class="form-group row">
                                     <label class="col-lg-7 col-form-label font-weight-semibold">Class Work Denominator <span class="text-danger">*</span></label>
                                     <div class="col-lg-5">
-                                        <input name="cw_denominator" min="0" max="100" value="{{ old('cw_denominator') ?? 10 }}" type="number" class="form-control">
+                                        <input name="cw_denominator" min="0" max="100" value="10" type="number" class="form-control">
                                     </div>
                                 </div>
-
+                                {{-- Home Work Denominator --}}
                                 <div class="form-group row">
                                     <label class="col-lg-7 col-form-label font-weight-semibold">Home Work Denominator <span class="text-danger">*</span></label>
                                     <div class="col-lg-5">
-                                        <input name="hw_denominator" min="0" max="100" value="{{ old('hw_denominator') ?? 10 }}" type="number" class="form-control">
+                                        <input name="hw_denominator" min="0" max="100" value="10" type="number" class="form-control">
                                     </div>
                                 </div>
-
+                                {{-- Topic Test Denominator --}}
                                 <div class="form-group row">
                                     <label class="col-lg-7 col-form-label font-weight-semibold">Topic Test Denominator <span class="text-danger">*</span></label>
                                     <div class="col-lg-5">
-                                        <input name="tt_denominator" min="0" max="100" value="{{ old('tt_denominator') ?? 20 }}" type="number" class="form-control">
+                                        <input name="tt_denominator" min="0" max="100" value="20" type="number" class="form-control">
                                     </div>
                                 </div>
-
+                                {{-- Termed Test Denominator --}}
                                 <div class="form-group row">
                                     <label class="col-lg-7 col-form-label font-weight-semibold">Termed Test Denominator <span class="text-danger">*</span></label>
                                     <div class="col-lg-5">
-                                        <input name="tdt_denominator" min="0" max="100" value="{{ old('tdt_denominator') ?? 60 }}" type="number" class="form-control">
+                                        <input name="tdt_denominator" min="0" max="100" value="60" type="number" class="form-control">
                                     </div>
                                 </div>
-
+                                {{-- CA Student Position By Value --}}
                                 <div class="form-group row">
                                     <label class="col-lg-7 col-form-label font-weight-semibold">Calculate CA Student Position By <span class="text-danger">*</span></label>
                                     <div class="col-lg-5">
                                         @foreach(Mk::getStudentCAPositionByValues() as $key => $value)
                                         <div class="d-flex mb-2">
-                                            <span><input type="radio" id="ca-position-by-{{ $key }}" name="ca_student_position_by_value" value="{{ $key }}" class="form-input-styled text-center" data-fouc></span>
+                                            <span><input type="radio" id="ca-position-by-{{ $key }}" name="ca_student_position_by_value" value="{{ $key }}" class="form-input-styled text-center"></span>
                                             <label for="ca-position-by-{{ $key }}" class="ml-2 w-50 m-auto-0">{{ $value }}</label>
                                         </div>
                                         @endforeach
@@ -226,25 +240,17 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group row">
+                                {{-- Number Format --}}
                                 <div class="col-12 number-formats">
                                     <label class="col-form-label font-weight-semibold">Number Format</label>
                                     <div class="text-info"><strong>Select Class Type first</strong></div>
                                     @foreach ($my_classes as $class)
                                     <div class="mb-2 div number-format-{{ $class->class_type_id }} d-none">
                                         <span class="m-auto">
-                                            <input type="checkbox" id="class-id-{{ $class->id }}" name="class_id_{{ $class->id }}" value="{{ $class->id }}" class="form-input-styled text-center" data-fouc>
+                                            <input type="checkbox" id="class_id_{{ $class->id }}" name="class_id_{{ $class->id }}" value="{{ $class->id }}" class="form-input-styled text-center">
                                         </span>
-
-                                        @if (old("class_id_{$class->id}") == $class->id)
-                                        <script>
-                                            // If the input was checked, set as clicked to check the previous checked checkbox(es) programmatically
-                                            $("#class-id-{{ $class->id }}").click();
-
-                                        </script>
-                                        @endif
-
-                                        <label for="class-id-{{ $class->id }}" class="ml-2 w-50 m-auto-0">{{ $class->name }}</label>
-                                        <input name="exam_number_format_{{ $class->id }}" type="text" value="{{ old("exam_number_format_{$class->id}") }}" class="form-control" placeholder="ie., S6237-F{{ $class->id }}-{{ str_repeat(Usr::getStudentExamNumberPlaceholder(), 2) }}-{{ date('Y') }}">
+                                        <span for="class_id_{{ $class->id }}" class="ml-2 w-50 m-auto-0 cursor-pointer">{{ $class->name }}</span>
+                                        <input name="exam_number_format_{{ $class->id }}" type="text" class="form-control" placeholder="ie., S6237-CLASS-{{ $class->id }}-{{ str_repeat(Usr::getStudentExamNumberPlaceholder(), 2) }}-{{ date('y') }}">
                                     </div>
                                     @endforeach
                                 </div>
@@ -276,10 +282,12 @@
                             @csrf
                             <input type="hidden" name="exam_id" value="{{ session('exam_id') }}">
                             <div class="row">
+                                {{-- Message --}}
                                 <div class="form-group col-md-6">
                                     <label class="col-form-label font-weight-semibold">Message <span class="text-danger">*</span></label>
                                     <textarea name="message" required class="form-control text-capitalize">{{ session('exam_name') }} exam results have been published, signin and check them now</textarea>
                                 </div>
+                                {{-- Duration --}}
                                 <div class="form-group col-md-6">
                                     <label for="duration" class="col-form-label font-weight-semibold">Duration
                                         <span class="text-danger">*</span></label>

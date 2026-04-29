@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('borrower_id')->index();
             $table->string('start_date');
             $table->string('end_date');
-            $table->string('returned')->default('0');
+            $table->boolean('returned')->default(false);
             $table->string('status')->nullable();
             $table->tinyText('remarks')->nullable();
             $table->timestamps();

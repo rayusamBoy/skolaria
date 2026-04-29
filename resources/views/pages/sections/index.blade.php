@@ -110,7 +110,7 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>
                                 {{ $s->name }}
-                                @if($s->active)
+                                @if($s->is_default)
                                 <i class="badge badge-success badge-default">default</i>
                                 @endif
                             </td>

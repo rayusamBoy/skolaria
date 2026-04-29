@@ -13,6 +13,10 @@ class Notice extends Eloquent
 
     protected $fillable = ['from_id', 'editor_id', 'viewers_ids', 'title', 'body'];
 
+    protected $casts = [
+        'viewers_ids' => 'array',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class, "from_id");

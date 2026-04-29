@@ -39,7 +39,7 @@ class AnalyticController extends Controller
         if (file_exists($gtag_code_structure_file))
             $d['gtag_code_structure_file'] = $gtag_code_structure_file;
 
-        $d['analytics_enabled'] = (int) $settings->firstWhere('type', 'analytics_enabled')->description === 1;
+        $d['analytics_enabled'] = (bool) $settings->firstWhere('type', 'analytics_enabled')->description === true;
 
         if (Qs::googleAnalyticsSetUpOkAndEnabled()) {
             $d['google_analytics_setup_ok'] = true;
@@ -73,7 +73,8 @@ class AnalyticController extends Controller
                 $d['topOses'] = Analytics::fetchTopOperatingSystems($period);
             } catch (\Exception $e) {
                 unset($d['google_analytics_setup_ok']); // Analytics not OK anymore
-                return view('pages.analytics', $d)->with('pop_error', [$e->getMessage()]);
+                session()->flash('pop_error', $e->getMessage());
+                return view('pages.analytics', $d);
             }
         }
 
@@ -98,7 +99,7 @@ class AnalyticController extends Controller
 
         if ($google_analytic_property_id !== null)
             $this->setting->update('google_analytic_property_id', $google_analytic_property_id);
-        if ($google_analytic_tag_id !== null)
+        if ($google_analytic_tag_id !== '')
             $this->setting->update('google_analytic_tag_id', $google_analytic_tag_id);
 
         if ($req->hasFile('service_account_credential_file')) {

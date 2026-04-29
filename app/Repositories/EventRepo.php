@@ -30,7 +30,7 @@ class EventRepo
 
     public function update($id, $data)
     {
-        return Event::whereId($id)->update($data);
+        return Event::where('id', $id)->update($data);
     }
 
     public function delete($id)

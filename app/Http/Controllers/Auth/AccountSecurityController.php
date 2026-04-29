@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Helpers\Qs;
 use App\Http\Controllers\Controller;
 use App\Repositories\UserRepo;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -12,197 +13,265 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 use Jenssegers\Agent\Agent;
 use PragmaRX\Google2FALaravel\Google2FA;
 use PragmaRX\Recovery\Recovery;
 
 class AccountSecurityController extends Controller
 {
-    protected $user;
+    protected UserRepo $user;
 
     public function __construct(UserRepo $user)
     {
         $this->user = $user;
     }
 
-    public function index()
+    /**
+     * Display account security settings page.
+     */
+    public function index(): View
     {
         $google2fa = app('pragmarx.google2fa');
-        $data["twofa_secret_code"] = $google2fa->generateSecretKey();
-        $data["google2FAIsActive"] = $this->getGoogle2FASecretKey();
+        $twofa_secret_code = $google2fa->generateSecretKey();
+        $google2FAIsActive = $this->getGoogle2FASecretKey();
 
-        $QR_Image = $google2fa->getQRCodeInline(
+        $qr_image = $google2fa->getQRCodeInline(
             config('app.name'),
             auth()->user()->email ?? Qs::getSetting('system_email'),
-            $data['twofa_secret_code']
+            $twofa_secret_code
         );
 
-        $data['QR_Image'] = $QR_Image;
+        $data['twofa_secret_code'] = $twofa_secret_code;
+        $data['google2FAIsActive'] = $google2FAIsActive;
+        $data['QR_Image'] = $qr_image;
         $data['recovery_codes'] = $this->get_recovery_codes();
         $data['browser_sessions'] = $this->get_browser_sessions();
-
-        $data['users_with_2fa_enabled'] = $this->user->all()->whereNotNull('twofa_secret_code');
+        $data['users_with_2fa_enabled'] = $this->user->all(['roles'])->whereNotNull('twofa_secret_code');
 
         return view('auth.2fa.account_security', $data);
     }
 
+    /**
+     * Generate and return recovery codes (stored in session).
+     */
     public function get_recovery_codes(): array
     {
         $recovery = new Recovery();
         $recovery->setBlocks(3);
 
-        // Put recovery codes into session to be updated letter to the database
-        session()->put('twofa_recovery_codes', $recovery->toJson());
+        session()->put('twofa_recovery_codes', $recovery->toArray());
 
-        $recovery = $recovery->toArray();
-
-        return $recovery;
+        return $recovery->toArray();
     }
 
-    public function account_recovery(Request $request)
+    /**
+     * Handle account recovery using recovery code.
+     */
+    public function account_recovery(Request $request): View|RedirectResponse
     {
         if ($request->method() === 'POST') {
             $user = auth()->user();
-            $recovery_code = $request->recovery_codes;
+            $recovery_code = $request->input('recovery_codes');
+            $stored_codes = $user->twofa_recovery_codes ?? [];
 
-            if (\in_array($recovery_code, json_decode(auth()->user()->twofa_recovery_codes))) {
-                $data['twofa_secret_code'] = null;
-                $data['twofa_recovery_codes'] = null;
-                $user->update($data);
-            } else
-                throw ValidationException::withMessages([
-                    'recovery_codes' => 'Invalid recovery codes.'
+            if (\in_array($recovery_code, $stored_codes)) {
+                $user->update([
+                    'twofa_secret_code' => null,
+                    'twofa_recovery_codes' => null,
                 ]);
-            return redirect()->route('index');
+                return redirect()->route('index');
+            }
+
+            throw ValidationException::withMessages([
+                'recovery_codes' => 'Invalid recovery code.',
+            ]);
         }
 
         return view('auth.2fa.account_recovery');
     }
 
-    public function showGoogle2FAVerification()
+    /**
+     * Show Google 2FA verification form.
+     */
+    public function show_google_2fa_verification(): View
     {
         return view('auth.2fa.verify');
     }
 
-    public function update_secret_codes(Request $request)
+    /**
+     * Update user's secret code and recovery codes from session.
+     */
+    public function update_secret_codes(Request $request): RedirectResponse
     {
-        $data = $request->only('twofa_secret_code');
-        // Get recovery codes from session.
-        $data['twofa_recovery_codes'] = $twofarc = session()->get('twofa_recovery_codes');
+        $twofa_recovery_codes = session()->get('twofa_recovery_codes');
 
-        // If the recovery codes missed in any way (ie., they are not in the session). Redirect back to the index page for re-processing or re-trying.
-        if ($twofarc === null)
-            return redirect()->route('account_security.index')->with('flash_danger', 'The system did not catch the recovery codes correctly. Please try again.');
+        if ($twofa_recovery_codes === null) {
+            return redirect()
+                ->route('account_security.index')
+                ->with('flash_warning', 'The system did not catch the recovery codes correctly. Please refresh the page and try again.');
+        }
+
+        $data = [
+            'twofa_secret_code' => $request->input('twofa_secret_code'),
+            'twofa_recovery_codes' => $twofa_recovery_codes,
+        ];
 
         $this->user->update(auth()->id(), $data);
-
-        // Remove recovery codes from session after update/store
         session()->forget('twofa_recovery_codes');
-        // Make valid current authenticated user - For this session to continue without checking the OTP.
+
+        // Mark 2FA as verified for current session
         $google2fa = new Google2FA($request);
         $google2fa->login();
 
         return back()->with('flash_success', __('msg.update_ok'));
     }
 
-    public function null_secret_code(Request $request)
+    /**
+     * Disable 2FA for a user.
+     */
+    public function null_secret_code(Request $request): RedirectResponse
     {
-        $id = $request->user_id ?? auth()->id();
-        $this->user->update($id, ['twofa_secret_code' => NULL]);
+        $user_id = $request->input('user', auth()->id());
+
+        if ($this->canNullSecretCode($user_id)) {
+            return back()->with('pop_error', __('msg.denied'));
+        }
+
+        $this->user->update($user_id, ['twofa_secret_code' => null]);
 
         return back()->with('flash_success', __('msg.update_ok'));
     }
 
-    public function getGoogle2FASecretKey()
-    {
-        $secret = auth()->user()->twofa_secret_code;
-
-        return $secret !== null && !empty($secret);
-    }
-
     /**
-     * The route for this method is bound to '2fa' middleware. Meaning this method will not run unless the request passed the middleware.
-     * Thus, if the user entered wrong otp in the verification form the middleware will return the response with error message to the form.
-     * This method will only run if the user logged in by the middleware; hence we will redirect the user to the intended route (hopefully; dashboard).
+     * Redirect to intended URL after successful 2FA verification.
      */
-    public function authenticate(): \Illuminate\Http\RedirectResponse
+    public function authenticate(): RedirectResponse
     {
         return redirect()->intended();
     }
 
-    public function get_session_connection()
-    {
-        return DB::connection(config(key: 'session.connection'))->table(table: config(key: 'session.table', default: 'sessions'));
-    }
-
+    /**
+     * Get browser sessions for current user.
+     */
     public function get_browser_sessions(): Collection
     {
-        if (config(key: 'session.driver') !== 'database')
+        if (config('session.driver') !== 'database') {
             return collect();
+        }
 
-        return collect(
-            value: $this->get_session_connection()
-                ->where(column: 'user_id', operator: auth()->user()->getAuthIdentifier())
-                ->latest(column: 'last_activity')
-                ->get()
-        )->map(callback: function ($session): object {
-            $agent = $this->create_agent($session);
-
-            return (object) [
-                'device' => [
-                    'browser' => $agent->browser(),
-                    'desktop' => $agent->isDesktop(),
-                    'mobile' => $agent->isMobile(),
-                    'tablet' => $agent->isTablet(),
-                    'platform' => $agent->platform(),
-                ],
-                'ip_address' => $session->ip_address,
-                'is_current_device' => $session->id === request()->session()->getId(),
-                'last_active' => Carbon::createFromTimestamp($session->last_activity)->diffForHumans(),
-            ];
-        });
+        return $this->getSessionConnection()
+            ->where('user_id', auth()->id())
+            ->latest('last_activity')
+            ->get()
+            ->map(fn($session) => $this->formatSessionData($session));
     }
 
-    protected function create_agent(mixed $session)
+    /**
+     * Logout other browser sessions after password confirmation.
+     */
+    public function logout_other_browser_sessions(): RedirectResponse
     {
-        return tap(
-            value: new Agent(),
-            callback: fn($agent) => $agent->setUserAgent(userAgent: $session->user_agent)
-        );
-    }
+        Validator::make(request()->toArray(), [
+            'password' => ['required', 'current_password:web'],
+        ])->validate();
 
-    public function logout_other_browser_sessions()
-    {
-        Validator::make(request()->toArray(), ['password' => ['required', 'current_password:web']])->validate();
-
-        $password = request()->password;
-        Auth::logoutOtherDevices($password);
-
-        $this->delete_other_session_records();
+        Auth::logoutOtherDevices(request()->password);
+        $this->deleteOtherSessionRecords();
 
         return redirect()->back()->with('flash_success', __('msg.other_bs_logout_ok'));
     }
 
-    protected function delete_other_session_records(): void
+    /**
+     * Get user's last activity timestamp.
+     */
+    public function get_user_last_activity(bool $human = false): Carbon|string
     {
-        if (config(key: 'session.driver') !== 'database')
-            return;
+        $last_activity = $this->getSessionConnection()
+            ->where('user_id', auth()->id())
+            ->latest('last_activity')
+            ->first();
 
-        $this->get_session_connection()
-            ->where(column: 'user_id', operator: '=', value: auth()->user()->getAuthIdentifier())
-            ->where(column: 'id', operator: '!=', value: request()->session()->getId())
+        if (!$last_activity) {
+            return $human ? 'Never' : now();
+        }
+
+        $timestamp = Carbon::createFromTimestamp($last_activity->last_activity);
+
+        return $human ? $timestamp->diffForHumans() : $timestamp;
+    }
+
+    // ----------------------------------------------------------------------
+    // Protected Helper Methods
+    // ----------------------------------------------------------------------
+
+    /**
+     * Format session data for display.
+     */
+    protected function formatSessionData($session): object
+    {
+        $agent = $this->createAgent($session);
+
+        return (object) [
+            'device' => [
+                'browser' => $agent->browser(),
+                'desktop' => $agent->isDesktop(),
+                'mobile' => $agent->isMobile(),
+                'tablet' => $agent->isTablet(),
+                'platform' => $agent->platform(),
+            ],
+            'ip_address' => $session->ip_address,
+            'is_current_device' => $session->id === request()->session()->getId(),
+            'last_active' => Carbon::createFromTimestamp($session->last_activity)->diffForHumans(),
+        ];
+    }
+
+    /**
+     * Create an Agent instance from session user agent.
+     */
+    protected function createAgent($session): Agent
+    {
+        return tap(new Agent(), fn($agent) => $agent->setUserAgent($session->user_agent));
+    }
+
+    /**
+     * Delete session records for other devices.
+     */
+    protected function deleteOtherSessionRecords(): void
+    {
+        if (config('session.driver') !== 'database') {
+            return;
+        }
+
+        $this->getSessionConnection()
+            ->where('user_id', auth()->id())
+            ->where('id', '!=', request()->session()->getId())
             ->delete();
     }
 
-    public function get_user_last_activity(bool $human = false): Carbon|string
+    /**
+     * Get session database connection query builder.
+     */
+    protected function getSessionConnection()
     {
-        $lastActivity = $this->get_session_connection()
-            ->where(column: 'user_id', operator: '=', value: auth()->user()->getAuthIdentifier())
-            ->latest(column: 'last_activity')
-            ->first();
+        return DB::connection(config('session.connection'))
+            ->table(config('session.table', 'sessions'));
+    }
 
-        return $human
-            ? Carbon::createFromTimestamp($lastActivity->last_activity)->diffForHumans()
-            : Carbon::createFromTimestamp($lastActivity->last_activity);
+    /**
+     * Check if 2FA is active for authenticated user.
+     */
+    public function getGoogle2FASecretKey(): bool
+    {
+        $secret = auth()->user()->twofa_secret_code;
+        return $secret !== null && $secret !== '';
+    }
+
+    /**
+     * Check if current user is allowed to disable 2FA.
+     */
+    protected function canNullSecretCode($user_id): bool
+    {
+        return $user_id !== auth()->id() && !Qs::userIsHead();
     }
 }

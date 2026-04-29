@@ -18,7 +18,6 @@ return new class extends Migration
             $table->tinyInteger('mark_from');
             $table->tinyInteger('mark_to');
             $table->integer('point');
-            $table->decimal('credit', 8, 1);
             $table->string('remark', 40)->nullable();
             $table->timestamps();
 

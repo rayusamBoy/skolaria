@@ -1,19 +1,19 @@
 @extends('layouts.master')
 
-@section('page_title', "Edit Section Of {$s->my_class->name}")
+@section('page_title', "Edit Section - {$s->name}")
 
 @section('content')
 
 <div class="card">
     <div class="card-header header-elements-inline">
-        <h6 class="card-title">Edit Section Of {{ $s->my_class->name }}</h6>
+        <h6 class="card-title">Edit Section</h6>
         {!! Qs::getPanelOptions() !!}
     </div>
 
     <div class="card-body">
         <div class="row">
             <div class="col-md-6">
-                <form class="ajax-update" method="post" action="{{ route('sections.update', $s->id) }}">
+                <form class="ajax-update" method="post" action="{{ route('sections.update', $s->id) }}" data-reload="#page-title">
                     @csrf @method('PUT')
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label font-weight-semibold">Name <span class="text-danger">*</span></label>
@@ -25,7 +25,8 @@
                     <div class="form-group row">
                         <label for="my_class_id" class="col-lg-3 col-form-label font-weight-semibold">Class </label>
                         <div class="col-lg-9">
-                            <input class="form-control" id="my_class_id" disabled="disabled" type="text" value="{{ $s->my_class->name }}">
+                            <input class="form-control" id="my_class_id" disabled type="text" value="{{ $s->my_class->name }}">
+                            <input type="hidden" name="my_class_id" value="{{ $s->my_class->id }}">
                         </div>
                     </div>
 

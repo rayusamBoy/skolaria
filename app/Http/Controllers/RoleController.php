@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Usr;
 use App\Repositories\PermissionRepo;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class RoleController extends Controller
 {
-    protected $permission;
+    protected PermissionRepo $permission;
+
     public function __construct(PermissionRepo $permission)
     {
         $this->permissionMap = config('permissions.names.tenant.roles');
@@ -16,82 +20,122 @@ class RoleController extends Controller
         $this->permission = $permission;
     }
 
-    public function index()
+    /**
+     * Display a listing of roles.
+     */
+    public function index(): View
     {
-        $data['permissions'] = $this->permission->getPermissions();
-        $data['groupedPermissions'] = $data['permissions']->groupBy(fn($perm) => explode('.', $perm->name)[0]);
+        $permissions = $this->permission->getPermissions();
+        $data['permissions'] = $permissions;
+        $data['grouped_permissions'] = $permissions->groupBy(
+            fn($perm) => explode('.', $perm->name)[0]
+        );
         $data['roles'] = $this->permission->getRoles([], ['users', 'permissions']);
 
         return view('pages.roles.index', $data);
     }
 
-    public function store(Request $request)
+    /**
+     * Store a newly created role.
+     */
+    public function store(Request $request): JsonResponse
     {
-        $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'unique:roles,name',
-            ],
-            'permissions' => 'array',
-            'permissions.*' => 'exists:permissions,name',
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'unique:roles,name'],
+            'permissions' => ['array'],
+            'permissions.*' => ['exists:permissions,name'],
         ]);
 
-        $role_name = ucwords($request->name);
+        $role_name = ucwords($validated['name']);
         $role = $this->permission->createRole(['name' => $role_name]);
 
         if ($request->filled('permissions')) {
-            $role->syncPermissions($request->permissions);
+            $role->syncPermissions($validated['permissions']);
         }
 
         return Usr::jsonStoreOk();
     }
 
-    public function edit($id)
+    /**
+     * Show the form for editing the specified role.
+     */
+    public function edit($id): View|RedirectResponse
     {
-        $permissions = $this->permission->getPermissions();
-        $data['groupedPermissions'] = $permissions->groupBy(fn($perm) => explode('.', $perm->name)[0]);
-        $data['role'] = $role = $this->permission->getRole(['id' => $id]);
+        $role = $this->permission->getRole(['id' => $id]);
 
-        if (\in_array($role->name, Usr::getTenancyAwareRootRoles(), true)) {
+        if ($this->isProtectedRootRole($role->name)) {
             return redirect()->route('roles.index')->with('flash_warning', __('msg.denied'));
         }
+
+        $permissions = $this->permission->getPermissions();
+        $data['grouped_permissions'] = $permissions->groupBy(
+            fn($perm) => explode('.', $perm->name)[0]
+        );
+        $data['role'] = $role;
 
         return view('pages.roles.edit', $data);
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Update the specified role.
+     */
+    public function update(Request $request, $id): RedirectResponse
     {
-        $request->validate([
-            'name' => [
-                'required',
-                'string',
-                "unique:roles,name,{$id}",
-            ],
-            'permissions' => 'array',
-            'permissions.*' => 'exists:permissions,name',
+        $role = $this->permission->getRole(['id' => $id]);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', "unique:roles,name,{$id}"],
+            'permissions' => ['array'],
+            'permissions.*' => ['exists:permissions,name'],
         ]);
 
-        $role = $this->permission->getRole(['id' => $id]);
-        $role_name = \in_array($role->name, Usr::getTenancyAwareDefaultRoles(), true) ? $role->name : ucwords($request->name);
-        $role->update(['name' => $role_name]);
-        $role->syncPermissions($request->permissions ?? []);
+        // Preserve name for default roles; otherwise update with sanitized input
+        $new_name = $this->isDefaultRole($role->name)
+            ? $role->name
+            : ucwords($validated['name']);
+
+        $role->update(['name' => $new_name]);
+
+        if ($request->filled('permissions')) {
+            $role->syncPermissions($validated['permissions']);
+        }
 
         return redirect()->route('roles.index')->with('flash_success', __('msg.update_ok'));
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified role.
+     */
+    public function destroy($id): RedirectResponse
     {
         $role = $this->permission->getRole(['id' => $id], ['users']);
+
         if ($role->users->count() > 0) {
             return back()->with('flash_warning', __('msg.role_in_use'));
         }
 
-        if (\in_array($role->name, Usr::getTenancyAwareDefaultRoles(), true)) {
+        if ($this->isDefaultRole($role->name)) {
             return back()->with('flash_warning', __('msg.denied'));
         }
 
         $role->delete();
+
         return redirect()->back()->with('flash_success', __('msg.del_ok'));
+    }
+
+    /**
+     * Check if a role name is among the tenancy‑aware root roles.
+     */
+    protected function isProtectedRootRole(string $role_name): bool
+    {
+        return \in_array($role_name, Usr::getTenancyAwareRootRoles(), true);
+    }
+
+    /**
+     * Check if a role name is among the tenancy‑aware default roles.
+     */
+    protected function isDefaultRole(string $role_name): bool
+    {
+        return \in_array($role_name, Usr::getTenancyAwareDefaultRoles(), true);
     }
 }

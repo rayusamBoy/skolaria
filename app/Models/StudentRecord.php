@@ -22,8 +22,6 @@ class StudentRecord extends Eloquent
         'dorm_room_no',
         'adm_no',
         'date_admitted',
-        'wd',
-        'wd_date',
         'grad',
         'grad_date',
         'house_no',
@@ -35,6 +33,10 @@ class StudentRecord extends Eloquent
         'chp',
         'p_status',
         'food_taboos'
+    ];
+
+    protected $casts = [
+        'grad' => 'boolean',
     ];
 
     public function user()

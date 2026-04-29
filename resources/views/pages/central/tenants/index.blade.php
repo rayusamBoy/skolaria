@@ -123,12 +123,16 @@
                                             <a id="tenant-delete-{{ Qs::hash($tenant->id) }}" onclick="confirmPermanentDeleteTwice(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                             <form method="post" id="item-delete-tenant-delete-{{ Qs::hash($tenant->id) }}" action="{{ route('tenants.destroy', Qs::hash($tenant->id)) }}" class="hidden page-block">@csrf @method('delete')</form>
                                             @endcan
-                                            {{-- Tenants Migrate Fresh --}}
+
                                             @can($central_permissions['tenants']['run_command']['permission'])
-                                            <a id="tenant-migrate-fresh-{{ Qs::hash($tenant->id) }}" onclick="confirmOperationTwice(this.id)" href="javascript:;" class="dropdown-item text-warning"><i class="material-symbols-rounded">swap_horiz</i> Migrate Fresh</a>
+                                            {{-- Tenant Migrate --}}
+                                            <a id="tenant-migrate-{{ Qs::hash($tenant->id) }}" onclick="confirmOperationTwice(this.id)" href="javascript:;" class="dropdown-item text-warning"><i class="material-symbols-rounded">swap_vert</i> Migrate</a>
+                                            <form method="post" id="item-confirm-operation-tenant-migrate-{{ Qs::hash($tenant->id) }}" action="{{ route('tenants.run_command', [0, Qs::hash($tenant->id)]) }}" class="hidden page-block">@csrf @method('post')</form>
+                                            {{-- Tenant Migrate Fresh --}}
+                                            <a id="tenant-migrate-fresh-{{ Qs::hash($tenant->id) }}" onclick="confirmOperationTwice(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">swap_horiz</i> Migrate Fresh</a>
                                             <form method="post" id="item-confirm-operation-tenant-migrate-fresh-{{ Qs::hash($tenant->id) }}" action="{{ route('tenants.run_command', [1, Qs::hash($tenant->id)]) }}" class="hidden page-block">@csrf @method('post')</form>
-                                            {{-- Tenants Seed --}}
-                                            <a id="tenant-seed-{{ Qs::hash($tenant->id) }}" onclick="confirmOperationTwice(this.id)" href="javascript:;" class="dropdown-item text-warning"><i class="material-symbols-rounded">filter_vintage</i> Seed</a>
+                                            {{-- Tenant Seed --}}
+                                            <a id="tenant-seed-{{ Qs::hash($tenant->id) }}" onclick="confirmOperationTwice(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">filter_vintage</i> Seed</a>
                                             <form method="post" id="item-confirm-operation-tenant-seed-{{ Qs::hash($tenant->id) }}" action="{{ route('tenants.run_command', [2, Qs::hash($tenant->id)]) }}" class="hidden page-block">@csrf @method('post')</form>
                                             @endcan
                                         </div>

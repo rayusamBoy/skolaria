@@ -3,7 +3,6 @@
 namespace App;
 
 use App\Models\BloodGroup;
-use App\Models\Group;
 use App\Models\Lga;
 use App\Models\LoginHistory;
 use App\Models\Nationality;
@@ -68,6 +67,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'preferences' => 'array',
         'firebase_device_tokens' => 'array',
         'hidden_alert_ids' => 'array',
+        'twofa_recovery_codes' => 'array',
     ];
 
     public const string GENDER_MALE = 'Male';
@@ -114,11 +114,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function staff()
     {
         return $this->hasMany(StaffRecord::class);
-    }
-
-    public function groups()
-    {
-        return $this->belongsToMany(Group::class)->withTimestamps();
     }
 
     public function getActivitylogOptions(): LogOptions

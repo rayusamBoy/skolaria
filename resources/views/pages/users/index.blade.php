@@ -67,10 +67,10 @@
                             <div class="col-12">
                                 {{-- PERMISSIONS --}}
                                 <div class="form-group">
-                                    <label for="permissions">Select Permission(s) (Optional):</label>
+                                    <label for="permissions">Additional Permissions (Optional):</label>
                                     <select class="form-control select" multiple="multiple" placeholder="Select Permission(s)" name="permissions[]" id="permissions">
                                         @foreach ($permissions as $perm)
-                                        <option value="{{ $perm->name }}">{{ $perm->name }}</option>
+                                        <option value="{{ $perm->name }}" title="{{ $perm->description ?? $perm->label ?? $perm->name }}">{{ $perm->label ?? $perm->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -113,7 +113,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="bg_id">Blood Group: </label>
-                                    <select class="select form-control" id="bg_id" name="bg_id" data-fouc data-placeholder="Choose..">
+                                    <select class="select form-control" id="bg_id" name="bg_id" data-placeholder="Choose..">
                                         <option value=""></option>
                                         @foreach ($blood_groups as $bg)
                                         <option @selected(old('bg_id')==$bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
@@ -132,7 +132,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="gender">Gender: <span class="text-danger">*</span></label>
-                                    <select class="select form-control" id="gender" name="gender" required data-fouc data-placeholder="Choose..">
+                                    <select class="select form-control" id="gender" name="gender" required data-placeholder="Choose..">
                                         <option value=""></option>
                                         @foreach (Usr::getGenders() as $gender)
                                         <option @selected(old('gender')==$gender) value="{{ $gender }}">{{ $gender }}</option>
@@ -255,7 +255,7 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="photo" class="d-block">Upload Passport Photo:</label>
-                                    <input value="{{ old('photo') }}" accept="image/*" type="file" id="photo" name="photo" class="form-input-styled" data-fouc>
+                                    <input value="{{ old('photo') }}" accept="image/*" type="file" id="photo" name="photo" class="form-input-styled">
                                     <span class="form-text text-muted">Accepted Images: jpeg, png. Max file size 2Mb</span>
                                 </div>
                             </div>
@@ -430,7 +430,7 @@
                     </thead>
 
                     <tbody>
-                        @foreach(Usr::getUsersByRoleNames([$role->name]) as $u)
+                        @foreach(Usr::getUsersByRoleNames([$role->name], ['staff']) as $u)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td><img src="{{ Usr::getTenancyAwarePhoto($u->photo) }}" class="rounded-circle" style="height:40px;width:40px;"></td>
@@ -461,15 +461,19 @@
                                     <div class="dropdown">
                                         <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
+                                            {{-- Edit --}}
                                             @if(auth()->user()->can($tenant_permissions['users']['edit']['permission']) && $user_can_modify_head)
                                             <a href="{{ route('users.edit', Qs::hash($u->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
                                             @endif
+                                            {{-- Show --}}
                                             @if(auth()->user()->can($tenant_permissions['users']['show']['permission']) && $user_can_modify_head)
                                             <a href="{{ route('users.show', Qs::hash($u->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> View Profile</a>
                                             @endif
+                                            {{-- Reset Password --}}
                                             @if(auth()->user()->can($tenant_permissions['users']['reset_password']['permission']) && $user_can_modify_head)
                                             <a href="javascript:;" data-href="{{ route('users.password.reset', Qs::hash($u->id)) }}" class="dropdown-item needs-reset-pass-confirmation"><i class="material-symbols-rounded">lock_reset</i> Reset Password</a>
                                             @endif
+                                            {{-- Destroy --}}
                                             @if(auth()->user()->can($tenant_permissions['users']['destroy']['permission']) && $user_can_modify_head)
                                             <a href="javascript:;" id="{{ Qs::hash($u->id) }}" onclick="confirmDelete(this.id)" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                             <form id="item-delete-{{ Qs::hash($u->id) }}" action="{{ route('users.destroy', Qs::hash($u->id)) }}" method="post" class="hidden">@csrf @method('delete')</form>
@@ -488,6 +492,5 @@
 
         </div>
     </div>
-</div>
 
-@endsection
+    @endsection

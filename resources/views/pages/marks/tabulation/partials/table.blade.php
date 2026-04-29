@@ -1,0 +1,43 @@
+<table class="table-styled tabulation-table float-head" border="1" style="width: 100%; border-collapse: collapse;">
+    <thead style="background: #f5f5f5;">
+        <tr>
+            <th class="text-center">#</th>
+            <th class="text-center">STUDENT NAME</th>
+            <th class="text-center">Gender</th>
+            @foreach($subjects as $sub)
+            <th class="text-center" title="{{ $sub->name }}">{{ strtoupper($sub->slug ?? $sub->name) }}</th>
+            <th class="text-center">Grd</th>
+            @endforeach
+            <th id="header-total" class="text-center col-total toggleable" data-toggle-target=".col-total">Total</th>
+            <th id="header-avg" class="text-center col-avg toggleable" title="Average" data-toggle-target=".col-avg">Avg</th>
+            <th id="header-grade" class="text-center col-grade toggleable" title="Grade" data-toggle-target=".col-grade">Grd</th>
+            <th id="header-points" class="text-center col-points toggleable" title="Points" data-toggle-target=".col-points">Pts</th>
+            <th id="header-division" class="text-center col-division toggleable" title="Division" data-toggle-target=".col-division">Div</th>
+            <th id="header-gpa" class="text-center col-gpa toggleable" title="Grade Point Average" data-toggle-target=".col-gpa">GPA</th>
+            <th id="header-position" class="text-center col-position toggleable" title="Position" data-toggle-target=".col-position">Pos</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($students_data as $row)
+        <tr>
+            <td class="text-center">{{ $loop->iteration }}</td>
+            <td>{{ $row['user']->name }}</td>
+            <td class="text-center">{{ substr($row['gender'], 0, 1) }}</td>
+
+            @foreach($subjects as $sub)
+            @php $sub_mark = $row['sub_marks'][$sub->id]; @endphp
+            <td class="text-center">{{ $sub_mark['mark'] ?? '—' }}</td>
+            <td class="text-center text-green">{{ $sub_mark['grade'] ?? '—' }}</td>
+            @endforeach
+
+            <td class="text-center text-danger col-total">{{ $row['total'] ?? '—' }}</td>
+            <td class="text-center text-secondary col-ave">{{ $row['ave'] ?? '—' }}</td>
+            <td class="text-center text-info col-grade">{{ $row['grade'] ?? '—' }}</td>
+            <td class="text-center text-pink col-points">{{ $row['points'] ?? '—' }}</td>
+            <td class="text-center text-orange col-division">{{ $row['division'] ?? '—' }}</td>
+            <td class="text-center text-violet col-gpa">{{ $row['gpa'] ?? '—' }}</td>
+            <td class="text-center text-primary col-position">{{ $row['pos'] ?? '—' }}</td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>

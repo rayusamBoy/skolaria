@@ -22,7 +22,7 @@ class LocationRepo
 
     public function getStateByNationalityID($nal_id)
     {
-        return State::where('nationality_id', $nal_id)->orderBy('name', 'asc')->get();
+        return State::where('country_id', $nal_id)->orderBy('name', 'asc')->get();
     }
 
     public function getState($id)

@@ -6,11 +6,11 @@
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="exam_id" class="col-form-label font-weight-bold">Assessments for:</label>
-                            <select required id="exam_id" name="exam_id" data-placeholder="Select Exam" class="form-control select">
-                                <option value="">Select Exam</option>
-                                @foreach ($assessments->where('exam.year', Qs::getCurrentSession()) as $as)
-                                <option @selected($selected && $exam->id == $as->exam->id) value="{{ $as->exam->id }}">{{ $as->exam->name }}</option>
+                            <label for="assessment_id" class="col-form-label font-weight-bold">Assessments for:</label>
+                            <select required id="assessment_id" name="assessment_id" data-placeholder="Select Assessment" class="form-control select">
+                                <option value="">Select Assessment</option>
+                                @foreach ($assessments as $as)
+                                <option @selected($selected && $exam->id == $as->id) value="{{ $as->id }}">{{ $as->exam->name }} assessment</option>
                                 @endforeach
                             </select>
                         </div>
@@ -61,7 +61,7 @@
 
         <div class="col-md-2 mt-4">
             <div class="text-right mt-1">
-                <button type="submit" class="btn btn-primary">Manage Assessments <i class="material-symbols-rounded ml-2">send</i></button>
+                <button type="submit" class="btn btn-primary">Manage <i class="material-symbols-rounded ml-2">send</i></button>
             </div>
         </div>
     </div>

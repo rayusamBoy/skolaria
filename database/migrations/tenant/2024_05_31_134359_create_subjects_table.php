@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -15,7 +14,8 @@ return new class extends Migration
             $table->increments('id');
             $table->string('name', 100);
             $table->string('slug', 100);
-            $table->boolean('core')->default(true);
+            $table->boolean('is_core')->default(true);
+            $table->decimal('credits');
             $table->unsignedInteger('my_class_id')->nullable()->index();
             $table->timestamps();
 

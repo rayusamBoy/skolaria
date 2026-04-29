@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('messages', function (Blueprint $table) {
-            $table->foreign(['deleted_by'], 'messages_ibfk_1')->references(['id'])->on('users')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign(['deleted_by'], 'messages_ibfk_1')->references(['id'])->on('users')->onUpdate('cascade')->onDelete('SET NULL');
             $table->foreign(['thread_id'], 'messages_ibfk_2')->references(['id'])->on('threads')->onUpdate('cascade')->onDelete('cascade');
             $table->foreign(['user_id'], 'messages_ibfk_3')->references(['id'])->on('users')->onUpdate('cascade')->onDelete('cascade');
         });

@@ -135,7 +135,7 @@ class NonTenancySettingsTableSeeder extends Seeder
                 array(
                     'id' => 15,
                     'type' => 'analytics_enabled',
-                    'description' => '1',
+                    'description' => true,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),

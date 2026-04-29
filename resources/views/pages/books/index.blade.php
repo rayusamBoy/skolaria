@@ -16,7 +16,7 @@
                 <a href="javascript:;" class="nav-link dropdown-toggle active" data-toggle="dropdown">Manage Books</a>
                 <div class="dropdown-menu dropdown-menu-right">
                     @foreach($my_classes as $mc)
-                    <a href="#book{{ $mc->id }}" class="dropdown-item" data-toggle="tab">{{ $mc->name }}</a>
+                    <a href="#book-{{ $mc->id }}" class="dropdown-item" data-toggle="tab">{{ $mc->name }}</a>
                     @endforeach
                 </div>
             </li>
@@ -31,7 +31,7 @@
         <div class="tab-content">
             @can($tenant_permissions['books']['store']['permission'])
             <div class="tab-pane fade" id="new-book">
-                <form method="post" enctype="multipart/form-data" class="ajax-store" action="{{ route('books.store') }}" data-fouc>
+                <form method="post" enctype="multipart/form-data" class="ajax-store" action="{{ route('books.store') }}">
                     @csrf
                     <div class="row">
                         {{-- Class --}}
@@ -125,7 +125,9 @@
             @endcan
 
             @foreach($my_classes as $mc)
-            <div class="tab-pane fade show" id="book{{ $mc->id }}">
+            <div class="tab-pane fade show" id="book-{{ $mc->id }}">
+                <strong class="status-styled">{{ $mc->name }}</strong>
+                
                 <table class="table datatable-button-html5-columns w-100">
                     <thead>
                         <tr>

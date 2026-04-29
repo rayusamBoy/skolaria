@@ -13,7 +13,7 @@
     <div class="card-body">
         <div class="row">
             <div class="col-12">
-                <form method="post" enctype="multipart/form-data" class="ajax-update" action="{{ route('book_requests.update', $book_request->id) }}" data-fouc>
+                <form method="post" enctype="multipart/form-data" class="ajax-update" action="{{ route('book_requests.update', Qs::hash($book_request->id)) }}">
                     @csrf @method('PUT')
                     <div class="row">
                         <input type="hidden" name="book_id" value="{{ $book_request->book_id }}">

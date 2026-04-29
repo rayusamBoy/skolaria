@@ -5,7 +5,7 @@
 @section('content')
 
 {{-- Query Print --}}
-@can($tenant_permissions['query_builders']['print_staff_data']['permission'])
+@can($tenant_permissions['query_builders']['print_users_data']['permission'])
 <div class="card card-collapsed">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded mr-2">print</i> Query Print</h6>
@@ -41,7 +41,7 @@
                     <div class="form-check">
                         <label class="form-check-label">
                             Landscape
-                            <input type="checkbox" name="paper_orientation" value="landscape" class="form-input-styled" data-fouc>
+                            <input type="checkbox" name="paper_orientation" value="landscape" class="form-input-styled">
                         </label>
                     </div>
                 </div>
@@ -207,7 +207,7 @@
                             @if($field==='photo')
                             <td><img src="{{ asset($record->$field) }}" width="60" height="60"></td>
                             @else
-                            <td>{{ Str::of($record->$field)->replace('"','') ?? '-' }}</td>
+                            <td>{{ Str::of($record->$field)->replace('"','') ?? '—' }}</td>
                             @endif
                             @endforeach
                         </tr>

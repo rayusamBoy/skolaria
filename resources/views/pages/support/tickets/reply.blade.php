@@ -44,7 +44,7 @@
                                             <label for="markdown-editor">Message <span class="text-danger">*</span></label>
                                             <div class="form-group row">
                                                 <div class="col-12">
-                                                    <div id="message-ticket-editor"></div>
+                                                    <div class="overtype-editor" data-ot-toolbar="true" data-ot-show-stats="true"></div>
                                                 </div>
                                             </div>
                                             <div class="form-group row float-right">

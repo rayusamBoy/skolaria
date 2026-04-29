@@ -7,7 +7,6 @@ use App\Models\ParentRelative;
 use App\Models\Section;
 use App\Models\Setting;
 use App\Models\StudentRecord;
-use App\Models\SubjectRecord;
 use DateTime;
 use Dompdf\Adapter\CPDF;
 use Hashids\Hashids;
@@ -190,7 +189,7 @@ class Qs
      */
     public static function userIsHead(?int $user_id = null): bool
     {
-        $user_id = $user_id ?? auth()->id();
+        $user_id ??= auth()->id();
         return \in_array($user_id, self::getHeadIds());
     }
 
@@ -312,16 +311,6 @@ class Qs
         return mb_strtoupper(implode('', $matches[0]));
     }
 
-    public static function findMyChildren($parent_id)
-    {
-        return StudentRecord::where('my_parent_id', $parent_id)->with(['user', 'my_class'])->get();
-    }
-
-    public static function findTeacherSubjectRecs($teacher_id)
-    {
-        return SubjectRecord::where('teacher_id', $teacher_id)->with('subject')->get();
-    }
-
     public static function findStudentRecord($user_id)
     {
         return StudentRecord::where('user_id', $user_id)->first();
@@ -329,6 +318,14 @@ class Qs
 
     public static function json($msg, $ok = TRUE, $arr = [])
     {
+        // Sometimes ie., using try-catch block, the json reponse is prepended by chars like 'aa'
+        // just before the json reponse return rendering it not json anymore.
+        // This may lead unexpected behaviour in the client side ie., response treated as failed even though
+        // the returned status code is 200. For example; during tenant creation.
+        // We clean the content of output buffer so as to ommit such scenarios
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
         return $arr ? response()->json($arr) : response()->json(['ok' => $ok, 'msg' => $msg]);
     }
 
@@ -399,26 +396,9 @@ class Qs
         return ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     }
 
-    public static function getExamAnnounces()
-    {
-        return ExamAnnounce::all();
-    }
-
-    public static function getExamAnnounce($exam_id)
-    {
-        return ExamAnnounce::where("exam_id", $exam_id)->orderBy("id", "desc")->first();
-    }
-
     public static function getValidExamAnnounces()
     {
         return ExamAnnounce::where("duration", ">=", time())->get();
-    }
-
-    public static function examAnnounceDurationIsValid(int $exam_id): bool
-    {
-        $exam_announce = self::getExamAnnounce($exam_id);
-        $diff_in_seconds = strtotime(date("Y-m-d H:i:s")) - strtotime($exam_announce->created_at);
-        return ($diff_in_seconds < $exam_announce->duration) ? true : false;
     }
 
     public static function onlyDateFormat($tiemestamp)
@@ -477,7 +457,7 @@ class Qs
                 "subjects.name as subject_name" => "full name",
                 "slug" => "short name",
                 "my_classes.name as class_name" => "class name",
-                "core" => "core"
+                "is_core" => "is core"
             ],
             "student_records" => [
                 "users.name as user" => "full name",
@@ -550,7 +530,7 @@ class Qs
             "exam_categories" => ["name" => "name"],
             "exams" => ["name" => "name", "term" => "term", "year" => "year"],
             "dorms" => ["name" => "name", "description" => "description"],
-            "class_types" => ["name" => "name", "code" => "code", "subjects_considered" => "subjects considered"],
+            "class_types" => ["name" => "name", "code" => "code", "minimum_subjects_required" => "subjects considered"],
             "my_classes" => ["name" => "name"],
             "books" => [
                 "name" => "name",
@@ -655,7 +635,7 @@ class Qs
             return;
         $data = file_get_contents($img_path, false);
 
-        $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        $base64 = "data:image/$type;base64," . base64_encode($data);
         return $base64;
     }
 
@@ -676,7 +656,7 @@ class Qs
     {
         $credential_file = storage_path('/app/public/' . self::getSetting('google_analytic_service_account_credential_file'));
 
-        return file_exists($credential_file) && self::getSetting('google_analytic_property_id') !== null && self::getSetting('google_analytic_tag_id') !== null && (int) self::getSetting('analytics_enabled') === 1;
+        return file_exists($credential_file) && self::getSetting('google_analytic_property_id') !== null && self::getSetting('google_analytic_tag_id') !== null && (bool) self::getSetting('analytics_enabled') === true;
     }
 
     public static function getSpatieAnalyticsPackagePeriods()

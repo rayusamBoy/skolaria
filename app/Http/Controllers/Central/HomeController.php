@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Central;
 use App\Http\Controllers\Controller;
 use App\Repositories\TenantRepo;
 use App\Repositories\UserRepo;
-use Illuminate\Http\Request as HttpReq;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    protected $user, $tenant;
+    protected UserRepo $user;
+    protected TenantRepo $tenant;
+
     public function __construct(UserRepo $user, TenantRepo $tenant)
     {
         $this->user = $user;
@@ -21,11 +23,11 @@ class HomeController extends Controller
         return redirect()->route('central_dashboard');
     }
 
-    public function dashboard(HttpReq $request)
+    public function dashboard(Request $request)
     {
-        $d['tenants'] = $this->tenant->getAll();
-        $d['users'] = $this->user->all();
+        $data['tenants'] = $this->tenant->getAll();
+        $data['users'] = $this->user->all();
 
-        return view('pages.central.dashboard', $d);
+        return view('pages.central.dashboard', $data);
     }
 }

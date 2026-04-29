@@ -46,7 +46,6 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
                 Route::post('publish/log-viewer', [CentralArtisanCommandsController::class, 'publish_log_viewer'])->name('artisan_commands.publish_log_viewer');
                 Route::post('clean/activity-logs', [CentralArtisanCommandsController::class, 'clean_activity_logs'])->name('logs.clean_activities');
                 Route::post('storage/link', [CentralArtisanCommandsController::class, 'storage_link'])->name('logs.storage_link');
-                Route::post('storage/unlink', [CentralArtisanCommandsController::class, 'storage_unlink'])->name('logs.storage_unlink');
             });
 
             /*************** Dashboard **************/

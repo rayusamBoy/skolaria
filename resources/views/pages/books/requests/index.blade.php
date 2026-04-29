@@ -23,7 +23,7 @@
 
             @can($tenant_permissions['book_requests']['store']['permission'])
             <li class="nav-item">
-                <a href="#new-request" class="nav-link" data-toggle="tab">Add a Request</a>
+                <a href="#new-request" class="nav-link" data-toggle="tab">Add Request</a>
             </li>
             @endcan
         </ul>
@@ -31,7 +31,7 @@
         <div class="tab-content">
             @can($tenant_permissions['book_requests']['store']['permission'])
             <div class="tab-pane fade" id="new-request">
-                <form method="post" enctype="multipart/form-data" class="ajax-store" action="{{ route('book_requests.store') }}" data-fouc>
+                <form method="post" enctype="multipart/form-data" class="ajax-store" action="{{ route('book_requests.store') }}">
                     @csrf
                     <div class="row">
                         {{-- Book --}}

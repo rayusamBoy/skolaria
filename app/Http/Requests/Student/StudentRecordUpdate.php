@@ -19,7 +19,7 @@ class StudentRecordUpdate extends FormRequest
 
     protected function getStudentIdIParam()
     {
-        return Usr::decodeHash($this->route('student'));
+        return $this->route('student');
     }
 
     /**
@@ -29,7 +29,7 @@ class StudentRecordUpdate extends FormRequest
      */
     protected function getUserIdInput()
     {
-        return $this->input('user_id') ? Usr::decodeHash($this->input('user_id')) : null;
+        return $this->input('user_id');
     }
 
     /**
@@ -93,7 +93,7 @@ class StudentRecordUpdate extends FormRequest
     {
         $input = $this->all();
 
-        $input['my_parent_id'] = $input['my_parent_id'] ? Usr::decodeHash($input['my_parent_id']) : NULL;
+        $input['my_parent_id'] = $input['my_parent_id'] ? Usr::decodeHash($input['my_parent_id']) : null;
 
         $this->getInputSource()->replace($input);
 
