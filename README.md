@@ -16,15 +16,16 @@ This project aims to provide a scalable and maintainable School Management Syste
 
 > We’re targeting the following improvements; feel free to pick one and contribute, or suggest yours if any!
 
-* [ ] Replace hard-coded user types with permission-based user roles.  
-  *(Largely Implemented using spatie/laravel-permission, with Gate::before for root roles and fine-grained regex-based role seeding. Remaining work: ensure all views and components are updated)*
+* [x] Replace hard-coded user types with permission-based user roles.  
 
-* [ ] Update the codebase to reflect the new user roles and permissions, including any necessary UI changes.  
-  *(largely done – the backend and seeders are refactored; UI permission checks updated. Remaining work: ensure all views and components are updated  to new structure.)*
+* [x] Update the codebase to reflect the new user roles and permissions, including any necessary UI changes.  
 
 * [x] Replace hard-coded UI css colors with CSS variables.
   
 * [x] Refactor routes into a more scalable and maintainable structure.
+  
+* [ ] Release version one of the application.  
+  *(In progress, with a few issues still being wrapped up.)*
 
 ## Quick Start
 
@@ -228,6 +229,14 @@ php artisan serve
     php artisan db:seed --class=DatabaseSeederNonTenancy
     ```
 
+    if you get an error like this: `Insufficient memory limit detected! Current: 128M, Recommended: 512M`
+    then increase your PHP memory limit in `php.ini` file and restart your server.
+    Or run the command with the increased memory limit:
+
+    ```bash
+    php -d memory_limit=512M artisan db:seed --class=DatabaseSeederNonTenancy
+    ```
+
 11. **(optional)**. If you have set the optional value for `VITE_VAPID_KEY`, you must also configure the Firebase [in this file](public/assets/js/firebase-config.js) and provide the Firebase service account credentials [in this file](storage/app/firebase/service-account-credentials.json). The app will work perfectly fine even if you do not set these values.
 12. **(optional)**. If you have set either or both of the options above, you must rebuild the node packages by running:
 
@@ -235,7 +244,7 @@ php artisan serve
     npm run build
     ```
 
-13. Start the `reverb` by running:
+13. You may start the `reverb` by running:
 
     ```bash
     php artisan reverb:start
