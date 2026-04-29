@@ -311,7 +311,6 @@ Please review the official [Laravel deployment guide](https://laravel.com/docs/1
     | Super Admin  | `superadmin` | `superadmin@sms.com` | `superadmin` |
     | Admin        | `admin`      | `admin@sms.com`      | `admin`      |
     | Teacher      | `teacher`    | `teacher@sms.com`    | `teacher`    |
-    | Companion    | `companion`  | `companion@sms.com`  | `companion`  |
     | Parent       | `parent`     | `parent@sms.com`     | `parent`     |
     | Accountant   | `accountant` | `accountant@sms.com` | `accountant` |
     | Librarian    | `librarian`  | `librarian@sms.com`  | `librarian`  |
