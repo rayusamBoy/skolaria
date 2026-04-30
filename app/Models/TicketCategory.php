@@ -10,6 +10,12 @@ class TicketCategory extends Model
 {
     use CentralConnection, MassUpdatable;
 
+    protected $fillable = ['name', 'description', 'is_visible'];
+
+    protected $casts = [
+        'is_visible' => 'boolean',
+    ];
+
     /**
      * The attributes that aren't mass assignable.
      *
