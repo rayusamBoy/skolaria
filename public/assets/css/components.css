@@ -5528,15 +5528,6 @@ a.disabled {
     border-radius: 0.175em;
 }
 
-.marks-converter .invalid-feedback > i {
-    padding-bottom: 0.15rem;
-    font-size: 14px;
-}
-
-.marks-converter .invalid-feedback {
-    font-size: 100%;
-}
-
 .w-1pcnt {
     width: 1%;
 }

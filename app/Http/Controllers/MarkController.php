@@ -1157,12 +1157,4 @@ class MarkController extends Controller
         }
         return $updates;
     }
-
-    /**
-     * Conversion view.
-     */
-    public function convert(): View
-    {
-        return view('pages.marks.convert');
-    }
 }

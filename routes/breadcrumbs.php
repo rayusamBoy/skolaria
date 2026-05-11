@@ -297,11 +297,6 @@ Breadcrumbs::for('marks.show', function (BreadcrumbTrail $trail, $id, $year): vo
     $trail->push('Student Marksheet', route('marks.show', [$id, $year]));
 });
 
-Breadcrumbs::for('marks.convert', function (BreadcrumbTrail $trail): void {
-    $trail->parent('dashboard');
-    $trail->push('Convert Exam Marks', route('marks.convert'));
-});
-
 // ----------------------------------------------------------------------
 // Assessments (Continuous Assessments)
 // ----------------------------------------------------------------------

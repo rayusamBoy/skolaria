@@ -262,7 +262,7 @@
                         @endcan
 
                         {{-- Marks (sub‑group) --}}
-                        @canany([$tenant_permissions['marks']['batch']['permission'], $tenant_permissions['marks']['manage']['permission'], $tenant_permissions['marks']['convert']['permission']])
+                        @canany([$tenant_permissions['marks']['batch']['permission'], $tenant_permissions['marks']['manage']['permission']])
                         <li class="nav-item nav-item-submenu {{ request()->routeIs('marks.*') ? 'nav-item-expanded' : '' }}">
                             <a href="#" class="nav-link {{ request()->routeIs('marks.*') ? 'active' : '' }}">
                                 Marks
@@ -276,11 +276,6 @@
                                 @can($tenant_permissions['marks']['manage']['permission'])
                                 <li class="nav-item">
                                     <a href="{{ route('marks.manage') }}" class="nav-link {{ request()->routeIs('marks.selector','marks.manage') ? 'active' : '' }}">Manage</a>
-                                </li>
-                                @endcan
-                                @can($tenant_permissions['marks']['convert']['permission'])
-                                <li class="nav-item">
-                                    <a href="{{ route('marks.convert') }}" class="nav-link {{ request()->routeIs('marks.convert') ? 'active' : '' }}">Convert</a>
                                 </li>
                                 @endcan
                             </ul>

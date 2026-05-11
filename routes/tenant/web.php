@@ -253,7 +253,6 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             Route::post('tabulation/select', [MarkController::class, 'tabulation_select'])->name('marks.tabulation_select');
             Route::get('tabulation/print/{exam}/{class}/{section?}/{year?}', [MarkController::class, 'print_tabulation'])->name('marks.print_tabulation');
 
-            Route::get('convert', [MarkController::class, 'convert'])->name('marks.convert');
             Route::get('manage/{exam?}/{class?}/{subject?}/{section?}/{selected?}', [MarkController::class, 'manage'])->name('marks.manage');
             Route::put('update/{exam}/{class}/{subject}/{section?}', [MarkController::class, 'update'])->name('marks.update');
             Route::put('comment/{exr_id}', [MarkController::class, 'comment_update'])->name('marks.comment_update');

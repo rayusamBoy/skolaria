@@ -500,11 +500,6 @@ return [
                     'label' => 'Update Marks Comments',
                     'description' => 'Add or edit comments on marks.',
                 ],
-                'convert' => [
-                    'permission' => 'marks.convert',
-                    'label' => 'Convert Marks',
-                    'description' => 'Convert marks between formats or grading systems.',
-                ],
                 'manage' => [
                     'permission' => 'marks.manage',
                     'label' => 'Manage Marks',
