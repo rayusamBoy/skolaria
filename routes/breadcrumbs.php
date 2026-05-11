@@ -1,617 +1,676 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Helpers\Qs;
-use App\Repositories\PaymentRepo;
 use App\Repositories\StudentRepo;
 use App\Repositories\TimeTableRepo;
 use Diglactic\Breadcrumbs\Breadcrumbs;
 use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
 
-Breadcrumbs::for('index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+// Common Home / Dashboard
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('index', function (BreadcrumbTrail $trail): void {
     $trail->push('Home', route('index'));
 });
 
-Breadcrumbs::for('home', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('home', function (BreadcrumbTrail $trail): void {
     $trail->push('Home', route('home'));
 });
 
-Breadcrumbs::for('dashboard', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('dashboard', function (BreadcrumbTrail $trail): void {
     $trail->push('Dashboard', route('dashboard'));
 });
 
-Breadcrumbs::for('central_index', function (BreadcrumbTrail $trail) {
+// Central home / dashboard
+Breadcrumbs::for('central_index', function (BreadcrumbTrail $trail): void {
     $trail->push('Home', route('central_index'));
 });
 
-Breadcrumbs::for('central_home', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('central_home', function (BreadcrumbTrail $trail): void {
     $trail->push('Home', route('central_home'));
 });
 
-Breadcrumbs::for('central_dashboard', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('central_dashboard', function (BreadcrumbTrail $trail): void {
     $trail->push('Dashboard', route('central_dashboard'));
 });
 
-// 2fa (two factor authentication (google)) 
-Breadcrumbs::for('account_security.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+// Account & Security
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('account_security.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Account Security', route('account_security.index'));
 });
 
-// My Account 
-Breadcrumbs::for('my_account.edit', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('my_account.edit', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('My Account', route('my_account.edit'));
 });
 
-Breadcrumbs::for('my_account.update', function (BreadcrumbTrail $trail) {
-    $trail->parent('my_account');
+Breadcrumbs::for('my_account.update', function (BreadcrumbTrail $trail): void {
+    $trail->parent('my_account.edit');
     $trail->push('Update', route('my_account.update'));
 });
 
-Breadcrumbs::for('my_account.change_pass', function (BreadcrumbTrail $trail) {
-    $trail->parent('my_account');
+Breadcrumbs::for('my_account.change_pass', function (BreadcrumbTrail $trail): void {
+    $trail->parent('my_account.edit');
     $trail->push('Change Password', route('my_account.change_pass'));
 });
 
+// ----------------------------------------------------------------------
 // Students
-Breadcrumbs::for('students.create', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('students.create', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Admit Student', route('students.create'));
 });
 
-Breadcrumbs::for('students.index', function (BreadcrumbTrail $trail) {
-    $trail->parent('dashboard');
-    $trail->push('Admit Student', route('students.index'));
-});
-
-Breadcrumbs::for('students.list_by_class', function (BreadcrumbTrail $trail, $class_id) {
+Breadcrumbs::for('students.list_by_class', function (BreadcrumbTrail $trail, $class_id): void {
     $trail->parent('dashboard');
     $trail->push('Students List', route('students.list_by_class', $class_id));
 });
 
-Breadcrumbs::for('students.password.reset', function (BreadcrumbTrail $trail, $st_id) {
+Breadcrumbs::for('students.password.reset', function (BreadcrumbTrail $trail, $st_id): void {
     $trail->parent('dashboard');
     $trail->push('Reset Student Password', route('students.password.reset', $st_id));
 });
 
-Breadcrumbs::for('students.graduated', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('students.graduated', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Graduated Students', route('students.graduated'));
 });
 
-Breadcrumbs::for('students.id_cards', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('students.id_cards', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Students ID Cards', route('students.id_cards'));
 });
 
-Breadcrumbs::for('students.id_cards.manage', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('students.id_cards.manage', function (BreadcrumbTrail $trail): void {
     $trail->parent('students.id_cards');
     $trail->push('Manage Students ID Cards', route('students.id_cards.manage'));
 });
 
-Breadcrumbs::for('students.show', function (BreadcrumbTrail $trail, $student) {
-    $class_id = StudentRepo::getRecordValue(['id' => $student], 'my_class_id');
-    if (auth()->user()->hasExactRoles([config('roles.default_roles.tenant.parent')])) {
-        $trail->parent('parent.my_children');
-    } else {
-        $trail->parent('students.list_by_class', $class_id);
-    }
-    $trail->push('Profile View', route('students.show', $student));
+Breadcrumbs::for('students.show', function (BreadcrumbTrail $trail, $student): void {
+    $class_id = StudentRepo::getStudentRecordColumn(['id' => $student], 'my_class_id');
+    $trail->parent(
+        auth()->user()->hasExactRoles([config('roles.default_roles.tenant.parent')])
+        ? 'parent.my_children'
+        : 'students.list_by_class',
+        $class_id
+    );
+    $trail->push('View Student Profile', route('students.show', $student));
 });
 
-Breadcrumbs::for('students.edit', function (BreadcrumbTrail $trail, $student) {
-    $class_id = StudentRepo::getRecordValue(['id' => $student], 'my_class_id');
+Breadcrumbs::for('students.edit', function (BreadcrumbTrail $trail, $student): void {
+    $class_id = StudentRepo::getStudentRecordColumn(['id' => $student], 'my_class_id');
     $trail->parent('students.list_by_class', $class_id);
-    $trail->push('Profile Edit', route('students.edit', $student));
+    $trail->push('Edit Student Profile', route('students.edit', $student));
 });
 
-Breadcrumbs::for('students.promotion', function (BreadcrumbTrail $trail, $student) {
+Breadcrumbs::for('students.promotion', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
-    $trail->push('Promote Student', route('students.promotion', $student));
+    $trail->push('Promote Student', route('students.promotion'));
 });
 
-Breadcrumbs::for('students.promotion.manage', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('students.promotion.manage', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
-    $trail->push('Manage Promotion', route('students.promotion.manage'));
+    $trail->push('Manage Promotions', route('students.promotion.manage'));
 });
 
+// ----------------------------------------------------------------------
 // Users
-Breadcrumbs::for('users.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('users.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Manage Users', route('users.index'));
 });
 
-Breadcrumbs::for('users.edit', function (BreadcrumbTrail $trail, $user) {
+Breadcrumbs::for('users.edit', function (BreadcrumbTrail $trail, $user): void {
     $trail->parent('users.index');
     $trail->push('Edit User Details', route('users.edit', $user));
 });
 
-Breadcrumbs::for('users.show', function (BreadcrumbTrail $trail, $user) {
+Breadcrumbs::for('users.show', function (BreadcrumbTrail $trail, $user): void {
     $trail->parent('users.index');
     $trail->push('View User Profile', route('users.show', $user));
 });
 
-// Central Users
-Breadcrumbs::for('central_users.index', function (BreadcrumbTrail $trail) {
-    $trail->parent('dashboard');
+// Central users
+Breadcrumbs::for('central_users.index', function (BreadcrumbTrail $trail): void {
+    $trail->parent('central_dashboard');
     $trail->push('Manage Users', route('central_users.index'));
 });
 
-Breadcrumbs::for('central_users.edit', function (BreadcrumbTrail $trail, $user) {
+Breadcrumbs::for('central_users.edit', function (BreadcrumbTrail $trail, $user): void {
     $trail->parent('central_users.index');
     $trail->push('Edit User Details', route('central_users.edit', $user));
 });
 
-Breadcrumbs::for('central_users.show', function (BreadcrumbTrail $trail, $user) {
+Breadcrumbs::for('central_users.show', function (BreadcrumbTrail $trail, $user): void {
     $trail->parent('central_users.index');
     $trail->push('View User Profile', route('central_users.show', $user));
 });
 
-// Classes
-Breadcrumbs::for('classes.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+// Classes / Dorms / Sections / Class Types
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('classes.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Manage Classes', route('classes.index'));
 });
 
-Breadcrumbs::for('classes.edit', function (BreadcrumbTrail $trail, $class) {
+Breadcrumbs::for('classes.edit', function (BreadcrumbTrail $trail, $class): void {
     $trail->parent('classes.index');
     $trail->push('Edit Class', route('classes.edit', $class));
 });
 
-// Dorms
-Breadcrumbs::for('dorms.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('dorms.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Manage Dorms', route('dorms.index'));
 });
 
-Breadcrumbs::for('dorms.edit', function (BreadcrumbTrail $trail, $dorm) {
+Breadcrumbs::for('dorms.edit', function (BreadcrumbTrail $trail, $dorm): void {
     $trail->parent('dorms.index');
     $trail->push('Edit Dorm', route('dorms.edit', $dorm));
 });
 
-// Sections
-Breadcrumbs::for('sections.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('sections.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Manage Class Sections', route('sections.index'));
 });
 
-Breadcrumbs::for('sections.edit', function (BreadcrumbTrail $trail, $section) {
+Breadcrumbs::for('sections.edit', function (BreadcrumbTrail $trail, $section): void {
     $trail->parent('sections.index');
     $trail->push('Edit Section', route('sections.edit', $section));
 });
 
-// Class Types
-Breadcrumbs::for('class_types.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('class_types.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Manage Class Types', route('class_types.index'));
 });
 
-Breadcrumbs::for('class_types.edit', function (BreadcrumbTrail $trail, $class_type) {
+Breadcrumbs::for('class_types.edit', function (BreadcrumbTrail $trail, $class_type): void {
     $trail->parent('class_types.index');
     $trail->push('Edit Class Type', route('class_types.edit', $class_type));
 });
 
+// ----------------------------------------------------------------------
 // Subjects
-Breadcrumbs::for('subjects.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('subjects.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Manage Subjects', route('subjects.index'));
 });
 
-Breadcrumbs::for('subject_records.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('subject_records.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Manage Subject Records', route('subject_records.index'));
 });
 
-Breadcrumbs::for('subjects.edit', function (BreadcrumbTrail $trail, $subject) {
+Breadcrumbs::for('subjects.edit', function (BreadcrumbTrail $trail, $subject): void {
     $trail->parent('subjects.index');
     $trail->push('Edit Subject', route('subjects.edit', $subject));
 });
 
-Breadcrumbs::for('subject_records.edit', function (BreadcrumbTrail $trail, $subject) {
+Breadcrumbs::for('subject_records.edit', function (BreadcrumbTrail $trail, $subject): void {
     $trail->parent('subject_records.index');
     $trail->push('Edit Subject Record', route('subject_records.edit', $subject));
 });
 
-// Exams
-Breadcrumbs::for('exams.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+// Exams / Grades / Divisions
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('exams.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Manage Exams', route('exams.index'));
 });
 
-Breadcrumbs::for('exams.edit', function (BreadcrumbTrail $trail, $exam) {
+Breadcrumbs::for('exams.edit', function (BreadcrumbTrail $trail, $exam): void {
     $trail->parent('exams.index');
     $trail->push('Edit Exam', route('exams.edit', $exam));
 });
 
-// Grades
-Breadcrumbs::for('grades.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('grades.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Manage Grades', route('grades.index'));
 });
 
-Breadcrumbs::for('grades.edit', function (BreadcrumbTrail $trail, $exam) {
+Breadcrumbs::for('grades.edit', function (BreadcrumbTrail $trail, $grade): void {
     $trail->parent('grades.index');
-    $trail->push('Edit Grade', route('grades.edit', $exam));
+    $trail->push('Edit Grade', route('grades.edit', $grade));
 });
 
-// Divisions
-Breadcrumbs::for('divisions.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('divisions.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Manage Divisions', route('divisions.index'));
 });
 
-Breadcrumbs::for('divisions.edit', function (BreadcrumbTrail $trail, $exam) {
+Breadcrumbs::for('divisions.edit', function (BreadcrumbTrail $trail, $division): void {
     $trail->parent('divisions.index');
-    $trail->push('Edit Division', route('divisions.edit', $exam));
+    $trail->push('Edit Division', route('divisions.edit', $division));
 });
 
+// ----------------------------------------------------------------------
 // Marks
-Breadcrumbs::for('marks.tabulation', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('marks.tabulation', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Tabulation Sheet', route('marks.tabulation'));
 });
 
-Breadcrumbs::for('marks.batch', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('marks.batch', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Manage Batch Marks', route('marks.batch'));
 });
 
-Breadcrumbs::for('marks.manage', function (BreadcrumbTrail $trail, $exam, $class, $section, $subject) {
+Breadcrumbs::for('marks.manage', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
-    $trail->push('Manage Exam Marks', route('marks.selector', [$exam, $section, $subject, $class]));
+    $trail->push('Manage Exam Marks', route('marks.manage'));
 });
 
-Breadcrumbs::for('marks.sheets', function (BreadcrumbTrail $trail, $class, $section) {
+Breadcrumbs::for('marks.sheets', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
-    $trail->push('Select Student Marksheet', route('marks.sheets', [$class, $section]));
+    $trail->push('Student Marksheet', route('marks.sheets'));
 });
 
-Breadcrumbs::for('marks.sheets_select', function (BreadcrumbTrail $trail) {
-    $trail->parent('dashboard');
-    $trail->push('Select Student Marksheet', route('marks.sheets_select'));
+Breadcrumbs::for('marks.year_selector', function (BreadcrumbTrail $trail, $id): void {
+    $trail->parent(
+        auth()->user()->hasExactRoles([config('roles.default_roles.tenant.parent')])
+        ? 'parent.my_children'
+        : 'dashboard'
+    );
+    $trail->push('Select Year', route('marks.year_selector', $id));
 });
 
-Breadcrumbs::for('marks.year_selector', function (BreadcrumbTrail $trail, $id) {
-    if (auth()->user()->hasExactRoles([config('roles.default_roles.tenant.parent')])) {
-        $trail->parent('parent.my_children');
-    } else {
-        $trail->parent('marks.sheets_select');
-    }
-    $trail->push('Select Exam Year', route('marks.year_selector', $id));
+Breadcrumbs::for('marks.show', function (BreadcrumbTrail $trail, $id, $year): void {
+    $trail->parent('marks.year_selector', Qs::hash($id));
+    $trail->push('Student Marksheet', route('marks.show', [$id, $year]));
 });
 
-Breadcrumbs::for('marks.show', function (BreadcrumbTrail $trail, $id, $year) {
-    $sid = Qs::hash($id);
-    $trail->parent('marks.year_selector', $sid);
-    $trail->push('Student Marksheet', route('marks.manage'));
-});
-
-Breadcrumbs::for('marks.convert', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('marks.convert', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Convert Exam Marks', route('marks.convert'));
 });
 
-// Continous Assessments
-Breadcrumbs::for('assessments.list', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+// Assessments (Continuous Assessments)
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('assessments.list', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
-    $trail->push('Continous Assessments List', route('assessments.list'));
+    $trail->push('Assessments List', route('assessments.list'));
 });
 
-Breadcrumbs::for('assessments.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('assessments.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
-    $trail->push('Select Continous Assessments', route('assessments.index'));
+    $trail->push('Manage Assessments', route('assessments.index'));
 });
 
-Breadcrumbs::for('assessments.manage', function (BreadcrumbTrail $trail, $exam, $class, $section, $subject) {
+Breadcrumbs::for('assessments.manage', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
-    $trail->push('Select Continous Assessments', route('assessments.selector', [$exam, $section, $subject, $class]));
+    $trail->push('Assessments Management', route('assessments.manage'));
 });
 
-Breadcrumbs::for('assessments.progressive', function (BreadcrumbTrail $trail, $exam = null, $class = null, $sec_id = null) {
+Breadcrumbs::for('assessments.progressive', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
-    $trail->push('Progressive Sheet', route('assessments.progressive', [$exam, $sec_id, $class]));
+    $trail->push('Progressive Sheet', route('assessments.progressive'));
 });
 
-Breadcrumbs::for('assessments.sheets', function (BreadcrumbTrail $trail, $class, $section) {
+Breadcrumbs::for('assessments.sheets', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
-    $trail->push('Select Student Assessmentsheet', route('assessments.sheets', [$class, $section]));
+    $trail->push('Assessment Sheet', route('assessments.sheets'));
 });
 
-Breadcrumbs::for('assessments.sheets_select', function (BreadcrumbTrail $trail) {
-    $trail->parent('dashboard');
-    $trail->push('Select Student Assessmentsheet', route('assessments.sheets_select'));
+Breadcrumbs::for('assessments.year_selector', function (BreadcrumbTrail $trail, $id): void {
+    $trail->parent(
+        auth()->user()->hasExactRoles([config('roles.default_roles.tenant.parent')])
+        ? 'parent.my_children'
+        : 'dashboard'
+    );
+    $trail->push('Select Year', route('assessments.year_selector', $id));
 });
 
-Breadcrumbs::for('assessments.year_selector', function (BreadcrumbTrail $trail, $id) {
-    if (auth()->user()->hasExactRoles([config('roles.default_roles.tenant.parent')])) {
-        $trail->parent('parent.my_children');
-    } else {
-        $trail->parent('assessments.sheets_select');
-    }
-    $trail->push('Select Exam Year', route('assessments.year_selector', $id));
+Breadcrumbs::for('assessments.show', function (BreadcrumbTrail $trail, $id, $year): void {
+    $trail->parent('assessments.year_selector', Qs::hash($id));
+    $trail->push('Assessment Sheet', route('assessments.show', [$id, $year]));
 });
 
-Breadcrumbs::for('assessments.show', function (BreadcrumbTrail $trail, $id, $year) {
-    $sid = Qs::hash($id);
-    $trail->parent('assessments.year_selector', $sid);
-    $trail->push('Student Assessmentsheet', route('assessments.index', [$id, $year]));
-});
-
+// ----------------------------------------------------------------------
 // Settings
-Breadcrumbs::for('settings.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('settings.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
-    $trail->push('Manage Sytem Settings', route('settings.index'));
+    $trail->push('System Settings', route('settings.index'));
 });
 
-Breadcrumbs::for('settings_non_tenancy.index', function (BreadcrumbTrail $trail) {
-    $trail->parent('dashboard');
-    $trail->push('Manage Sytem Settings', route('settings_non_tenancy.index'));
+Breadcrumbs::for('settings_non_tenancy.index', function (BreadcrumbTrail $trail): void {
+    $trail->parent('central_dashboard');
+    $trail->push('System Settings', route('settings_non_tenancy.index'));
 });
 
-// Timetable
-Breadcrumbs::for('timetables.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+// Timetables & Time Slots
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('timetables.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Manage Timetables', route('timetables.index'));
 });
 
-Breadcrumbs::for('ttr.show', function (BreadcrumbTrail $trail, $ttr) {
+Breadcrumbs::for('ttr.show', function (BreadcrumbTrail $trail, $ttr): void {
     $trail->parent('timetables.index');
     $trail->push('View Timetable', route('ttr.show', $ttr));
 });
 
-Breadcrumbs::for('ttr.edit', function (BreadcrumbTrail $trail, $ttr) {
+Breadcrumbs::for('ttr.edit', function (BreadcrumbTrail $trail, $ttr): void {
     $trail->parent('timetables.index');
     $trail->push('Edit Timetable', route('ttr.edit', $ttr));
 });
 
-Breadcrumbs::for('ttr.manage', function (BreadcrumbTrail $trail, $ttr) {
+Breadcrumbs::for('ttr.manage', function (BreadcrumbTrail $trail, $ttr): void {
     $trail->parent('timetables.index');
     $trail->push('Manage Timetable Record', route('ttr.manage', $ttr));
 });
 
-//Payments
-Breadcrumbs::for('payments.create', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('ts.edit', function (BreadcrumbTrail $trail, $ts_id): void {
+    $timeTableRepo = new TimeTableRepo;
+    $ttr_id = $timeTableRepo->findTimeSlot($ts_id)->ttr_id;
+    $trail->parent('ttr.manage', $ttr_id);
+    $trail->push('Edit Time Slot', route('ts.edit', $ts_id));
+});
+
+// ----------------------------------------------------------------------
+// Payments
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('payments.create', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
     $trail->push('Create Payment', route('payments.create'));
 });
 
-Breadcrumbs::for('payments.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('payments.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
-    $trail->push('Select Payments Year', route('payments.index'));
+    $trail->push('Payments', route('payments.index'));
 });
 
-Breadcrumbs::for('payments.show', function (BreadcrumbTrail $trail, $payment) {
+Breadcrumbs::for('payments.show', function (BreadcrumbTrail $trail, $payment): void {
     $trail->parent('payments.index');
-    $trail->push('Manage Payments', route('payments.show', $payment));
+    $trail->push('Payments Details', route('payments.show', $payment));
 });
 
-Breadcrumbs::for('payments.edit', function (BreadcrumbTrail $trail, $payment) {
+Breadcrumbs::for('payments.edit', function (BreadcrumbTrail $trail, $payment): void {
     $trail->parent('payments.index');
     $trail->push('Edit Payment', route('payments.edit', $payment));
 });
 
-Breadcrumbs::for('payments.manage', function (BreadcrumbTrail $trail, $class_id) {
+Breadcrumbs::for('payments.manage', function (BreadcrumbTrail $trail, $class_id): void {
     $trail->parent('dashboard');
     $trail->push('Student Payments', route('payments.manage', $class_id));
 });
 
-Breadcrumbs::for('payments.invoice', function (BreadcrumbTrail $trail, $payment_id, $year) {
-    $class_id = PaymentRepo::getRecordValue($payment_id, 'my_class_id');
-    $trail->parent('payments.manage', $class_id);
-    $trail->push('Manage Payments', route('payments.invoice', [$payment_id, $year]));
+Breadcrumbs::for('payments.invoice', function (BreadcrumbTrail $trail, $student_id, $year): void {
+    $trail->parent('payments.manage');
+    $trail->push('Student Invoice', route('payments.invoice', [$student_id, $year]));
 });
 
-Breadcrumbs::for('payments.status', function (BreadcrumbTrail $trail, $payment_id, $year) {
+Breadcrumbs::for('payments.status', function (BreadcrumbTrail $trail, $student_id, $year): void {
     $trail->parent('parent.my_children');
-    $trail->push('Payments Status', route('payments.status', [$payment_id, $year]));
+    $trail->push('Payment Status', route('payments.status', [$student_id, $year]));
 });
 
+// ----------------------------------------------------------------------
 // Pins
-Breadcrumbs::for('pins.create', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('pins.create', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
-    $trail->push('Create Pins', route('pins.create'));
+    $trail->push('Generate Pins', route('pins.create'));
 });
 
-Breadcrumbs::for('pins.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('pins.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('pins.create');
-    $trail->push('Pins', route('pins.index'));
+    $trail->push('View Pins', route('pins.index'));
 });
 
-Breadcrumbs::for('pins.enter', function (BreadcrumbTrail $trail, $sid) {
+Breadcrumbs::for('pins.enter', function (BreadcrumbTrail $trail, $sid): void {
     $trail->parent('marks.year_selector', Qs::hash($sid));
     $trail->push('Enter Pin', route('pins.enter', $sid));
 });
 
-// Children
-Breadcrumbs::for('parent.my_children', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+// Children / Parent
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('parent.my_children', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('My Children', route('parent.my_children'));
 });
 
-// Time Slots
-Breadcrumbs::for('ts.edit', function (BreadcrumbTrail $trail, $ts_id) {
-    $time_table = new TimeTableRepo;
-    $ttr_id = $time_table->findTimeSlot($ts_id)->ttr_id;
-    $trail->parent('ttr.manage', $ttr_id);
-    $trail->push('Edit Time Slots', route('ts.edit', $ts_id));
-});
+// ----------------------------------------------------------------------
+// Bin / Statistics / Analytics
+// ----------------------------------------------------------------------
 
-// Bin
-Breadcrumbs::for('bin', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('bin', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Recycle Bin', route('bin'));
 });
 
-// Statistics
-Breadcrumbs::for('statistics.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('statistics.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Statistics', route('statistics.index'));
 });
 
-// Analytics
-Breadcrumbs::for('analytics.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('analytics.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Analytics', route('analytics.index'));
 });
 
-Breadcrumbs::for('analytics.fetch_data', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('analytics.fetch_data', function (BreadcrumbTrail $trail): void {
     $trail->parent('analytics.index');
-    $trail->push('Data', route('analytics.fetch_data'));
+    $trail->push('Analytics Data', route('analytics.fetch_data'));
 });
 
-// Schedule
-Breadcrumbs::for('schedule.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+// Schedule / Events
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('schedule.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Schedule', route('schedule.index'));
 });
 
-Breadcrumbs::for('events.manage', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('events.manage', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Manage Events', route('events.manage'));
 });
 
-Breadcrumbs::for('events.edit', function (BreadcrumbTrail $trail, $event_id) {
+Breadcrumbs::for('events.edit', function (BreadcrumbTrail $trail, $event_id): void {
     $trail->parent('home');
     $trail->push('Edit Event', route('events.edit', $event_id));
 });
 
-// Artisan Commands
-Breadcrumbs::for('artisan_commands.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+// Artisan Commands / Query Builder
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('artisan_commands.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Artisan Commands', route('artisan_commands.index'));
 });
 
-// Query Builder
-Breadcrumbs::for('query_builder.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('query_builder.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Query Builder', route('query_builder.index'));
 });
 
-Breadcrumbs::for('query_builder.select', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('query_builder.select', function (BreadcrumbTrail $trail): void {
     $trail->parent('query_builder.index');
     $trail->push('Query Results', route('query_builder.select'));
 });
 
+// ----------------------------------------------------------------------
 // Notices
-Breadcrumbs::for('notices.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('notices.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Notices', route('notices.index'));
 });
 
-Breadcrumbs::for('notices.edit', function (BreadcrumbTrail $trail, $notice_id) {
+Breadcrumbs::for('notices.edit', function (BreadcrumbTrail $trail, $notice_id): void {
     $trail->parent('notices.index');
-    $trail->push('Edit', route('notices.edit', $notice_id));
+    $trail->push('Edit Notice', route('notices.edit', $notice_id));
 });
 
+// ----------------------------------------------------------------------
 // Messages
-Breadcrumbs::for('messages', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('messages', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Messages', route('messages'));
 });
 
-Breadcrumbs::for('messages.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('messages.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Messages', route('messages.index'));
 });
 
-Breadcrumbs::for('messages.show', function (BreadcrumbTrail $trail, $message_id) {
+Breadcrumbs::for('messages.show', function (BreadcrumbTrail $trail, $message_id): void {
     $trail->parent('messages.index');
-    $trail->push('Show', route('messages.show', $message_id));
+    $trail->push('View Thread(s)', route('messages.show', $message_id));
 });
 
-Breadcrumbs::for('messages.create', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('messages.create', function (BreadcrumbTrail $trail): void {
     $trail->parent('messages.index');
-    $trail->push('Create', route('messages.create'));
+    $trail->push('New Message', route('messages.create'));
 });
 
-// LOGS HISTORIES
-Breadcrumbs::for('logs.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+// Logs (tenant & central)
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('logs.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Manage Logs', route('logs.index'));
 });
 
-Breadcrumbs::for('central_logs.index', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
+Breadcrumbs::for('central_logs.index', function (BreadcrumbTrail $trail): void {
+    $trail->parent('central_dashboard');
     $trail->push('Manage Logs', route('central_logs.index'));
 });
 
+// ----------------------------------------------------------------------
 // Books
-Breadcrumbs::for('books.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('books.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Manage Books', route('books.index'));
 });
 
-Breadcrumbs::for('book_requests.index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('books.edit', function (BreadcrumbTrail $trail, $book_id): void {
+    $trail->parent('books.index');
+    $trail->push('Edit Book', route('books.edit', $book_id));
+});
+
+Breadcrumbs::for('books.show', function (BreadcrumbTrail $trail, $book_id): void {
+    $trail->parent('books.index');
+    $trail->push('Book Details', route('books.show', $book_id));
+});
+
+Breadcrumbs::for('book_requests.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Manage Book Requests', route('book_requests.index'));
 });
 
-Breadcrumbs::for('books.edit', function (BreadcrumbTrail $trail, $book_id) {
-    $trail->parent('books.index');
-    $trail->push('Edit a Book', route('books.edit', $book_id));
-});
-
-Breadcrumbs::for('book_requests.edit', function (BreadcrumbTrail $trail, $book_req_id) {
+Breadcrumbs::for('book_requests.edit', function (BreadcrumbTrail $trail, $book_req_id): void {
     $trail->parent('book_requests.index');
-    $trail->push('Edit Book Request', route('book_requests.edit', $book_req_id));
+    $trail->push('Edit Request', route('book_requests.edit', $book_req_id));
 });
 
+// ----------------------------------------------------------------------
 // Tenants
-Breadcrumbs::for('tenants.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('tenants.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Manage Tenants', route('tenants.index'));
 });
 
-Breadcrumbs::for('tenants.edit', function (BreadcrumbTrail $trail, $tenant_id) {
+Breadcrumbs::for('tenants.edit', function (BreadcrumbTrail $trail, $tenant_id): void {
     $trail->parent('tenants.index');
     $trail->push('Edit Tenant', route('tenants.edit', $tenant_id));
 });
 
-Breadcrumbs::for('tenants.show', function (BreadcrumbTrail $trail, $tenant_id) {
+Breadcrumbs::for('tenants.show', function (BreadcrumbTrail $trail, $tenant_id): void {
     $trail->parent('tenants.index');
     $trail->push('View Tenant', route('tenants.show', $tenant_id));
 });
 
+// ----------------------------------------------------------------------
 // Notifications
-Breadcrumbs::for('notifications.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('notifications.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Manage Notifications', route('notifications.index'));
 });
 
-// Tickets
-Breadcrumbs::for('tickets.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+// Tickets (tenant & central)
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('tickets.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Support Tickets', route('tickets.index'));
 });
 
-Breadcrumbs::for('tickets.index_central', function (BreadcrumbTrail $trail) {
-    $trail->parent('home');
+Breadcrumbs::for('tickets.index_central', function (BreadcrumbTrail $trail): void {
+    $trail->parent('central_dashboard');
     $trail->push('Manage Tickets', route('tickets.index_central'));
 });
 
-Breadcrumbs::for('tickets.reply', function (BreadcrumbTrail $trail, $ticket_id) {
+Breadcrumbs::for('tickets.reply', function (BreadcrumbTrail $trail, $ticket_id): void {
     $trail->parent('tickets.index');
-    $trail->push('Ticket', route('tickets.reply', $ticket_id));
+    $trail->push('Ticket Reply', route('tickets.reply', $ticket_id));
 });
 
-Breadcrumbs::for('tickets.answer', function (BreadcrumbTrail $trail, $ticket_id) {
+Breadcrumbs::for('tickets.answer', function (BreadcrumbTrail $trail, $ticket_id): void {
     $trail->parent('tickets.index_central');
-    $trail->push('Ticket', route('tickets.answer', $ticket_id));
+    $trail->push('Ticket Answer', route('tickets.answer', $ticket_id));
 });
 
+// ----------------------------------------------------------------------
 // Roles
-Breadcrumbs::for('roles.index', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('roles.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Manage Roles', route('roles.index'));
 });
 
-Breadcrumbs::for('roles.edit', function (BreadcrumbTrail $trail, $role_id) {
+Breadcrumbs::for('roles.edit', function (BreadcrumbTrail $trail, $role_id): void {
     $trail->parent('roles.index');
     $trail->push('Edit Role', route('roles.edit', $role_id));
 });
 
-// TEST
-Breadcrumbs::for('test', function (BreadcrumbTrail $trail) {
+// ----------------------------------------------------------------------
+// Test (debugging)
+// ----------------------------------------------------------------------
+
+Breadcrumbs::for('test', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
     $trail->push('Test', route('test'));
 });
