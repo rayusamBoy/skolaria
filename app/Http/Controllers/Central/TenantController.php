@@ -29,15 +29,15 @@ class TenantController extends Controller
      */
     public function index()
     {
-        $data["tenants"] = $this->tenant->getAll();
-        $data["user_roles"] = $this->user->getRoles();
+        $data["tenants"] = $this->tenant->getAllTenants();
+        $data["user_roles"] = $this->user->getRolesByName();
 
         return view("pages.central.tenants.index", $data);
     }
 
     public function show($tenant)
     {
-        $data["tenant"] = $this->tenant->find($tenant);
+        $data["tenant"] = $this->tenant->findTenant($tenant);
 
         return view("pages.central.tenants.show", $data);
     }
@@ -52,8 +52,9 @@ class TenantController extends Controller
         $creation_error = $domain_error = $tenant = null;
 
         try {
-            $tenant = $this->tenant->create($data);
+            $tenant = $this->tenant->createTenant($data);
         } catch (\Throwable $t) {
+            logger()->error('err', ['fs'=> $t]);
             $creation_error = $t->getMessage();
         }
 
@@ -79,10 +80,10 @@ class TenantController extends Controller
 
         if ($creation_error || $domain_error) {
             Log::error("Errors during tenant creation process: ", $errors);
-            return Qs::json(null, null, ['msg' => implode(", ", $errors), 'ok' => false, 'pop' => true, 'pop_timer' => 0]);
+            return Qs::json(msg: "", arr: ['msg' => implode(", ", $errors), 'ok' => false, 'pop' => true, 'pop_timer' => 0]);
         }
 
-        return Qs::json(null, null, ['msg' => __('msg.store_ok'), 'ok' => true, 'pop' => true, 'pop_timer' => 0]);
+        return Qs::json(msg: "", arr: ['msg' => __('msg.store_ok'), 'ok' => true, 'pop' => true, 'pop_timer' => 0]);
     }
 
     /**
@@ -90,7 +91,7 @@ class TenantController extends Controller
      */
     public function edit($tenant)
     {
-        $data["tenant"] = $this->tenant->find($tenant);
+        $data["tenant"] = $this->tenant->findTenant($tenant);
 
         return view("pages.central.tenants.edit", $data);
     }
@@ -100,7 +101,7 @@ class TenantController extends Controller
      */
     public function update(TenantRequest $request, $tenant)
     {
-        $tenant = $this->tenant->find($tenant);
+        $tenant = $this->tenant->findTenant($tenant);
 
         $data = $request->only(['account_status', 'payment_status', 'remarks', 'name']);
         $data['updated_at'] = Carbon::now();
@@ -115,7 +116,7 @@ class TenantController extends Controller
 
         $tenant->update($data);
 
-        return Qs::json(null, null, ['msg' => __('msg.update_ok'), 'ok' => true, 'pop' => true]);
+        return Qs::json(msg: "", arr: ['msg' => __('msg.update_ok'), 'ok' => true, 'pop' => true]);
     }
 
     /**
@@ -123,7 +124,7 @@ class TenantController extends Controller
      */
     public function destroy($tenant)
     {
-        $tenant = $this->tenant->find($tenant);
+        $tenant = $this->tenant->findTenant($tenant);
         try {
             $tenant->delete();
         } catch (\Exception $e) {

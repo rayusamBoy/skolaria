@@ -15,7 +15,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">List of Continous Assessments</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -29,7 +29,7 @@
                             <th>Term</th>
                             <th>Session</th>
                             <td>Category</td>
-                            <td>Locked</td>
+                            <td>Is Locked?</td>
                         </tr>
                     </thead>
                     <tbody>
@@ -40,7 +40,7 @@
                             <td>{{ NUmber::spellOrdinal($as->exam->term) . 'Term ' }}</td>
                             <td>{{ $as->exam->year }}</td>
                             <td>{{ $as->exam->category->name }}</td>
-                            <td>{{ $as->exam->locked ? "Yes" : "No" }}</td>
+                            <td>{{ $as->exam->is_locked ? "Yes" : "No" }}</td>
                         </tr>
                         @endforeach
                     </tbody>

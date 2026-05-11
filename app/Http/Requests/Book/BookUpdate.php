@@ -34,8 +34,7 @@ class BookUpdate extends FormRequest
     public function attributes()
     {
         return  [
-            'my_class_id' => 'Class',
-            'name' => 'Book name',
+            'my_class_id' => 'class',
         ];
     }
 }

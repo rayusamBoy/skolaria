@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="font-weight-bold card-title">Edit Time Slots</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">

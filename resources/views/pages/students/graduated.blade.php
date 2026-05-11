@@ -7,7 +7,7 @@
 <div class="card w-fit wmin-100-pcnt">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Students Graduated</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -38,18 +38,18 @@
                 {{-- Bulk Block/Unblock --}}
                 @canany([$tenant_permissions['student_records']['block_all_graduated']['permission'], $tenant_permissions['student_records']['unblock_all_graduated']['permission']])
                 @php
-                $unique_blocked_values = $grad_students->pluck('user')->pluck('blocked')->unique();
+                $unique_blocked_values = $grad_students->pluck('user')->pluck('is_blocked')->unique();
                 @endphp
                 <div class="card mb-3">
                     <div class="card-body text-center">
                         @can($tenant_permissions['student_records']['block_all_graduated']['permission'])
-                        <button id="students-block-all-grad" @disabled($grad_students->isEmpty() || $unique_blocked_values->hasSole(fn($value, $key) => (bool) $value === true)) class="btn btn-danger">
+                        <button id="students-block-all-gradudated" @disabled($grad_students->isEmpty() || $unique_blocked_values->hasSole(fn($value, $key) => (bool) $value === true)) class="btn btn-danger">
                             Block All Graduated Students
                         </button>
                         @endcan
 
                         @can($tenant_permissions['student_records']['unblock_all_graduated']['permission'])
-                        <button id="students-unblock-all-grad" @disabled($grad_students->isEmpty() || $unique_blocked_values->hasSole(fn($value, $key) => (bool) $value === false)) class="btn btn-success ml-2">
+                        <button id="students-unblock-all-graduated" @disabled($grad_students->isEmpty() || $unique_blocked_values->hasSole(fn($value, $key) => (bool) $value === false)) class="btn btn-success ml-2">
                             Unblock All Graduated Students
                         </button>
                         @endcan
@@ -76,10 +76,10 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>
-                                <img src="{{ Usr::getTenancyAwarePhoto($gs->user->photo) }}" class="rounded-circle" style="width:40px;height:40px;" alt="photo">
+                                <img src="{{ Usr::getTenancyAwarePhotoUrl($gs->user->photo_path) }}" class="rounded-circle" style="width:40px;height:40px;" alt="photo">
                             </td>
                             <td>{{ $gs->user->name }}</td>
-                            <td>{{ $gs->student->adm_no }}</td>
+                            <td>{{ $gs->student->admission_number }}</td>
                             <td>{{ $gs->fc->name }} {{ $gs->fs->name }}</td>
                             <td>{{ $gs->from_session }}</td>
                             <td>{{ $gs->remarks }}</td>
@@ -87,14 +87,14 @@
                             @if(auth()->user()->canAny([$tenant_permissions['student_records']['block_all_graduated']['permission'], $tenant_permissions['student_records']['unblock_all_graduated']['permission']]))
                             <td>
                                 <label class="form-switch m-0">
-                                    <input type="checkbox" id="checkbox-user-{{ $gs->student_id }}" onchange="updateUserBlockedState({{ $gs->student_id }}, this)" @checked($gs->student->blocked)>
+                                    <input type="checkbox" id="checkbox-user-{{ $gs->student_id }}" onchange="updateUserBlockedState({{ $gs->student_id }}, this)" @checked($gs->user->is_blocked)>
                                     <i></i>
                                 </label>
                             </td>
                             @else
                             <td>
                                 <label class="form-switch m-0">
-                                    <input type="checkbox" @disabled(true) @checked($gs->student->blocked)>
+                                    <input type="checkbox" @disabled(true) @checked($gs->user->is_blocked)>
                                     <i></i>
                                 </label>
                             </td>
@@ -161,21 +161,21 @@
                             <th>Name</th>
                             <th>ADM No</th>
                             <th>Section</th>
-                            <th>Grad Year</th>
+                            <th>Graduated Year</th>
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($grad_students->where('from_class', $mc->id) as $gs)
+                        @foreach($grad_students->where('previous_my_class_id', $mc->id) as $gs)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>
-                                <img src="{{ Usr::getTenancyAwarePhoto($gs->user->photo) }}" class="rounded-circle" style="width:40px;height:40px;" alt="photo">
+                                <img src="{{ Usr::getTenancyAwarePhotoUrl($gs->user->photo_path) }}" class="rounded-circle" style="width:40px;height:40px;" alt="photo">
                             </td>
                             <td>{{ $gs->user->name }}</td>
-                            <td>{{ $gs->student->adm_no }}</td>
+                            <td>{{ $gs->student->admission_number }}</td>
                             <td>{{ $gs->fc->name }} {{ $gs->fs->name }}</td>
-                            <td>{{ $gs->grad_date }}</td>
+                            <td>{{ $gs->graduated_session }}</td>
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">

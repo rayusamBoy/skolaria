@@ -9,7 +9,7 @@
         <div class="card">
             <div class="card-header header-elements-inline bg-danger">
                 <h6 class="font-weight-bold card-title">Add Time Slots</h6>
-                {!! Qs::getPanelOptions() !!}
+                {!! Qs::getPanelOptionsHtml() !!}
             </div>
 
             <div class="card-body collapse">
@@ -88,7 +88,7 @@
         <div class="card">
             <div class="card-header header-elements-inline bg-info">
                 <h6 class="font-weight-bold card-title">Use Existing Time Slots</h6>
-                {!! Qs::getPanelOptions() !!}
+                {!! Qs::getPanelOptionsHtml() !!}
             </div>
 
             <div class="card-body collapse">

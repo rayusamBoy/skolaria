@@ -17,6 +17,31 @@
 
 @section('content')
 
+@php
+// Pre‑compute soft‑delete permissions per resource
+$canRestorePayment = auth()->user()->can($tenant_permissions['soft_deletes']['payment_restore']['permission']);
+$canForceDelPayment = auth()->user()->can($tenant_permissions['soft_deletes']['payment_force_delete']['permission']);
+$hasPaymentActions = $canRestorePayment || $canForceDelPayment;
+
+$canRestoreUser = auth()->user()->can($tenant_permissions['soft_deletes']['user_restore']['permission']);
+$canForceDelUser = auth()->user()->can($tenant_permissions['soft_deletes']['user_force_delete']['permission']);
+$hasUserActions = $canRestoreUser || $canForceDelUser;
+
+$canRestoreClass = auth()->user()->can($tenant_permissions['soft_deletes']['my_class_restore']['permission']);
+$canForceDelClass = auth()->user()->can($tenant_permissions['soft_deletes']['my_class_force_delete']['permission']);
+$hasClassActions = $canRestoreClass || $canForceDelClass;
+
+$canRestoreExam = auth()->user()->can($tenant_permissions['soft_deletes']['exam_restore']['permission']);
+$canForceDelExam = auth()->user()->can($tenant_permissions['soft_deletes']['exam_force_delete']['permission']);
+$hasExamActions = $canRestoreExam || $canForceDelExam;
+
+$canRestoreThread = auth()->user()->can($tenant_permissions['soft_deletes']['thread_restore']['permission']);
+$canForceDelThread = auth()->user()->can($tenant_permissions['soft_deletes']['thread_force_delete']['permission']);
+$hasThreadActions = $canRestoreThread || $canForceDelThread;
+
+$isSuperAdmin = auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin'));
+@endphp
+
 @if($payments->isEmpty() && $users->isEmpty() && $trashed_my_classes->isEmpty() && $exams->isEmpty() && $threads->isEmpty())
 <div class="text-center">
     <img src="{{ asset('global_assets/icons/bin-empty-2.gif') }}" alt="Bin empty gif"></img>
@@ -37,7 +62,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Payments</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
     <div class="card-body">
         <div class="tab-content">
@@ -53,7 +78,9 @@
                             <th>Method</th>
                             <th>Info</th>
                             <th>Deleted At</th>
+                            @if($hasPaymentActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -62,38 +89,34 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $p->title }}</td>
                             <td>{{ $p->amount }}</td>
-                            <td>{{ $p->ref_no }}</td>
+                            <td>{{ $p->reference_number }}</td>
                             <td>{{ $p->my_class_id ? $p->my_class->name : 'All' }}</td>
                             <td>{{ ucwords($p->method) }}</td>
                             <td>{{ $p->description }}</td>
-                            <td>{{ Qs::onlyDateFormat($p->deleted_at) }}</td>
+                            <td>{{ Qs::formatDate($p->deleted_at) }}</td>
+                            @if($hasPaymentActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Restore --}}
-                                            @can($tenant_permissions['soft_deletes']['restore']['permission'])
+                                            @if($canRestorePayment)
                                             <a id="{{ $p->id }}" onclick="$('form#pay-restore-'+this.id).submit();" href="javascript:;" class="dropdown-item">
                                                 <i class="material-symbols-rounded">undo</i> Restore
                                             </a>
-                                            <form class="d-none" method="post" id="pay-restore-{{ $p->id }}" action="{{ route('payments.restore', $p->id) }}">
-                                                @csrf
-                                            </form>
-                                            @endcan
-                                            {{-- Delete --}}
-                                            @can($tenant_permissions['soft_deletes']['payment_force_delete']['permission'])
+                                            <form class="d-none" method="post" id="pay-restore-{{ $p->id }}" action="{{ route('payments.restore', $p->id) }}">@csrf</form>
+                                            @endif
+                                            @if($canForceDelPayment)
                                             <a id="{{ $p->id }}" onclick="confirmForceDelete(this.id, 'payment')" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
-                                            <form class="d-none" method="post" id="payment-force-delete-{{ $p->id }}" action="{{ route('payments.force_delete', $p->id) }}">
-                                                @csrf
-                                            </form>
-                                            @endcan
+                                            <form class="d-none" method="post" id="payment-force-delete-{{ $p->id }}" action="{{ route('payments.force_delete', $p->id) }}">@csrf</form>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
@@ -109,7 +132,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Users</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
     <div class="card-body">
         <div class="tab-content">
@@ -124,7 +147,9 @@
                             <th>Role</th>
                             <th>Contact</th>
                             <th>Deleted At</th>
+                            @if($hasUserActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -132,7 +157,7 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>
-                                <img class="rounded-circle" style="height:40px;width:40px;" src="{{ Usr::getTenancyAwarePhoto($user->photo) }}">
+                                <img class="rounded-circle" style="height:40px;width:40px;" src="{{ Usr::getTenancyAwarePhotoUrl($user->photo) }}">
                             </td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->username }}</td>
@@ -141,36 +166,32 @@
                             @php $s_recs = Usr::getStudentRecordByUserId($user->id,['my_class','section']) @endphp
                             <td class="text-center">{{ $s_recs->first()->my_class->name }} - {{ $s_recs->first()->section->name }}</td>
                             @else
-                            <td>{{ $user->email ?? $user->phone ?? $user->phone2 ?? '—' }}</td>
+                            <td>{{ $user->email ?? $user->primary_mobile ?? $user->secondary_mobile ?? '—' }}</td>
                             @endif
-                            <td>{{ Qs::onlyDateFormat($user->deleted_at) }}</td>
+                            <td>{{ Qs::formatDate($user->deleted_at) }}</td>
+                            @if($hasUserActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Restore --}}
-                                            @can($tenant_permissions['soft_deletes']['user_restore']['permission'])
+                                            @if($canRestoreUser)
                                             <a id="{{ $user->id }}" onclick="$('form#user-restore-'+this.id).submit();" href="javascript:;" class="dropdown-item">
                                                 <i class="material-symbols-rounded">undo</i> Restore
                                             </a>
-                                            <form class="d-none" method="post" id="user-restore-{{ $user->id }}" action="{{ route('user.restore',$user->id) }}">
-                                                @csrf
-                                            </form>
-                                            @endcan
-                                            {{-- Delete --}}
-                                            @can($tenant_permissions['soft_deletes']['user_force_delete']['permission'])
+                                            <form class="d-none" method="post" id="user-restore-{{ $user->id }}" action="{{ route('user.restore',$user->id) }}">@csrf</form>
+                                            @endif
+                                            @if($canForceDelUser)
                                             <a id="{{ $user->id }}" onclick="confirmForceDelete(this.id,'user')" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
-                                            <form class="d-none" method="post" id="user-force-delete-{{ $user->id }}" action="{{ route('user.force_delete',$user->id) }}">
-                                                @csrf
-                                            </form>
-                                            @endcan
+                                            <form class="d-none" method="post" id="user-force-delete-{{ $user->id }}" action="{{ route('user.force_delete',$user->id) }}">@csrf</form>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
@@ -186,7 +207,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Classes</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
     <div class="card-body">
         <div class="tab-pane fade show active" id="all-classes">
@@ -197,7 +218,9 @@
                         <th>Name</th>
                         <th>Class Type</th>
                         <th>Deleted At</th>
+                        @if($hasClassActions)
                         <th class="text-center">Action</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
@@ -206,34 +229,30 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $c->name }}</td>
                         <td>{{ $c->class_type->name }}</td>
-                        <td>{{ Qs::onlyDateFormat($c->deleted_at) }}</td>
+                        <td>{{ Qs::formatDate($c->deleted_at) }}</td>
+                        @if($hasClassActions)
                         <td class="text-center">
                             <div class="list-icons">
                                 <div class="dropdown">
                                     <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                     <div class="dropdown-menu dropdown-menu-left">
-                                        {{-- Restore --}}
-                                        @can($tenant_permissions['soft_deletes']['my_class_restore']['permission'])
+                                        @if($canRestoreClass)
                                         <a id="{{ $c->id }}" onclick="$('form#my_class-restore-'+this.id).submit();" href="javascript:;" class="dropdown-item">
                                             <i class="material-symbols-rounded">undo</i> Restore
                                         </a>
-                                        <form class="d-none" method="post" id="my_class-restore-{{ $c->id }}" action="{{ route('my_class.restore',$c->id) }}">
-                                            @csrf
-                                        </form>
-                                        @endcan
-                                        {{-- Delete --}}
-                                        @can($tenant_permissions['soft_deletes']['my_class_force_delete']['permission'])
+                                        <form class="d-none" method="post" id="my_class-restore-{{ $c->id }}" action="{{ route('my_class.restore',$c->id) }}">@csrf</form>
+                                        @endif
+                                        @if($canForceDelClass)
                                         <a id="{{ $c->id }}" onclick="confirmForceDelete(this.id,'my_class')" href="javascript:;" class="dropdown-item text-danger">
                                             <i class="material-symbols-rounded">delete</i> Delete
                                         </a>
-                                        <form class="d-none" method="post" id="my_class-force-delete-{{ $c->id }}" action="{{ route('my_class.force_delete',$c->id) }}">
-                                            @csrf
-                                        </form>
-                                        @endcan
+                                        <form class="d-none" method="post" id="my_class-force-delete-{{ $c->id }}" action="{{ route('my_class.force_delete',$c->id) }}">@csrf</form>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
                         </td>
+                        @endif
                     </tr>
                     @endforeach
                 </tbody>
@@ -248,7 +267,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Exams</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
     <div class="card-body">
         <div class="tab-pane fade show active" id="all-exams">
@@ -261,7 +280,9 @@
                         <th>Session</th>
                         <th>Category</th>
                         <th>Edit Status</th>
+                        @if($hasExamActions)
                         <th class="text-center">Action</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
@@ -273,33 +294,29 @@
                         <td>{{ $ex->year }}</td>
                         <td>{{ $ex->category->name }}</td>
                         <td>{!! $ex->editable?'<i class="material-symbols-rounded">check</i>':'<i class="material-symbols-rounded">close</i>' !!}</td>
+                        @if($hasExamActions)
                         <td class="text-center">
                             <div class="list-icons">
                                 <div class="dropdown">
                                     <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                     <div class="dropdown-menu dropdown-menu-left">
-                                        {{-- Restore --}}
-                                        @can($tenant_permissions['soft_deletes']['exam_restore']['permission'])
+                                        @if($canRestoreExam)
                                         <a id="{{ $ex->id }}" onclick="$('form#exam-restore-'+this.id).submit();" href="javascript:;" class="dropdown-item">
                                             <i class="material-symbols-rounded">undo</i> Restore
                                         </a>
-                                        <form class="d-none" method="post" id="exam-restore-{{ $ex->id }}" action="{{ route('exam.restore',$ex->id) }}">
-                                            @csrf
-                                        </form>
-                                        @endcan
-                                        {{-- Delete --}}
-                                        @can($tenant_permissions['soft_deletes']['exam_force_delete']['permission'])
+                                        <form class="d-none" method="post" id="exam-restore-{{ $ex->id }}" action="{{ route('exam.restore',$ex->id) }}">@csrf</form>
+                                        @endif
+                                        @if($canForceDelExam)
                                         <a id="{{ $ex->id }}" onclick="confirmForceDelete(this.id,'exam')" href="javascript:;" class="dropdown-item text-danger">
                                             <i class="material-symbols-rounded">delete</i> Delete
                                         </a>
-                                        <form class="d-none" method="post" id="exam-force-delete-{{ $ex->id }}" action="{{ route('exam.force_delete',$ex->id) }}">
-                                            @csrf
-                                        </form>
-                                        @endcan
+                                        <form class="d-none" method="post" id="exam-force-delete-{{ $ex->id }}" action="{{ route('exam.force_delete',$ex->id) }}">@csrf</form>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
                         </td>
+                        @endif
                     </tr>
                     @endforeach
                 </tbody>
@@ -314,7 +331,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Messages Threads</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
     <div class="card-body">
         <div class="tab-pane fade show active" id="all-threads">
@@ -328,7 +345,9 @@
                         <th># Participants</th>
                         <th>Created At</th>
                         <th>Deleted At</th>
+                        @if($hasThreadActions)
                         <th class="text-center">Action</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
@@ -337,37 +356,33 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $thread->subject }}</td>
                         <td>{{ $thread->creator()->name }}</td>
-                        <td>{!! Qs::parsedown($thread->getLatestMessageAttribute()->body) ?? '' !!}</td>
+                        <td>{!! Qs::parseMarkdown($thread->getLatestMessageAttribute()->body) ?? '' !!}</td>
                         <td>{{ count($thread->participantsArray()) }}</td>
                         <td>{{ $thread->created_at }}</td>
                         <td>{{ $thread->deleted_at }}</td>
+                        @if($hasThreadActions)
                         <td class="text-center">
                             <div class="list-icons">
                                 <div class="dropdown">
                                     <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
                                     <div class="dropdown-menu dropdown-menu-left">
-                                        {{-- Restore --}}
-                                        @can($tenant_permissions['soft_deletes']['thread_restore']['permission'])
+                                        @if($canRestoreThread)
                                         <a id="{{ $thread->id }}" onclick="$('form#thread-restore-'+this.id).submit();" href="javascript:;" class="dropdown-item">
                                             <i class="material-symbols-rounded">undo</i> Restore
                                         </a>
-                                        <form class="d-none" method="post" id="thread-restore-{{ $thread->id }}" action="{{ route('thread.restore',$thread->id) }}">
-                                            @csrf
-                                        </form>
-                                        @endcan
-                                        {{-- Delete --}}
-                                        @can($tenant_permissions['soft_deletes']['thread_force_delete']['permission'])
+                                        <form class="d-none" method="post" id="thread-restore-{{ $thread->id }}" action="{{ route('thread.restore',$thread->id) }}">@csrf</form>
+                                        @endif
+                                        @if($canForceDelThread)
                                         <a id="{{ $thread->id }}" onclick="confirmForceDelete(this.id,'thread')" href="javascript:;" class="dropdown-item text-danger">
                                             <i class="material-symbols-rounded">delete</i> Delete
                                         </a>
-                                        <form class="d-none" method="post" id="thread-force-delete-{{ $thread->id }}" action="{{ route('thread.force_delete',$thread->id) }}">
-                                            @csrf
-                                        </form>
-                                        @endcan
+                                        <form class="d-none" method="post" id="thread-force-delete-{{ $thread->id }}" action="{{ route('thread.force_delete',$thread->id) }}">@csrf</form>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
                         </td>
+                        @endif
                     </tr>
                     @endforeach
                 </tbody>
@@ -377,7 +392,7 @@
 </div>
 @endif
 
-@if(auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
+@if($isSuperAdmin)
 @php
 $model_names_to_remove = [];
 if($payments->isEmpty()) $model_names_to_remove[] = 'payments';

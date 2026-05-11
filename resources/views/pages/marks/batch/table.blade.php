@@ -38,7 +38,7 @@ $sub_count = $subjects->count() + $initial_cols;
             <td style="text-align: center">{{ $mk->section->name }}</td>
 
             @foreach($subjects as $sub)
-            <td style="text-align: center">{{ $marks->where('subject_id', $sub->id)->where('student_id', $mk->user->id)->value('exm') }}</td>
+            <td style="text-align: center">{{ $marks->where('subject_id', $sub->id)->where('student_id', $mk->user->id)->value('exam_mark') }}</td>
             @endforeach
         </tr>
         @endforeach

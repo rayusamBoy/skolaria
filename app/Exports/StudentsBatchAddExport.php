@@ -47,7 +47,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
         $user_headings = StudentRecordController::getUserHeadings();
         $student_headings = StudentRecordController::getStudentHeadings();
         $this->all_headings = [...$user_headings, ...$student_headings];
-        $this->parameters_columns_to_hide_and_populate = ['state_id', 'nal_id', 'my_class_id'];
+        $this->parameters_columns_to_hide_and_populate = ['state_id', 'nationality_id', 'my_class_id'];
         $this->end_data_row = self::DEFAULT_END_ROW;
     }
 
@@ -61,7 +61,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
             'email' => 25,
             'address' => 25,
             'food_taboos' => 45,
-            'chp' => 45,
+            'chronic_health_problems' => 45,
         ];
 
         $column_widths = [];
@@ -141,7 +141,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
                 }
 
                 // Apply date format to date columns
-                $date_columns = ['dob', 'date_admitted'];
+                $date_columns = $this->buildDateColumns();
                 $last_row = $sheet->getHighestRow();
                 $start_row = self::NUMBER_OF_HEADING_ROWS + 1;
                 $format = str_replace('Y', 'yyyy', Usr::getDateFormat());
@@ -187,17 +187,18 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
         $mappings = $this->getDropdownMappings();
 
         foreach ($mappings as $heading => $options_callback) {
-            $col_index = array_search($heading, $this->all_headings) + 1;
+            $col_index = array_search($heading, $this->all_headings);
             if ($col_index === false) {
                 continue;
             }
+            $col_index += 1;
 
             $options = $options_callback();
             if (empty($options)) {
                 continue;
             }
 
-            $col_letter = Usr::numberToLetter($col_index);
+            $col_letter = Usr::numberToColumnLetter($col_index);
             $range = "{$col_letter}{$start_row}:{$col_letter}{$end_row}";
 
             $validation = $sheet->getCell($col_letter . $start_row + 1)->getDataValidation();
@@ -218,17 +219,15 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
     }
 
     /**
-     * Build the list of column letters that contain dates.
+     * Build the list of column names that contain dates.
      */
     protected function buildDateColumns(): array
     {
-        $date_params = array_keys(array_filter(
+        return array_keys(array_filter(
             $this->student_record_request->rules(),
             fn($rule) =>
             \is_array($rule) ? \in_array('date', $rule) || \in_array('date_format', $rule) : str_contains($rule, 'date')
         ));
-
-        return array_map(fn($param) => $this->mapHeadingToLetter($param), $date_params);
     }
 
     /**
@@ -239,12 +238,13 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
         $date_columns = $this->buildDateColumns();
 
         foreach ($date_columns as $heading) {
-            $col_index = array_search($heading, $this->all_headings) + 1;
+            $col_index = array_search($heading, $this->all_headings);
             if ($col_index === false) {
                 continue;
             }
+            $col_index += 1;
 
-            $col_letter = Usr::numberToLetter($col_index);
+            $col_letter = Usr::numberToColumnLetter($col_index);
             $range = "{$col_letter}{$start_row}:{$col_letter}{$end_row}";
 
             $validation = $sheet->getCell($col_letter . $start_row + 1)->getDataValidation();
@@ -258,7 +258,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
             $validation->setError('Value is not a valid date.');
             $validation->setPromptTitle('Enter a date.');
             $validation->setPrompt("Please, enter a valid date.\nDate format: " . str_replace('Y', 'yyyy', Usr::getDateFormat()));
-            $validation->setFormula1('DATE(1900,1,1)');
+            $validation->setFormula1('DATE(1900,01,01)');
             $validation->setFormula2('TODAY()');
 
             $sheet->setDataValidation($range, clone $validation);
@@ -272,13 +272,13 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
     {
         return [
             'gender' => fn() => Usr::getGenders(),
-            'bg_id' => fn() => Usr::getBloodGroups()->pluck('name')->toArray(),
-            'lga_id' => fn() => $this->location->getLgas($this->data['state']->id)->pluck('name')->toArray(),
+            'blood_group_id' => fn() => Usr::getBloodGroups()->pluck('name')->toArray(),
+            'lga_id' => fn() => $this->location->getStateById($this->data['state']->id)->pluck('name')->toArray(),
             'religion' => fn() => Usr::getReligions(),
             'section_id' => fn() => $this->my_class->getClassSections($this->data['class']->id)->pluck('name')->toArray(),
             'disability' => fn() => array_values(Usr::getDisabilities()),
-            'p_status' => fn() => Usr::getStudentParentsStatus(),
-            'dorm_id' => fn() => $this->dorm->getAll()->pluck('name')->toArray(),
+            'parent_status' => fn() => Usr::getStudentParentsStatus(),
+            'dorm_id' => fn() => $this->dorm->getAllDorms()->pluck('name')->toArray(),
         ];
     }
 
@@ -312,6 +312,6 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
     private function mapHeadingToLetter(string $heading): string
     {
         $index = array_search($heading, $this->all_headings);
-        return Usr::numberToLetter($index !== false ? $index + 1 : 1);
+        return Usr::numberToColumnLetter($index !== false ? $index + 1 : 1);
     }
 }

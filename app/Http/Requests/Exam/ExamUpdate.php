@@ -47,7 +47,6 @@ class ExamUpdate extends FormRequest
     public function attributes()
     {
         return [
-            'number_format' => 'exam number format',
             'cw_denominator' => 'class work denominator',
             'hw_denominator' => 'home work denominator',
             'tt_denominator' => 'topic test denominator',

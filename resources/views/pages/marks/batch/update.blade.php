@@ -1,7 +1,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded mr-2">deployed_code_history</i> Batch Update </h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="row">
@@ -18,7 +18,7 @@
     </div>
 
     <div class="card-body">
-        <form class="page-block" method="post" action="{{ route('marks.batch_update') }}">
+        <form class="ajax-update ajax-not-global" method="post" action="{{ route('marks.batch_update') }}">
             @csrf @method('PUT')
             <div class="row">
                 <div class="col-md-8">
@@ -55,7 +55,7 @@
 
                 <div class="col-md-4 mt-4">
                     <div class="text-right mt-1">
-                        <button type="submit" data-text="Updating" class="btn btn-sm btn-success">Update Batch Marks <i class="material-symbols-rounded ml-2">send</i></button>
+                        <button type="submit" data-text="Updating..." class="btn btn-sm btn-success">Update Batch Marks <i class="material-symbols-rounded ml-2">send</i></button>
                     </div>
                 </div>
             </div>

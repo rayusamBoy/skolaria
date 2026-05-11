@@ -38,7 +38,6 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->alias([
             'checkForPassUpdate' => \App\Http\Middleware\Custom\CheckForPasswordUpdate::class,
-            'examIsLocked' => \App\Http\Middleware\Custom\ExamIsLocked::class,
             '2fa' => \PragmaRX\Google2FALaravel\Middleware::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
@@ -49,6 +48,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'do_not_show_els_with_these_ids_again',
             'active_system_skin',
         ]);
+        $middleware->prependToPriorityList(
+            before: \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            prepend: \App\Http\Middleware\Custom\DecodeRouteParamsMiddleware::class,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

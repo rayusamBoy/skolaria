@@ -4,7 +4,6 @@
 {{-- Forms --}}
 <script src="{{ asset('global_assets/js/plugins/forms/wizards/steps.min.js') }}"></script>
 <script src="{{ asset('global_assets/js/plugins/forms/styling/uniform.min.js') }}"></script>
-<script src="{{ asset('global_assets/js/plugins/forms/inputs/inputmask.js') }}"></script>
 <script src="{{ asset('global_assets/js/plugins/forms/validation/validate.min.js') }}"></script>
 {{-- Notifications --}}
 <script type="text/javascript" src="{{ asset('global_assets/js/plugins/notifications/sweetalert2.min.js') }}"></script>

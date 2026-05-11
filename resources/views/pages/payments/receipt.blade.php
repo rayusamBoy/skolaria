@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <head>
-    <title>Receipt_{{ "{$pr->ref_no}_" . $sr->user->name }}</title>
+    <title>Receipt_{{ "{$pr->reference_number}_" . $sr->user->name }}</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/receipt.css') }}" />
 
     @laravelPWA
@@ -14,8 +14,8 @@
             <table width="100%">
                 <tr>
                     <td>
-                        <strong><span style="color: #1b0c80; font-size: 25px;">{{ strtoupper($settings->firstWhere('type', 'system_name')->description) }}</span></strong><br />
-                        <strong><span style="color: #1b0c80; font-size: 20px;">{{ ucwords($settings->firstWhere('type', 'address')->description) }}</span></strong>
+                        <strong><span style="color: #1b0c80; font-size: 25px;">{{ strtoupper($settings->firstWhere('key', 'system_name')->value) }}</span></strong><br />
+                        <strong><span style="color: #1b0c80; font-size: 20px;">{{ ucwords($settings->firstWhere('key', 'address')->value) }}</span></strong>
 
                         <br /> <br />
 
@@ -26,7 +26,7 @@
 
             {{--Background Logo--}}
             <div style="position: relative;  text-align: center; ">
-                <img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'logo')) }}" style="max-width: 500px; max-height:600px; margin-top: 60px; position: absolute; opacity: 0.05; margin-left: auto; margin-right: auto; left: 0; right: 0;" />
+                <img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('key', 'logo')) }}" style="max-width: 500px; max-height:600px; margin-top: 60px; position: absolute; opacity: 0.05; margin-left: auto; margin-right: auto; left: 0; right: 0;" />
             </div>
 
             {{--Receipt No --}}
@@ -35,7 +35,7 @@
                     <span style="font-size: 16px;">Receipt Reference No.</span>
                 </div>
                 <div style="padding: 10px 20px; width: 200px; background-color: lightyellow;">
-                    <span style="font-size: 25px;">{{ $pr->ref_no }}</span>
+                    <span style="font-size: 25px;">{{ $pr->reference_number }}</span>
                 </div>
             </div>
 
@@ -48,7 +48,7 @@
 
             {{--Photo--}}
             <div style="margin: 15px;">
-                <img style="width: 100px; height: 100px; float: left;" src="{{ Usr::getTenancyAwarePhoto($sr->user->photo) }}" alt="...">
+                <img style="width: 100px; height: 100px; float: left;" src="{{ Usr::getTenancyAwarePhotoUrl($sr->user->photo_path) }}" alt="...">
             </div>
 
             {{-- Headers --}}
@@ -60,7 +60,7 @@
                     </tr>
                     <tr>
                         <td class="bold">ADM NO:</td>
-                        <td>{{ $sr->adm_no }}</td>
+                        <td>{{ $sr->admission_number }}</td>
                     </tr>
                     <tr>
                         <td class="bold">CLASS:</td>
@@ -79,7 +79,7 @@
             <table class="td-left" style="font-size: 16px" cellspacing="2" cellpadding="2">
                 <tr>
                     <td class="bold">REFERENCE:</td>
-                    <td>{{ $payment->ref_no }}</td>
+                    <td>{{ $payment->reference_number }}</td>
                     <td class="bold">TITLE:</td>
                     <td>{{ $payment->title }}</td>
                 </tr>
@@ -87,7 +87,7 @@
                     <td class="bold">AMOUNT:</td>
                     <td>{{ $payment->amount }}</td>
                     <td class="bold">DESCRIPTION:</td>
-                    <td>{{ $payment->description }}</td>
+                    <td>{{ $payment->value }}</td>
                 </tr>
             </table>
 
@@ -100,15 +100,15 @@
                 <thead>
                     <tr>
                         <td class="bold">Date</td>
-                        <td class="bold">Amount Paid ({{ Pay::getCurrencyUnit() }})</td>
-                        <td class="bold">Balance ({{ Pay::getCurrencyUnit() }})</td>
+                        <td class="bold">Amount Paid ({{ Pay::getDefaultCurrencySymbol() }})</td>
+                        <td class="bold">Balance ({{ Pay::getDefaultCurrencySymbol() }})</td>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($receipts as $r)
                     <tr>
                         <td>{{ date('D\, j F\, Y', strtotime($r->created_at)) }}</td>
-                        <td>{{ $r->amt_paid }}</td>
+                        <td>{{ $r->amount_paid }}</td>
                         <td>{{ $r->balance }}</td>
                     </tr>
                     @endforeach
@@ -119,10 +119,10 @@
 
             <div class="bold arial" style="text-align: center; float:right; width: 200px; padding: 5px; margin-right:30px">
                 <div style="padding: 10px 20px; width: 200px; background-color: lightcyan;">
-                    <span style="font-size: 16px;">{{ $pr->paid ? 'PAYMENT STATUS' : 'TOTAL DUE' }}</span>
+                    <span style="font-size: 16px;">{{ $pr->is_paid ? 'PAYMENT STATUS' : 'TOTAL DUE' }}</span>
                 </div>
                 <div style="padding: 10px 20px; width: 200px; background-color: lightyellow;">
-                    <span style="font-size: 25px;">{{ $pr->paid ? 'CLEARED' : $pr->balance }}</span>
+                    <span style="font-size: 25px;">{{ $pr->is_paid ? 'CLEARED' : $pr->balance }}</span>
                 </div>
             </div>
 

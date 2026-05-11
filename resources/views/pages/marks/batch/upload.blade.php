@@ -1,11 +1,11 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded mr-2">upload_2</i> Batch Upload </h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
-        <form class="ajax-update" method="post" action="{{ route('marks.batch_upload') }}">
+        <form class="ajax-update ajax-not-global" method="post" action="{{ route('marks.batch_upload') }}">
             @csrf @method('PUT')
             <div class="row">
                 <div class="col-12">

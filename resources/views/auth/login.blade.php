@@ -63,7 +63,7 @@
                                 @endif
 
                                 {{-- Error message for a blocked user --}}
-                                @if (Session::has("access_denied"))
+                                @if (session()->has("access_denied"))
                                 <div class="alert alert-warning alert-styled-left alert-dismissible">
                                     <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
                                     <i>{{ session("access_denied") }}</i>

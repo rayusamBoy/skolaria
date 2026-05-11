@@ -10,7 +10,7 @@ class Grade extends Eloquent
 {
     use LogsActivity;
 
-    protected $fillable = ['name', 'class_type_id', 'mark_from', 'mark_to', 'remark', 'point'];
+    protected $fillable = ['name', 'class_type_id', 'mark_from', 'mark_to', 'remarks', 'point'];
 
     public function class_type()
     {

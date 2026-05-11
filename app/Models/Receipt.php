@@ -10,11 +10,11 @@ class Receipt extends Eloquent
 {
     use LogsActivity;
 
-    protected $fillable = ['pr_id', 'year', 'balance', 'amt_paid'];
+    protected $fillable = ['payment_record_id', 'year', 'balance', 'amount_paid'];
 
     public function pr()
     {
-        return $this->belongsTo(PaymentRecord::class, 'pr_id');
+        return $this->belongsTo(PaymentRecord::class, 'payment_record_id');
     }
     
     public function getActivitylogOptions(): LogOptions

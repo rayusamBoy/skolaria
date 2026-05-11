@@ -18,13 +18,13 @@ return new class extends Migration
             $table->unsignedInteger('my_class_id')->index();
             $table->unsignedInteger('section_id')->index();
             $table->integer('total')->nullable();
-            $table->decimal('ave')->nullable();
-            $table->decimal('class_ave')->nullable();
-            $table->integer('pos')->nullable();
-            $table->integer('class_pos')->nullable();
+            $table->decimal('average')->nullable();
+            $table->decimal('class_average')->nullable();
+            $table->integer('section_position')->nullable();
+            $table->integer('class_position')->nullable();
             $table->unsignedInteger('grade_id')->nullable()->index();
             $table->unsignedInteger('points')->nullable();
-            $table->decimal('gpa')->nullable();
+            $table->decimal('gpa', 3, 2)->nullable();
             $table->unsignedInteger('division_id')->nullable()->index();
             $table->string('af')->nullable();
             $table->string('ps')->nullable();

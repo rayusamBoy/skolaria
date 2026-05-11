@@ -60,6 +60,7 @@ trait AuthorizesPermissions
 
     /**
      * Resolve permission using precedence:
+     * 0. #[SkipPermission]
      * 1. route action ['permission']
      * 2. PHP 8 attribute #[Permission(...)]
      * 3. exact match in $permissionMap
@@ -72,6 +73,24 @@ trait AuthorizesPermissions
     {
         $route = request()->route();
         $actionArr = $route ? $route->getAction() : [];
+        // 0) Class‑level or method‑level #[SkipPermission]
+        if (class_exists(ReflectionMethod::class)) {
+            // Check the method first (more specific)
+            try {
+                $methodRef = new ReflectionMethod($this, $action);
+                if (!empty($methodRef->getAttributes(\App\Auth\Attributes\SkipPermission::class))) {
+                    return null;
+                }
+            } catch (\ReflectionException $e) {
+                // method not found – fall through to class check
+            }
+
+            // Check the class
+            $classRef = new \ReflectionClass($this);
+            if (!empty($classRef->getAttributes(\App\Auth\Attributes\SkipPermission::class))) {
+                return null;
+            }
+        }
 
         // 1) Route action explicit
         if (!empty($actionArr) && \array_key_exists('permission', $actionArr) && $actionArr['permission']) {

@@ -4,10 +4,18 @@
 
 @section('content')
 
+@php
+$canEdit = auth()->user()->can($central_permissions['tenants']['edit']['permission']);
+$canShow = auth()->user()->can($central_permissions['tenants']['show']['permission']);
+$canDelete = auth()->user()->can($central_permissions['tenants']['destroy']['permission']);
+$canRunCommand = auth()->user()->can($central_permissions['tenants']['run_command']['permission']);
+$hasActions = $canEdit || $canShow || $canDelete || $canRunCommand;
+@endphp
+
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Tenants</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -58,7 +66,7 @@
                             <div class="form-group">
                                 <label for="payment_status"> Payment Status: <span class="text-danger">*</span></label>
                                 <select required data-placeholder="Select Status" class="form-control select" name="payment_status" id="payment_status">
-                                    @foreach (Pay::getPaymentStatuses() as $key => $value)
+                                    @foreach (Pay::getPaymentStatusOptions() as $key => $value)
                                     <option @selected(old('payment_status')==$key) value="{{ $key }}">{{ $value }}</option>
                                     @endforeach
                                 </select>
@@ -91,7 +99,9 @@
                             <th>Payment Status</th>
                             <th>Created At</th>
                             <th>Updated At</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -104,27 +114,28 @@
                             <td>{{ ucfirst($tenant->payment_status) }}</td>
                             <td>{{ $tenant->created_at->diffForHumans() }}</td>
                             <td>{{ $tenant->updated_at->diffForHumans() }}</td>
+
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
 
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Edit --}}
-                                            @can($central_permissions['tenants']['edit']['permission'])
+                                            @if($canEdit)
                                             <a href="{{ route('tenants.edit', Qs::hash($tenant->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
-                                            @endcan
-                                            {{-- View Profile --}}
-                                            @can($central_permissions['tenants']['show']['permission'])
+                                            @endif
+
+                                            @if($canShow)
                                             <a href="{{ route('tenants.show', Qs::hash($tenant->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> View Profile</a>
-                                            @endcan
-                                            {{-- Delete --}}
-                                            @can($central_permissions['tenants']['destroy']['permission'])
+                                            @endif
+
+                                            @if($canDelete)
                                             <a id="tenant-delete-{{ Qs::hash($tenant->id) }}" onclick="confirmPermanentDeleteTwice(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                             <form method="post" id="item-delete-tenant-delete-{{ Qs::hash($tenant->id) }}" action="{{ route('tenants.destroy', Qs::hash($tenant->id)) }}" class="hidden page-block">@csrf @method('delete')</form>
-                                            @endcan
+                                            @endif
 
-                                            @can($central_permissions['tenants']['run_command']['permission'])
+                                            @if($canRunCommand)
                                             {{-- Tenant Migrate --}}
                                             <a id="tenant-migrate-{{ Qs::hash($tenant->id) }}" onclick="confirmOperationTwice(this.id)" href="javascript:;" class="dropdown-item text-warning"><i class="material-symbols-rounded">swap_vert</i> Migrate</a>
                                             <form method="post" id="item-confirm-operation-tenant-migrate-{{ Qs::hash($tenant->id) }}" action="{{ route('tenants.run_command', [0, Qs::hash($tenant->id)]) }}" class="hidden page-block">@csrf @method('post')</form>
@@ -134,11 +145,12 @@
                                             {{-- Tenant Seed --}}
                                             <a id="tenant-seed-{{ Qs::hash($tenant->id) }}" onclick="confirmOperationTwice(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">filter_vintage</i> Seed</a>
                                             <form method="post" id="item-confirm-operation-tenant-seed-{{ Qs::hash($tenant->id) }}" action="{{ route('tenants.run_command', [2, Qs::hash($tenant->id)]) }}" class="hidden page-block">@csrf @method('post')</form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>

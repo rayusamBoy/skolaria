@@ -4,13 +4,14 @@
 
 @section('content')
 
-@if(!Qs::currentSessionMatchesCurrentYear() && auth()->user()->can('view_system_warnings'))
+@if(!Qs::currentSessionMatchesCurrentYear() && auth()->user()->can($tenant_permissions['system']['view_warnings']['permission']))
 @php session()->flash('pop_warning_confirm', __('msg.session_and_year_not_matched')) @endphp
 @endif
 
 <div class="card-columns">
 
-    <!-- Active Students -->
+    {{-- Active Students --}}
+    @can($tenant_permissions['dashboard_statistics']['active_students']['permission'])
     <div class="card card-body bg-teal-300">
         <div class="media">
             <div class="media-body">
@@ -27,15 +28,17 @@
                     </div>
                 </div>
             </div>
-            @if(auth()->user()->hasAnyRole(Usr::getTenancyAwareStaffRoles()))
+            @can($tenant_permissions['dashboard_statistics']['student_breakdown_modal']['permission'])
             <div class="ml-3 align-self-center d-md-block cursor-pointer" data-toggle="modal" data-target="#students-number">
                 <em class="btn btn-sm">VIEW BREAKDOWN</em>
             </div>
-            @endif
+            @endcan
         </div>
     </div>
+    @endcan
 
-    <!-- Graduated Students -->
+    {{-- Graduated Students --}}
+    @can($tenant_permissions['dashboard_statistics']['graduated_students']['permission'])
     <div class="card card-body bg-slate-800">
         <div class="media">
             <div class="media-body">
@@ -54,8 +57,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
-    <!-- Overall Students -->
+    {{-- Overall Students --}}
+    @can($tenant_permissions['dashboard_statistics']['overall_students']['permission'])
     <div class="card card-body bg-slate-600">
         <div class="media">
             <div class="media-body">
@@ -75,8 +80,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
-    <!-- Total Administrators -->
+    {{-- Total Administrators --}}
+    @can($tenant_permissions['dashboard_statistics']['administrators']['permission'])
     <div class="card card-body bg-danger-600 has-bg-image">
         <div class="media">
             <div class="media-body">
@@ -98,8 +105,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
-    <!-- Support Team (Teachers) -->
+    {{-- Total Teachers --}}
+    @can($tenant_permissions['dashboard_statistics']['teachers']['permission'])
     <div class="card card-body bg-danger-400 has-bg-image">
         <div class="media">
             <div class="media-body ml-2">
@@ -115,8 +124,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
-    <!-- Accountants & Librarians -->
+    {{-- Accountants & Librarians --}}
+    @can($tenant_permissions['dashboard_statistics']['accountants_librarians']['permission'])
     <div class="card card-body bg-danger-400 has-bg-image">
         <div class="media">
             <div class="media-body ml-2">
@@ -136,8 +147,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
-    <!-- Assessments Declared -->
+    {{-- Assessments Declared --}}
+    @can($tenant_permissions['dashboard_statistics']['assessments_declared']['permission'])
     <div class="card card-body bg-success-400 has-bg-image">
         <div class="media">
             <div class="media-body">
@@ -149,8 +162,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
-    <!-- Total Parents -->
+    {{-- Total Parents --}}
+    @can($tenant_permissions['dashboard_statistics']['parents']['permission'])
     <div class="card card-body bg-indigo-400 has-bg-image">
         <div class="media">
             <div class="media-body">
@@ -169,8 +184,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
-    <!-- Total Subjects -->
+    {{-- Total Subjects --}}
+    @can($tenant_permissions['dashboard_statistics']['subjects']['permission'])
     <div class="card card-body bg-brown-400 has-bg-image">
         <div class="media">
             <div class="media-body">
@@ -182,8 +199,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
-    <!-- Total Classes -->
+    {{-- Total Classes --}}
+    @can($tenant_permissions['dashboard_statistics']['classes']['permission'])
     <div class="card card-body bg-orange-400 has-bg-image">
         <div class="media">
             <div class="media-body">
@@ -195,8 +214,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
-    <!-- Results Declared -->
+    {{-- Results Declared --}}
+    @can($tenant_permissions['dashboard_statistics']['results_declared']['permission'])
     <div class="card card-body bg-success-400 has-bg-image">
         <div class="media">
             <div class="media-body">
@@ -208,8 +229,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
-    <!-- Total Payments Done -->
+    {{-- Total Payments Done --}}
+    @can($tenant_permissions['dashboard_statistics']['payments_done']['permission'])
     <div class="card card-body bg-pink-400 has-bg-image">
         <div class="media">
             <div class="media-body">
@@ -221,8 +244,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
-    <!-- Total Books -->
+    {{-- Total Books --}}
+    @can($tenant_permissions['dashboard_statistics']['books']['permission'])
     <div class="card card-body bg-violet-800 has-bg-image">
         <div class="media">
             <div class="media-body">
@@ -234,8 +259,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
-    <!-- Total Book Requests -->
+    {{-- Total Book Requests --}}
+    @can($tenant_permissions['dashboard_statistics']['book_requests']['permission'])
     <div class="card card-body bg-violet-400 has-bg-image">
         <div class="media">
             <div class="media-body ml-2">
@@ -256,11 +283,13 @@
             </div>
         </div>
     </div>
+    @endcan
 
 </div>
 
-<!-- Reports section (larger charts) -->
+{{-- Reports section (larger charts) --}}
 <div class="row">
+    @can($tenant_permissions['dashboard_statistics']['gender_chart']['permission'])
     <div class="col-md-6">
         <div class="card card-collapsed print-this">
             <div class="card-header header-elements-inline">
@@ -278,7 +307,8 @@
             </div>
         </div>
     </div>
-
+    @endcan
+    @can($tenant_permissions['dashboard_statistics']['payments_chart']['permission'])
     <div class="col-md-6">
         <div class="card card-collapsed print-this">
             <div class="card-header header-elements-inline">
@@ -296,8 +326,10 @@
             </div>
         </div>
     </div>
+    @endcan
 </div>
 
+@can($tenant_permissions['dashboard_statistics']['students_per_class_chart']['permission'])
 <div class="row">
     <div class="col-12">
         <div class="card card-collapsed print-this">
@@ -311,14 +343,15 @@
                     </div>
                 </div>
             </div>
-           <div class="card-body">
+            <div class="card-body">
                 <canvas id="chart-students-per-class" width="800" height="240" aria-label="Students per class" role="img"></canvas>
-           </div>
+            </div>
         </div>
     </div>
 </div>
+@endcan
 
-<!-- Notices -->
+{{-- Notices --}}
 <div class="row">
     <div class="col-12">
         <div class="card card-collapsed">
@@ -341,7 +374,8 @@
     </div>
 </div>
 
-@includeWhen(auth()->user()->can($tenant_permissions['notices']['index']['permission']), 'pages.modals.students_number_breakdown')
+{{-- Student breakdown modal --}}
+@includeWhen(auth()->user()->can($tenant_permissions['dashboard_statistics']['student_breakdown_modal']['permission']) && auth()->user()->can($tenant_permissions['notices']['index']['permission']), 'pages.modals.students_number_breakdown')
 
 @endsection
 

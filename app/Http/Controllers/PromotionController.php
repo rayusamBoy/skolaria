@@ -7,12 +7,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Mark;
 use App\Repositories\MyClassRepo;
 use App\Repositories\StudentRepo;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
 class PromotionController extends Controller
 {
-    protected $my_class, $student;
+    protected MyClassRepo $my_class;
+    protected StudentRepo $student;
+    protected $year;
 
     public function __construct(MyClassRepo $my_class, StudentRepo $student)
     {
@@ -20,110 +25,170 @@ class PromotionController extends Controller
         parent::__construct();
         $this->my_class = $my_class;
         $this->student = $student;
+        $this->year = Qs::getCurrentSession();
     }
 
-    public function promotion($status, $fc = NULL, $fs = NULL, $tc = NULL, $ts = NULL)
+    /**
+     * Show promotion form (selector) and optionally student list for a class/section.
+     */
+    public function promotion($status = null, $fc = null, $fs = null, $tc = null, $ts = null): View|RedirectResponse
     {
-        $d['old_year'] = $old_yr = Qs::getSetting('current_session');
-        $old_yr = explode('-', $old_yr);
-        $d['new_year'] = ++$old_yr[0] . '-' . ++$old_yr[1];
-        $d['sections'] = $this->my_class->getAllSections();
-        $d['selected'] = false;
+        $old_year = $this->year;
+        $old_yr = explode('-', $old_year);
+        $new_year = ++$old_yr[0] . '-' . ++$old_yr[1];
+
+        $data = [
+            'old_year' => $old_year,
+            'new_year' => $new_year,
+            'sections' => $this->my_class->getAllSections(),
+            'selected' => false,
+        ];
 
         if ($fc && $fs && $tc && $ts) {
-            $d['selected'] = true;
-            $d['status'] = $status; // Student status, whether is an active student (1) or graduated student (0)
-            $d['fc'] = $fc;
-            $d['fs'] = $fs;
-            $d['tc'] = $tc;
-            $d['ts'] = $ts;
+            $data['selected'] = true;
+            $data['status'] = $status;
+            $data['fc'] = $fc;
+            $data['fs'] = $fs;
+            $data['tc'] = $tc;
+            $data['ts'] = $ts;
 
-            $d['students'] = $sts = ($status == 1) ? $this->student->whereRecord(['my_class_id' => $fc, 'section_id' => $fs, 'session' => $d['old_year']])->with('promotion')->get()->whereNotNull('user') : $this->student->whereGraduatesRecord(['my_class_id' => $fc, 'section_id' => $fs, 'session' => $d['old_year']])->with('promotion')->get()->whereNotNull('user');
+            $query = ($status == 1)
+                ? $this->student->getActiveStudentsQueryWithRelations([
+                    'my_class_id' => $fc,
+                    'section_id' => $fs,
+                    'session' => $old_year,
+                ])
+                : $this->student->getGraduatedStudentsQuery([
+                    'my_class_id' => $fc,
+                    'section_id' => $fs,
+                    'session' => $old_year,
+                ]);
 
-            if ($sts->count() < 1)
-                return redirect()->route('students.promotion')->with('flash_success', __('msg.nstp'));
+            $students = $query->with('promotion')->get()->whereNotNull('user');
+
+            if ($students->isEmpty()) {
+                return redirect()->route('students.promotion')
+                    ->with('flash_success', __('msg.nstp'));
+            }
+
+            $data['students'] = $students;
         }
 
-        return view('pages.students.promotion.index', $d);
+        return view('pages.students.promotion.index', $data);
     }
 
-    public function selector(Request $req)
+    /**
+     * Handle the promotion selection form and redirect to the promotion action.
+     */
+    public function selector(Request $req): RedirectResponse
     {
-        return redirect()->route('students.promotion', [$req->status, $req->fc, $req->fs, $req->tc, $req->ts]);
+        return redirect()->route('students.promotion', [
+            $req->status,
+            $req->fc,
+            $req->fs,
+            $req->tc,
+            $req->ts,
+        ]);
     }
 
-    public function promote(Request $req, $status, $fc, $fs, $tc, $ts)
+    /**
+     * Promote, retain or graduate selected students.
+     */
+    public function promote(Request $req, $status, $fc, $fs, $tc, $ts): RedirectResponse
     {
-        $d = [];
-        $oy = Qs::getSetting('current_session');
-        $old_yr = explode('-', $oy);
-        $ny = ++$old_yr[0] . '-' . ++$old_yr[1];
-        $students = ($status == 1) ? $this->student->whereRecord(['my_class_id' => $fc, 'section_id' => $fs, 'session' => $oy])->get()->whereNotNull('user')->sortBy('user.name') : $this->student->whereGraduatesRecord(['my_class_id' => $fc, 'section_id' => $fs, 'session' => $oy])->get()->whereNotNull('user')->sortBy('user.name');
+        $old_year = Qs::getSetting('current_session');
+        $old_yr = explode('-', $old_year);
+        $new_year = ++$old_yr[0] . '-' . ++$old_yr[1];
 
-        if ($students->count() < 1)
-            return redirect()->route('students.promotion')->with('flash_danger', __('msg.srnf'));
+        $students = ($status == 1)
+            ? $this->student->getActiveStudentsQueryWithRelations([
+                'my_class_id' => $fc,
+                'section_id' => $fs,
+                'session' => $old_year,
+            ])->get()->whereNotNull('user')
+            : $this->student->getGraduatedStudentsQuery([
+                'my_class_id' => $fc,
+                'section_id' => $fs,
+                'session' => $old_year,
+            ])->get()->whereNotNull('user');
+
+        if ($students->isEmpty()) {
+            return redirect()->route('students.promotion')
+                ->with('flash_danger', __('msg.srnf'));
+        }
 
         foreach ($students as $st) {
-            $p = "p-{$st->id}";
-            $p = $req->$p;
+            $action = $req->input("p-{$st->id}");
 
-            if ($p === 'P') { // Promote
-                $d['my_class_id'] = $tc;
-                $d['section_id'] = $ts;
-                $d['grad'] = 0;
-                $d['grad_date'] = NULL;
-                $d['session'] = $ny;
+            $student_update = [];
+            if ($action === 'P') { // Promote
+                $student_update = [
+                    'my_class_id' => $tc,
+                    'section_id' => $ts,
+                    'is_graduated' => false,
+                    'graduated_session' => null,
+                    'session' => $new_year,
+                ];
+            } elseif ($action === 'D') { // Don't Promote
+                $student_update = [
+                    'my_class_id' => $fc,
+                    'section_id' => $fs,
+                    'is_graduated' => $st->is_graduated ?? false,
+                    'graduated_session' => null,
+                    'session' => $old_year,
+                ];
+            } elseif ($action === 'G') { // Graduated
+                $student_update = [
+                    'my_class_id' => $fc,
+                    'section_id' => $fs,
+                    'is_graduated' => true,
+                    'graduated_session' => $old_year,
+                ];
             }
-            if ($p === 'D') { // Don't Promote
-                $d['my_class_id'] = $fc;
-                $d['section_id'] = $fs;
-                $d['grad'] = $st->grad ?? 0;
-                $d['grad_date'] = NULL;
-                $d['session'] = $oy;
-            }
-            if ($p === 'G') { // Graduated
-                $d['my_class_id'] = $fc;
-                $d['section_id'] = $fs;
-                $d['grad'] = 1;
-                $d['grad_date'] = $oy;
+
+            if ($student_update) {
+                $this->student->updateStudentRecords($st->id, $student_update);
             }
 
-            $this->student->updateRecord($st->id, $d);
-
-            //  Insert New Promotion Data
-            $promote['from_class'] = $fc;
-            $promote['from_section'] = $fs;
-            $promote['grad'] = ($p === 'G') ? 1 : 0;
-            $promote['to_class'] = \in_array($p, ['D', 'G']) ? $fc : $tc;
-            $promote['to_section'] = \in_array($p, ['D', 'G']) ? $fs : $ts;
-            $promote['student_id'] = $st->id;
-            $promote['user_id'] = $st->user_id;
-            $promote['user'] = $st->user_id;
-            $promote['from_session'] = $oy;
-            $promote['to_session'] = $ny;
-            $promote['status'] = $p; // Student status whether is Promoted (P), Did not promoted (D), or Graduated (G)
-
-            $this->student->createPromotion($promote);
+            // Insert promotion record
+            $promotion = [
+                'previous_my_class_id' => $fc,
+                'previous_section_id' => $fs,
+                'is_graduated' => ($action === 'G'),
+                'new_my_class_id' => \in_array($action, ['D', 'G']) ? $fc : $tc,
+                'new_section_id' => \in_array($action, ['D', 'G']) ? $fs : $ts,
+                'student_id' => $st->id,
+                'user_id' => $st->user_id,
+                'user' => $st->user_id,
+                'from_session' => $old_year,
+                'to_session' => $new_year,
+                'status' => $action,
+            ];
+            $this->student->createPromotion($promotion);
         }
 
-        return redirect()->route('students.promotion')->with('flash_success', __('msg.update_ok'));
+        return redirect()->route('students.promotion')
+            ->with('flash_success', __('msg.update_ok'));
     }
 
-    public function remarks(Request $req, $p_id)
+    /**
+     * Update remarks for a promotion record.
+     */
+    public function remarks(Request $req, $p_id): JsonResponse
     {
         Validator::make($req->toArray(), [
-            'remarks' => 'sometimes|nullable|string|max:500'
-        ], [], [])->validate();
+            'remarks' => 'sometimes|nullable|string|max:500',
+        ])->validate();
 
-        $data = $req->only('remarks');
-
-        $this->student->updatePromotion(['id' => $p_id], $data);
+        $this->student->updatePromotion(['id' => $p_id], $req->only('remarks'));
 
         return Qs::jsonUpdateOk();
     }
 
-
-    public function manage()
+    /**
+     * Show the promotion management / reset page.
+     */
+    public function manage(): View
     {
         $data['promotions'] = $this->student->getAllPromotions()->whereNotNull('user');
         $data['old_year'] = Qs::getCurrentSession();
@@ -132,46 +197,65 @@ class PromotionController extends Controller
         return view('pages.students.promotion.reset', $data);
     }
 
-    public function reset($promotion_id)
+    /**
+     * Reset a single promotion.
+     */
+    public function reset($promotion_id): RedirectResponse
     {
         $this->reset_single($promotion_id);
 
-        return redirect()->route('students.promotion.manage')->with('flash_success', __('msg.update_ok'));
+        return redirect()->route('students.promotion.manage')
+            ->with('flash_success', __('msg.update_ok'));
     }
 
-    public function reset_all()
+    /**
+     * Reset all promotions for the current session → next session.
+     */
+    public function reset_all(): RedirectResponse
     {
         $where = ['from_session' => Qs::getCurrentSession(), 'to_session' => Qs::getNextSession()];
-        $proms = $this->student->getPromotions($where);
+        $promotions = $this->student->getPromotionsByConditions($where);
 
-        if ($proms->count() > 0)
-            foreach ($proms as $prom) {
+        if ($promotions->isNotEmpty()) {
+            foreach ($promotions as $prom) {
                 $this->reset_single($prom->id);
             }
+        }
 
-        return redirect()->route('students.promotion.manage')->with('flash_success', __('msg.update_ok'));
+        return redirect()->route('students.promotion.manage')
+            ->with('flash_success', __('msg.update_ok'));
     }
 
-    protected function delete_old_marks($student_id, $year)
+    /**
+     * Delete marks for a student in a given year.
+     */
+    protected function delete_old_marks(int $student_id, string $year): void
     {
         Mark::where(['student_id' => $student_id, 'year' => $year])->delete();
     }
 
-    protected function reset_single($promotion_id)
+    /**
+     * Reset a single promotion record (rollback).
+     */
+    protected function reset_single(int $promotion_id): void
     {
         $prom = $this->student->findPromotion($promotion_id);
 
-        $data['my_class_id'] = $prom->from_class;
-        $data['section_id'] = $prom->from_section;
-        $data['session'] = $prom->from_session;
-        $data['grad'] = 0;
-        $data['grad_date'] = null;
+        if (!$prom) {
+            return;
+        }
 
-        $this->student->updateRecord($prom->user_id, $data, 'user_id');
+        $this->student->updateStudentRecords($prom->user_id, [
+            'my_class_id' => $prom->previous_my_class_id,
+            'section_id' => $prom->previous_section_id,
+            'session' => $prom->from_session,
+            'is_graduated' => false,
+            'graduated_session' => null,
+        ], 'user_id');
 
-        // Delete Marks if Already Inserted for New Session
+        // Delete marks that might have been entered for the new session
         $this->delete_old_marks($prom->student_id, Qs::getNextSession());
 
-        return $this->student->deletePromotion($promotion_id);
+        $this->student->deletePromotion($promotion_id);
     }
 }

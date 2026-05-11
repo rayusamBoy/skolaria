@@ -33,12 +33,12 @@ class TicketPropertiesCreate extends FormRequest
     public function attributes()
     {
         return [
-            'categories.name.*' => 'Category name',
-            'categories.description.*' => 'Category description',
-            'categories.is_visible.*' => 'Category visibility',
-            'labels.name.*' => 'Label name',
-            'labels.description.*' => 'Label description',
-            'labels.is_visible.*' => 'Label visibility',
+            'categories.name.*' => 'category name',
+            'categories.description.*' => 'category description',
+            'categories.is_visible.*' => 'category visibility',
+            'labels.name.*' => 'label name',
+            'labels.description.*' => 'label description',
+            'labels.is_visible.*' => 'label visibility',
         ];
     }
 }

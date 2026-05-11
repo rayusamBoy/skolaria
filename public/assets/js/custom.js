@@ -78,12 +78,12 @@ $(document).ready(() => {
     $("form.page-block").on("submit", () => blockUI());
 
     $(".date-pick").datepicker({
-        format: "mm/dd/yyyy",
+        format: "yyyy-mm-dd",
         autoclose: true,
     });
 
-    $(".date-pick-day-none").datepicker({
-        format: "M, yyyy",
+    $(".date-pick-full-month-year").datepicker({
+        format: "MM, yyyy",
         autoclose: true,
     });
 
@@ -493,6 +493,7 @@ const updateHiddenIDs = (ids, $el) => {
     const $btn = $el.find("button.do-not-show-again");
     $btn.hide();
     $.ajax({
+        global: false,
         url: update_hidden_alerts_url,
         method: "POST",
         data: { hidden_alert_ids: ids },
@@ -1088,6 +1089,7 @@ const getNoticesData = (url) => {
             )}</div>`,
         );
     $.ajax({
+        global: false,
         url,
         type: "get",
         datatype: "html",
@@ -1233,14 +1235,14 @@ function getTableColumns(tableName) {
                     '<option disabled selected>where</option><option value="none" selected>none (default)</option>',
                 );
             $.each(resp, (i, data) => {
-                if (i !== "photo")
+                if (i !== "photo_path")
                     $where.append($("<option>", { value: i, text: data }));
             });
             $orderby
                 .empty()
                 .append('<option value="id" selected>id (default)</option>');
             $.each(resp, (i, data) => {
-                if (i !== "photo")
+                if (i !== "photo_path")
                     $orderby.append($("<option>", { value: i, text: data }));
             });
             $select
@@ -1740,7 +1742,7 @@ function updateExamLockState(exam_id, el) {
         const value = el.checked ? 1 : 0;
         $.ajax({
             method: "post",
-            data: { id: exam_id, locked: value },
+            data: { id: exam_id, is_locked: value },
             url,
             success: (resp) => {
                 if (!resp.ok) {
@@ -1766,7 +1768,7 @@ function updateStaffDataEdtiState(user_id, el) {
         const value = el.checked ? 1 : 0;
         $.ajax({
             method: "post",
-            data: { id: user_id, staff_data_edit: value },
+            data: { id: user_id, allow_staff_data_edit: value },
             url,
             success: (resp) => {
                 if (!resp.ok) {
@@ -1792,7 +1794,7 @@ function updateUserBlockedState(user_id, el) {
         const value = el.checked ? 1 : 0;
         $.ajax({
             method: "post",
-            data: { id: user_id, blocked: value },
+            data: { id: user_id, is_blocked: value },
             url,
             success: (resp) => {
                 if (!resp.ok) {
@@ -1877,22 +1879,22 @@ $("a.needs-reset-pass-confirmation").on("click", function (ev) {
  */
 $("form.ajax-pay").on("submit", function (ev) {
     ev.preventDefault();
-    submitForm($(this), "store");
+    submitForm($(this), "store", true);
     // Retrieve IDS
     const formId = $(this).attr("id");
     const $tdAmt = $(`td#amt-${formId}`);
-    const $tdAmtPaid = $(`td#amt_paid-${formId}`);
+    const $tdAmountPaid = $(`td#amount_paid-${formId}`);
     const $tdBal = $(`td#bal-${formId}`);
     const $input = $(`#val-${formId}`);
     // Get Values
     let amt = parseInt($tdAmt.data("amount"));
-    let amtPaid = parseInt($tdAmtPaid.data("amount"));
+    let amtPaid = parseInt($tdAmountPaid.data("amount"));
     const amtInput = parseInt($input.val());
     // Update Values
     amtPaid += amtInput;
     const bal = amt - amtPaid;
     $tdBal.text(`${bal}`);
-    $tdAmtPaid.text(`${amtPaid}`).data("amount", `${amtPaid}`);
+    $tdAmountPaid.text(`${amtPaid}`).data("amount", `${amtPaid}`);
     $input.attr("max", bal);
     if (bal < 1) $(`#${formId}`).fadeOut("slow").remove();
 });
@@ -1911,7 +1913,8 @@ $(document).on(
             $(this).hasClass("ajax-store") || $(this).attr("id") === "ajax-reg"
                 ? "store"
                 : "";
-        submitForm($(this), formType);
+        const $isNotGlobal = $(this).hasClass("ajax-not-global");
+        submitForm($(this), formType, $isNotGlobal);
         const reloadDiv = $(this).data("reload");
         if (reloadDiv) reloadDivFn(reloadDiv);
     },
@@ -1932,7 +1935,7 @@ function reloadDivFn(div, url = window.location.href) {
  * Submit form (base method for submitting forms)
  *-------------------------------------------------------------
  */
-function submitForm($form, formType) {
+function submitForm($form, formType, $isNotGlobal = false) {
     // Normal form Submit button
     let $btn = $form.find("button[type=submit]");
     // Wizard form - Steps validation Submit button
@@ -1941,6 +1944,7 @@ function submitForm($form, formType) {
     if ($btn.hasClass("needs-time-counter")) setTimeCounter($btn);
     disableBtn($btn);
     const ajaxOptions = {
+        global: !$isNotGlobal,
         url: $form.attr("action"),
         type: "POST",
         cache: false,
@@ -1955,6 +1959,7 @@ function submitForm($form, formType) {
             if ($btn.hasClass("needs-time-counter")) stopTimeCounter();
             hideAjaxAlert();
             enableBtn($btn, btnHtml);
+            if (resp.hasAjaxErrors) displayAjaxErr(resp.errors);
             if (resp.ok && resp.msg) {
                 resp.pop
                     ? pop({
@@ -2498,14 +2503,14 @@ $(".deselect-all-group").click(function () {
  */
 $(document).on(
     "click",
-    "#students-block-all-active, #students-block-all-grad",
+    "#students-block-all-active, #students-block-all-graduated",
     function () {
         confirmRequest($(this), "block");
     },
 );
 $(document).on(
     "click",
-    "#students-unblock-all-active, #students-unblock-all-grad",
+    "#students-unblock-all-active, #students-unblock-all-graduated",
     function () {
         confirmRequest($(this), "unblock");
     },
@@ -2552,3 +2557,30 @@ function ajaxProcessRequest($this, type) {
         },
     );
 }
+
+/**
+ *-------------------------------------------------------------
+ * Handle select change validation for Query-builder
+ *-------------------------------------------------------------
+ */
+$("select#select").on("change", function () {
+    let vals = $(this).val() || [];
+    let btn = $(this).closest("form").find("button[type=submit]");
+    if (vals.includes("*") && vals.length > 1) {
+        $(this)
+            .siblings(".select2")
+            .find(".select2-selection")
+            .addClass("border-danger");
+        btn.prop("disabled", true);
+        pop({
+            msg: "Cannot combine default (*) with specific columns.",
+            type: "warning",
+        });
+        return;
+    }
+    $(this)
+        .siblings(".select2")
+        .find(".select2-selection")
+        .removeClass("border-danger");
+    btn.prop("disabled", false);
+});

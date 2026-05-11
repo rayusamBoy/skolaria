@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title font-weight-bold">Fill The Form To Manage Marks</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -34,7 +34,7 @@
         </div>
     </div>
 
-    @php $is_restricted = $exam->locked && auth()->user()->cannot($tenant_permissions['marks']['update']['permission']) @endphp
+    @php $is_restricted = $exam->is_locked && auth()->user()->cannot($tenant_permissions['marks']['update']['permission']) @endphp
 
     <div class="card-body">
         @include('pages.marks.edit')

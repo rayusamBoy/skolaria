@@ -20,7 +20,7 @@
 <script src="{{ asset('global_assets/js/main/color-modes.js') }}"></script>
 
 @php
-    $colors = $settings->firstWhere('type', 'login_and_related_pgs_txts_and_bg_colors')->description;
+    $colors = $settings->firstWhere('key', 'login_and_related_pgs_txts_and_bg_colors')->value;
     $texts_color = 'var(--navbar-text)';
     $bg_color = 'var(--navbar-bg)';
     if ($colors !== null) {
@@ -28,7 +28,7 @@
         $texts_color = $colors_exploaded[0];
         $bg_color = $colors_exploaded[1];
     }
-    $bg_url = Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'login_and_related_pages_bg'));
+    $bg_url = Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('key', 'login_and_related_pages_bg'));
 @endphp
 
 <style>

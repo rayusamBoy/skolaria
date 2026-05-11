@@ -23,12 +23,4 @@ class PinCreate extends FormRequest
             'pin_count' => 'required|numeric|min:10|max:1000',
         ];
     }
-
-    public function attributes()
-    {
-        return  [
-            'pin_count' => 'Pin Amount',
-        ];
-    }
-
 }

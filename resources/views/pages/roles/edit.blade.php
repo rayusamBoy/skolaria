@@ -1,12 +1,12 @@
 @extends('layouts.master')
 
-@section('page_title', 'Edit Role')
+@section('page_title', "Edit Role - $role->name")
 
 @section('content')
 <div class="card">
     <div class="card-header header-elements-inline">
-        <h6 class="card-title">Edit Role {{ $role->name }}</h6>
-        {!! Qs::getPanelOptions() !!}
+        <h6 class="card-title">Edit Role</h6>
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -38,7 +38,7 @@
                                 <h2 class="mb-0">
                                     <button class="btn btn-link btn-block text-left d-flex justify-content-between align-items-center" type="button" data-toggle="collapse" data-target="#collapse-{{ Str::slug($group) }}" aria-expanded="true" aria-controls="collapse-{{ Str::slug($group) }}">
                                         <span class="font-weight-bold">{{ ucfirst(str_replace('_', ' ', $group)) }}</span>
-                                        <span class="badge badge-primary badge-pill">{{ count($perms) }}</span>
+                                        <span class="badge badge-primary badge-pill badge-default">{{ count($perms) }}</span>
                                     </button>
                                 </h2>
                             </div>

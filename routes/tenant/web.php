@@ -85,8 +85,8 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         Route::get('show', [AccountSecurityController::class, 'show_google_2fa_verification'])->name('two_factor.show');
         // middleware captures OTP and runs authenticate
         Route::post('authenticate', [AccountSecurityController::class, 'authenticate'])->name('two_factor.authenticate')->middleware(['2fa', 'throttle:5,1']);
-        Route::post('update/code', [AccountSecurityController::class, 'update_secret_codes'])->name('two_factor.update_secret_codes')->middleware('2fa');
-        Route::patch('code/null/{user?}', [AccountSecurityController::class, 'null_secret_code'])->name('two_factor.null_secret_code')->middleware('2fa');
+        Route::post('update/code', [AccountSecurityController::class, 'update_secret_codes'])->name('two_factor.update_secret_codes')->middleware(['2fa', 'password.confirm']);
+        Route::patch('code/null/{user?}', [AccountSecurityController::class, 'null_secret_code'])->name('two_factor.null_secret_code')->middleware(['2fa', 'password.confirm']);
         Route::delete('logout/other-browser-sessions', [AccountSecurityController::class, 'logout_other_browser_sessions'])->name('account_security.logout_other_browser_sessions');
     });
 
@@ -213,7 +213,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             Route::post('store', [NoticeController::class, 'store'])->name('notices.store');
             Route::delete('{notice}', [NoticeController::class, 'destroy'])->name('notices.destroy');
             Route::get('{notice}/edit', [NoticeController::class, 'edit'])->name('notices.edit')->middleware('decodeRouteParams');
-            Route::post('{notice}', [NoticeController::class, 'update_record'])->name('notices.update');
+            Route::post('update/{notice}', [NoticeController::class, 'update'])->name('notices.update');
         });
 
         /*************** Payments (invoices, receipts, actions) *****************/
@@ -236,8 +236,8 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             Route::get('/', [PinController::class, 'index'])->name('pins.index');
             Route::get('create', [PinController::class, 'create'])->name('pins.create');
             Route::post('store', [PinController::class, 'store'])->name('pins.store');
-            Route::get('enter/{pin}', [PinController::class, 'enter_pin'])->name('pins.enter');
-            Route::post('verify/{pin}', [PinController::class, 'verify'])->name('pins.verify');
+            Route::get('enter/{pin}', [PinController::class, 'enter_pin'])->name('pins.enter')->middleware('decodeRouteParams');
+            Route::post('verify/{pin}', [PinController::class, 'verify'])->name('pins.verify')->middleware('decodeRouteParams');
             Route::delete('/', [PinController::class, 'destroy'])->name('pins.destroy');
         });
 
@@ -418,13 +418,13 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         Route::group(['prefix' => 'notifications', 'middleware' => ['universal']], function () {
             Route::post('mark/as-read/{notification}', [NotificationController::class, 'mark_as_read'])->name('notifications.mark_as_read');
             Route::put('mark/all-read', [NotificationController::class, 'mark_all_read'])->name('notifications.mark_all_read');
-            Route::put('update/notifiable', [NotificationController::class, 'update_is_notifiable'])->name('notifications.update_is_notifiable');
+            Route::put('update/notifiable', [NotificationController::class, 'update_notification_preferences'])->name('notifications.update.notification_preferences');
             Route::match(['post', 'put', 'delete'], 'update/firebase/device-token', [NotificationController::class, 'update_firebase_device_token'])->name('notifications.firebase.update_device_token');
         });
 
         /*************** Tickets (support workflow) **************/
         Route::prefix('tickets')->group(function () {
-            Route::get('reply/{ticket}', [TicketController::class, 'reply'])->name('tickets.reply');
+            Route::get('reply/{ticket}', [TicketController::class, 'reply'])->name('tickets.reply')->middleware('decodeRouteParams');
             Route::put('store/message', [TicketController::class, 'store_message'])->name('tickets.store_message');
             Route::get('{ticket}/close', [TicketController::class, 'close_ticket'])->name('tickets.close');
             Route::patch('{ticket}/archive', [TicketController::class, 'archive_ticket'])->name('tickets.archive');

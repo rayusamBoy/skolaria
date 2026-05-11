@@ -4,14 +4,19 @@
 
 @section('content')
 
+@php
+$canEdit = auth()->user()->can($tenant_permissions['class_types']['edit']['permission']);
+$canDelete = auth()->user()->can($tenant_permissions['class_types']['destroy']['permission']);
+$hasActions = $canEdit || $canDelete;
+@endphp
+
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Class Types</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
-        {{-- only users who can create class types see the Create tab --}}
         <ul class="nav nav-tabs nav-tabs-highlight">
             <li class="nav-item">
                 <a href="#manage-class-types" class="nav-link active" data-toggle="tab">
@@ -86,7 +91,9 @@
                             <th>Name</th>
                             <th>Code</th>
                             <th>Minimum Subjects Required</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -96,19 +103,18 @@
                             <td>{{ $ct->name }}</td>
                             <td>{{ $ct->code }}</td>
                             <td>{{ $ct->minimum_subjects_required }}</td>
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Edit --}}
-                                            @can($tenant_permissions['class_types']['edit']['permission'])
+                                            @if($canEdit)
                                             <a href="{{ route('class_types.edit', $ct->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-                                            @endcan
-                                            {{-- Delete --}}
-                                            @can($tenant_permissions['class_types']['destroy']['permission'])
+                                            @endif
+                                            @if($canDelete)
                                             <a id="{{ $ct->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -116,17 +122,17 @@
                                                 @csrf
                                                 @method('delete')
                                             </form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
 </div>

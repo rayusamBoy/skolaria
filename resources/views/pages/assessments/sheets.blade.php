@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded">two_pager</i> Select Student Assessmentsheet</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -74,10 +74,10 @@
                 @foreach($students->whereNotNull('user') as $s)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhoto($s->user->photo) }}" alt="photo"></td>
+                    <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhotoUrl($s->user->photo_path) }}" alt="photo"></td>
                     <td>{{ $s->user->name }}</td>
                     <td>{{ $s->user->gender }}</td>
-                    <td>{{ $s->adm_no }}</td>
+                    <td>{{ $s->admission_number }}</td>
                     <td><a class="btn btn-link" href="{{ route('assessments.year_selector', Qs::hash($s->user_id)) }}">View Assessmentsheet</a></td>
                 </tr>
                 @endforeach

@@ -47,10 +47,10 @@ class UserController extends Controller
      */
     public function index(): View
     {
-        $data['nationals'] = $this->loc->getAllNationals();
+        $data['nationals'] = $this->loc->getAllNationalities();
         $data['blood_groups'] = $this->user->getBloodGroups();
-        $data['roles'] = $this->permission->getRoles($this->getExcludedRoles());
-        $data['permissions'] = $this->permission->getPermissions();
+        $data['roles'] = $this->permission->getAllRoles($this->getExcludedRoles());
+        $data['permissions'] = $this->permission->getAllPermissions();
 
         return view('pages.users.index', $data);
     }
@@ -60,15 +60,15 @@ class UserController extends Controller
      */
     public function edit($user): View
     {
-        $roles = $this->permission->getRoles($this->getExcludedRoles());
+        $roles = $this->permission->getAllRoles($this->getExcludedRoles());
 
         $data['roles'] = $roles;
-        $data['permissions'] = $this->permission->getPermissions();
-        $data['user'] = $this->user->find($user);
-        $data['staff_rec'] = $this->user->getStaffRecord(['user_id' => $user])->first();
+        $data['permissions'] = $this->permission->getAllPermissions();
+        $data['user'] = $this->user->findUser($user);
+        $data['staff_rec'] = $this->user->getStaffRecordsByConditions(['user_id' => $user])->first();
         $data['users'] = $this->user->getUsersByRoleNames($roles->pluck('name')->toArray());
         $data['blood_groups'] = $this->user->getBloodGroups();
-        $data['nationals'] = $this->loc->getAllNationals();
+        $data['nationals'] = $this->loc->getAllNationalities();
 
         return view('pages.users.edit', $data);
     }
@@ -82,7 +82,7 @@ class UserController extends Controller
             return back()->with('flash_danger', __('msg.denied'));
         }
 
-        $this->user->update($user, [
+        $this->user->updateUsersByColumn($user, [
             'password' => Hash::make('user'),
             'password_updated_at' => null,
         ]);
@@ -107,7 +107,7 @@ class UserController extends Controller
             return Usr::json(__('msg.user_invalid'), false);
         }
 
-        $user = $this->user->create($user_data);
+        $user = $this->user->createUser($user_data);
         $user->syncRoles($role_names);
 
         if ($req->filled('permissions')) {
@@ -134,7 +134,7 @@ class UserController extends Controller
             return Usr::json(__('msg.denied'), false);
         }
 
-        $user = $this->user->find($user_id);
+        $user = $this->user->findUser($user_id);
         $role_names = $req->roles;
         $last_role_name = strtolower(last($role_names));
 
@@ -143,7 +143,7 @@ class UserController extends Controller
         $user_is_parent = $user->hasRole(config('roles.default_roles.tenant.parent'));
 
         $user_data = $this->prepareUserData($req, $last_role_name, $user_is_staff, $user->code);
-        $user_data['work'] = $user_is_parent ? $req->work : null;
+        $user_data['occupation'] = $user_is_parent ? $req->occupation : null;
 
         $this->handlePhotoUpload($req, $user_data, $user->code, $last_role_name);
         $user->update($user_data);
@@ -172,17 +172,17 @@ class UserController extends Controller
             return back()->with('pop_error', __('msg.denied'));
         }
 
-        $user = $this->user->find($user_id);
+        $user = $this->user->findUser($user_id);
         $user_is_parent = $user->hasRole(config('roles.default_roles.tenant.parent'));
         $data['user_is_parent'] = $user_is_parent;
         $data['user'] = $user;
 
         if ($this->hasStaffRole($user->roles->pluck('name')->toArray())) {
-            $data['staff_rec'] = $this->user->getStaffRecord(['user_id' => $user->id])->first();
+            $data['staff_rec'] = $this->user->getStaffRecordsByConditions(['user_id' => $user->id])->first();
         }
 
         if ($user_is_parent) {
-            $data['my_childrens'] = $this->student->getRecord(['my_parent_id' => $user->id], ['user', 'my_class']);
+            $data['my_childrens'] = $this->student->getStudentRecords(['my_parent_id' => $user->id], ['user', 'my_class']);
         }
 
         if ($user->hasRole(config('roles.default_roles.tenant.teacher'))) {
@@ -201,7 +201,7 @@ class UserController extends Controller
             return back()->with('pop_error', __('msg.denied'));
         }
 
-        $user = $this->user->find($user);
+        $user = $this->user->findUser($user);
 
         if ($user->hasRole(config('roles.default_roles.tenant.teacher')) && $this->userTeachesSubject($user->id)) {
             return back()->with('pop_error', __('msg.del_teacher'));
@@ -219,18 +219,18 @@ class UserController extends Controller
     {
         $this->user->updateStaffRecord(
             ['user_id' => $req->id],
-            $req->only('staff_data_edit')
+            $req->input('allow_staff_data_edit')
         );
 
         return Usr::json('ok');
     }
 
     /**
-     * Toggle user blocked status.
+     * Toggle user is_blocked status.
      */
     public function toggle_user_block(UserBlockedState $req): JsonResponse
     {
-        $this->user->update($req->id, $req->only('blocked'));
+        $this->user->updateUsersByColumn($req->id, $req->only('is_blocked'));
 
         return Usr::json('ok');
     }
@@ -281,7 +281,7 @@ class UserController extends Controller
      */
     protected function hasStaffRole(array $roles): bool
     {
-        return \count(array_intersect($roles, Usr::getStaff())) > 0;
+        return \count(array_intersect($roles, Usr::getStaffRoleNames())) > 0;
     }
 
     /**
@@ -294,8 +294,8 @@ class UserController extends Controller
         ?string $existing_code = null
     ): array {
         $exclude = [
-            ...Usr::getStaffRecord(),
-            ...Usr::getParentRelativeRecord(),
+            ...Usr::getStaffRecordFields(),
+            ...Usr::getParentRelativeRecordFields(),
             '_token',
             '_method'
         ];
@@ -304,13 +304,13 @@ class UserController extends Controller
 
         $data['name'] = $name = ucwords(strtolower($req->name));
         $data['message_media_heading_color'] = Usr::getUserMediaHeadingColor($name);
-        $data['dob'] = $req->dob;
+        $data['date_of_birth'] = $req->date_of_birth;
 
         if ($existing_code === null) {
             // New user
             $data['code'] = strtoupper(Str::random(10));
             $data['username'] = $user_is_staff
-                ? $this->generateStaffId($req->emp_date)
+                ? $this->generateStaffId($req->employment_date)
                 : $req->username;
             $this->handlePhotoUpload($req, $data, $data['code'], $last_role_name);
         } else {
@@ -324,10 +324,10 @@ class UserController extends Controller
     /**
      * Generate a unique staff ID.
      */
-    protected function generateStaffId($emp_date = null): string
+    protected function generateStaffId($employment_date = null): string
     {
-        $date = $emp_date ?: now();
-        return Usr::getAppCode() . '/STAFF/' . date('Y/m', strtotime($date)) . '/' . mt_rand(1000, 9999);
+        $date = $employment_date ?: now();
+        return Usr::getSystemShortCode() . '/STAFF/' . date('Y/m', strtotime($date)) . '/' . mt_rand(1000, 9999);
     }
 
     /**
@@ -356,11 +356,11 @@ class UserController extends Controller
      */
     protected function createStaffRecord(int $user_id, UserRequest $req): void
     {
-        $staff_data = $req->only(Usr::getStaffRecord());
+        $staff_data = $req->only(Usr::getStaffRecordFields());
         $staff_data['user_id'] = $user_id;
-        $staff_data['code'] = $this->generateStaffId($req->emp_date);
+        $staff_data['code'] = $this->generateStaffId($req->employment_date);
 
-        $this->user->createStaffRecord($staff_data);
+        $this->user->getStaffRecordsQuery($staff_data);
     }
 
     /**
@@ -368,9 +368,9 @@ class UserController extends Controller
      */
     protected function createParentRecord(int $user_id, UserRequest $req): void
     {
-        $parent_data = $req->only(Usr::getParentRelativeRecord(['name2']));
+        $parent_data = $req->only(Usr::getParentRelativeRecordFields(['relative_name']));
         $parent_data['user_id'] = $user_id;
-        $parent_data['name'] = ucwords(strtolower($req->name2));
+        $parent_data['name'] = ucwords(strtolower($req->relative_name));
         $parent_data['relation'] = $req->relation;
 
         $this->user->createParentRelativeRecord($parent_data);
@@ -387,16 +387,16 @@ class UserController extends Controller
     ): void {
         if ($was_staff) {
             if ($is_staff) {
-                $staff_data = $req->only(Usr::getStaffRecord());
+                $staff_data = $req->only(Usr::getStaffRecordFields());
                 $this->user->updateStaffRecord(['user_id' => $user_id], $staff_data);
             } else {
-                $this->user->deleteStaffRecord(['user_id' => $user_id]);
+                $this->user->deleteStaffRecords(['user_id' => $user_id]);
             }
         } elseif ($is_staff) {
-            $staff_data = $req->only(Usr::getStaffRecord());
+            $staff_data = $req->only(Usr::getStaffRecordFields());
             $staff_data['user_id'] = $user_id;
-            $staff_data['code'] = $this->generateStaffId($req->emp_date);
-            $this->user->createStaffRecord($staff_data);
+            $staff_data['code'] = $this->generateStaffId($req->employment_date);
+            $this->user->getStaffRecordsQuery($staff_data);
         }
     }
 
@@ -409,11 +409,11 @@ class UserController extends Controller
             return;
         }
 
-        $parent_data = $req->only(Usr::getParentRelativeRecord(['user_id', 'name2']));
-        $parent_data['name'] = ucwords(strtolower($req->name2));
+        $parent_data = $req->only(Usr::getParentRelativeRecordFields(['user_id', 'relative_name']));
+        $parent_data['name'] = ucwords(strtolower($req->relative_name));
         $parent_data['relation'] = $req->relation;
 
-        $this->user->updateOrCreateParentRelativeRec(['user_id' => $user_id], $parent_data);
+        $this->user->updateOrCreateParentRelative(['user_id' => $user_id], $parent_data);
     }
 
     /**
@@ -421,6 +421,6 @@ class UserController extends Controller
      */
     protected function userTeachesSubject($user_id): bool
     {
-        return $this->my_class->findSubjectRecByTeacher($user_id)->isNotEmpty();
+        return $this->my_class->findSubjectRecordsByTeacher($user_id)->isNotEmpty();
     }
 }

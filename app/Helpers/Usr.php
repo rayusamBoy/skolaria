@@ -4,7 +4,6 @@ namespace App\Helpers;
 
 use App\Models\BloodGroup;
 use App\Models\ClassType;
-use App\Models\Lga;
 use App\Models\MyClass;
 use App\Models\Nationality;
 use App\Models\StudentRecord;
@@ -16,28 +15,49 @@ use Illuminate\Support\Facades\Storage;
 
 class Usr extends Qs
 {
-    public static function getUsersByIds($ids, $with_trashed = false)
+    /**
+     * Get users by IDs, optionally including soft‑deleted ones.
+     *
+     * @param array $ids
+     * @param bool  $with_trashed
+     * @return Collection
+     */
+    public static function getUsersByIds(array $ids, bool $with_trashed = false): Collection
     {
-        return $with_trashed ? User::withTrashed()->whereIn("id", $ids)->get() : User::whereIn("id", $ids)->get();
+        return $with_trashed
+            ? User::withTrashed()->whereIn('id', $ids)->get()
+            : User::whereIn('id', $ids)->get();
     }
 
-    public static function getUsersByRoleNames(array $role_names, array $with = [])
+    /**
+     * Get users by role names.
+     *
+     * @param array $role_names
+     * @param array $with
+     * @return Collection
+     */
+    public static function getUsersByRoleNames(array $role_names, array $with = []): Collection
     {
         $userRepo = new UserRepo();
         return $userRepo->getUsersByRoleNames($role_names, $with);
     }
 
-    public static function getEducationLevels()
+    /**
+     * List of education levels.
+     *
+     * @return array
+     */
+    public static function getEducationLevels(): array
     {
         return ['Primary', 'Secondary', 'Advanced', 'Certificate', 'Diploma', 'Degree', 'Master', 'Doctoral', 'PhD'];
     }
 
-    public static function getLgas()
-    {
-        return Lga::all();
-    }
-
-    public static function getStaffRoles()
+    /**
+     * List of staff designations.
+     *
+     * @return array
+     */
+    public static function getStaffDesignations(): array
     {
         return [
             'Master',
@@ -50,7 +70,7 @@ class Usr extends Qs
             'Section Leader',
             'Class Teacher',
             'Ordinary Teacher',
-            'Part-time Teacher',
+            'Part‑time Teacher',
             'Volunteer Teacher',
             'Guest Teacher',
             'Statistician',
@@ -67,9 +87,14 @@ class Usr extends Qs
         ];
     }
 
-    public static function getPredefinedSubjects()
+    /**
+     * List of predefined subject names.
+     *
+     * @return array
+     */
+    public static function getPredefinedSubjects(): array
     {
-        $subjects = [
+        return [
             'Qualifying Test',
             'Civics',
             'History',
@@ -97,7 +122,7 @@ class Usr extends Qs
             'Food and Nutrition',
             'Textiles and Dressmaking',
             'Commerce',
-            'Book-Keeping',
+            'Book‑Keeping',
             'Building Construction',
             'Architectural Draughting',
             'Surveying',
@@ -126,13 +151,16 @@ class Usr extends Qs
             'Advanced Mathematics',
             'Economics',
             'Accountancy',
-            'Food and Human Nutrition'
+            'Food and Human Nutrition',
         ];
-
-        return $subjects;
     }
 
-    public static function getStudentParentsStatus()
+    /**
+     * Statuses for student parents.
+     *
+     * @return array
+     */
+    public static function getStudentParentsStatus(): array
     {
         return [
             'An Orphan',
@@ -141,198 +169,312 @@ class Usr extends Qs
         ];
     }
 
-    public static function getDisabilities()
+    /**
+     * Disability types (values) with descriptions (keys).
+     *
+     * @return array
+     */
+    public static function getDisabilities(): array
     {
         return [
             'People who are blind or who have partial vision' => 'Vision Impairment',
             'People who are deaf or hard of hearing' => 'Hearing Impairment',
             'People with illness that affect the mind or brain (the way a person thinks, feels, and acts). Includes, bipolar disorder, depression, schizophrenia, anxiety and personality disorder.' => 'Mental Illness',
-            'A person that may have significant limitations in the skills needed to live and work in the community. Including, difficulties with communication, self-care, social skills, safety, and self-direction' => 'Intellectual Disability',
+            'A person that may have significant limitations in the skills needed to live and work in the community. Including, difficulties with communication, self-care, social skills, safety, and self‑direction' => 'Intellectual Disability',
             'Refers to any type of brain damage that occurs after birth. The injury may occur because of infection, disease, lack of oxygen or trauma to the head.' => 'Acquired Brain Injury',
-            'It is an umbrella description which includes Autistic disorder, Asperger\'s syndrome and atypical autism. It affects the way information is teken in and stored in the brain.' => 'Autism Spectrum Disorder',
-            'That is some aspect of a person\'s pysical functioning, usually either their mobility, dexterity, or stamina, is affected' => 'Physical Disability',
+            'It is an umbrella description which includes Autistic disorder, Asperger\'s syndrome and atypical autism. It affects the way information is taken in and stored in the brain.' => 'Autism Spectrum Disorder',
+            'That is some aspect of a person\'s physical functioning, usually either their mobility, dexterity, or stamina, is affected' => 'Physical Disability',
         ];
     }
 
-    public static function getAllClassesOrdered($order_by = "name")
+    /**
+     * Get all classes ordered by a given column (cached).
+     *
+     * @param string $order_by
+     * @return Collection
+     */
+    public static function getAllClassesOrdered(string $order_by = 'name'): Collection
     {
         return once(fn() => MyClass::with(['class_type', 'section'])->orderBy($order_by)->get());
     }
 
-    public static function getClassTypes()
+    /**
+     * Get all class types ordered by ID.
+     *
+     * @return Collection
+     */
+    public static function getClassTypes(): Collection
     {
         return ClassType::orderBy('id')->get();
     }
 
-    public static function getStudents($data)
+    /**
+     * Get students matching given conditions, including user relation (cached once).
+     *
+     * @param array $where
+     * @return Collection
+     */
+    public static function getStudentsWhere(array $where): Collection
     {
-        return once(fn() => StudentRecord::with('user')->where($data)->get()->whereNotNull('user'));
+        return once(fn() => StudentRecord::with('user')->where($where)->get()->whereNotNull('user'));
     }
 
-    public static function getClassStudents($class_id)
+    /**
+     * Get all students of a class (with user relation).
+     *
+     * @param int $class_id
+     * @return Collection
+     */
+    public static function getClassStudents(int $class_id): Collection
     {
-        return StudentRecord::where(['my_class_id' => $class_id])->with('user')->get()->whereNotNull('user');
+        return StudentRecord::where('my_class_id', $class_id)->with('user')->get()->whereNotNull('user');
     }
 
-    public static function getStudentRecordByUserIds($ids, $relationship = [])
+    /**
+     * Get student records by user IDs with optional relationships.
+     *
+     * @param array $ids
+     * @param array $relationship
+     * @return Collection
+     */
+    public static function getStudentRecordByUserIds(array $ids, array $relationship = []): Collection
     {
-        return StudentRecord::whereIn("user_id", $ids)->with($relationship)->get();
+        return StudentRecord::whereIn('user_id', $ids)->with($relationship)->get();
     }
 
-    public static function getStudentRecordByUserId($id, $relationship = [])
+    /**
+     * Get student records for a single user ID with optional relationships.
+     *
+     * @param int   $id
+     * @param array $relationship
+     * @return Collection
+     */
+    public static function getStudentRecordByUserId(int $id, array $relationship = []): Collection
     {
         return StudentRecord::where('user_id', $id)->with($relationship)->get();
     }
 
-    // Students Classes
-    public static function renderClasses(Collection $class_collection)
+    /**
+     * Render class names as table headers, spanning their sections.
+     *
+     * @param Collection $class_collection
+     * @return string
+     */
+    public static function renderClassHeaders(Collection $class_collection): string
     {
-        $collection = '';
+        $html = '';
         foreach ($class_collection as $class) {
-            $collection .= '<th colspan="' . $class->section->count() . '" class="text-center">' . $class->name . '</th>';
+            $html .= '<th colspan="' . $class->section->count() . '" class="text-center">' . $class->name . '</th>';
         }
-        return $collection;
+        return $html;
     }
 
-    // Class Sections
-    public static function renderClassSections(Collection $class_collection)
+    /**
+     * Render section names as table cells.
+     *
+     * @param Collection $class_collection
+     * @return string
+     */
+    public static function renderSectionCells(Collection $class_collection): string
     {
-        $collection = '';
-        foreach ($class_collection as $class) {
-            foreach ($class->section as $section) {
-                $collection .= "<td>{$section->name}</td>";
-            }
-        }
-        return $collection;
-    }
-
-    // Total Male Students per Section ie., A, B, and C
-    public static function renderMaleCountPerSection(Collection $class_collection)
-    {
-        $collection = $counts = '';
+        $html = '';
         foreach ($class_collection as $class) {
             foreach ($class->section as $section) {
-                $counts .= '<td>' . self::getStudents(['my_class_id' => $class->id, 'section_id' => $section->id, 'grad' => 0])->where('user.gender', User::GENDER_MALE)->count() . '</td>';
+                $html .= "<td>{$section->name}</td>";
             }
-            $collection .= $counts;
-            $counts = '';
         }
-        return $collection;
+        return $html;
     }
 
-    // Total Female Students per Section ie., A, B, and C
-    public static function renderFemaleCountPerSection(Collection $class_collection)
+    /**
+     * Render male student count per section (active students).
+     *
+     * @param Collection $class_collection
+     * @return string
+     */
+    public static function renderMaleCountPerSectionRow(Collection $class_collection): string
     {
-        $collection = $counts = '';
+        $html = '';
         foreach ($class_collection as $class) {
             foreach ($class->section as $section) {
-                $counts .= '<td>' . self::getStudents(['my_class_id' => $class->id, 'section_id' => $section->id, 'grad' => 0])->where('user.gender', User::GENDER_FEMALE)->count() . '</td>';
+                $count = self::getStudentsWhere([
+                    'my_class_id' => $class->id,
+                    'section_id' => $section->id,
+                    'is_graduated' => false,
+                ])->where('user.gender', User::GENDER_MALE)->count();
+                $html .= "<td>$count</td>";
             }
-            $collection .= $counts;
-            $counts = '';
         }
-        return $collection;
+        return $html;
     }
 
-    // Total Students (Male and Female) per Section
-    public static function renderTotalPerSection(Collection $class_collection)
+    /**
+     * Render female student count per section (active students).
+     *
+     * @param Collection $class_collection
+     * @return string
+     */
+    public static function renderFemaleCountPerSectionRow(Collection $class_collection): string
     {
-        $collection = $counts = '';
+        $html = '';
         foreach ($class_collection as $class) {
             foreach ($class->section as $section) {
-                $counts .= '<td>' . self::getStudents(['my_class_id' => $class->id, 'section_id' => $section->id, 'grad' => 0])->count() . '</td>';
+                $count = self::getStudentsWhere([
+                    'my_class_id' => $class->id,
+                    'section_id' => $section->id,
+                    'is_graduated' => false,
+                ])->where('user.gender', User::GENDER_FEMALE)->count();
+                $html .= "<td>$count</td>";
             }
-            $collection .= $counts;
-            $counts = '';
         }
-        return $collection;
+        return $html;
     }
 
-    // Total Students (Male and Female) per Class
-    public static function renderTotalPerClass(Collection $class_collection)
+    /**
+     * Render total student count per section (active).
+     *
+     * @param Collection $class_collection
+     * @return string
+     */
+    public static function renderTotalPerSectionRow(Collection $class_collection): string
     {
-        $counts = '';
+        $html = '';
         foreach ($class_collection as $class) {
-            $counts .= '<td colspan="' . $class->section->count() . '">' . self::getStudents(['my_class_id' => $class->id, 'grad' => 0])->count() . '</td>';
+            foreach ($class->section as $section) {
+                $count = self::getStudentsWhere([
+                    'my_class_id' => $class->id,
+                    'section_id' => $section->id,
+                    'is_graduated' => false,
+                ])->count();
+                $html .= "<td>$count</td>";
+            }
         }
-        return $counts;
+        return $html;
     }
 
-    public static function renderTable($class_collection)
+    /**
+     * Render total student count per class (active).
+     *
+     * @param Collection $class_collection
+     * @return string
+     */
+    public static function renderTotalPerClassCell(Collection $class_collection): string
     {
-        if ($class_collection->count() <= 0)
+        $html = '';
+        foreach ($class_collection as $class) {
+            $count = self::getStudentsWhere(['my_class_id' => $class->id, 'is_graduated' => false])->count();
+            $html .= '<td colspan="' . $class->section->count() . '">' . $count . '</td>';
+        }
+        return $html;
+    }
+
+    /**
+     * Render a complete class/section/student breakdown table.
+     *
+     * @param Collection $class_collection
+     * @return string
+     */
+    public static function renderClassPopulationTable(Collection $class_collection): string
+    {
+        if ($class_collection->count() <= 0) {
             return 'No record found.';
+        }
 
-        return
-            '<table class="table table-sm table-responsive text-center">
-                <thead>
-                    <tr><th>Class</th>' . self::renderClasses($class_collection) . ' </tr>
-                    <tr><th>Section</th>' . self::renderClassSections($class_collection) . '</tr>
-                </thead>
-                <tbody>
-                    <tr><td>Male</td>' . self::renderMaleCountPerSection($class_collection) . '</tr>
-                    <tr><td>Female</td>' . self::renderFemaleCountPerSection($class_collection) . '</tr>
-                </tbody>
-                <tfoot>
-                    <tr><td>Total per Section</td>' . self::renderTotalPerSection($class_collection) . '</tr>
-                    <tr><td>Total per Class</td>' . self::renderTotalPerClass($class_collection) . ' </tr>
-                </tfoot>
-            </table>';
+        return '<table class="table table-sm table-responsive text-center">
+            <thead>
+                <tr><th>Class</th>' . self::renderClassHeaders($class_collection) . '</tr>
+                <tr><th>Section</th>' . self::renderSectionCells($class_collection) . '</tr>
+            </thead>
+            <tbody>
+                <tr><td>Male</td>' . self::renderMaleCountPerSectionRow($class_collection) . '</tr>
+                <tr><td>Female</td>' . self::renderFemaleCountPerSectionRow($class_collection) . '</tr>
+            </tbody>
+            <tfoot>
+                <tr><td>Total per Section</td>' . self::renderTotalPerSectionRow($class_collection) . '</tr>
+                <tr><td>Total per Class</td>' . self::renderTotalPerClassCell($class_collection) . '</tr>
+            </tfoot>
+        </table>';
     }
 
-    public static function getNationality($nal_id)
+    /**
+     * Get nationality by ID.
+     *
+     * @param int $nationality_id
+     * @return Collection
+     */
+    public static function getNationality(int $nationality_id): Collection
     {
-        return Nationality::where('id', $nal_id)->get();
+        return Nationality::where('id', $nationality_id)->get();
     }
 
-    public static function createAvatar($name, $code, $user_role)
+    /**
+     * Generate an avatar image for a user.
+     *
+     * @param string $name
+     * @param string $code
+     * @param string $user_role
+     * @return string
+     */
+    public static function createAvatar(string $name, string $code, string $user_role): string
     {
-        $words = explode(" ", $name);
-        // Assume the names parts (first, middle, surname) are separated by a space.
-        // Take the first letter of the name parts in upper case.
-        $initials = strtoupper(substr($words[0], 0, 1) . (\array_key_exists(1, $words) && $words[1] != "" ? substr($words[1], 0, 1) : (\array_key_exists(2, $words) && $words[2] != "" ? substr($words[2], 0, 1) : substr($words[0], 1, 1))));
+        $words = explode(' ', $name);
+        $initials = strtoupper(
+            substr($words[0], 0, 1)
+            . (isset($words[1]) && $words[1] !== ''
+                ? substr($words[1], 0, 1)
+                : (isset($words[2]) && $words[2] !== ''
+                    ? substr($words[2], 0, 1)
+                    : substr($words[0], 1, 1)
+                )
+            )
+        );
 
-        // Define a background color and text color for the avatar
-        $textColor = '#' . substr(md5($name), 0, 6); // Use a unique text color based on the name
-        // $bgColor = '#ffffff'; // White background color
-
-        // Create an image with the initials and colors
+        $textColor = '#' . substr(md5($name), 0, 6);
         $image = imagecreate(200, 200);
-
-        // $bg = imagecolorallocate($image, hexdec(substr($bgColor, 1, 2)), hexdec(substr($bgColor, 3, 2)), hexdec(substr($bgColor, 5, 2))); // White background color manipulation
-        $bg = imagecolorallocatealpha($image, 0, 0, 0, 127); // Tranparent background
-        $text = imagecolorallocate($image, hexdec(substr($textColor, 1, 2)), hexdec(substr($textColor, 3, 2)), hexdec(substr($textColor, 5, 2)));
-
+        $bg = imagecolorallocatealpha($image, 0, 0, 0, 127);
+        $text = imagecolorallocate(
+            $image,
+            hexdec(substr($textColor, 1, 2)),
+            hexdec(substr($textColor, 3, 2)),
+            hexdec(substr($textColor, 5, 2))
+        );
         imagefill($image, 0, 0, $bg);
         imagettftext($image, 60, 0, 40, 130, $text, public_path('global_assets/fonts/CASTELAR.ttf'), $initials);
 
-        // Try to create directory first if does not exists
         $dir_for_db = Qs::getUploadPath($user_role) . $code;
-        $dir_for_store = storage_path() . '/app/public/' . Qs::getUploadPath($user_role) . $code;
-
-        if (!is_dir($dir_for_store))
+        $dir_for_store = storage_path() . '/app/public/' . $dir_for_db;
+        if (!is_dir($dir_for_store)) {
             mkdir($dir_for_store, 0755, true);
+        }
 
-        // Save the image to a file
         $avatar_path = "$dir_for_db/photo.png";
         $img_path = "$dir_for_store/photo.png";
-
         imagepng($image, $img_path);
         imagedestroy($image);
 
         return $avatar_path;
     }
 
-    public static function getBloodGroups()
+    /**
+     * Get all blood groups.
+     *
+     * @return Collection
+     */
+    public static function getBloodGroups(): Collection
     {
         return BloodGroup::all();
     }
 
+    /**
+     * Book statuses with explanations.
+     *
+     * @return array
+     */
     public static function getBookStatuses(): array
     {
         return [
-            'Due' => 'This means that the item is being read by another and is due to be returned on the date listed.',
             'In Library' => 'This means that the item is available for a user to borrow.',
+            'Due' => 'This means that the item is being read by another and is due to be returned on the date listed.',
             'Lib Use Only' => 'This means that the item may only be used within the library.',
             'Not Available' => 'This means that the item is temporary not available due to special circumstances.',
             'Missing' => 'This means that the item has been reported missing and/or is being searched for by library staff.',
@@ -342,27 +484,46 @@ class Usr extends Qs
         ];
     }
 
+    /**
+     * Check if tenancy is initialized.
+     *
+     * @return bool
+     */
     public static function tenancyInitialized(): bool
     {
         return tenancy()->initialized;
     }
 
+    /**
+     * Account statuses, optionally excluding some.
+     *
+     * @param array $remove
+     * @return array
+     */
     public static function getAccountStatuses(array $remove = []): array
     {
         $statuses = ['Active', 'Inactive', 'Suspended', 'Blocked'];
-
         return $remove ? array_values(array_diff($statuses, $remove)) : $statuses;
     }
 
     /**
-     * Get tenancy-aware asset URL for a photo with cache busting.
-     * Appends file modification timestamp as query parameter for Workbox caching.
-     *
-     * @param string $url Relative URL of the photo asset (e.g., "uploads/avatars/photo.jpg")
+     * Get the default user image. Used when a user does not have a photo.
      * @return string
      */
-    public static function getTenancyAwarePhoto(string $url): string
+    public static function getDefaultUserImage()
     {
+        return 'global_assets/images/user.png';
+    }
+
+    /**
+     * Get tenancy‑aware asset URL for a photo with cache busting.
+     *
+     * @param string|null $url Relative URL of the photo asset (e.g., "path/to/photo"). Defaults to the default user image.
+     * @return string
+     */
+    public static function getTenancyAwarePhotoUrl(string|null $url): string
+    {
+        $url ??= self::getDefaultUserImage();
         $base_url = self::tenancyInitialized()
             ? (str_contains($url, 'global_assets') ? asset($url) : tenant_asset($url))
             : asset($url);
@@ -374,7 +535,9 @@ class Usr extends Qs
 
         $ttl = 60 * 10; // 10 minutes
         $version = cache()->remember($cache_key, $ttl, function () use ($url, $is_tenant_asset) {
-            $file_path = ($is_tenant_asset) ? Storage::disk('public')->path($url) : public_path(ltrim($url, '/'));
+            $file_path = $is_tenant_asset
+                ? Storage::disk('public')->path($url)
+                : public_path(ltrim($url, '/'));
 
             return file_exists($file_path) ? filemtime($file_path) : config('app.version', '1.0.0');
         });
@@ -382,82 +545,140 @@ class Usr extends Qs
         return "$base_url?$version";
     }
 
-    public static function getStudentExamNumberPlaceholder()
+    /**
+     * Placeholder used for student exam number generation.
+     *
+     * @return string
+     */
+    public static function getStudentExamNumberPlaceholder(): string
     {
-        return "*";
+        return '*';
     }
 
-    public static function getGenders()
+    /**
+     * Get the two genders.
+     *
+     * @return array
+     */
+    public static function getGenders(): array
     {
         return [User::GENDER_MALE, User::GENDER_FEMALE];
     }
 
-    public static function getReligions()
+    /**
+     * Get list of religions.
+     *
+     * @return array
+     */
+    public static function getReligions(): array
     {
         return ['Islam', 'Christianity', 'Other'];
     }
 
-    public static function getDateFormat()
+    /**
+     * Get the application date format.
+     *
+     * @return string
+     */
+    public static function getDateFormat(): string
     {
-        return 'm/d/Y';
+        return 'Y-m-d';
     }
 
-    public static function userAssignedTickets($user_id = null)
+    /**
+     * Get tickets assigned to a user that are not closed or archived (cached).
+     *
+     * @param int|null $user_id
+     * @return Collection
+     */
+    public static function userAssignedTickets(?int $user_id = null): Collection
     {
         $user_id ??= auth()->id();
-        return once(fn() => Ticket::where('assigned_to', $user_id)->where('status', '!=', 'closed')->where('is_archived', false)->get());
+        return once(fn() => Ticket::where('assigned_to', $user_id)
+            ->where('status', '!=', 'closed')
+            ->where('is_archived', false)
+            ->get());
     }
 
-    public static function getUserMediaHeadingColor($name)
+    /**
+     * Generate a unique heading color based on a name.
+     *
+     * @param string $name
+     * @return string
+     */
+    public static function getUserMediaHeadingColor(string $name): string
     {
         return '#' . substr(md5($name), 0, 6);
     }
 
+    /**
+     * Root roles for the current tenancy context.
+     *
+     * @return array
+     */
     public static function getTenancyAwareRootRoles(): array
     {
-        return array_values(
-            config(
-                self::tenancyInitialized()
-                ? 'roles.root_roles.tenant'
-                : 'roles.root_roles.central',
-                []
-            )
-        );
+        return array_values(config(
+            self::tenancyInitialized()
+            ? 'roles.root_roles.tenant'
+            : 'roles.root_roles.central',
+            []
+        ));
     }
 
-    public static function getTenancyAwareDefaultRoles()
+    /**
+     * Default roles for the current tenancy context.
+     *
+     * @return array
+     */
+    public static function getTenancyAwareDefaultRoles(): array
     {
-        return array_values(
-            config(
-                self::tenancyInitialized()
-                ? 'roles.default_roles.tenant'
-                : 'roles.default_roles.central',
-                []
-            )
-        );
+        return array_values(config(
+            self::tenancyInitialized()
+            ? 'roles.default_roles.tenant'
+            : 'roles.default_roles.central',
+            []
+        ));
     }
 
-    public static function getTenancyAwareStaffRoles()
+    /**
+     * Staff roles for the current tenancy context.
+     *
+     * @return array
+     */
+    public static function getTenancyAwareStaffRoles(): array
     {
-        return array_values(
-            config(
-                self::tenancyInitialized()
-                ? 'roles.staff_roles.tenant'
-                : 'roles.staff_roles.central',
-                []
-            )
-        );
+        return array_values(config(
+            self::tenancyInitialized()
+            ? 'roles.staff_roles.tenant'
+            : 'roles.staff_roles.central',
+            []
+        ));
     }
 
-    public static function deleteUserPhotoDirs(collection|array $role_names, string $code)
+    /**
+     * Delete user photo directories for the given roles and user code.
+     *
+     * @param Collection|array $role_names
+     * @param string           $code
+     * @return void
+     */
+    public static function deleteUserPhotoDirs(Collection|array $role_names, string $code): void
     {
         foreach ($role_names as $name) {
             $path = self::getUploadPath(strtolower($name)) . $code;
-            Storage::exists($path) ? Storage::deleteDirectory($path) : false;
+            if (Storage::exists($path)) {
+                Storage::deleteDirectory($path);
+            }
         }
     }
 
-    public static function getAvailableAppSkins()
+    /**
+     * Get the available application skins/themes with short description.
+     *
+     * @return array
+     */
+    public static function getAvailableAppSkins(): array
     {
         return [
             'default' => 'Original light/dark balanced theme',
@@ -474,43 +695,62 @@ class Usr extends Qs
         ];
     }
 
-    public static function getDefaultUserPreferences()
+    /**
+     * Default user preferences.
+     *
+     * @return array
+     */
+    public static function getDefaultUserPreferences(): array
     {
-        $preferences = [
+        return [
             'always_minimize_sidebar' => 0,
             'allow_system_sounds' => 1,
             'active_system_skin' => array_key_first(self::getAvailableAppSkins()),
         ];
-
-        return $preferences;
     }
 
-    public static function getDefaultIsNotifiableUserColumnValues()
+    /**
+     * Default notification preference values for a newly created user.
+     *
+     * @return array
+     */
+    public static function getDefaultNotificationPreferences(): array
     {
-        $values = [
-            'status' => (bool) true,
-            'on_email_channel' => (bool) true,
-            'on_sms_channel' => (bool) true,
-            'on_push_channel' => (bool) true,
+        return [
+            'status' => true,
+            'on_email_channel' => true,
+            'on_sms_channel' => true,
+            'on_push_channel' => true,
         ];
-
-        return $values;
     }
 
-    public static function getLoginAndRelatedPagesBgDescription()
+    /**
+     * Get the value (path) of the login/related pages background image.
+     *
+     * @return string
+     */
+    public static function getLoginAndRelatedPagesBgValue(): string
     {
         return 'storage/uploads/login_and_related_pages_bg.png';
     }
 
-    public static function getTenancyAwareImgOrDefaultBgUrl($img)
+    /**
+     * Get a tenancy‑aware image URL (or the default background) with cache busting.
+     *
+     * @param mixed $img must have value and updated_at properties.
+     * @return string
+     */
+    public static function getTenancyAwareImgOrDefaultBgUrl($img): string
     {
-        if ($img === null)
-            return asset(path: self::getLoginAndRelatedPagesBgDescription());
+        if ($img === null) {
+            return asset(path: self::getLoginAndRelatedPagesBgValue());
+        }
 
-        $img_desc = $img->description;
-        $img_url = $img_desc === null ? asset(path: self::getLoginAndRelatedPagesBgDescription()) : (self::tenancyInitialized() ? tenant_asset($img_desc) : asset($img_desc));
-        $img_url = "$img_url?" . strtotime($img->updated_at);
+        $img_desc = $img->value;
+        $img_url = $img_desc === null
+            ? asset(path: self::getLoginAndRelatedPagesBgValue())
+            : (self::tenancyInitialized() ? tenant_asset($img_desc) : asset($img_desc));
 
-        return $img_url;
+        return "$img_url?" . strtotime($img->updated_at);
     }
 }

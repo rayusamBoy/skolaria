@@ -12,14 +12,19 @@ use App\Notifications\StudentPaymentPaid;
 use App\Repositories\MyClassRepo;
 use App\Repositories\PaymentRepo;
 use App\Repositories\StudentRepo;
-use Dompdf\Dompdf;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
 class PaymentController extends Controller
 {
-    protected $my_class, $pay, $student, $year;
+    protected MyClassRepo $my_class;
+    protected PaymentRepo $pay;
+    protected StudentRepo $student;
+    protected string $year;
 
     public function __construct(MyClassRepo $my_class, PaymentRepo $pay, StudentRepo $student)
     {
@@ -31,164 +36,225 @@ class PaymentController extends Controller
         $this->student = $student;
     }
 
-    public function index()
+    /**
+     * Display payment years selection.
+     */
+    public function index(): View
     {
-        $d['selected'] = false;
-        $d['years'] = $this->pay->getPaymentYears();
+        $data['selected'] = false;
+        $data['years'] = $this->pay->getDistinctPaymentYears();
 
-        return view('pages.payments.index', $d);
+        return view('pages.payments.index', $data);
     }
 
-    public function show($year)
+    /**
+     * Show payments for a specific year.
+     */
+    public function show(string $year): View|RedirectResponse
     {
-        $d['payments'] = $p = $this->pay->getPayment(['year' => $year])->get();
+        $payments = $this->pay->getPaymentsByConditions(['year' => $year])->get();
 
-        if ($p->count() < 1)
+        if ($payments->isEmpty()) {
             return Qs::goWithDanger('payments.index');
+        }
 
-        $d['selected'] = true;
-        $d['years'] = $this->pay->getPaymentYears();
-        $d['year'] = $year;
+        $data['payments'] = $payments;
+        $data['selected'] = true;
+        $data['years'] = $this->pay->getDistinctPaymentYears();
+        $data['year'] = $year;
 
-        return view('pages.payments.index', $d);
+        return view('pages.payments.index', $data);
     }
 
-    public function select_year(Request $req)
+    /**
+     * Redirect to the selected year's payments.
+     */
+    public function select_year(Request $req): RedirectResponse
     {
         return Qs::goToRoute(['payments.show', $req->year]);
     }
 
-    public function create()
+    /**
+     * Show form to create a new payment.
+     */
+    public function create(): View
     {
         return view('pages.payments.create');
     }
 
-    public function invoice($st_id, $year = null)
+    /**
+     * Show invoice for a student, optionally filtered by year.
+     */
+    public function invoice($st_id, $year = null): View|RedirectResponse
     {
-        if (!$st_id)
+        if (!$st_id) {
             return Qs::goWithDanger();
+        }
 
-        $inv = $year ? $this->pay->getAllMyPR($st_id, $year) : $this->pay->getAllMyPR($st_id);
-        $pr = $inv->get()->whereNotnull('payment');
+        $records = $year
+            ? $this->pay->getStudentPaymentRecords($st_id, $year)
+            : $this->pay->getStudentPaymentRecords($st_id);
+        $records = $records->get()->whereNotNull('payment');
 
-        $d['sr'] = $this->student->whereRecord(['user_id' => $st_id])->first();
-        $d['uncleared'] = $pr->where('paid', 0);
-        $d['cleared'] = $pr->where('paid', 1);
-        $d['year'] = $year;
+        $data['sr'] = $this->student->getActiveStudentsQueryWithRelations(['user_id' => $st_id])->first();
+        $data['uncleared'] = $records->where('is_paid', false);
+        $data['cleared'] = $records->where('is_paid', true);
+        $data['year'] = $year;
 
-        return view('pages.payments.invoice', $d);
+        return view('pages.payments.invoice', $data);
     }
 
-    public function status($st_id, $year = null)
+    /**
+     * Show payment status for a student (current year enforced).
+     */
+    public function status($st_id, $year = null): View|RedirectResponse
     {
-        if ($year)
-            if ($year != $this->year)
-                return back()->with('flash_danger', __('msg.year_invalid'));
+        if ($year && $year != $this->year) {
+            return back()->with('flash_danger', __('msg.year_invalid'));
+        }
 
-        if (!$st_id)
+        if (!$st_id) {
             return Qs::goWithDanger();
+        }
 
-        $inv = $year ? $this->pay->getAllMyPR($st_id, $year) : $this->pay->getAllMyPR($st_id);
-        $pr = $inv->get()->whereNotnull('payment');
+        $records = $year
+            ? $this->pay->getStudentPaymentRecords($st_id, $year)
+            : $this->pay->getStudentPaymentRecords($st_id);
+        $records = $records->get()->whereNotNull('payment');
 
-        $d['sr'] = $this->student->whereRecord(['user_id' => $st_id])->first();
-        $d['uncleared'] = $pr->where('paid', 0);
-        $d['cleared'] = $pr->where('paid', 1);
+        $data['sr'] = $this->student->getActiveStudentsQueryWithRelations(['user_id' => $st_id])->first();
+        $data['uncleared'] = $records->where('is_paid', false);
+        $data['cleared'] = $records->where('is_paid', true);
 
-        return view('pages.payments.status', $d);
+        return view('pages.payments.status', $data);
     }
 
-    public function receipts($pr_id, $notification_id = null)
+    /**
+     * Display receipts for a payment record, optionally mark notification read.
+     */
+    public function receipts($pr_id, $notification_id = null): View|RedirectResponse
     {
-        if (!$pr_id)
+        if (!$pr_id) {
             return Qs::goWithDanger();
+        }
 
         try {
-            $d['pr'] = $pr = $this->pay->getRecord(['id' => $pr_id])->with('receipt')->first();
+            $record = $this->pay->getPaymentRecords(['id' => $pr_id])->with('receipt')->firstOrFail();
         } catch (ModelNotFoundException $ex) {
             return back()->with('flash_danger', __('msg.rnf'));
         }
 
-        $d['sr'] = $this->student->whereRecord(['user_id' => $pr->student_id])->first();
-        $d['receipts'] = $pr->receipt;
-        $d['payment'] = $pr->payment;
-        $d['settings'] = Qs::getSettings();
+        $data['pr'] = $record;
+        $data['sr'] = $this->student->getActiveStudentsQueryWithRelations(['user_id' => $record->student_id])->first();
+        $data['receipts'] = $record->receipt;
+        $data['payment'] = $record->payment;
+        $data['settings'] = Qs::getSettings();
 
         if ($notification_id !== null) {
             app(NotificationController::class)->mark_as_read($notification_id, false);
         }
 
-        return view('pages.payments.receipt', $d);
+        return view('pages.payments.receipt', $data);
     }
 
-    public function pay_now(Request $req, $pr_id)
+    /**
+     * Process a payment for an outstanding record.
+     */
+    public function pay_now(Request $req, $pr_id): JsonResponse
     {
         Validator::make($req->toArray(), [
-            'amt_paid' => 'required|numeric'
-        ], [], ['amt_paid' => 'Amount Paid'])->validate();
+            'amount_paid' => 'required|numeric'
+        ], [], ['amount_paid' => 'Amount Paid'])->validate();
 
-        $pr = $this->pay->findRecord($pr_id);
-        $payment = $this->pay->find($pr->payment_id);
-        $d['amt_paid'] = $amt_p = $pr->amt_paid + $req->amt_paid;
-        $d['balance'] = $bal = $payment->amount - $amt_p;
-        $d['paid'] = $bal < 1 ? 1 : 0;
+        $record = $this->pay->findPaymentRecord($pr_id);
+        $payment = $this->pay->findPayment($record->payment_id);
+        $amt_p = $record->amount_paid + $req->amount_paid;
+        $bal = $payment->amount - $amt_p;
 
-        $this->pay->updateRecord($pr_id, $d);
+        $this->pay->updatePaymentRecord($pr_id, [
+            'amount_paid' => $amt_p,
+            'balance' => $bal,
+            'is_paid' => $bal < 1 ? true : false,
+        ]);
 
-        $d2['amt_paid'] = $req->amt_paid;
-        $d2['balance'] = $bal;
-        $d2['pr_id'] = $pr_id;
-        $d2['year'] = $this->year;
+        $receipt_data = [
+            'amount_paid' => $req->amount_paid,
+            'balance' => $bal,
+            'payment_record_id' => $pr_id,
+            'year' => $this->year,
+        ];
+        $receipt = $this->pay->createReceipt($receipt_data);
 
-        $receipt = $this->pay->createReceipt($d2);
-        $st_rec = $this->student->whereRecord(['user_id' => $pr->student_id])->with(['my_parent', 'user'])->get();
-        $parent = $st_rec->pluck('my_parent')->first();
+        $student_record = $this->student->getActiveStudentsQueryWithRelations(['user_id' => $record->student_id])
+            ->with(['my_parent', 'user'])
+            ->first();
 
+        $parent = $student_record?->my_parent;
         if ($parent) {
-            //return (new StudentPaymentPaid($receipt))->toMail($parent); // For Testing on browser
-            $parent->notify(new StudentPaymentPaid($receipt, $st_rec->first()));
+            $parent->notify(new StudentPaymentPaid($receipt, $student_record));
         }
 
         return Qs::jsonUpdateOk();
     }
 
-    public function manage($class_id = null)
+    /**
+     * Show student payment management for a class.
+     */
+    public function manage($class_id = null): View|RedirectResponse
     {
-        $d['selected'] = false;
+        $data['selected'] = false;
 
         if ($class_id) {
-            $d['students'] = $st = $this->student->whereRecord(['my_class_id' => $class_id])->get()->whereNotnull('user')->sortBy('user.name');
-            if ($st->count() < 1)
-                return Qs::goWithDanger('payments.manage');
+            $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class_id])
+                ->get()
+                ->whereNotNull('user')
+                ->sortBy('user.name');
 
-            $d['selected'] = true;
-            $d['my_class_id'] = $class_id;
+            if ($students->isEmpty()) {
+                return Qs::goWithDanger('payments.manage');
+            }
+
+            $data['selected'] = true;
+            $data['my_class_id'] = $class_id;
+            $data['students'] = $students;
         }
 
-        return view('pages.payments.manage', $d);
+        return view('pages.payments.manage', $data);
     }
 
-    public function select_class(Request $req)
+    /**
+     * Select a class and generate payment records for all its students.
+     */
+    public function select_class(Request $req): RedirectResponse
     {
         Validator::make($req->toArray(), [
             'my_class_id' => 'required|exists:my_classes,id'
         ], [], ['my_class_id' => 'Class'])->validate();
 
-        $wh['my_class_id'] = $class_id = $req->my_class_id;
+        $class_id = $req->my_class_id;
 
-        $pay1 = $this->pay->getPayment(['my_class_id' => $class_id, 'year' => $this->year])->get();
-        $pay2 = $this->pay->getGeneralPayment(['year' => $this->year])->get();
-        $payments = $pay2->count() ? $pay1->merge($pay2) : $pay1;
-        $students = $this->student->whereRecord($wh)->get();
+        $class_payments = $this->pay->getPaymentsByConditions([
+            'my_class_id' => $class_id,
+            'year' => $this->year,
+        ])->get();
 
-        if ($payments->count() && $students->count()) {
-            foreach ($payments as $p) {
-                foreach ($students as $st) {
-                    $pr['student_id'] = $st->user_id;
-                    $pr['payment_id'] = $p->id;
-                    $pr['year'] = $this->year;
-                    $rec = $this->pay->createRecord($pr);
-                    $rec->ref_no ?: $rec->update(['ref_no' => mt_rand(100000, 99999999)]);
+        $global_payments = $this->pay->getGlobalPayments(['year' => $this->year])->get();
+        $payments = $global_payments->isNotEmpty() ? $class_payments->merge($global_payments) : $class_payments;
+
+        $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class_id])->get();
+
+        if ($payments->isNotEmpty() && $students->isNotEmpty()) {
+            foreach ($payments as $payment) {
+                foreach ($students as $student) {
+                    $record = $this->pay->firstOrCreatePaymentRecord([
+                        'student_id' => $student->user_id,
+                        'payment_id' => $payment->id,
+                        'year' => $this->year,
+                    ]);
+
+                    if (!$record->reference_number) {
+                        $record->update(['reference_number' => mt_rand(100000, 99999999)]);
+                    }
                 }
             }
         }
@@ -196,44 +262,63 @@ class PaymentController extends Controller
         return Qs::goToRoute(['payments.manage', $class_id]);
     }
 
-    public function store(PaymentCreate $req)
+    /**
+     * Store a new payment definition.
+     */
+    public function store(PaymentCreate $req): JsonResponse
     {
         $data = $req->all();
         $data['year'] = $this->year;
-        $data['ref_no'] = Pay::genRefCode();
+        $data['reference_number'] = Pay::generateReferenceCode();
 
-        $this->pay->create($data);
+        $this->pay->createPayment($data);
 
         return Qs::jsonStoreOk();
     }
 
-    public function edit($id)
+    /**
+     * Show the form for editing a payment definition.
+     */
+    public function edit(int $id): View|RedirectResponse
     {
-        $d['payment'] = $pay = $this->pay->find($id);
+        $payment = $this->pay->findPayment($id);
 
-        return $pay === null ? Qs::goWithDanger('payments.index') : view('pages.payments.edit', $d);
+        return $payment !== null
+            ? view('pages.payments.edit', ['payment' => $payment])
+            : Qs::goWithDanger('payments.index');
     }
 
-    public function update(PaymentUpdate $req, $id)
+    /**
+     * Update the specified payment definition.
+     */
+    public function update(PaymentUpdate $req, int $id): JsonResponse
     {
-        $data = $req->all();
-        $this->pay->update($id, $data);
+        $this->pay->updatePayment($id, $req->except(['_method', '_token']));
 
         return Qs::jsonUpdateOk();
     }
 
-    public function destroy($id)
+    /**
+     * Soft‑delete a payment definition.
+     */
+    public function destroy(int $id): RedirectResponse
     {
-        $this->pay->find($id)->delete();
+        $this->pay->findPayment($id)->delete();
 
-        return Qs::deleteOk('payments.index');
+        return Qs::redirectDeleteSuccess('payments.index');
     }
 
-    public function reset_record($id)
+    /**
+     * Reset a payment record (clear amount paid and receipts).
+     */
+    public function reset_record(int $id): RedirectResponse
     {
-        $pr['amt_paid'] = $pr['paid'] = $pr['balance'] = 0;
-        $this->pay->updateRecord($id, $pr);
-        $this->pay->deleteReceipts(['pr_id' => $id]);
+        $this->pay->updatePaymentRecord($id, [
+            'amount_paid' => 0,
+            'balance' => 0,
+            'is_paid' => false,
+        ]);
+        $this->pay->deleteReceipts(['payment_record_id' => $id]);
 
         return back()->with('flash_success', __('msg.update_ok'));
     }

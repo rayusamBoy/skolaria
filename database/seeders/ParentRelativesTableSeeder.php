@@ -23,8 +23,8 @@ class ParentRelativesTableSeeder extends Seeder
             array (
                 'user_id' => \DB::table('users')->where('username', 'parent')->value('id'),
                 'name' => 'Relative Name',
-                'phone3' => '+255 1111 222 333',
-                'phone4' => NULL,
+                'primary_mobile' => '+255111122233',
+                'secondary_mobile' => NULL,
                 'relation' => 'Brother',
                 'created_at' => NULL,
                 'updated_at' => NULL,

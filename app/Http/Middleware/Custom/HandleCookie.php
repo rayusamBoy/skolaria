@@ -41,14 +41,14 @@ class HandleCookie
         $active_system_skin = $this->resolveActiveSystemSkin($user, $request);
 
         $hidden_alerts_cookie = $this->cookie_service->setForever(
-            'do_not_show_els_with_these_ids_again',
-            $hidden_alert_ids,
+            name: 'do_not_show_els_with_these_ids_again',
+            value: $hidden_alert_ids,
             httpOnly: false
         );
 
         $active_skin_cookie = $this->cookie_service->setForever(
-            'active_system_skin',
-            json_encode($active_system_skin),
+            name: 'active_system_skin',
+            value: json_encode($active_system_skin),
             httpOnly: false
         );
 

@@ -6,10 +6,31 @@ $my_class = $my_classes->where('id', $class_id)->first();
 @section('page_title', "Student Information - {$my_class->name} (" . $my_class->class_type->name . ")")
 
 @section('content')
+
+@php
+// Pre‑compute all relevant permissions for this view
+$canViewProfile = auth()->user()->can($tenant_permissions['student_records']['show']['permission']);
+$canEdit = auth()->user()->can($tenant_permissions['student_records']['edit']['permission']);
+$canResetPassword = auth()->user()->can($tenant_permissions['student_records']['reset_password']['permission']);
+$canMarksheet = auth()->user()->can($tenant_permissions['marks']['year_selector']['permission']);
+$canAssessmentsheet = auth()->user()->can($tenant_permissions['assessments']['show']['permission']);
+$canDelete = auth()->user()->can($tenant_permissions['users']['destroy']['permission']);
+
+// Block/Unblock permissions
+$canBlockAll = auth()->user()->can($tenant_permissions['student_records']['block_all_class']['permission']);
+$canUnblockAll = auth()->user()->can($tenant_permissions['student_records']['unblock_all_class']['permission']);
+$canToggleBlock = $canBlockAll || $canUnblockAll;
+
+// Does the user have any action at all?
+$hasActions = $canViewProfile || $canEdit || $canResetPassword || $canMarksheet || $canAssessmentsheet || $canDelete;
+
+$showBlockUnblockButtons = $canBlockAll || $canUnblockAll;
+@endphp
+
 <div class="card w-fit wmin-100-pcnt">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Students List</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -34,30 +55,28 @@ $my_class = $my_classes->where('id', $class_id)->first();
         </ul>
 
         <div class="tab-content">
-
             {{-- All students --}}
             <div class="tab-pane fade show active" id="all-students">
-                {{-- Block / Unblock All --}}
-                @canany([$tenant_permissions['student_records']['block_all_class']['permission'], $tenant_permissions['student_records']['unblock_all_class']['permission']])
+                @if($showBlockUnblockButtons)
                 @php
-                $unique_blocked_values = $students->pluck('user')->pluck('blocked')->unique();
+                $unique_blocked_values = $students->pluck('user')->pluck('is_blocked')->unique();
                 @endphp
                 <div class="card mb-3">
                     <div class="card-body text-center">
-                        @can($tenant_permissions['student_records']['block_all_class']['permission'])
+                        @if($canBlockAll)
                         <button id="students-block-all-active" @disabled($students->isEmpty() || $unique_blocked_values->hasSole(fn($value, $key) => (bool) $value === true)) value="{{ $my_class->id }}" url="{{ route('students.block_all_class') }}" class="btn btn-danger">
                             Block All {{ $my_class->name }} Students
                         </button>
-                        @endcan
+                        @endif
 
-                        @can($tenant_permissions['student_records']['unblock_all_class']['permission'])
+                        @if($canUnblockAll)
                         <button id="students-unblock-all-active" @disabled($students->isEmpty() || $unique_blocked_values->hasSole(fn($value, $key) => (bool) $value === false)) value="{{ $my_class->id }}" url="{{ route('students.unblock_all_class') }}" class="btn btn-success">
                             Unblock All {{ $my_class->name }} Students
                         </button>
-                        @endcan
+                        @endif
                     </div>
                 </div>
-                @endcanany
+                @endif
 
                 <table class="table datatable-button-html5-columns">
                     <thead>
@@ -69,7 +88,9 @@ $my_class = $my_classes->where('id', $class_id)->first();
                             <th>Section</th>
                             <th>Parent</th>
                             <th>Blocked</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -77,10 +98,10 @@ $my_class = $my_classes->where('id', $class_id)->first();
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>
-                                <img class="rounded-circle" style="height:40px;width:40px;" src="{{ Usr::getTenancyAwarePhoto($s->user->photo) }}" alt="photo">
+                                <img class="rounded-circle" style="height:40px;width:40px;" src="{{ Usr::getTenancyAwarePhotoUrl($s->user->photo_path) }}" alt="photo">
                             </td>
                             <td>{{ $s->user->name }}</td>
-                            <td>{{ $s->adm_no }}</td>
+                            <td>{{ $s->admission_number }}</td>
                             <td>{{ $s->section->name }}</td>
                             <td>
                                 @if($s->my_parent)
@@ -90,70 +111,64 @@ $my_class = $my_classes->where('id', $class_id)->first();
                                 @else &mdash; @endif
                             </td>
 
-                            @if(auth()->user()->can([$tenant_permissions['student_records']['block_all_class']['permission'], $tenant_permissions['student_records']['unblock_all_class']['permission']]))
                             <td>
+                                @if($canToggleBlock)
                                 <label class="form-switch m-0">
-                                    <input id="checkbox-user-{{ $s->user->id }}" onchange="updateUserBlockedState({{ $s->user->id }}, this)" type="checkbox" @checked($s->user->blocked)>
+                                    <input id="checkbox-user-{{ $s->user->id }}" onchange="updateUserBlockedState({{ $s->user->id }}, this)" type="checkbox" @checked($s->user->is_blocked)>
                                     <i></i>
                                 </label>
-                            </td>
-                            @else
-                            <td>
+                                @else
                                 <label class="form-switch m-0">
-                                    <input type="checkbox" @disabled(true) @checked($s->user->blocked)>
+                                    <input type="checkbox" @disabled(true) @checked($s->user->is_blocked)>
                                     <i></i>
                                 </label>
+                                @endif
                             </td>
-                            @endif
 
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a href="javascript:;" data-toggle="dropdown" class="material-symbols-rounded">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- View Profile --}}
-                                            @can($tenant_permissions['student_records']['show']['permission'])
+                                            @if($canViewProfile)
                                             <a href="{{ route('students.show', Qs::hash($s->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">visibility</i>View Profile
                                             </a>
-                                            @endcan
-                                            {{-- Edit --}}
-                                            @can($tenant_permissions['student_records']['edit']['permission'])
+                                            @endif
+                                            @if($canEdit)
                                             <a href="{{ route('students.edit', Qs::hash($s->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i>Edit
                                             </a>
-                                            @endcan
-                                            {{-- Reset Password --}}
-                                            @can($tenant_permissions['student_records']['reset_password']['permission'])
+                                            @endif
+                                            @if($canResetPassword)
                                             <a href="javascript:;" data-default_pass="student" data-href="{{ route('students.password.reset', Qs::hash($s->user->id)) }}" class="dropdown-item needs-reset-pass-confirmation">
                                                 <i class="material-symbols-rounded">lock_reset</i>Reset Password
                                             </a>
-                                            @endcan
-                                            {{-- Marksheet --}}
-                                            @can($tenant_permissions['marks']['year_selector']['permission'])
+                                            @endif
+                                            @if($canMarksheet)
                                             <a target="_blank" href="{{ route('marks.year_selector', Qs::hash($s->user->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">bottom_sheets</i>Marksheet
                                             </a>
-                                            @endcan
-                                            {{-- Assessmentsheet --}}
-                                            @can($tenant_permissions['assessments']['show']['permission'])
+                                            @endif
+                                            @if($canAssessmentsheet)
                                             <a target="_blank" href="{{ route('assessments.year_selector', Qs::hash($s->user->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">two_pager</i>Assessmentsheet
                                             </a>
-                                            @endcan
-                                            {{-- Delete --}}
-                                            @can($tenant_permissions['users']['destroy']['permission'])
+                                            @endif
+                                            @if($canDelete)
                                             <a id="{{ Qs::hash($s->user->id) }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i>Delete
                                             </a>
                                             <form method="post" id="item-delete-{{ Qs::hash($s->user->id) }}" action="{{ route('users.destroy', Qs::hash($s->user->id)) }}" class="hidden">
                                                 @csrf @method('delete')
                                             </form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
@@ -174,7 +189,9 @@ $my_class = $my_classes->where('id', $class_id)->first();
                             <th>ADM No</th>
                             <th>Parent</th>
                             <th>Blocked</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -182,10 +199,10 @@ $my_class = $my_classes->where('id', $class_id)->first();
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>
-                                <img class="rounded-circle" style="height:40px;width:40px;" src="{{ Usr::getTenancyAwarePhoto($sr->user->photo) }}" alt="photo">
+                                <img class="rounded-circle" style="height:40px;width:40px;" src="{{ Usr::getTenancyAwarePhotoUrl($sr->user->photo_path) }}" alt="photo">
                             </td>
                             <td>{{ $sr->user->name }}</td>
-                            <td>{{ $sr->adm_no }}</td>
+                            <td>{{ $sr->admission_number }}</td>
                             <td>
                                 @if($sr->my_parent)
                                 <a href="{{ route('users.show', Qs::hash($sr->my_parent_id)) }}">
@@ -194,65 +211,60 @@ $my_class = $my_classes->where('id', $class_id)->first();
                                 @else &mdash; @endif
                             </td>
 
-                            @if(auth()->user()->can([$tenant_permissions['student_records']['block_all_class']['permission'], $tenant_permissions['student_records']['unblock_all_class']['permission']]))
                             <td>
+                                @if($canToggleBlock)
                                 <label class="form-switch m-0">
-                                    <input id="checkbox-user-{{ $sr->user->id }}" onchange="updateUserBlockedState({{ $sr->user->id }}, this)" type="checkbox" @checked($sr->user->blocked)>
+                                    <input id="checkbox-user-{{ $sr->user->id }}" onchange="updateUserBlockedState({{ $sr->user->id }}, this)" type="checkbox" @checked($sr->user->is_blocked)>
                                     <i></i>
                                 </label>
-                            </td>
-                            @else
-                            <td>
+                                @else
                                 <label class="form-switch m-0">
-                                    <input type="checkbox" @disabled(true) @checked($sr->user->blocked)>
+                                    <input type="checkbox" @disabled(true) @checked($sr->user->is_blocked)>
                                     <i></i>
                                 </label>
+                                @endif
                             </td>
-                            @endif
 
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a href="javascript:;" data-toggle="dropdown" class="material-symbols-rounded">lists</a>
                                         <div class="dropdown-menu dropdown-menu-right">
-                                            {{-- View Profile --}}
-                                            @can($tenant_permissions['student_records']['show']['permission'])
+                                            @if($canViewProfile)
                                             <a href="{{ route('students.show', Qs::hash($sr->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">visibility</i>View Profile
                                             </a>
-                                            @endcan
-                                            {{-- Edit --}}
-                                            @can($tenant_permissions['student_records']['edit']['permission'])
+                                            @endif
+                                            @if($canEdit)
                                             <a href="{{ route('students.edit', Qs::hash($sr->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i>Edit
                                             </a>
-                                            @endcan
-                                            {{-- Marksheet --}}
-                                            @can($tenant_permissions['marks']['year_selector']['permission'])
-                                            <a href="javascript:;" class="dropdown-item">
+                                            @endif
+                                            @if($canMarksheet)
+                                            <a href="{{ route('marks.year_selector', Qs::hash($sr->user->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">bottom_sheets</i>Marksheet
                                             </a>
-                                            @endcan
-                                            {{-- Delete --}}
-                                            @can($tenant_permissions['users']['destroy']['permission'])
+                                            @endif
+                                            @if($canDelete)
                                             <a id="{{ Qs::hash($sr->user->id) }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i>Delete
                                             </a>
                                             <form method="post" id="item-delete-{{ Qs::hash($sr->user->id) }}" action="{{ route('users.destroy', Qs::hash($sr->user->id)) }}" class="hidden">
                                                 @csrf @method('delete')
                                             </form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
             @endforeach
-
         </div>
     </div>
 </div>

@@ -4,10 +4,18 @@
 
 @section('content')
 
+@php
+$canView = auth()->user()->can($tenant_permissions['time_tables']['show_record']['permission']);
+$canEdit = auth()->user()->can($tenant_permissions['time_tables']['edit_record']['permission']);
+$canManage = auth()->user()->can($tenant_permissions['time_tables']['manage_record']['permission']);
+$canDelete = auth()->user()->can($tenant_permissions['time_tables']['delete_record']['permission']);
+$hasActions = $canView || $canEdit || $canManage || $canDelete;
+@endphp
+
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage TimeTables</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -92,7 +100,9 @@
                             <th>Section</th>
                             <th>Type</th>
                             <th>Year</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -104,42 +114,40 @@
                             <td>{{ $ttr->section->name ?? 'All' }}</td>
                             <td>{{ $ttr->exam_id ? $ttr->exam->name : 'Class Timetable' }}</td>
                             <td>{{ $ttr->year }}</td>
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-right">
-                                            {{-- View Record --}}
-                                            @can($tenant_permissions['time_tables']['show_record']['permission'])
+                                            @if($canView)
                                             <a href="{{ route('ttr.show', $ttr->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">visibility</i>View
                                             </a>
-                                            @endcan
-                                            {{-- Edit Record --}}
-                                            @can($tenant_permissions['time_tables']['edit_record']['permission'])
+                                            @endif
+                                            @if($canEdit)
                                             <a href="{{ route('ttr.edit', $ttr->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i>Edit
                                             </a>
-                                            @endcan
-                                            {{-- Manage Record --}}
-                                            @can($tenant_permissions['time_tables']['manage_record']['permission'])
+                                            @endif
+                                            @if($canManage)
                                             <a href="{{ route('ttr.manage', $ttr->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">manage_search</i>Manage
                                             </a>
-                                            @endcan
-                                            {{-- Delete Record --}}
-                                            @can($tenant_permissions['time_tables']['delete_record']['permission'])
+                                            @endif
+                                            @if($canDelete)
                                             <a id="{{ $ttr->id }}" onclick="confirmPermanentDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i>Delete
                                             </a>
                                             <form method="post" id="item-delete-{{ $ttr->id }}" action="{{ route('ttr.destroy', $ttr->id) }}" class="hidden">
                                                 @csrf @method('delete')
                                             </form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>

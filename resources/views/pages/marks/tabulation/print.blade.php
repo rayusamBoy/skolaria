@@ -27,7 +27,7 @@
         @include('pages.marks.tabulation.partials.table')
         @include('pages.marks.tabulation.partials.performance_summary')
         <p class="copyright text-center mt-4">
-            {{ date('Y') }}. {{ ucwords(strtolower($settings->firstWhere('type', 'system_name')->description)) }}. All rights reserved.
+            {{ date('Y') }}. {{ ucwords(strtolower($settings->firstWhere('key', 'system_name')->value)) }}. All rights reserved.
         </p>
     </div>
 

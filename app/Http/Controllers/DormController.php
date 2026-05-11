@@ -7,10 +7,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Dorm\DormCreate;
 use App\Http\Requests\Dorm\DormUpdate;
 use App\Repositories\DormRepo;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class DormController extends Controller
 {
-    protected $dorm;
+    protected DormRepo $dorm;
 
     public function __construct(DormRepo $dorm)
     {
@@ -19,39 +22,56 @@ class DormController extends Controller
         $this->dorm = $dorm;
     }
 
-    public function index()
+    /**
+     * Display a listing of dormitories.
+     */
+    public function index(): View
     {
-        $d['dorms'] = $this->dorm->getAll();
+        $data['dorms'] = $this->dorm->getAllDorms();
 
-        return view('pages.dorms.index', $d);
+        return view('pages.dorms.index', $data);
     }
 
-    public function store(DormCreate $req)
+    /**
+     * Store a newly created dormitory.
+     */
+    public function store(DormCreate $req): JsonResponse
     {
         $data = $req->only(['name', 'description']);
-        $this->dorm->create($data);
+        $this->dorm->createDorm($data);
 
         return Qs::jsonStoreOk();
     }
 
-    public function edit($id)
+    /**
+     * Show the form for editing the specified dormitory.
+     */
+    public function edit(int $id): View|RedirectResponse
     {
-        $d['dorm'] = $dorm = $this->dorm->find($id);
+        $dorm = $this->dorm->findDorm($id);
 
-        return $dorm !== null ? view('pages.dorms.edit', $d) : Qs::goWithDanger('dorms.index');
+        return $dorm !== null
+            ? view('pages.dorms.edit', ['dorm' => $dorm])
+            : Qs::goWithDanger('dorms.index');
     }
 
-    public function update(DormUpdate $req, $id)
+    /**
+     * Update the specified dormitory.
+     */
+    public function update(DormUpdate $req, int $id): JsonResponse
     {
         $data = $req->only(['name', 'description']);
-        $this->dorm->update($id, $data);
+        $this->dorm->updateDorm($id, $data);
 
         return Qs::jsonUpdateOk();
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified dormitory.
+     */
+    public function destroy(int $id): RedirectResponse
     {
-        $this->dorm->find($id)->delete();
+        $this->dorm->findDorm($id)->delete();
 
         return back()->with('flash_success', __('msg.delete_ok'));
     }

@@ -1,7 +1,7 @@
 <div class="card card-collapsed">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded mr-2">file_save</i> Batch Template </h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -25,8 +25,8 @@
 
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="nal_id">Nationality: <span class="text-danger">*</span></label>
-                                    <select onchange="getState(this.value, '#state_id-2')" data-placeholder="Choose..." required name="nal_id" id="nal_id" class="select-search form-control">
+                                    <label for="nationality_id">Nationality: <span class="text-danger">*</span></label>
+                                    <select onchange="getState(this.value, '#state_id-2')" data-placeholder="Choose..." required name="nationality_id" id="nationality_id" class="select-search form-control">
                                         <option value=""></option>
                                         @foreach($nationals as $nal)
                                         <option value="{{ $nal->id }}">{{ $nal->name }}</option>

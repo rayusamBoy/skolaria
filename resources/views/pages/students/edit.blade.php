@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Please fill The form Below</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -56,15 +56,15 @@
 
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="phone">Phone:</label>
-                            <input value="{{ $sr->user->phone  }}" id="phone" type="text" name="phone" class="form-control" placeholder="">
+                            <label for="primary_mobile">Primary Mobile:</label>
+                            <input value="{{ $sr->user->primary_mobile  }}" id="primary_mobile" type="text" name="primary_mobile" class="form-control" placeholder="">
                         </div>
                     </div>
 
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="telephone">Telephone:</label>
-                            <input value="{{ $sr->user->phone2  }}" type="text" id="telephone" name="phone2" class="form-control" placeholder="">
+                            <label for="secondary_mobile">Secondary Mobile:</label>
+                            <input value="{{ $sr->user->secondary_mobile  }}" type="text" id="secondary_mobile" name="secondary_mobile" class="form-control" placeholder="">
                         </div>
                     </div>
                 </div>
@@ -72,18 +72,18 @@
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="dob">Date of Birth: <span class="text-danger">*</span></label>
-                            <input name="dob" value="{{ $sr->user->dob  }}" id="dob" required type="text" class="form-control date-pick" placeholder="Select Date...">
+                            <label for="date_of_birth">Date of Birth: <span class="text-danger">*</span></label>
+                            <input name="date_of_birth" value="{{ $sr->user->date_of_birth  }}" id="date_of_birth" required type="text" class="form-control date-pick" placeholder="Select Date...">
                         </div>
                     </div>
 
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="nal_id">Nationality: <span class="text-danger">*</span></label>
-                            <select onchange="getState(this.value)" data-placeholder="Choose..." required name="nal_id" id="nal_id" class="select-search form-control">
+                            <label for="nationality_id">Nationality: <span class="text-danger">*</span></label>
+                            <select onchange="getState(this.value)" data-placeholder="Choose..." required name="nationality_id" id="nationality_id" class="select-search form-control">
                                 <option value=""></option>
                                 @foreach($nationals as $na)
-                                <option @selected($sr->user->nal_id == $na->id) value="{{ $na->id }}">{{ $na->name }}</option>
+                                <option @selected($sr->user->nationality_id == $na->id) value="{{ $na->id }}">{{ $na->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -93,7 +93,7 @@
                         <div class="form-group">
                             <label for="state_id">State: <span class="text-danger">*</span></label>
                             <select onchange="getLGA(this.value)" required data-placeholder="Choose.." class="select-search form-control" name="state_id" id="state_id">
-                                @foreach($states->where('country_id', $sr->user->nal_id) as $st)
+                                @foreach($states->where('country_id', $sr->user->nationality_id) as $st)
                                 <option @selected($sr->user->state_id == $st->id) value="{{ $st->id }}">{{ $st->name }}</option>
                                 @endforeach
                             </select>
@@ -136,17 +136,17 @@
 
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="p_status" class="w-100">Parent Status: <span class="text-danger">*</span>
+                            <label for="parent_status" class="w-100">Parent Status: <span class="text-danger">*</span>
                                 <i class="material-symbols-rounded float-right text-info" data-toggle="tooltip" title="Choose option, search option, or type to add option">info</i>
                             </label>
-                            <select required data-placeholder="Choose or type to add" name="p_status" id="p_status" class="select-tags form-control">
+                            <select required data-placeholder="Choose or type to add" name="parent_status" id="parent_status" class="select-tags form-control">
                                 <option value=""></option>
                                 @foreach(Usr::getStudentParentsStatus() as $status)
-                                <option @selected($sr->p_status == $status) value="{{ $status }}">{{ $status }}</option>
+                                <option @selected($sr->parent_status == $status) value="{{ $status }}">{{ $status }}</option>
                                 @endforeach
 
-                                @if(!in_array($sr->p_status, Usr::getStudentParentsStatus()))
-                                <option selected value="{{ $sr->p_status }}">{{ $sr->p_status }}</option>
+                                @if(!in_array($sr->parent_status, Usr::getStudentParentsStatus()))
+                                <option selected value="{{ $sr->parent_status }}">{{ $sr->parent_status }}</option>
                                 @endif
                             </select>
                         </div>
@@ -156,11 +156,11 @@
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="bg_id">Blood Group:</label>
-                            <select class="select form-control" id="bg_id" name="bg_id" data-placeholder="Choose..">
+                            <label for="blood_group_id">Blood Group:</label>
+                            <select class="select form-control" id="blood_group_id" name="blood_group_id" data-placeholder="Choose..">
                                 <option value=""></option>
                                 @foreach(Usr::getBloodGroups() as $bg)
-                                <option @selected($sr->user->bg_id == $bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
+                                <option @selected($sr->user->blood_group_id == $bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -168,8 +168,8 @@
 
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="ps_name">Primary School Name: <span class="text-danger">*</span></label>
-                            <input name="ps_name" id="ps_name" value="{{ $sr->ps_name ?? '' }}" type="text" class="form-control">
+                            <label for="primary_school_name">Primary School Name: <span class="text-danger">*</span></label>
+                            <input name="primary_school_name" id="primary_school_name" value="{{ $sr->primary_school_name ?? '' }}" type="text" class="form-control">
                         </div>
                     </div>
 
@@ -185,15 +185,15 @@
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="ss_name">Secondary School Name:</label>
-                            <input name="ss_name" id="ss_name" value="{{ $sr->ss_name ?? '' }}" type="text" class="form-control">
+                            <label for="secondary_school_name">Secondary School Name:</label>
+                            <input name="secondary_school_name" id="secondary_school_name" value="{{ $sr->secondary_school_name ?? '' }}" type="text" class="form-control">
                         </div>
                     </div>
 
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="house_no">House Number:</label>
-                            <input type="text" name="house_no" id="house_no" placeholder="House number" class="form-control text-uppercase" value="{{ $sr->house_no }}">
+                            <label for="house_number">House Number:</label>
+                            <input type="text" name="house_number" id="house_number" placeholder="House number" class="form-control text-uppercase" value="{{ $sr->house_number }}">
                         </div>
                     </div>
 
@@ -221,8 +221,8 @@
 
                     <div class="col-md-9">
                         <div class="form-group">
-                            <label for="chp">Chronic Health Problem(s):</label>
-                            <input type="text" name="chp" id="chp" placeholder="Mention (if presents)" class="form-control" value="{{ $sr->chp }}">
+                            <label for="chronic_health_problems">Chronic Health Problem(s):</label>
+                            <input type="text" name="chronic_health_problems" id="chronic_health_problems" placeholder="Mention (if presents)" class="form-control" value="{{ $sr->chronic_health_problems }}">
                         </div>
                     </div>
                 </div>
@@ -294,8 +294,8 @@
 
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="adm_no">Admission Number:</label>
-                            <input type="text" id="adm_no" name="adm_no" placeholder="Admission Number" class="form-control" value="{{ $sr->adm_no }}">
+                            <label for="admission_number">Admission Number:</label>
+                            <input type="text" id="admission_number" name="admission_number" placeholder="Admission Number" class="form-control" value="{{ $sr->admission_number }}">
                         </div>
                     </div>
                 </div>

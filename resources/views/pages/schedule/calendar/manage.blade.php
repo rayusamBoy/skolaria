@@ -1,20 +1,26 @@
 <div class="{{ $selected ? 'card' : 'card card-collapsed' }}">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Events</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
-        {{-- only users with manage_events can see tabs and actions --}}
+        @php
+        $canEdit = auth()->user()->can($tenant_permissions['schedules']['edit_event']['permission']);
+        $canDelete = auth()->user()->can($tenant_permissions['schedules']['delete_event']['permission']);
+        $canUpdate = auth()->user()->can($tenant_permissions['schedules']['update_event']['permission']);
+        $hasActions = $canEdit || $canDelete;
+        @endphp
+
         <ul class="nav nav-tabs nav-tabs-highlight">
             <li class="nav-item">
                 <a href="#all-events" class="{{ $selected ? 'nav-link' : 'nav-link active' }}" data-toggle="tab">
                     Manage Events
                 </a>
             </li>
-            @if($selected && auth()->user()->can($tenant_permissions['schedules']['update_event']['permission']))
+            @if($selected && $canUpdate)
             <li class="nav-item">
-                <a href="#edit-event" class="{{ $selected ? 'nav-link active' : 'nav-link' }}" data-toggle="tab">
+                <a href="#edit-event" class="nav-link active" data-toggle="tab">
                     Edit Event
                 </a>
             </li>
@@ -35,7 +41,9 @@
                             <th>Day</th>
                             <th>Status</th>
                             <th>By</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -49,19 +57,18 @@
                             <td>{{ $evt->day }}</td>
                             <td>{{ $evt->status }}</td>
                             <td>{{ $evt->user->name }}</td>
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Edit --}}
-                                            @can($tenant_permissions['schedules']['edit_event']['permission'])
+                                            @if($canEdit)
                                             <a href="{{ route('schedule.events.edit', $evt->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-                                            @endcan
-                                            {{-- Delete --}}
-                                            @can($tenant_permissions['schedules']['delete_event']['permission'])
+                                            @endif
+                                            @if($canDelete)
                                             <a id="{{ $evt->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -69,18 +76,19 @@
                                                 @csrf
                                                 <input type="hidden" name="id" value="{{ $evt->id }}">
                                             </form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
 
-            @if($selected && auth()->user()->can($tenant_permissions['schedules']['update_event']['permission']))
+            @if($selected && $canUpdate)
             {{-- Edit Event --}}
             <div class="tab-pane fade show active" id="edit-event">
                 <form class="ajax-update" method="post" action="{{ route('schedule.events.update', $event->id) }}">
@@ -111,7 +119,7 @@
                         <div class="form-group col-md-3">
                             <label for="status" class="font-weight-semibold">Status</label>
                             <select required class="form-control select" name="status" id="status">
-                                @foreach(Evt::getStatuses() as $st)
+                                @foreach(Evt::getStatusOptions() as $st)
                                 <option @selected($event->status == $st) value="{{ $st }}">{{ $st }}</option>
                                 @endforeach
                             </select>

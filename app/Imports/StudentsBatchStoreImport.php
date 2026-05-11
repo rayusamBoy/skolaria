@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
 use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
@@ -23,7 +24,7 @@ use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
-class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollection, WithHeadingRow, WithValidation, SkipsEmptyRows, WithCustomValueBinder
+class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollection, WithHeadingRow, WithValidation, SkipsEmptyRows, WithCustomValueBinder, WithCalculatedFormulas
 {
     protected LocationRepo $location;
     protected DormRepo $dorm;
@@ -38,6 +39,7 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
     protected array $parameters_columns_to_hide_and_populate;
     protected array $date_columns;
     protected array $rules_cache;
+    protected bool $first_row_seen = false;
 
     public function __construct()
     {
@@ -52,11 +54,11 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
         $this->user_parameters = StudentRecordController::getUserHeadings(false);
         $this->student_parameters = StudentRecordController::getStudentHeadings(false);
         $this->all_parameters = [...$this->user_parameters, ...$this->student_parameters];
-        $this->parameters_columns_to_hide_and_populate = ['state_id', 'nal_id', 'my_class_id'];
+        $this->parameters_columns_to_hide_and_populate = ['state_id', 'nationality_id', 'my_class_id'];
 
+        $this->rules_cache = $this->student_record_request->rules();
         // Precompute date columns (letters) for bindValue
         $this->date_columns = $this->buildDateColumns();
-        $this->rules_cache = $this->student_record_request->rules();
     }
 
     /**
@@ -77,20 +79,20 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
 
     /**
      * Determine whether a row should be skipped.
+     *  1. Skip the first data row (visible heading, row 5).
+     *  2. Skip rows that contain only auto‑populated hidden parameters (no user input).
      */
     public function isEmptyWhen(array $row): bool
     {
-        // 1. Is it the heading row (value contains the heading name itself)?
-        foreach ($this->all_parameters as $attribute) {
-            if (str_contains($row[$attribute] ?? '', $attribute)) {
-                return true;
-            }
-            break; // Only check the first attribute (name)
+        // Skip the very first data row (visible heading row, row 5)
+        if ($this->first_row_seen === false) {
+            $this->first_row_seen = true;
+            return true;
         }
 
-        // 2. Does the row contain only auto‑populated hidden parameters?
-        $non_null = array_keys(array_filter($row, fn($value) => $value != null));
-        return \count(array_diff($non_null, $this->parameters_columns_to_hide_and_populate)) === 0;
+        // Skip rows that contain only hidden parameters (no actual data)
+        $nonNull = array_keys(array_filter($row, fn($value) => $value !== null));
+        return \count(array_diff($nonNull, $this->parameters_columns_to_hide_and_populate)) === 0;
     }
 
     /**
@@ -103,12 +105,12 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
         $state_id = $first['state_id'];
 
         $blood_groups = Usr::getBloodGroups();
-        $lgas = $this->location->getLgas($state_id);
+        $lgas = $this->location->getStateById($state_id);
         $sections = $this->my_class->getClassSections($my_class_id);
-        $dorms = $this->dorm->getAll();
+        $dorms = $this->dorm->getAllDorms();
 
         foreach ($rows as $row) {
-            $row['bg_id'] = $blood_groups->where('name', $row['bg_id'])->value('id');
+            $row['blood_group_id'] = $blood_groups->where('name', $row['blood_group_id'])->value('id');
             $row['lga_id'] = $lgas->where('name', $row['lga_id'])->value('id');
             $row['section_id'] = $sections->where('name', $row['section_id'])->value('id');
             $row['dorm_id'] = $dorms->where('name', $row['dorm_id'])->value('id');
@@ -116,11 +118,11 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
             $user_data = $this->extractUserData($row);
             $student_data = $this->extractStudentData($row, $user_data['username']);
 
-            $user = $this->user->create($user_data);
+            $user = $this->user->createUser($user_data);
             $user->assignRole(config('roles.default_roles.tenant.student'));
 
             $student_data['user_id'] = $user->id;
-            $this->student->createRecord($student_data);
+            $this->student->createStudentRecord($student_data);
         }
     }
 
@@ -154,8 +156,10 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
 
     /**
      * Extract user‑related data from a row.
+     * @param array|Collection $row If is a collection, must implement ArrayAccess interface.
+     * @return array
      */
-    protected function extractUserData(array $row): array
+    protected function extractUserData(array|Collection $row): array
     {
         $data = [];
         foreach ($this->user_parameters as $param) {
@@ -170,12 +174,12 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
         $data['name'] = $name;
         $data['code'] = $code;
         $data['password'] = Hash::make('student');
-        $data['photo'] = Usr::createAvatar($name, $code, $user_role);
+        $data['photo_path'] = Usr::createAvatar($name, $code, $user_role);
 
-        $ct = $this->my_class->findTypeByClass($row['my_class_id'])->code;
-        $adm_no = $row['adm_no'];
+        $ct = $this->my_class->findClassTypeByClassId($row['my_class_id'])->code;
+        $admission_number = $row['admission_number'];
         $data['username'] = strtoupper(
-            Usr::getAppCode() . '/' . $ct . '/' . date('Y', strtotime($row['date_admitted'])) . '/' . ($adm_no ?: mt_rand(1000, 99999))
+            Usr::getSystemShortCode() . '/' . $ct . '/' . date('Y', strtotime($row['date_admitted'])) . '/' . ($admission_number ?: mt_rand(1000, 99999))
         );
 
         return $data;
@@ -183,20 +187,22 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
 
     /**
      * Extract student‑related data from a row.
+     * @param array|Collection $row If is a collection, must implement ArrayAccess interface.
+     * @return array
      */
-    protected function extractStudentData(array $row, string $username): array
+    protected function extractStudentData(array|Collection $row, string $username): array
     {
         $sr = [];
         foreach ($this->student_parameters as $param) {
             $sr[$param] = $row[$param];
         }
 
-        $sr['adm_no'] = $username;
+        $sr['admission_number'] = $username;
         $sr['session'] = $this->session;
-        $sr['house_no'] = strtoupper($sr['house_no'] ?? '');
-        $sr['ps_name'] = ucfirst($sr['ps_name'] ?? '');
-        $sr['ss_name'] = ucfirst($sr['ss_name'] ?? '');
-        $sr['p_status'] = ucfirst($sr['p_status'] ?? '');
+        $sr['house_number'] = strtoupper($sr['house_number'] ?? '');
+        $sr['primary_school_name'] = ucfirst($sr['primary_school_name'] ?? '');
+        $sr['secondary_school_name'] = ucfirst($sr['secondary_school_name'] ?? '');
+        $sr['parent_status'] = ucfirst($sr['parent_status'] ?? '');
 
         return $sr;
     }
@@ -222,6 +228,6 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
     {
         $all = array_values($this->all_parameters);
         $index = array_search($heading_param, $all);
-        return Usr::numberToLetter(($index !== false ? $index : 0) + 1);
+        return Usr::numberToColumnLetter(($index !== false ? $index : 0) + 1);
     }
 }

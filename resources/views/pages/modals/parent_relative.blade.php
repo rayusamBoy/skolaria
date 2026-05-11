@@ -1,6 +1,6 @@
 <!-- Modal -->
 <div class="modal fade" id="parent-relative-modal" tabindex="-1" aria-labelledby="close-relative-info-heading" aria-hidden="true">
-    @php $p_relative = Qs::getParentRelative($user->id) @endphp
+    @php $p_relative = Qs::getParentRelativeByUserId($user->id) @endphp
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -20,13 +20,13 @@
                         <td>{{ $p_relative->relation }}</td>
                     </tr>
                     <tr>
-                        <td class="font-weight-bold">Relative Phone</td>
-                        <td><a href="tel: {{ $p_relative->phone3 }}">{{ $p_relative->phone3 }}</a></td>
+                        <td class="font-weight-bold">Relative Primary Mobile</td>
+                        <td><a href="tel:{{ $p_relative->primary_mobile }}">{{ $p_relative->primary_mobile }}</a></td>
                     </tr>
-                    @if(isset($p_relative->phone4))
+                    @if(isset($p_relative->secondary_mobile))
                     <tr>
-                        <td class="font-weight-bold">Relative Telephone</td>
-                        <td><a href="tel: {{ $p_relative->phone4 }}">{{ $p_relative->phone4 }}</a></td>
+                        <td class="font-weight-bold">Relative Secondary Mobile</td>
+                        <td><a href="tel:{{ $p_relative->secondary_mobile }}">{{ $p_relative->secondary_mobile }}</a></td>
                     </tr>
                     @endif
                 </table>

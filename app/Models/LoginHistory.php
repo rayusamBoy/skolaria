@@ -7,7 +7,7 @@ use Eloquent;
 
 class LoginHistory extends Eloquent
 {
-    protected $fillable = ['user_id', 'login_times', 'last_login', 'last_reset'];
+    protected $fillable = ['user_id', 'login_count', 'last_login', 'last_reset'];
     public $timestamps = false;
 
     public function user()

@@ -8,7 +8,7 @@
     <div class="col-md-3 text-center">
         <div class="card">
             <div class="card-body">
-                <img style="width: 90%; height: 90%" src="{{ Usr::getTenancyAwarePhoto($sr->user->photo) }}" alt="photo" class="rounded-circle">
+                <img style="width: 90%; height: 90%" src="{{ Usr::getTenancyAwarePhotoUrl($sr->user->photo_path) }}" alt="photo" class="rounded-circle">
                 <br>
                 <h3 class="mt-3">{{ $sr->user->name }}</h3>
             </div>
@@ -57,25 +57,25 @@
                                     <td>{{ $sr->user->email }}</td>
                                 </tr>
                                 @endif
-                                @if($sr->user->phone)
+                                @if($sr->user->primary_mobile || $sr->user->secondary_mobile)
                                 <tr>
-                                    <td class="font-weight-bold">Phone</td>
-                                    <td>{{ $sr->user->phone.' '.$sr->user->phone2 }}</td>
+                                    <td class="font-weight-bold">Mobile</td>
+                                    <td>{{ $sr->user->primary_mobile.' '.$sr->user->secondary_mobile }}</td>
                                 </tr>
                                 @endif
-                                @if($sr->user->dob)
+                                @if($sr->user->date_of_birth)
                                 <tr>
                                     <td class="font-weight-bold">Birthday</td>
-                                    <td>{{ $sr->user->dob }}</td>
+                                    <td>{{ $sr->user->date_of_birth }}</td>
                                 </tr>
                                 @endif
-                                @if($sr->user->bg_id)
+                                @if($sr->user->blood_group_id)
                                 <tr>
                                     <td class="font-weight-bold">Blood Group</td>
                                     <td>{{ $sr->user->blood_group->name }}</td>
                                 </tr>
                                 @endif
-                                @if($sr->user->nal_id)
+                                @if($sr->user->nationality_id)
                                 <tr>
                                     <td class="font-weight-bold">Nationality</td>
                                     <td>{{ $sr->user->nationality->name }}</td>
@@ -109,10 +109,10 @@
                                     <td>{{$sr->disability }}</td>
                                 </tr>
                                 @endif
-                                @if($sr->chp)
+                                @if($sr->chronic_health_problems)
                                 <tr>
-                                    <td class="font-weight-bold">Chronic Health Problem</td>
-                                    <td>{{$sr->chp }}</td>
+                                    <td class="font-weight-bold">Chronic Health Problems</td>
+                                    <td>{{$sr->chronic_health_problems }}</td>
                                 </tr>
                                 @endif
                             </tbody>
@@ -125,41 +125,41 @@
                             <tbody>
                                 <tr>
                                     <td class="font-weight-bold">Status</td>
-                                    <td>{{ $sr->grad == 1 ? "Graduate ({$sr->grad_date})" : 'Active' }}</td>
+                                    <td>{{ $sr->is_graduated ? "Graduated: ({$sr->graduated_session})" : 'Active' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">Admission Number</td>
-                                    <td>{{ $sr->adm_no }}</td>
+                                    <td>{{ $sr->admission_number }}</td>
                                 </tr>
-                                @if($sr->p_status)
+                                @if($sr->parent_status)
                                 <tr>
-                                    <td class="font-weight-bold">Parental status</td>
-                                    <td>{{ $sr->p_status }}</td>
+                                    <td class="font-weight-bold">Parent status</td>
+                                    <td>{{ $sr->parent_status }}</td>
                                 </tr>
                                 @endif
-                                @if($sr->ps_name)
+                                @if($sr->primary_school_name)
                                 <tr>
-                                    <td class="font-weight-bold">Primary School</td>
-                                    <td>{{ $sr->ps_name }}</td>
+                                    <td class="font-weight-bold">Primary School Name</td>
+                                    <td>{{ $sr->primary_school_name }}</td>
                                 </tr>
                                 @endif
-                                @if($sr->ss_name)
+                                @if($sr->secondary_school_name)
                                 <tr>
-                                    <td class="font-weight-bold">Secondary School</td>
-                                    <td>{{ $sr->ss_name }}</td>
+                                    <td class="font-weight-bold">Secondary School Name</td>
+                                    <td>{{ $sr->secondary_school_name }}</td>
                                 </tr>
                                 @endif
-                                @if($sr->house_no)
+                                @if($sr->house_number)
                                 <tr>
                                     <td class="font-weight-bold">House Number</td>
-                                    <td>{{ $sr->house_no }}</td>
+                                    <td>{{ $sr->house_number }}</td>
                                 </tr>
                                 @endif
                                 <tr>
                                     <td class="font-weight-bold">Class</td>
                                     <td>{{ $sr->my_class->name }} - {{ $sr->section->name }}</td>
                                 </tr>
-                                @if($sr->user->nal_id)
+                                @if($sr->user->nationality_id)
                                 <tr>
                                     <td class="font-weight-bold">Nationality</td>
                                     <td>{{ $sr->user->nationality->name }}</td>

@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Artisan Commands</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="row">

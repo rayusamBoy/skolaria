@@ -10,7 +10,7 @@ class ExamRecord extends Eloquent
 {
     use MassUpdatable;
 
-    protected $fillable = ['exam_id', 'my_class_id', 'student_id', 'section_id', 'af', 'ps', 't_comment', 'p_comment', 'year', 'total', 'ave', 'class_ave', 'pos', 'class_pos', 'grade_id', 'points', 'gpa', 'division_id'];
+    protected $fillable = ['exam_id', 'my_class_id', 'student_id', 'section_id', 'af', 'ps', 't_comment', 'p_comment', 'year', 'total', 'average', 'class_average', 'section_position', 'class_position', 'grade_id', 'points', 'gpa', 'division_id'];
 
     public function grade()
     {

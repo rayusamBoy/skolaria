@@ -7,7 +7,7 @@
 <div class="card marks-converter">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Marks Converter</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="row">

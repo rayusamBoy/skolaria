@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('login_histories', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id')->index();
-            $table->integer('login_times')->default(0);
+            $table->integer('login_count')->default(0);
             $table->timestamp('last_login')->nullable();
             $table->timestamp('last_reset')->nullable();
             $table->timestamp('created_at')->nullable()->useCurrent();

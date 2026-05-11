@@ -7,12 +7,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Analytic\GoogleSetup;
 use App\Http\Requests\Analytic\Request as AnalyticRequest;
 use App\Repositories\SettingRepo;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 use Spatie\Analytics\Facades\Analytics;
 use Spatie\Analytics\Period;
 
 class AnalyticController extends Controller
 {
-    protected $setting;
+    protected SettingRepo $setting;
+
     public function __construct(SettingRepo $setting)
     {
         $this->permissionMap = config('permissions.names.tenant.analytics');
@@ -20,97 +23,127 @@ class AnalyticController extends Controller
         $this->setting = $setting;
     }
 
-    public function index($data = [])
+    /**
+     * Display the analytics dashboard, optionally filtered by period.
+     */
+    public function index(array $data = []): View|RedirectResponse
     {
         $settings = Qs::getSettings();
-        $d['google_analytic_property_id'] = $google_analytic_property_id = $settings->firstWhere('type', 'google_analytic_property_id')->description;
-        $d['google_analytic_tag_id'] = $settings->firstWhere('type', 'google_analytic_tag_id')->description;
 
-        $credential_file = storage_path('/app/public/' . $settings->firstWhere('type', 'google_analytic_service_account_credential_file')->description);
-        $gtag_code_structure_file = __DIR__ . '/../../../../storage/app/private/analytics/google-tag-manager-code-structure.php';
+        $property_id = $settings->firstWhere('key', 'google_analytic_property_id')->value;
+        $tag_id = $settings->firstWhere('key', 'google_analytic_tag_id')->value;
+        $credential_rel = $settings->firstWhere('key', 'google_analytic_service_account_credential_file')->value;
+        $analytics_enabled = (bool) $settings->firstWhere('key', 'analytics_enabled')->value;
 
-        // These are usually configured statically; meaning they are not expected to change (see the analytic config file)
-        // For multitenant scope we will update accordingly during runtime
-        config(['analytics.property_id' => $google_analytic_property_id]); // Update analytic property id during runtime
-        config(['analytics.service_account_credentials_json' => $credential_file]); // Update credetial file during runtime
+        $credential_path = storage_path("app/public/$credential_rel");
+        $gtag_code_path = app_path('../../storage/app/private/analytics/google-tag-manager-code-structure.php');
 
-        if (file_exists($credential_file))
-            $d['credential_file'] = $credential_file;
-        if (file_exists($gtag_code_structure_file))
-            $d['gtag_code_structure_file'] = $gtag_code_structure_file;
+        config(['analytics.property_id' => $property_id]);
+        config(['analytics.service_account_credentials_json' => $credential_path]);
 
-        $d['analytics_enabled'] = (bool) $settings->firstWhere('type', 'analytics_enabled')->description === true;
+        $view_data = [
+            'google_analytic_property_id' => $property_id,
+            'google_analytic_tag_id' => $tag_id,
+            'analytics_enabled' => $analytics_enabled,
+        ];
+
+        if (file_exists($credential_path)) {
+            $view_data['credential_file'] = $credential_path;
+        }
+        if (file_exists($gtag_code_path)) {
+            $view_data['gtag_code_structure_file'] = $gtag_code_path;
+        }
 
         if (Qs::googleAnalyticsSetUpOkAndEnabled()) {
-            $d['google_analytics_setup_ok'] = true;
+            $view_data['google_analytics_setup_ok'] = true;
 
-            $d['data'] = $data = \count($data) <= 0 ? ['period_number' => 6, 'period_name' => 'months'] : $data;
+            if (empty($data)) {
+                $data = ['period_number' => 6, 'period_name' => 'months'];
+            }
 
-            $period = match ($data["period_name"]) {
-                'days' => Period::days($data["period_number"]),
-                'months' => Period::months($data["period_number"]),
-                'years' => Period::years($data["period_number"]),
-            };
+            $period = $this->resolvePeriod($data['period_name'], $data['period_number']);
 
             try {
-                // Visitors and page views
-                $d['vstrsAndPgVw'] = Analytics::fetchVisitorsAndPageViews($period);
-                // Visitors and page views by date
-                $d['vstrsAndPgVwByDt'] = Analytics::fetchVisitorsAndPageViewsByDate($period);
-                // Total visitors and pageviews
-                $d['ttlVstrsAndPgVw'] = Analytics::fetchTotalVisitorsAndPageViews($period);
-                // Most visited pages
-                $d['mostVstdPgs'] = Analytics::fetchMostVisitedPages($period);
-                // Top referrers
-                $d['topReferrers'] = Analytics::fetchTopReferrers($period);
-                // User Types
-                $d['userTypes'] = Analytics::fetchUserTypes($period);
-                // Top browsers
-                $d['topBrowsers'] = Analytics::fetchTopBrowsers($period);
-                // Top countries
-                $d['topCountries'] = Analytics::fetchTopCountries($period);
-                // Top operating systems
-                $d['topOses'] = Analytics::fetchTopOperatingSystems($period);
+                $view_data = [...$view_data, ...$this->fetchAnalyticsData($period)];
             } catch (\Exception $e) {
-                unset($d['google_analytics_setup_ok']); // Analytics not OK anymore
+                unset($view_data['google_analytics_setup_ok']);
                 session()->flash('pop_error', $e->getMessage());
-                return view('pages.analytics', $d);
+                return view('pages.analytics', $view_data);
             }
         }
 
-        return view('pages.analytics', $d);
+        return view('pages.analytics', $view_data);
     }
 
-    public function fetch_data(AnalyticRequest $req)
+    /**
+     * Fetch analytics data for a different time period.
+     */
+    public function fetch_data(AnalyticRequest $req): View|RedirectResponse
     {
-        $d = $req->only(['period_number', 'period_name']);
-        $period_names = array_keys(Qs::getSpatieAnalyticsPackagePeriods());
+        $params = $req->only(['period_number', 'period_name']);
+        $allowed = array_keys(Qs::getSpatieAnalyticsPackagePeriods());
 
-        if (!\in_array($d['period_name'], $period_names))
-            return redirect()->route('analytics.index')->with('flash_warning', __('msg.invalid_period_name'));
+        if (!\in_array($params['period_name'], $allowed)) {
+            return redirect()->route('analytics.index')
+                ->with('flash_warning', __('msg.invalid_period_name'));
+        }
 
-        return $this->index($d);
+        return $this->index($params);
     }
 
-    public function google_setup(GoogleSetup $req)
+    /**
+     * Save Google Analytics property, tag, and credentials.
+     */
+    public function google_setup(GoogleSetup $req): RedirectResponse
     {
-        $google_analytic_property_id = $req->google_analytic_property_id;
-        $google_analytic_tag_id = rtrim($req->google_analytic_tag_id, "_"); // Remove any '_' data mask residue characters
+        $property_id = $req->google_analytic_property_id;
+        $tag_id = rtrim($req->google_analytic_tag_id, '_');
 
-        if ($google_analytic_property_id !== null)
-            $this->setting->update('google_analytic_property_id', $google_analytic_property_id);
-        if ($google_analytic_tag_id !== '')
-            $this->setting->update('google_analytic_tag_id', $google_analytic_tag_id);
+        if ($property_id !== null) {
+            $this->setting->update('google_analytic_property_id', $property_id);
+        }
+        if ($tag_id !== '') {
+            $this->setting->update('google_analytic_tag_id', $tag_id);
+        }
 
         if ($req->hasFile('service_account_credential_file')) {
             $file = $req->file('service_account_credential_file');
-            $fdata = Qs::getFileMetaData($file);
-            $fpath = 'analytics/service-acc-credential-file.' . $fdata['ext'];
-            $file->storeAs($fpath);
-
-            $this->setting->update('google_analytic_service_account_credential_file', $fpath);
+            $meta = Qs::getFileMetaData($file);
+            $store_path = 'analytics/service-acc-credential-file.' . $meta['ext'];
+            $file->storeAs($store_path);
+            $this->setting->update('google_analytic_service_account_credential_file', $store_path);
         }
 
         return back()->with('flash_success', __('msg.update_ok'));
+    }
+
+    /**
+     * Convert period name and count to a Spatie Period object.
+     */
+    protected function resolvePeriod(string $name, int $count): Period
+    {
+        return match ($name) {
+            'days' => Period::days($count),
+            'months' => Period::months($count),
+            'years' => Period::years($count),
+        };
+    }
+
+    /**
+     * Fetch all Google Analytics metrics and dimensions for the given period.
+     */
+    protected function fetchAnalyticsData(Period $period): array
+    {
+        return [
+            'vstrsAndPgVw' => Analytics::fetchVisitorsAndPageViews($period),
+            'vstrsAndPgVwByDt' => Analytics::fetchVisitorsAndPageViewsByDate($period),
+            'ttlVstrsAndPgVw' => Analytics::fetchTotalVisitorsAndPageViews($period),
+            'mostVstdPgs' => Analytics::fetchMostVisitedPages($period),
+            'topReferrers' => Analytics::fetchTopReferrers($period),
+            'userTypes' => Analytics::fetchUserTypes($period),
+            'topBrowsers' => Analytics::fetchTopBrowsers($period),
+            'topCountries' => Analytics::fetchTopCountries($period),
+            'topOses' => Analytics::fetchTopOperatingSystems($period),
+        ];
     }
 }

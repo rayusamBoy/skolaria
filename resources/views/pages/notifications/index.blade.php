@@ -4,10 +4,18 @@
 
 @section('content')
 
+@php
+$user = auth()->user();
+$canDelete = $user->can($tenant_permissions['notifications']['destroy']['permission']);
+$canMarkAllRead = $user->can($tenant_permissions['notifications']['mark_all_read']['permission']);
+$canMarkAsRead = $user->can($tenant_permissions['notifications']['mark_as_read']['permission']);
+$hasActions = $canMarkAsRead || $canDelete;
+@endphp
+
 <div class="card card-collapsed">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Preferences</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="row">
@@ -21,15 +29,22 @@
         </div>
     </div>
 
+    @php
+    $isGlobalEmailChannelOn = $settings->firstWhere('key',"enable_email_notification")->value == 1 ? true : false;
+    $isGlobalPushChannelOn = $settings->firstWhere('key',"enable_push_notification")->value == 1 ? true : false;
+    $isGlobalSmsChannelOn = $settings->firstWhere('key',"enable_sms_notification")->value == 1 ? true : false;
+    $isGlobalNotificationOn = $isGlobalEmailChannelOn && $isGlobalPushChannelOn && $isGlobalSmsChannelOn;
+    @endphp
+
     <div class="card-body">
-        @can($tenant_permissions['notifications']['update_is_notifiable']['permission'])
-        <form method="post" action="{{ route('notifications.update_is_notifiable') }}">
+        @can($tenant_permissions['notifications']['update_notification_preferences']['permission'])
+        <form method="post" action="{{ route('notifications.update.notification_preferences') }}">
             @csrf @method('put')
             <div class="form-group row">
                 <div class="col-lg-3">
                     <label for="email_channel" class="col-form-label font-weight-semibold">Email notification</label>
                     <div class="text-center">
-                        <select class="form-control select" name="on_email_channel" id="email_channel">
+                        <select class="form-control select" @disabled(!$isGlobalEmailChannelOn) name="on_email_channel" id="email_channel">
                             <option @selected($email_channel_on==true) value="true">On</option>
                             <option @selected($email_channel_on==false) value="false">Off</option>
                         </select>
@@ -38,7 +53,7 @@
                 <div class="col-lg-3">
                     <label for="push_channel" class="col-form-label font-weight-semibold">Push notification</label>
                     <div class="text-center">
-                        <select class="form-control select" name="on_push_channel" id="push_channel">
+                        <select class="form-control select" @disabled(!$isGlobalPushChannelOn) name="on_push_channel" id="push_channel">
                             <option @selected($push_channel_on==true) value="true">On</option>
                             <option @selected($push_channel_on==false) value="false">Off</option>
                         </select>
@@ -47,7 +62,7 @@
                 <div class="col-lg-3">
                     <label for="sms_channel" class="col-form-label font-weight-semibold">SMS notification</label>
                     <div class="text-center">
-                        <select class="form-control select" name="on_sms_channel" id="sms_channel">
+                        <select class="form-control select" @disabled(!$isGlobalSmsChannelOn) name="on_sms_channel" id="sms_channel">
                             <option @selected($sms_channel_on==true) value="true">On</option>
                             <option @selected($sms_channel_on==false) value="false">Off</option>
                         </select>
@@ -56,16 +71,16 @@
                 <div class="col-lg-3">
                     <label for="status" class="col-form-label font-weight-semibold">Allow Notifications</label>
                     <div>
-                        <select class="form-control select" name="status" id="status">
-                            <option @selected($is_notifiable==true) value="true">Yes</option>
-                            <option @selected($is_notifiable==false) value="false">No</option>
+                        <select class="form-control select" @disabled(!$isGlobalNotificationOn) name="status" id="status">
+                            <option @selected($notification_preferences==true) value="true">Yes</option>
+                            <option @selected($notification_preferences==false) value="false">No</option>
                         </select>
                     </div>
                 </div>
             </div>
             <div class="form-group row">
                 <div class="offset-lg-9 col-lg-3">
-                    <button type="submit" class="btn btn-sm btn-danger float-right">
+                    <button type="submit" @if(!$isGlobalNotificationOn) disabled data-toggle="tooltip" data-placement="top" title="You can't change this setting. Please contact your administrator." @endif class="btn btn-sm btn-danger float-right">
                         Submit form <span class="material-symbols-rounded ml-2 pb-2px">send</span>
                     </button>
                 </div>
@@ -95,7 +110,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Notifications</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -106,51 +121,55 @@
                     <th>Subject</th>
                     <th>Created At</th>
                     <th>Read At</th>
+                    @if($hasActions)
                     <th class="text-center">Action</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
-                @foreach(auth()->user()->notifications as $notification)
+                @foreach($user->notifications as $notification)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
                     <td>
                         @php $data = $notification->data; @endphp
-                        <a target="_blank" @if(isset($data['receipt'])) href="{{ route('payments.receipts', [Qs::hash($data['receipt']['pr_id']), $notification->id]) }}" @elseif(!empty($data['url'])) href="{{ $data['url'] }}" @endif>
+                        <a target="_blank" @if(isset($data['receipt'])) href="{{ route('payments.receipts', [Qs::hash($data['receipt']['payment_record_id']), $notification->id]) }}" @elseif(!empty($data['url'])) href="{{ $data['url'] }}" @endif>
                             <strong>{{ $data['subject'] }}</strong>
                         </a>
                     </td>
                     <td>{{ $notification->created_at }}</td>
                     <td>{{ $notification->read_at ?? 'Never' }}</td>
+                    @if($hasActions)
                     <td class="text-center">
                         <div class="list-icons">
                             <div class="dropdown">
                                 <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                 <div class="dropdown-menu dropdown-menu-left">
-                                    @if(is_null($notification->read_at) && auth()->user()->can('mark_notifications'))
+                                    @if($notification->read_at === null && $canMarkAsRead)
                                     <a href="{{ route('notifications.mark_as_read', $notification->id) }}" class="dropdown-item">
                                         <i class="material-symbols-rounded">done</i> Mark as read
                                     </a>
                                     @endif
 
-                                    @can($tenant_permissions['notifications']['destroy']['permission'])
+                                    @if($canDelete)
                                     <a id="{{ $notification->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                         <i class="material-symbols-rounded">delete</i> Delete
                                     </a>
                                     <form method="post" id="item-delete-{{ $notification->id }}" action="{{ route('notifications.destroy', $notification->id) }}" class="hidden">
                                         @csrf @method('delete')
                                     </form>
-                                    @endcan
+                                    @endif
                                 </div>
                             </div>
                         </div>
                     </td>
+                    @endif
                 </tr>
                 @endforeach
             </tbody>
         </table>
 
-        @can($tenant_permissions['notifications']['mark_all_read']['permission'])
-        @if(auth()->user()->unreadNotifications->isNotEmpty())
+        @if($canMarkAllRead)
+        @if($user->unreadNotifications->isNotEmpty())
         <a href="javascript:;" id="mark_all_read" class="btn btn-warning float-right mt-3" onclick="confirmOperation(this.id)">
             Mark all Read<i class="material-symbols-rounded ml-1 pb-2px">done_all</i>
         </a>
@@ -158,7 +177,7 @@
             @csrf @method('PUT')
         </form>
         @endif
-        @endcan
+        @endif
 
     </div>
 </div>

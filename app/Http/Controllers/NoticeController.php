@@ -2,19 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Qs;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Notice\NoticeCreate;
 use App\Http\Requests\Notice\NoticeSetAsViewed;
 use App\Http\Requests\Notice\NoticeUpdate;
+use App\Models\Notice;
 use App\Repositories\NoticeRepo;
 use App\Repositories\UserRepo;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class NoticeController extends Controller
 {
-    protected $notice, $user, $year;
-
-    protected $permissionMap;
+    protected NoticeRepo $notice;
+    protected UserRepo $user;
+    protected string $year;
 
     public function __construct(NoticeRepo $notice, UserRepo $user)
     {
@@ -25,56 +30,73 @@ class NoticeController extends Controller
         $this->year = Qs::getCurrentSession();
     }
 
-    public function index()
+    /**
+     * Display a listing of notices (admin sees all, others see own).
+     */
+    public function index(): View
     {
-        $d['notices'] = $this->notice->allOrOnlyMine();
-        $d['edit'] = false;
+        $data['notices'] = $this->notice->getAllOrOwnNotices();
+        $data['edit'] = false;
 
-        return view('pages.notices.index', $d);
+        return view('pages.notices.index', $data);
     }
 
-    public function store(NoticeCreate $req)
+    /**
+     * Store a newly created notice.
+     */
+    public function store(NoticeCreate $req): JsonResponse
     {
         $data = $req->all();
-        $data['from_id'] = $data['editor_id'] = auth()->id();
-        $this->notice->create($data);
+        $data['creator_id'] = $data['editor_id'] = auth()->id();
+        $this->notice->createNotice($data);
 
         return Qs::jsonStoreOk();
     }
 
-    public function update_record(NoticeUpdate $req, $id)
+    /**
+     * Update the specified notice.
+     */
+    public function update(NoticeUpdate $req, Notice $notice): JsonResponse
     {
         $data = $req->all();
         $data['editor_id'] = auth()->id();
-        $this->notice->update($id, $data);
+        $notice->update($data);
 
         return Qs::jsonUpdateOk();
     }
 
-    public function edit($notice)
+    /**
+     * Show the form for editing the specified notice.
+     */
+    public function edit($notice): View
     {
-        $d['notice'] = $this->notice->getById($notice)->first();
-        $d['notices'] = $this->notice->allOrOnlyMine();
-        $d['edit'] = true;
+        $data['notice'] = $this->notice->getNoticesById($notice)->first();
+        $data['notices'] = $this->notice->getAllOrOwnNotices();
+        $data['edit'] = true;
 
-        return view('pages.notices.index', $d);
+        return view('pages.notices.index', $data);
     }
 
-    public function mark_as_viewed(NoticeSetAsViewed $req)
+    /**
+     * Mark a notice as viewed by the current user.
+     */
+    #[SkipPermission]
+    public function mark_as_viewed(NoticeSetAsViewed $req): JsonResponse
     {
-        $ntc_id = $req->id;
-        $viewers_ids = $this->notice->getById($ntc_id)->value("viewers_ids");
-        // Push auth user id to viewers ids
+        $notice_id = $req->id;
+        $viewers_ids = $this->notice->getNoticesById($notice_id)->value('viewers_ids');
         $viewers_ids[] = auth()->id();
-        // Update the viewers ids
-        $this->notice->update($ntc_id, ["viewers_ids" => $viewers_ids]);
+        $this->notice->updateNotice($notice_id, ['viewers_ids' => $viewers_ids]);
 
-        return Qs::json("updated");
+        return Qs::json('updated');
     }
 
-    public function destroy($notice_id)
+    /**
+     * Remove the specified notice.
+     */
+    public function destroy(Notice $notice): RedirectResponse
     {
-        $this->notice->delete($notice_id);
+        $notice->delete();
 
         return back()->with('flash_success', __('msg.delete_ok'));
     }

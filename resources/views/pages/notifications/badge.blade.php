@@ -19,7 +19,7 @@ $unread_notifications_count = $unread_notifications->count();
         <div>
             <ul class="list-style-circle text-default unread-notifications-list px-2">
                 @forelse($unread_notifications as $not)
-                <li class="unread-{{ $not->id }}"><a target="_blank" @if(isset($not->data['receipt'])) href="{{ route('payments.receipts', [Qs::hash($not->data['receipt']['pr_id']), $not->id]) }}" @elseif($not->data['url']) href="{{ $not->data['url'] }}" @endif><strong>{{ $not->data['subject'] }}</strong></a><small class="float-right pl-2">{{ $not->created_at }}</small></li>
+                <li class="unread-{{ $not->id }}"><a target="_blank" @if(isset($not->data['receipt'])) href="{{ route('payments.receipts', [Qs::hash($not->data['receipt']['payment_record_id']), $not->id]) }}" @elseif($not->data['url']) href="{{ $not->data['url'] }}" @endif><strong>{{ $not->data['subject'] }}</strong></a><small class="float-right pl-2">{{ $not->created_at }}</small></li>
                 @empty
                 <h6 class="text-success">No new notifications</h6>
                 @endforelse

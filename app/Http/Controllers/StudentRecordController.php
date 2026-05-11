@@ -53,7 +53,7 @@ class StudentRecordController extends Controller
      */
     public function reset_password($st_id): RedirectResponse
     {
-        $this->user->update($st_id, ['password' => Hash::make('student')]);
+        $this->user->updateUsersByColumn($st_id, ['password' => Hash::make('student')]);
 
         return back()->with('flash_success', __('msg.p_reset'));
     }
@@ -66,7 +66,7 @@ class StudentRecordController extends Controller
         $data['parents'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.parent')]);
         $data['dorms'] = $this->student->getAllDorms();
         $data['states'] = $this->loc->getStates();
-        $data['nationals'] = $this->loc->getAllNationals();
+        $data['nationals'] = $this->loc->getAllNationalities();
 
         return view('pages.students.add', $data);
     }
@@ -76,12 +76,12 @@ class StudentRecordController extends Controller
      */
     public function store(StudentRecordCreate $req): JsonResponse
     {
-        $user_data = $req->only(Usr::getUserRecord());
-        $student_data = $req->only(Usr::getStudentData());
+        $user_data = $req->only(Usr::getUserRecordFields());
+        $student_data = $req->only(Usr::getStudentDataFields());
 
-        $class_type = $this->my_class->findTypeByClass($req->my_class_id);
+        $class_type = $this->my_class->findClassTypeByClassId($req->my_class_id);
         $user_code = strtoupper(Str::random(10));
-        $adm_no = $req->adm_no ?: mt_rand(1000, 99999);
+        $admission_number = $req->admission_number ?: mt_rand(1000, 99999);
 
         $role = config('roles.default_roles.tenant.student');
 
@@ -89,21 +89,21 @@ class StudentRecordController extends Controller
         $user_data['name'] = strtoupper($req->name);
         $user_data['code'] = $user_code;
         $user_data['password'] = Hash::make('student');
-        $user_data['username'] = $this->generateStudentUsername($class_type->code, $student_data['date_admitted'], $adm_no);
+        $user_data['username'] = $this->generateStudentUsername($class_type->code, $student_data['date_admitted'], $admission_number);
 
         // Handle file uploads
         $this->handleFileUpload($req, 'photo', $user_data, $user_code, $role);
         $this->handleFileUpload($req, 'birth_certificate', $student_data, $user_code, $role);
 
-        $user = $this->user->create($user_data);
+        $user = $this->user->createUser($user_data);
         $user->assignRole($role);
 
         $student_data['user_id'] = $user->id;
-        $student_data['adm_no'] = $user->username;
+        $student_data['admission_number'] = $user->username;
         $student_data['session'] = $this->session;
         $this->formatStudentDataFields($student_data);
 
-        $this->student->createRecord($student_data);
+        $this->student->createStudentRecord($student_data);
 
         return Usr::jsonStoreOk();
     }
@@ -117,13 +117,13 @@ class StudentRecordController extends Controller
         $student_headings = self::getStudentHeadings(false);
 
         $data['heading_names'] = [...$user_headings, ...$student_headings];
-        $data['class'] = $class = $this->my_class->find($req->my_class_id);
+        $data['class'] = $class = $this->my_class->findClass($req->my_class_id);
         $data['my_class_id'] = $req->my_class_id;
-        $data['nationality'] = $this->loc->getNationality($req->nal_id);
-        $data['nal_id'] = $req->nal_id;
+        $data['nationality'] = $this->loc->getNationalityById($req->nationality_id);
+        $data['nationality_id'] = $req->nationality_id;
         $data['state'] = $this->loc->getState($req->state_id);
         $data['state_id'] = $req->state_id;
-        $data['lgas'] = $this->loc->getLGAs($req->state_id);
+        $data['lgas'] = $this->loc->getStateById($req->state_id);
         $data['sections'] = $this->my_class->getClassSections($req->my_class_id);
         $data['dormitories'] = $this->student->getAllDorms();
         $data['genders'] = Usr::getGenders();
@@ -152,7 +152,7 @@ class StudentRecordController extends Controller
      */
     public static function getUserHeadings(bool $values_only = true): array
     {
-        return Usr::getUserRecord([], $values_only);
+        return Usr::getUserRecordFields([], $values_only);
     }
 
     /**
@@ -160,7 +160,7 @@ class StudentRecordController extends Controller
      */
     public static function getStudentHeadings(bool $values_only = true): array
     {
-        return Usr::getStudentData(['my_parent_id', 'age', 'birth_certificate'], $values_only);
+        return Usr::getStudentDataFields(['my_parent_id', 'age', 'birth_certificate'], $values_only);
     }
 
     /**
@@ -171,16 +171,26 @@ class StudentRecordController extends Controller
         $template = $req->file('template');
         $file_meta = Usr::getFileMetaData($template);
         $name = str_replace('.' . $file_meta['ext'], '', $file_meta['name']);
-        $req['template_name'] = $name;
+        $req['template_file_name'] = $name;
 
         Validator::make($req->toArray(), [
             'template' => 'required|file|mimes:xlsx,xlx|max:4096',
-            'template_name' => new HasOrderedClassDescriptionSession($this->students_batch_file_name_description),
+            'template_file_name' => new HasOrderedClassDescriptionSession($this->students_batch_file_name_description),
         ], [], ['template' => 'students batch add template'])->validate();
 
-        Excel::import(new StudentsBatchStoreImport(), $template);
+        try {
+            Excel::import(new StudentsBatchStoreImport(), $template);
+            return Usr::jsonStoreOk();
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $errors = [];
 
-        return Usr::jsonStoreOk();
+            foreach ($e->failures() as $failure) {
+                $actual_row = $failure->row() + 1; // 1 = The very first data row (visible heading row, row 5, skipped)
+                $errors[$failure->attribute()] = "There was an error on row $actual_row. " . implode(', ', $failure->errors());
+            }
+
+            return Usr::json(arr: ['errors' => $errors, 'hasAjaxErrors' => true]);
+        }
     }
 
     /**
@@ -197,7 +207,7 @@ class StudentRecordController extends Controller
         }
 
         $data['class_id'] = $class_id;
-        $data['students'] = $this->student->findStudentsByClass($class_id, ['section', 'user', 'my_parent']);
+        $data['students'] = $this->student->getActiveStudentsByClass($class_id, ['section', 'user', 'my_parent']);
         $data['sections'] = $this->my_class->getClassSections($class_id);
 
         return view('pages.students.list', $data);
@@ -208,7 +218,7 @@ class StudentRecordController extends Controller
      */
     public function graduated(): View
     {
-        $data['grad_students'] = $this->student->allGradStudents()->whereNotNull('user');
+        $data['grad_students'] = $this->student->getAllGraduatedPromotionsWithDetails()->whereNotNull('user');
 
         return view('pages.students.graduated', $data);
     }
@@ -218,11 +228,11 @@ class StudentRecordController extends Controller
      */
     public function mark_not_graduated($sr_id, $prom_id)
     {
-        $d['grad'] = 0;
-        $d['grad_date'] = NULL;
+        $d['is_graduated'] = false;
+        $d['graduated_session'] = NULL;
         $d['session'] = $this->session;
 
-        $this->student->updateRecord($sr_id, $d);
+        $this->student->updateStudentRecords($sr_id, $d);
         $this->student->deletePromotion($prom_id);
 
         return back()->with('flash_success', __('msg.update_ok'));
@@ -259,7 +269,7 @@ class StudentRecordController extends Controller
         $data['parents'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.parent')]);
         $data['dorms'] = $this->student->getAllDorms();
         $data['states'] = $this->loc->getStates();
-        $data['nationals'] = $this->loc->getAllNationals();
+        $data['nationals'] = $this->loc->getAllNationalities();
         $data['class_sections'] = $this->my_class->getClassSections($sr->my_class_id);
 
         return view('pages.students.edit', $data);
@@ -277,23 +287,23 @@ class StudentRecordController extends Controller
         $sr = $this->findStudentRecord($student);
         $user_code = $sr->user->code;
 
-        $user_data = $req->only(Usr::getUserRecord());
+        $user_data = $req->only(Usr::getUserRecordFields());
         $user_data['name'] = strtoupper($req->name);
-        $user_data['username'] = $req->adm_no;
+        $user_data['username'] = $req->admission_number;
 
         $this->handleFileUpload($req, 'photo', $user_data, $user_code, 'student');
-        $this->user->update($sr->user->id, $user_data);
+        $this->user->updateUsersByColumn($sr->user->id, $user_data);
 
-        $student_data = $req->only(Usr::getStudentData());
+        $student_data = $req->only(Usr::getStudentDataFields());
         $this->handleFileUpload($req, 'birth_certificate', $student_data, $user_code, 'student');
 
         $this->formatStudentDataFields($student_data);
-        $student_data['adm_no'] = $req->adm_no;
+        $student_data['admission_number'] = $req->admission_number;
 
-        $this->student->updateRecord($student, $student_data);
+        $this->student->updateStudentRecords($student, $student_data);
 
         // Optional: Delete old marks if class/section changed
-        // Mk::deleteOldRecord($sr->user->id, $student_data['my_class_id']);
+        // Mk::deleteOldClassRecords($sr->user->id, $student_data['my_class_id']);
 
         return Usr::jsonUpdateOk();
     }
@@ -304,7 +314,7 @@ class StudentRecordController extends Controller
     public function block_all_class(HttpReq $req): JsonResponse
     {
         $student_ids = $this->getUserIdsByClass($req->class_id);
-        $this->user->updateByIds($student_ids, ['blocked' => 1]);
+        $this->user->updateByIds($student_ids, ['is_blocked' => true]);
 
         return Usr::json('Selected class students have been blocked successfully.');
     }
@@ -315,7 +325,7 @@ class StudentRecordController extends Controller
     public function unblock_all_class(HttpReq $req): JsonResponse
     {
         $student_ids = $this->getUserIdsByClass($req->class_id);
-        $this->user->updateByIds($student_ids, ['blocked' => 0]);
+        $this->user->updateByIds($student_ids, ['is_blocked' => false]);
 
         return Usr::json('Selected class students have been unblocked successfully.');
     }
@@ -325,8 +335,8 @@ class StudentRecordController extends Controller
      */
     public function block_all_graduated(): JsonResponse
     {
-        $student_ids = $this->student->allGradOnlyStudents()->pluck('user_id');
-        $this->user->updateByIds($student_ids, ['blocked' => 1]);
+        $student_ids = $this->student->getAllGraduatedPromotions()->pluck('user_id');
+        $this->user->updateByIds($student_ids, ['is_blocked' => true]);
 
         return Usr::json('Graduated students have been blocked successfully.');
     }
@@ -336,8 +346,8 @@ class StudentRecordController extends Controller
      */
     public function unblock_all_graduated(): JsonResponse
     {
-        $student_ids = $this->student->allGradOnlyStudents()->pluck('user_id');
-        $this->user->updateByIds($student_ids, ['blocked' => 0]);
+        $student_ids = $this->student->getAllGraduatedPromotions()->pluck('user_id');
+        $this->user->updateByIds($student_ids, ['is_blocked' => false]);
 
         return Usr::json('Graduated students have been unblocked successfully.');
     }
@@ -349,10 +359,10 @@ class StudentRecordController extends Controller
     /**
      * Generate student username based on app code, class code, admission year, and admission number.
      */
-    protected function generateStudentUsername(string $class_code, string $date_admitted, $adm_no): string
+    protected function generateStudentUsername(string $class_code, string $date_admitted, $admission_number): string
     {
         $year = date('Y', strtotime($date_admitted));
-        return strtoupper(Usr::getAppCode() . '/' . $class_code . '/' . $year . '/' . $adm_no);
+        return strtoupper(Usr::getSystemShortCode() . '/' . $class_code . '/' . $year . '/' . $admission_number);
     }
 
     /**
@@ -378,10 +388,10 @@ class StudentRecordController extends Controller
      */
     protected function formatStudentDataFields(array &$student_data): void
     {
-        $student_data['house_no'] = strtoupper($student_data['house_no'] ?? '');
-        $student_data['ps_name'] = ucfirst($student_data['ps_name'] ?? '');
-        $student_data['ss_name'] = ucfirst($student_data['ss_name'] ?? '');
-        $student_data['p_status'] = ucfirst($student_data['p_status'] ?? '');
+        $student_data['house_number'] = strtoupper($student_data['house_number'] ?? '');
+        $student_data['primary_school_name'] = ucfirst($student_data['primary_school_name'] ?? '');
+        $student_data['secondary_school_name'] = ucfirst($student_data['secondary_school_name'] ?? '');
+        $student_data['parent_status'] = ucfirst($student_data['parent_status'] ?? '');
     }
 
     /**
@@ -389,8 +399,8 @@ class StudentRecordController extends Controller
      */
     protected function findStudentRecord($id)
     {
-        return $this->student->whereRecord(['id' => $id])->first()
-            ?? $this->student->whereGraduatesRecord(['id' => $id])->first();
+        return $this->student->getActiveStudentsQueryWithRelations(['id' => $id])->first()
+            ?? $this->student->getGraduatedStudentsQuery(['id' => $id])->first();
     }
 
     /**
@@ -412,7 +422,7 @@ class StudentRecordController extends Controller
      */
     protected function getUserIdsByClass(int $class_id): array
     {
-        return $this->student->whereRecord(['my_class_id' => $class_id])
+        return $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class_id])
             ->get()
             ->pluck('user_id')
             ->toArray();

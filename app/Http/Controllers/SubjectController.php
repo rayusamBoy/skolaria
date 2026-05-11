@@ -10,10 +10,14 @@ use App\Http\Requests\Subject\SubjectRecordUpdate;
 use App\Http\Requests\Subject\SubjectUpdate;
 use App\Repositories\MyClassRepo;
 use App\Repositories\UserRepo;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class SubjectController extends Controller
 {
-    protected $my_class, $user;
+    protected MyClassRepo $my_class;
+    protected UserRepo $user;
 
     public function __construct(MyClassRepo $my_class, UserRepo $user)
     {
@@ -23,89 +27,129 @@ class SubjectController extends Controller
         $this->user = $user;
     }
 
-    public function index()
+    /**
+     * Display a listing of subjects.
+     */
+    public function index(): View
     {
-        $d['teachers'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.teacher')]);
-        $d['subjects'] = $this->my_class->getAllSubjects();
+        $data['teachers'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.teacher')]);
+        $data['subjects'] = $this->my_class->getAllSubjects();
 
-        return view('pages.subjects.index', $d);
+        return view('pages.subjects.index', $data);
     }
 
-    public function index_record()
+    /**
+     * Display subject records.
+     */
+    public function index_record(): View
     {
-        $d['teachers'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.teacher')]);
-        $d['subjects'] = $this->my_class->getAllSubjects(['my_class', 'record', 'record.section', 'record.teacher']);
+        $data['teachers'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.teacher')]);
+        $data['subjects'] = $this->my_class->getAllSubjects([
+            'my_class',
+            'record',
+            'record.section',
+            'record.teacher'
+        ]);
 
-        return view('pages.subjects.records.index', $d);
+        return view('pages.subjects.records.index', $data);
     }
 
-    public function store(SubjectCreate $req)
+    /**
+     * Store a newly created subject.
+     */
+    public function store(SubjectCreate $req): JsonResponse
     {
-        $d = $req->only($this->my_class->getSubjectData());
-        $this->my_class->createSubject($d);
+        $data = $req->only($this->my_class->getSubjectData());
+        $this->my_class->createSubject($data);
 
         return Mk::jsonStoreOk();
     }
 
-    public function store_record(SubjectRecordCreate $req)
+    /**
+     * Store a newly created subject record.
+     */
+    public function store_record(SubjectRecordCreate $req): JsonResponse
     {
         if ($req->filled('students_ids')) {
-            $d = $req->only($this->my_class->getSubjectRecordData(['section_id']));
+            $data = $req->only($this->my_class->getSubjectRecordData(['section_id']));
         } else {
-            $d = $req->only($this->my_class->getSubjectRecordData(['students_ids']));
-            $d['students_ids'] = null;
+            $data = $req->only($this->my_class->getSubjectRecordData(['students_ids']));
+            $data['students_ids'] = null;
         }
 
-        $this->my_class->createSubjectRecord($d);
+        $this->my_class->createSubjectRecord($data);
 
         return Mk::jsonStoreOk();
     }
 
-    public function edit($id)
+    /**
+     * Show the form for editing the specified subject.
+     */
+    public function edit($id): View|RedirectResponse
     {
-        $sub = $this->my_class->findSubject($id);
-        $d['sub'] = $sub;
+        $subject = $this->my_class->findSubject($id);
 
-        return $sub->count() > 0 ? view('pages.subjects.edit', $d) : Mk::goWithDanger('subjects.index');
+        return $subject !== null
+            ? view('pages.subjects.edit', ['sub' => $subject])
+            : Mk::goWithDanger('subjects.index');
     }
 
-    public function edit_record($id)
+    /**
+     * Show the form for editing the specified subject record.
+     */
+    public function edit_record($id): View|RedirectResponse
     {
-        $d['sub_rec'] = $sub_rec = $this->my_class->getSubjectRecord(['id' => $id])->first();
-        $d['teachers'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.teacher')]);
-        $d['my_class_sections'] = $this->my_class->getSections(['my_class_id' => $sub_rec->subject->my_class_id]);
+        $subject_record = $this->my_class->getSubjectRecord(['id' => $id])->first();
 
-        return $sub_rec->exists() ? view('pages.subjects.records.edit', $d) : Mk::goWithDanger('subjects.index');
-    }
-
-    public function update(SubjectUpdate $req, $id)
-    {
-        $d = $req->only($this->my_class->getSubjectData(['my_class_id']));
-
-        $this->my_class->updateSubject($id, $d);
-
-        return Mk::jsonUpdateOk();
-    }
-
-    public function update_record(SubjectRecordUpdate $req, $id)
-    {
-        if ($req->filled('students_ids')) {
-            $d = $req->only($this->my_class->getSubjectRecordData(['section_id']));
-            $d['section_id'] = null;
-        } else {
-            $d = $req->only($this->my_class->getSubjectRecordData(['students_ids']));
-            $d['students_ids'] = null;
+        if (!$subject_record) {
+            return Mk::goWithDanger('subjects.index');
         }
 
-        $this->my_class->updateSubjectRecord(['id' => $id], $d);
+        $data['sub_rec'] = $subject_record;
+        $data['teachers'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.teacher')]);
+        $data['my_class_sections'] = $this->my_class->getSectionsByConditions([
+            'my_class_id' => $subject_record->subject->my_class_id
+        ]);
+
+        return view('pages.subjects.records.edit', $data);
+    }
+
+    /**
+     * Update the specified subject.
+     */
+    public function update(SubjectUpdate $req, $id): JsonResponse
+    {
+        $data = $req->only($this->my_class->getSubjectData(['my_class_id']));
+        $this->my_class->updateSubject($id, $data);
 
         return Mk::jsonUpdateOk();
     }
 
-    public function destroy($subject)
+    /**
+     * Update the specified subject record.
+     */
+    public function update_record(SubjectRecordUpdate $req, $id): JsonResponse
     {
-        $subject_has_records = $this->my_class->whereSubject(['id' => $subject])->with('record')->exists();
-        if ($subject_has_records) {
+        if ($req->filled('students_ids')) {
+            $data = $req->only($this->my_class->getSubjectRecordData(['section_id']));
+            $data['section_id'] = null;
+        } else {
+            $data = $req->only($this->my_class->getSubjectRecordData(['students_ids']));
+            $data['students_ids'] = null;
+        }
+
+        $this->my_class->updateSubjectRecords(['id' => $id], $data);
+
+        return Mk::jsonUpdateOk();
+    }
+
+    /**
+     * Remove the specified subject if it has no records.
+     */
+    public function destroy($subject): RedirectResponse
+    {
+        $has_records = $this->my_class->whereSubject(['id' => $subject])->with('record')->exists();
+        if ($has_records) {
             return back()->with('flash_warning', __('msg.subject_in_use'));
         }
 
@@ -114,9 +158,12 @@ class SubjectController extends Controller
         return back()->with('flash_success', __('msg.del_ok'));
     }
 
-    public function delete_record($record)
+    /**
+     * Remove the specified subject record.
+     */
+    public function delete_record($record): RedirectResponse
     {
-        $this->my_class->deleteSubjectRecord(['id' => $record]); // Delete subject record
+        $this->my_class->deleteSubjectRecords(['id' => $record]);
 
         return back()->with('flash_success', __('msg.del_ok'));
     }

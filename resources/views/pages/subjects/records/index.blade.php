@@ -4,10 +4,16 @@
 
 @section('content')
 
+@php
+$canEditRecord = auth()->user()->can($tenant_permissions['subjects']['edit_record']['permission']);
+$canDeleteRecord = auth()->user()->can($tenant_permissions['subjects']['delete_record']['permission']);
+$hasActions = $canEditRecord || $canDeleteRecord;
+@endphp
+
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Records</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -114,7 +120,9 @@
                             <th>Class</th>
                             <th>Section</th>
                             <th>Teacher</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -122,7 +130,7 @@
                         @if($s->record->first())
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td><span data-toggle="tooltip" title="{{ "Short Name: {$s->slug}, Is Core: " . ($s->is_core ? 'Yes' : 'No') }}">{{ $s->name }}</span></td>
+                            <td><span data-toggle="tooltip" title="{{ "Short Name: {$s->slug}, Is Core?: " . ($s->is_core ? 'Yes' : 'No') }}">{{ $s->name }}</span></td>
                             <td>{{ $s->my_class->name }}</td>
                             <td>
                                 @foreach($s->record as $key => $rec)
@@ -147,18 +155,19 @@
                                 @endif
                                 @endforeach
                             </td>
+                            @if($hasActions)
                             <td class="text-center">
                                 @foreach($s->record as $key => $rec)
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @can($tenant_permissions['subjects']['edit_record']['permission'])
+                                            @if($canEditRecord)
                                             <a href="{{ route('subject_records.edit', $rec->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-                                            @endcan
-                                            @can($tenant_permissions['subjects']['delete_record']['permission'])
+                                            @endif
+                                            @if($canDeleteRecord)
                                             <a id="{{ $s->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -166,7 +175,7 @@
                                                 @csrf
                                                 @method('delete')
                                             </form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -175,6 +184,7 @@
                                 @endif
                                 @endforeach
                             </td>
+                            @endif
                         </tr>
                         @endif
                         @endforeach

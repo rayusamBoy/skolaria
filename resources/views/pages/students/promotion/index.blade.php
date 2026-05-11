@@ -12,7 +12,7 @@
             TO
             <span class="text-success">{{ $new_year }}</span> Session
         </h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -37,7 +37,7 @@ $toSection = $sections->firstWhere('id', $ts);
             TO
             <span class="text-purple">{{ $toClass->name }} {{ $toSection->name }}</span>
         </h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">

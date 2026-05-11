@@ -16,11 +16,11 @@ return new class extends Migration
             $table->unsignedInteger('book_id')->index();
             $table->unsignedBigInteger('user_id')->index();
             $table->unsignedBigInteger('borrower_id')->index();
-            $table->string('start_date');
-            $table->string('end_date');
-            $table->boolean('returned')->default(false);
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->boolean('is_returned')->default(false);
             $table->string('status')->nullable();
-            $table->tinyText('remarks')->nullable();
+            $table->text('remarks')->nullable();
             $table->timestamps();
         });
     }

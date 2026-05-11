@@ -32,12 +32,12 @@ class DeleteIDCardsThemeDir implements ShouldQueue
      */
     public function handle(): void
     {
-        event(new TenantDeletingIDCardsThemeDir($this->tenant, ['msg' => 'Deleting Tenant ID Cards Theme Directory...', 'url' => request()->url()]));
+        event(new TenantDeletingIDCardsThemeDir($this->tenant));
 
         $dir = Qs::getTenancyAwareIDCardsThemeDir();
         if (is_dir($dir))
             File::deleteDirectory($dir); // Delete tenant's students id cards theme file's specific dir.
 
-        event(new TenantIDCardsThemeDirDeleted($this->tenant, ['msg' => 'Tenant ID Cards Theme Directory Deleted.', 'url' => request()->url()]));
+        event(new TenantIDCardsThemeDirDeleted($this->tenant));
     }
 }

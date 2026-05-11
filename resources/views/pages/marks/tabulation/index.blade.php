@@ -18,7 +18,7 @@
 <div class="card no-print">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded mr-2">table</i> Tabulation Sheet</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -44,8 +44,8 @@
                         <select required id="exam_id" name="exam_id" class="form-control select-search" data-placeholder="Select Year First">
                             <option value="">Select Year First</option>
                             @if($selected)
-                            @foreach ($exams as $exm)
-                            <option @selected($selected && $exam_id==$exm->id) value="{{ $exm->id }}">{{ $exm->name }}</option>
+                            @foreach ($exams as $exam)
+                            <option @selected($selected && $exam_id==$exam->id) value="{{ $exam->id }}">{{ $exam->name }}</option>
                             @endforeach
                             @endif
                         </select>
@@ -113,7 +113,7 @@
         @include('pages.marks.tabulation.partials.table')
         @include('pages.marks.tabulation.partials.performance_summary')
         <p class="text-center mt-4" style="font-size: 12px;">
-            {{ date('Y') }}. {{ ucwords(strtolower($settings->firstWhere('type', 'system_name')->description)) }}. All rights reserved.
+            {{ date('Y') }}. {{ ucwords(strtolower($settings->firstWhere('key', 'system_name')->value)) }}. All rights reserved.
         </p>
     </div>
 </div>

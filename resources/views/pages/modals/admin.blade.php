@@ -16,11 +16,11 @@
                             <h5 class="mt-3">{{ "Contact options" }}</h5>
                             <ul class="list-unstyled">
                                 @php
-                                $whatsapp = $settings->firstWhere('type', 'admin_whatsapp_link')->description ?? null;
-                                $email = $settings->firstWhere('type', 'admin_email')->description ?? null;
-                                $fb = $settings->firstWhere('type', 'admin_facebook_link')->description ?? null;
-                                $x = $settings->firstWhere('type', 'admin_x_link')->description ?? null;
-                                $github = $settings->firstWhere('type', 'admin_github_link')->description ?? null;
+                                $whatsapp = $settings->firstWhere('key', 'admin_whatsapp_link')->value ?? null;
+                                $email = $settings->firstWhere('key', 'admin_email')->value ?? null;
+                                $fb = $settings->firstWhere('key', 'admin_facebook_link')->value ?? null;
+                                $x = $settings->firstWhere('key', 'admin_x_link')->value ?? null;
+                                $github = $settings->firstWhere('key', 'admin_github_link')->value ?? null;
                                 @endphp
 
                                 @if($whatsapp)

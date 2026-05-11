@@ -13,23 +13,23 @@
             {{-- Logo and School Details--}}
             <table width="100%">
                 <tr>
-                    <td><img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'logo')) }}" style="max-height : 100px;"></td>
+                    <td><img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('key', 'logo')) }}" style="max-height: 100px;"></td>
 
-                    <td style="text-align: center; ">
-                        <strong><span style="color: #1b0c80; font-size: 25px;">{{ strtoupper($settings->firstWhere('type', 'system_name')->description) }}</span></strong><br />
-                        <strong><span style="color: #000; font-size: 15px;"><i>{{ ucwords($settings->firstWhere('type', 'address')->description) }}</i></span></strong><br />
+                    <td style="text-align: center;">
+                        <strong><span style="color: #1b0c80; font-size: 25px;">{{ strtoupper($settings->firstWhere('key', 'system_name')->value) }}</span></strong><br />
+                        <strong><span style="color: #000; font-size: 15px;"><i>{{ ucwords($settings->firstWhere('key', 'address')->value) }}</i></span></strong><br />
                         <strong><span style="color: #000; font-size: 15px;">RESULT SHEET {{ '(' . strtoupper($class_type->name) . ')' }}</span></strong>
                     </td>
                     <td style="width: 100px; height: 100px; float: left;">
-                        <img src="{{ Usr::getTenancyAwarePhoto($sr->user->photo) }}" alt="..." width="100" height="100">
+                        <img src="{{ Usr::getTenancyAwarePhotoUrl($sr->user->photo_path) }}" alt="..." width="100" height="100">
                     </td>
                 </tr>
             </table>
             <br />
 
             {{-- Background Logo --}}
-            <div style="position: relative;  text-align: center; ">
-                <img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'logo')) }}" style="max-width: 500px; max-height: 600px; margin-top: 60px; position: absolute; opacity: 0.1; margin: auto; left: 0; right: 0;" />
+            <div class="bg-div">
+                <img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('key', 'logo')) }}" />
             </div>
 
             {{-- Marksheet Print --}}

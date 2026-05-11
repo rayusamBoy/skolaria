@@ -16,11 +16,11 @@ return new class extends Migration
             $table->unsignedBigInteger('student_id')->index();
             $table->unsignedBigInteger('user_id')->index();
             $table->text('remarks')->nullable();
-            $table->unsignedInteger('from_class')->index();
-            $table->unsignedInteger('from_section')->index();
-            $table->unsignedInteger('to_class')->index();
-            $table->unsignedInteger('to_section')->index();
-            $table->tinyInteger('grad');
+            $table->unsignedInteger('previous_my_class_id')->index();
+            $table->unsignedInteger('previous_section_id')->index();
+            $table->unsignedInteger('new_my_class_id')->index();
+            $table->unsignedInteger('new_section_id')->index();
+            $table->boolean('is_graduated');
             $table->string('from_session');
             $table->string('to_session');
             $table->string('status');

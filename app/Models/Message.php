@@ -5,13 +5,9 @@ namespace App\Models;
 use Cmgmyr\Messenger\Models\Message as OriginalMessage;
 use Cmgmyr\Messenger\Models\Models;
 use Illuminate\Support\Facades\DB;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 class Message extends OriginalMessage
 {
-    use LogsActivity;
-
     /**
      * Delete a message.
      *
@@ -19,7 +15,7 @@ class Message extends OriginalMessage
      *
      * @return mixed
      */
-    public function deleteMessage($messageId)
+    public function deleteMessage(int $messageId)
     {
         return OriginalMessage::where('id', $messageId)->delete();
     }
@@ -47,13 +43,5 @@ class Message extends OriginalMessage
     public function user()
     {
         return $this->belongsTo(Models::user());
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logFillable()
-            ->dontSubmitEmptyLogs()
-            ->logOnlyDirty();
     }
 }

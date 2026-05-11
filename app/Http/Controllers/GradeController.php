@@ -8,10 +8,14 @@ use App\Http\Requests\Grade\GradeCreate;
 use App\Http\Requests\Grade\GradeUpdate;
 use App\Repositories\ExamRepo;
 use App\Repositories\MyClassRepo;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class GradeController extends Controller
 {
-    protected $exam, $my_class;
+    protected ExamRepo $exam;
+    protected MyClassRepo $my_class;
 
     public function __construct(ExamRepo $exam, MyClassRepo $my_class)
     {
@@ -21,15 +25,21 @@ class GradeController extends Controller
         $this->my_class = $my_class;
     }
 
-    public function index()
+    /**
+     * Display a listing of grades.
+     */
+    public function index(): View
     {
-        $d['grades'] = $this->exam->allGrades();
-        $d['class_types'] = $this->my_class->getTypes();
+        $data['grades'] = $this->exam->getAllGrades();
+        $data['class_types'] = $this->my_class->getAllClassTypes();
 
-        return view('pages.grades.index', $d);
+        return view('pages.grades.index', $data);
     }
 
-    public function store(GradeCreate $req)
+    /**
+     * Store a newly created grade.
+     */
+    public function store(GradeCreate $req): JsonResponse
     {
         $data = $req->all();
         $this->exam->createGrade($data);
@@ -37,22 +47,31 @@ class GradeController extends Controller
         return Qs::jsonStoreOk();
     }
 
-    public function edit($id)
+    /**
+     * Show the form for editing the specified grade.
+     */
+    public function edit($id): View
     {
-        $d['gr'] = $this->exam->getGrade(['id' => $id], ['class_type'])->first();
+        $data['gr'] = $this->exam->getGradesByConditions(['id' => $id], ['class_type'])->first();
 
-        return view('pages.grades.edit', $d);
+        return view('pages.grades.edit', $data);
     }
 
-    public function update(GradeUpdate $req, $id)
+    /**
+     * Update the specified grade.
+     */
+    public function update(GradeUpdate $req, $id): JsonResponse
     {
-        $data = $req->all();
+        $data = $req->except(['_token', '_method']);
         $this->exam->updateGrade($id, $data);
 
         return Qs::jsonUpdateOk();
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified grade.
+     */
+    public function destroy($id): RedirectResponse
     {
         $this->exam->deleteGrade($id);
 

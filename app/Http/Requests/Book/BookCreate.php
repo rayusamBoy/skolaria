@@ -33,9 +33,8 @@ class BookCreate extends FormRequest
 
     public function attributes()
     {
-        return  [
-            'my_class_id' => 'Class',
-            'name' => 'Book name',
+        return [
+            'my_class_id' => 'class',
         ];
     }
 }

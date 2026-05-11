@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Edit Book Request</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -50,14 +50,14 @@
 
                     <div class="row">
                         {{--Returned--}}
-                        <input type="hidden" name="was_returned" value="{{ $book_request->returned }}">
+                        <input type="hidden" name="was_returned" value="{{ $book_request->is_returned }}">
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label for="returned" class="font-weight-semibold">Returned</label>
+                                <label for="is_returned" class="font-weight-semibold">Returned</label>
                                 <div class="form-group text-center">
-                                    <select class="form-control select" name="returned" id="returned">
-                                        <option @if($book_request->returned == 1) selected @endif value="1">Yes</option>
-                                        <option @if($book_request->returned == 0) selected @endif value="0">No</option>
+                                    <select class="form-control select" name="is_returned" id="is_returned">
+                                        <option @selected($book_request->is_returned) value="1">Yes</option>
+                                        <option @selected(!$book_request->is_returned) value="0">No</option>
                                     </select>
                                 </div>
                             </div>

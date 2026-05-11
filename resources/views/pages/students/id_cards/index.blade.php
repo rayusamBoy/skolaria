@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded mr-2">id_card</i> Students ID Cards</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -26,12 +26,12 @@
 
                 <div class="col-md-2 form-group">
                     <label for="issued_date" class="col-form-label font-weight-bold">Issued Date:</label>
-                    <input name="issued_date" value="{{ date('M, Y') }}" type="text" class="form-control date-pick-day-none" placeholder="Select Date...">
+                    <input name="issued_date" value="{{ date('M, Y') }}" type="text" class="form-control date-pick-full-month-year" placeholder="Select Date...">
                 </div>
 
                 <div class="col-md-2 form-group">
                     <label for="expire_date" class="col-form-label font-weight-bold">Expire Date: <span class="text-danger">*</span></label>
-                    <input name="expire_date" value="{{ $selected ? $expire_date : old('expire_date') }}" type="text" class="form-control date-pick-day-none" placeholder="Select Date..." required>
+                    <input name="expire_date" value="{{ $selected ? $expire_date : old('expire_date') }}" type="text" class="form-control date-pick-full-month-year" placeholder="Select Date..." required>
                 </div>
 
                 <div class="form-group col-md-2">
@@ -165,11 +165,11 @@
                     @foreach($students as $s)
                     <tr>
                         <td><input type="checkbox" name="students_ids[]" value="{{ $s->user->id }}" class="form-input-styled text-center st-id-checkbox"></td>
-                        <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhoto($s->user->photo) }}" alt="photo"></td>
+                        <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhotoUrl($s->user->photo_path) }}" alt="photo"></td>
                         <td>{{ $s->user->name }}</td>
-                        <td>{{ $s->adm_no }}</td>
+                        <td>{{ $s->admission_number }}</td>
                         <td>{{ $s->user->gender }}</td>
-                        <td>{{ $s->user->dob }}</td>
+                        <td>{{ $s->user->date_of_birth }}</td>
                     </tr>
                     @endforeach
                 </tbody>

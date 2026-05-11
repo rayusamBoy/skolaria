@@ -4,10 +4,16 @@
 
 @section('content')
 
+@php
+$canEdit = auth()->user()->can($tenant_permissions['notices']['edit']['permission']);
+$canDelete = auth()->user()->can($tenant_permissions['notices']['destroy']['permission']);
+$hasActions = $canEdit || $canDelete;
+@endphp
+
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Notices</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -71,14 +77,14 @@
                             <th>Title</th>
                             <th>Body</th>
                             @can($tenant_permissions['users']['show']['permission'])
-                            @if(auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
                             <th>Creator</th>
-                            @endif
                             @endcan
                             <th>Viewers</th>
                             <th>Created at</th>
                             <th>Updated at</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -88,14 +94,12 @@
                             <td class="break-all break-spaces">{{ $ntc->title }}</td>
                             <td class="break-all break-spaces wmin-300">{{ $ntc->body }}</td>
                             @can($tenant_permissions['users']['show']['permission'])
-                            @if(auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
                             <td>
                                 @php $user_id = $ntc->user->id @endphp
                                 <a target="_blank" href="{{ route('users.show', Qs::hash($user_id)) }}">
                                     {{ auth()->id() == $user_id ? 'Me' : $ntc->user->name }}
                                 </a>
                             </td>
-                            @endif
                             @endcan
                             <td>
                                 @if($ntc->viewers_ids)
@@ -104,22 +108,21 @@
                                 &mdash;
                                 @endif
                             </td>
-                            <td>{{ Qs::onlyDateFormat($ntc->created_at) }}</td>
-                            <td>{{ Qs::onlyDateFormat($ntc->updated_at) }}</td>
+                            <td>{{ Qs::formatDate($ntc->created_at) }}</td>
+                            <td>{{ Qs::formatDate($ntc->updated_at) }}</td>
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
 
                                         <div class="dropdown-menu dropdown-menu-right">
-                                            {{-- Edit --}}
-                                            @can($tenant_permissions['notices']['edit']['permission'])
+                                            @if($canEdit)
                                             <a href="{{ route('notices.edit', Qs::hash($ntc->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-                                            @endcan
-                                            {{-- Delete --}}
-                                            @can($tenant_permissions['notices']['destroy']['permission'])
+                                            @endif
+                                            @if($canDelete)
                                             <a id="{{ $ntc->id }}" onclick="confirmPermanentDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -127,11 +130,12 @@
                                                 @csrf
                                                 @method('delete')
                                             </form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
@@ -144,7 +148,7 @@
             @can($tenant_permissions['notices']['edit']['permission'])
             <div class="{{ in_array(request()->route()->getName(), ['notices.edit']) ? 'tab-pane fade show active' : 'tab-pane fade' }}" id="edit-notice">
                 {{-- Alert if super_admin editing another’s notice --}}
-                @if(auth()->id() != $notice->from_id && auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
+                @if(auth()->id() != $notice->creator_id && auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
                 <div class="alert alert-danger border-0 alert-dismissible">
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
                     <span><strong>Alert:</strong> You are editing the notice you did not create.</span>
@@ -166,13 +170,13 @@
                                 <input type="text" name="title" value="{{ $notice->title }}" required placeholder="Title of the Notice" class="form-control">
                                 <div class="pt-1 col-xl-7">
                                     <small class="text-muted">
-                                        Created - {{ Qs::onlyDateFormat($notice->created_at) }},
-                                        by {{ $notice->from_id == auth()->id() ? 'Me' : $notice->user->name }}
+                                        Created - {{ Qs::formatDate($notice->created_at) }},
+                                        by {{ $notice->creator_id == auth()->id() ? 'Me' : $notice->user->name }}
                                     </small>
                                     @if($notice->editor_id)
                                     <hr class="m-1">
                                     <small class="text-muted">
-                                        Last edited - {{ Qs::onlyDateFormat($notice->updated_at) }},
+                                        Last edited - {{ Qs::formatDate($notice->updated_at) }},
                                         by {{ $notice->editor_id == auth()->id()
                                                 ? 'Me'
                                                 : ($notice->editor->name . ' (' . str_replace('_', ' ', $notice->editor->role) . ')') }}

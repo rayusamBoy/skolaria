@@ -25,12 +25,12 @@ class RoleController extends Controller
      */
     public function index(): View
     {
-        $permissions = $this->permission->getPermissions();
+        $permissions = $this->permission->getAllPermissions();
         $data['permissions'] = $permissions;
         $data['grouped_permissions'] = $permissions->groupBy(
             fn($perm) => explode('.', $perm->name)[0]
         );
-        $data['roles'] = $this->permission->getRoles([], ['users', 'permissions']);
+        $data['roles'] = $this->permission->getAllRoles([], ['users', 'permissions']);
 
         return view('pages.roles.index', $data);
     }
@@ -61,13 +61,13 @@ class RoleController extends Controller
      */
     public function edit($id): View|RedirectResponse
     {
-        $role = $this->permission->getRole(['id' => $id]);
+        $role = $this->permission->getRoleByConditions(['id' => $id]);
 
         if ($this->isProtectedRootRole($role->name)) {
             return redirect()->route('roles.index')->with('flash_warning', __('msg.denied'));
         }
 
-        $permissions = $this->permission->getPermissions();
+        $permissions = $this->permission->getAllPermissions();
         $data['grouped_permissions'] = $permissions->groupBy(
             fn($perm) => explode('.', $perm->name)[0]
         );
@@ -81,7 +81,7 @@ class RoleController extends Controller
      */
     public function update(Request $request, $id): RedirectResponse
     {
-        $role = $this->permission->getRole(['id' => $id]);
+        $role = $this->permission->getRoleByConditions(['id' => $id]);
 
         $validated = $request->validate([
             'name' => ['required', 'string', "unique:roles,name,{$id}"],
@@ -108,7 +108,7 @@ class RoleController extends Controller
      */
     public function destroy($id): RedirectResponse
     {
-        $role = $this->permission->getRole(['id' => $id], ['users']);
+        $role = $this->permission->getRoleByConditions(['id' => $id], ['users']);
 
         if ($role->users->count() > 0) {
             return back()->with('flash_warning', __('msg.role_in_use'));

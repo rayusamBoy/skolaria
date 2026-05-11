@@ -3,32 +3,53 @@
 namespace App\Repositories;
 
 use App\Models\Dorm;
+use Illuminate\Database\Eloquent\Collection;
 
 class DormRepo
 {
-    /*********** Dorm ***************/
+    /*********** Dorms ***************/
 
-    public function create($data)
+    /**
+     * Create a new dormitory.
+     *
+     * @param array $data
+     * @return Dorm
+     */
+    public function createDorm(array $data): Dorm
     {
         return Dorm::create($data);
     }
 
-    public function getAll($order = 'name')
+    /**
+     * Get all dormitories, ordered by a given column.
+     *
+     * @param string $order  Column to order by
+     * @return Collection
+     */
+    public function getAllDorms(string $order = 'name'): Collection
     {
         return Dorm::orderBy($order)->get();
     }
 
-    public function getDorm($data)
+    /**
+     * Update a dormitory by ID.
+     *
+     * @param int   $id
+     * @param array $data
+     * @return int  Number of updated rows
+     */
+    public function updateDorm(int $id, array $data): int
     {
-        return Dorm::where($data)->get();
+        return Dorm::where('id', $id)->update($data);
     }
 
-    public function update($id, $data)
-    {
-        return Dorm::find($id)->update($data);
-    }
-
-    public function find($id)
+    /**
+     * Find a dormitory by its primary key.
+     *
+     * @param int $id
+     * @return Dorm|null
+     */
+    public function findDorm(int $id): ?Dorm
     {
         return Dorm::find($id);
     }

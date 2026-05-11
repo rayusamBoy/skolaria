@@ -27,8 +27,8 @@ class TenantEventCompleted extends Notification
     {
         $channels = [];
 
-        if ($notifiable->is_notifiable) {
-            if (\is_array($notifiable->is_notifiable) && $notifiable->is_notifiable['status']) {
+        if ($notifiable->notification_preferences) {
+            if (\is_array($notifiable->notification_preferences) && $notifiable->notification_preferences['status']) {
                 $channels = [FcmChannel::class];
             }
         }

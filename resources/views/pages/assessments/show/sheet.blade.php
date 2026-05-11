@@ -29,25 +29,25 @@
             <td>@php $hw_avg = Mk::getAverage($asr->hw1 + $asr->hw2 + $asr->hw3 + $asr->hw4 +$asr->hw5, 5) @endphp {{ $hw_avg != 0 ? $hw_avg : '—' }}</td>
             {{--Topic Test--}}
             <td>@php $tt_avg = Mk::getAverage($asr->tt1 + $asr->tt2 + $asr->tt2, 3) @endphp {{ $tt_avg != 0 ? $tt_avg : '—'  }}</td>
-            <td>{{ $asr->exm ?: '—' }}</td>
+            <td>{{ $asr->evaluated_exam_mark ?? '—' }}</td>
             <td>{{ data_get($asr, 'tex'.$asr->exam->term, '—') }}</td>
             {{--Grade, Subject Position & Remarks--}}
             <td>{{ $asr->grade?->name ?? '—' }}</td>
-            <td>{!! $asr->grade ? Mk::getSuffix($asr->sub_pos) : '—' !!}</td>
-            <td>{{ $asr->grade?->remark ?? '—' }}</td>
+            <td>{!! $asr->grade ? Mk::getOrdinalSuffix($asr->subject_position) : '—' !!}</td>
+            <td>{{ $asr->grade?->remarks ?? '—' }}</td>
             @endforeach
         </tr>
         @endforeach
         @php $asr = $assessments_records->where('assessment_id', $as->id)->first(); @endphp
         <tr>
             <td colspan="5"><strong>TOTAL SCORES OBTAINED: </strong> {{ $asr->total ?? '—' }}</td>
-            <td colspan="4"><strong>FINAL AVERAGE: </strong> {{ $asr->ave ?? '—' }}</td>
-            <td colspan="3"><strong>CLASS AVERAGE: </strong> {{ $asr->class_ave ?? '—' }}</td>
+            <td colspan="4"><strong>FINAL AVERAGE: </strong> {{ $asr->average ?? '—' }}</td>
+            <td colspan="3"><strong>CLASS AVERAGE: </strong> {{ $asr->class_average ?? '—' }}</td>
         </tr>
         <tr>
-            <td colspan="5"><strong>FINAL POSITION: </strong>{{ $asr->pos ?? '—' }} out-of {{ Mk::getSectionCount($asr->exam->id, $my_class->id, $sr->section->id) }}</td>
+            <td colspan="5"><strong>FINAL POSITION: </strong>{{ $asr->section_position ?? '—' }} out-of {{ Mk::getSectionCount($asr->exam->id, $my_class->id, $sr->section->id) }}</td>
             <td colspan="4"><strong>FINAL AVERAGE GRADE: </strong> {{ $asr->grade->name ?? '—' }}</td>
-            <td colspan="3"><strong>CLASS AVERAGE GRADE: </strong> {{ ($asr->class_ave != NULL) ? MK::getGrade($asr->class_ave) : '—' }}</td>
+            <td colspan="3"><strong>CLASS AVERAGE GRADE: </strong> {{ ($asr->class_average != NULL) ? MK::getGradeNameByScore($asr->class_average) : '—' }}</td>
         </tr>
     </tbody>
 </table>

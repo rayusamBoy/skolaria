@@ -8,92 +8,141 @@ use App\Http\Requests\SettingUpdate;
 use App\Repositories\MyClassRepo;
 use App\Repositories\SettingRepo;
 use ColorThief\ColorThief;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class SettingController extends Controller
 {
-    protected $setting, $my_class;
+    protected SettingRepo $setting;
+    protected MyClassRepo $my_class;
 
     public function __construct(SettingRepo $setting, MyClassRepo $my_class)
     {
-        $this->permissionMap = config('permissions.names.tenant.sections');
+        $this->permissionMap = config('permissions.names.tenant.settings');
         parent::__construct();
         $this->setting = $setting;
         $this->my_class = $my_class;
     }
 
-    public function index()
+    /**
+     * Display the settings page.
+     */
+    public function index(): View
     {
-        $d['class_types'] = $this->my_class->getTypes();
-        $d['settings'] = Qs::getSettings();
+        $data['class_types'] = $this->my_class->getAllClassTypes();
+        $data['settings'] = Qs::getSettings();
 
-        return view('pages.settings', $d);
+        return view('pages.settings', $data);
     }
 
-    public function update(SettingUpdate $req)
+    /**
+     * Update system settings.
+     */
+    public function update(SettingUpdate $req): RedirectResponse
     {
-        $sets = $req->except('_token', '_method', 'logo', 'login_and_related_pages_bg');
-        $sets['lock_exam'] = $sets['lock_exam'] == 1 ? 1 : 0;
-        foreach ($sets as $key => $value) {
+        // Update flat settings (exclude files)
+        $settings = $req->except(['_token', '_method', 'logo', 'login_and_related_pages_bg']);
+        $settings['lock_exam'] = $settings['lock_exam'] == 1 ? 1 : 0;
+
+        foreach ($settings as $key => $value) {
             $this->setting->update($key, $value);
         }
 
+        // Handle logo upload
         if ($req->hasFile('logo')) {
-            $logo = $req->file('logo');
-            $f = Qs::getFileMetaData($logo);
-            $f['name'] = 'logo.' . $f['ext'];
-            $f['path'] = $logo_path = Qs::getPublicUploadPath() . '/' . $f['name'];
-            $logo->storeAs($f['path']);
-            $this->setting->update('logo', $logo_path);
+            $this->uploadAndUpdateSetting($req->file('logo'), 'logo', 'logo');
         }
 
+        // Handle background image and color settings
         if ($req->hasFile('login_and_related_pages_bg')) {
-            $login_and_related_pages_bg = $req->file('login_and_related_pages_bg');
-            $f = Qs::getFileMetaData($login_and_related_pages_bg);
-            $f['name'] = 'login_and_related_pages_bg.' . $f['ext'];
-            $f['path'] = $login_page_path = Qs::getPublicUploadPath() . '/' . $f['name'];
-            $login_and_related_pages_bg->storeAs($f['path']);
-            $this->setting->update('login_and_related_pages_bg', $login_page_path);
+            $this->uploadAndUpdateSetting(
+                $req->file('login_and_related_pages_bg'),
+                'login_and_related_pages_bg',
+                'login_and_related_pages_bg'
+            );
 
-            switch ($req->texts_and_bg_colors) {
-                case 'from_img':
-                    $dominant_color = ColorThief::getColor($req->file('login_and_related_pages_bg')->getPathname());
-                    $bg_color = "rgb($dominant_color[0],$dominant_color[1],$dominant_color[2])";
-                    $texts_color = Qs::get_color_from_color($bg_color);
-                    $colors = $texts_color . Qs::getDelimiter() . $bg_color;
-                    $this->setting->update('login_and_related_pgs_txts_and_bg_colors', $colors);
-                    break;
-                default:
-                    $this->setting->update('login_and_related_pgs_txts_and_bg_colors', NULL);
-                    break;
+            $this->updateColorsFromBackground($req, $req->file('login_and_related_pages_bg'));
+
+            if ($req->has('show_login_and_related_pgs_preview')) {
+                session()->flash('show_login_and_related_pgs_preview', true);
             }
-
-            if ($req->has('show_login_and_related_pgs_preview'))
-                Session::flash('show_login_and_related_pgs_preview', true);
         }
 
         return redirect()->route('settings.index')->with('flash_success', __('msg.update_ok'));
     }
 
-    public function enable_analytics()
+    /**
+     * Enable analytics tracking.
+     */
+    public function enable_analytics(): RedirectResponse
     {
         $this->setting->update('analytics_enabled', true);
-        return back()->with('flash_success', __('msg.update_ok'));
-    }
 
-    public function disable_analytics()
-    {
-        $this->setting->update('analytics_enabled', false);
         return back()->with('flash_success', __('msg.update_ok'));
     }
 
     /**
-     * Preview the application's login form.
-     *
-     * @return \Illuminate\View\View
+     * Disable analytics tracking.
      */
-    public function preview_login_form()
+    public function disable_analytics(): RedirectResponse
+    {
+        $this->setting->update('analytics_enabled', false);
+
+        return back()->with('flash_success', __('msg.update_ok'));
+    }
+
+    /**
+     * Preview the login form.
+     */
+    public function preview_login_form(): View
     {
         return view('auth.login');
+    }
+
+    // ----------------------------------------------------------------------
+    // Protected helper methods
+    // ----------------------------------------------------------------------
+
+    /**
+     * Upload a file and update the corresponding setting with its storage path.
+     *
+     * @param \Illuminate\Http\UploadedFile $file
+     * @param string $setting_key
+     * @param string $base_filename
+     * @return void
+     */
+    protected function uploadAndUpdateSetting(\Illuminate\Http\UploadedFile $file, string $setting_key, string $base_filename): void
+    {
+        $file_meta = Qs::getFileMetaData($file);
+        $file_meta['name'] = "$base_filename." . $file_meta['ext'];
+        $file_meta['path'] = Qs::getPublicUploadPath() . '/' . $file_meta['name'];
+
+        $file->storeAs($file_meta['path']);
+        $this->setting->update($setting_key, $file_meta['path']);
+    }
+
+    /**
+     * Extract dominant color from the uploaded background image and update colors.
+     *
+     * @param SettingUpdate $req
+     * @param \Illuminate\Http\UploadedFile $file
+     * @return void
+     */
+    protected function updateColorsFromBackground(SettingUpdate $req, \Illuminate\Http\UploadedFile $file): void
+    {
+        try {
+            if ($req->input('texts_and_bg_colors') === 'from_img') {
+                $dominant_color = (array) ColorThief::getColor($file->getPathname());
+                $bg_color = \sprintf('rgb(%d,%d,%d)', ...$dominant_color);
+                $texts_color = Qs::getContrastColor($bg_color);
+                $colors = $texts_color . Qs::getDelimiter() . $bg_color;
+                $this->setting->update('login_and_related_pgs_txts_and_bg_colors', $colors);
+            } else {
+                $this->setting->update('login_and_related_pgs_txts_and_bg_colors', null);
+            }
+        } catch (\Throwable $e) {
+            logger()->error('Failed to extract dominant color: ' . $e->getMessage());
+            $this->setting->update('login_and_related_pgs_txts_and_bg_colors', null);
+        }
     }
 }

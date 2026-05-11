@@ -18,10 +18,10 @@ return new class extends Migration
             $table->tinyInteger('mark_from');
             $table->tinyInteger('mark_to');
             $table->integer('point');
-            $table->string('remark', 40)->nullable();
+            $table->string('remarks', 40)->nullable();
             $table->timestamps();
 
-            $table->unique(['name', 'class_type_id', 'remark']);
+            $table->unique(['name', 'class_type_id', 'remarks']);
         });
     }
 

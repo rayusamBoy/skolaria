@@ -23,7 +23,7 @@ class StudentPaymentPaid extends Notification implements ShouldQueue
         $this->receipt = $receipt;
         $this->subject = "{$student->user->name} Payment has been made";
         $this->student = $student;
-        $this->url = route('payments.receipts', [Pay::hash($this->receipt->pr_id), $this->id]);
+        $this->url = route('payments.receipts', [Pay::hash($this->receipt->payment_record_id), $this->id]);
     }
 
     /**
@@ -42,7 +42,7 @@ class StudentPaymentPaid extends Notification implements ShouldQueue
      */
     public function toMail(): MailMessage
     {
-        $url = route('payments.receipts', Pay::hash($this->receipt->pr_id));
+        $url = route('payments.receipts', Pay::hash($this->receipt->payment_record_id));
         return (new MailMessage)
             ->subject($this->subject)
             ->greeting('Salaam, Hello')
@@ -76,10 +76,10 @@ class StudentPaymentPaid extends Notification implements ShouldQueue
 
     public function toFcm(): FcmMessage
     {
-        $currency_unit = Pay::getCurrencyUnit();
+        $currency_unit = Pay::getDefaultCurrencySymbol();
         $data = [
             'title' => $this->subject,
-            'body' => "Amount paid was: {$this->receipt->amt_paid} ($currency_unit) with a remaining balance of: {$this->receipt->balance} ($currency_unit). For the academic year: {$this->receipt->year}.",
+            'body' => "Amount paid was: {$this->receipt->amount_paid} ($currency_unit) with a remaining balance of: {$this->receipt->balance} ($currency_unit). For the academic year: {$this->receipt->year}.",
             'icon' => Pay::getAppIcon(),
             'type' => 'notifications',
             'url' => $this->url,

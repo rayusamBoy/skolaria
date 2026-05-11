@@ -62,8 +62,11 @@
                                 @endif
 
                                 @if($google2FAIsActive)
-                                <a id="google-2fa" onclick="confirmOperation(this.id)" href="javascript:;" class="btn btn-danger"> Deactivate</a>
-                                <form method="post" id="item-confirm-operation-google-2fa" action="{{ route('two_factor.null_secret_code') }}" class="hidden">@csrf @method('patch')</form>
+                                <form method="post" action="{{ route('two_factor.null_secret_code') }}">
+                                    @csrf
+                                    @method('patch')
+                                    <button type="submit" class="btn btn-danger">Deactivate</button>
+                                </form>
                                 @endif
 
                             </div>
@@ -80,7 +83,7 @@
 <div class="card card-collapsed">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Google Two Factor Authentication Recovery Codes</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="row">
@@ -132,7 +135,7 @@
 <div class="card card-collapsed">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Users with Google Two Factor Authentication enabled</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -157,7 +160,7 @@
                         @foreach($users_with_2fa_enabled as $user)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhoto($user->photo) }}" alt="photo"></td>
+                            <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhotoUrl($user->photo_path) }}" alt="photo"></td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->username }}</td>
                             <td>{{ $user->roles->pluck('name')->join(', ') }}</td>
@@ -166,7 +169,7 @@
                             @php $s_recs = Usr::getStudentRecordByUserId($user->id, ['my_class', 'section']) @endphp
                             <td class="text-center" colspan="2">{{ $s_recs->first()->my_class->name . ' - ' . $s_recs->first()->section->name }}</td>
                             @else
-                            <td>{{ $user->phone ?? '—' }}</td>
+                            <td>{{ $user->primary_mobile ?? $user->secondary_mobile ?? '—' }}</td>
                             <td>{{ $user->email ?? '—' }}</td>
                             @endif
 
@@ -193,7 +196,7 @@
 <div class="card card-collapsed">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Browser Sessions & History</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="row">
@@ -249,17 +252,17 @@
                         <h6>Login History</h6>
                         <table class="table table-bordered table-respxonsive">
                             <tr>
-                                <td class="font-weight-bold">Login Times</td>
-                                <td>{{ $login_history->login_times}}</td>
+                                <td class="font-weight-bold">Login Count</td>
+                                <td>{{ $login_history->login_count}}</td>
                             </tr>
                             <tr>
                                 <td class="font-weight-bold">Last Login</td>
-                                <td>{{ Qs::fullDateTimeFormat($login_history->last_login) }}</td>
+                                <td>{{ Qs::formatDateTime($login_history->last_login) }}</td>
                             </tr>
                             @if ($login_history->last_reset)
                             <tr>
                                 <td class="font-weight-bold">Last Reset</td>
-                                <td>{{ Qs::fullDateTimeFormat($login_history->last_reset) }}</td>
+                                <td>{{ Qs::formatDateTime($login_history->last_reset) }}</td>
                             </tr>
                             @endif
                         </table>

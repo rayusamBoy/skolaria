@@ -24,12 +24,4 @@ class NoticeUpdate extends FormRequest
             'body' => 'required|string|min:7|max:500',
         ];
     }
-
-    public function attributes()
-    {
-        return  [
-            'title' => 'notice title',
-            'body' => 'notice body or content',
-        ];
-    }
 }

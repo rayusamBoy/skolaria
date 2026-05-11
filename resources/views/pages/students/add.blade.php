@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Please fill The form Below To Admit A New Student</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -54,15 +54,15 @@
 
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="phone">Phone:</label>
-                            <input value="{{ old('phone') }}" type="text" id="phone" name="phone" class="form-control" placeholder="+255123456789">
+                            <label for="primary_mobile">Primary Mobile:</label>
+                            <input value="{{ old('primary_mobile') }}" type="text" id="primary_mobile" name="primary_mobile" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
 
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="phone2">Telephone:</label>
-                            <input value="{{ old('phone2') }}" type="text" id="phone2" name="phone2" class="form-control" placeholder="+255123456789">
+                            <label for="secondary_mobile">Secondary Mobile:</label>
+                            <input value="{{ old('secondary_mobile') }}" type="text" id="secondary_mobile" name="secondary_mobile" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
                 </div>
@@ -70,18 +70,18 @@
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="dob">Date of Birth: <span class="text-danger">*</span></label>
-                            <input name="dob" value="{{ old('dob') }}" id="dob" type="text" required class="form-control date-pick" placeholder="Select Date...">
+                            <label for="date_of_birth">Date of Birth: <span class="text-danger">*</span></label>
+                            <input name="date_of_birth" value="{{ old('date_of_birth') }}" id="date_of_birth" type="text" required class="form-control date-pick" placeholder="Select Date...">
                         </div>
                     </div>
 
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="nal_id">Nationality: <span class="text-danger">*</span></label>
-                            <select onchange="getState(this.value)" data-placeholder="Choose..." required name="nal_id" id="nal_id" class="select-search form-control">
+                            <label for="nationality_id">Nationality: <span class="text-danger">*</span></label>
+                            <select onchange="getState(this.value)" data-placeholder="Choose..." required name="nationality_id" id="nationality_id" class="select-search form-control">
                                 <option value=""></option>
                                 @foreach($nationals as $nal)
-                                <option @selected(old('nal_id')==$nal->id) value="{{ $nal->id }}">{{ $nal->name }}</option>
+                                <option @selected(old('nationality_id')==$nal->id) value="{{ $nal->id }}">{{ $nal->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -130,13 +130,13 @@
 
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="p_status" class="w-100">Parent Status: <span class="text-danger">*</span>
+                            <label for="parent_status" class="w-100">Parent Status: <span class="text-danger">*</span>
                                 <i class="material-symbols-rounded float-right text-info" data-toggle="tooltip" title="Choose option, search option, or type to add option">info</i>
                             </label>
-                            <select required data-placeholder="Choose or type to add" name="p_status" id="p_status" class="select-tags form-control">
+                            <select required data-placeholder="Choose or type to add" name="parent_status" id="parent_status" class="select-tags form-control">
                                 <option value=""></option>
                                 @foreach(Usr::getStudentParentsStatus() as $status)
-                                <option @selected(old('p_status')==$status) value="{{ $status }}">{{ $status }}</option>
+                                <option @selected(old('parent_status')==$status) value="{{ $status }}">{{ $status }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -146,11 +146,11 @@
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="bg_id">Blood Group:</label>
-                            <select class="select form-control" id="bg_id" name="bg_id" data-placeholder="Choose..">
+                            <label for="blood_group_id">Blood Group:</label>
+                            <select class="select form-control" id="blood_group_id" name="blood_group_id" data-placeholder="Choose..">
                                 <option value=""></option>
                                 @foreach(Usr::getBloodGroups() as $bg)
-                                <option @selected(old('bg_id')==$bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
+                                <option @selected(old('blood_group_id')==$bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -158,8 +158,8 @@
 
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="ps_name">Primary School Name: <span class="text-danger">*</span></label>
-                            <input required type="ps_name" value="{{ old('ps_name') }}" id="ps_name" name="ps_name" class="form-control" placeholder="Primary School">
+                            <label for="primary_school_name">Primary School Name: <span class="text-danger">*</span></label>
+                            <input required type="primary_school_name" value="{{ old('primary_school_name') }}" id="primary_school_name" name="primary_school_name" class="form-control" placeholder="Primary School">
                         </div>
                     </div>
 
@@ -175,15 +175,15 @@
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="ss_name">Secondary School Name:</label>
-                            <input type="ss_name" value="{{ old('ss_name') }}" id="ss_name" name="ss_name" class="form-control" placeholder="Secondary School">
+                            <label for="secondary_school_name">Secondary School Name:</label>
+                            <input type="secondary_school_name" value="{{ old('secondary_school_name') }}" id="secondary_school_name" name="secondary_school_name" class="form-control" placeholder="Secondary School">
                         </div>
                     </div>
 
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="house_no">House Number:</label>
-                            <input type="text" name="house_no" id="house_no" placeholder="House number" class="form-control text-uppercase" value="{{ old('house_no') }}">
+                            <label for="house_number">House Number:</label>
+                            <input type="text" name="house_number" id="house_number" placeholder="House number" class="form-control text-uppercase" value="{{ old('house_number') }}">
                         </div>
                     </div>
 
@@ -211,8 +211,8 @@
 
                     <div class="col-md-9">
                         <div class="form-group">
-                            <label for="chp">Chronic Health Problem(s):</label>
-                            <input type="text" name="chp" id="chp" placeholder="Mention (if presents)" class="form-control" value="{{ old('chp') }}">
+                            <label for="chronic_health_problems">Chronic Health Problem(s):</label>
+                            <input type="text" name="chronic_health_problems" id="chronic_health_problems" placeholder="Mention (if presents)" class="form-control" value="{{ old('chronic_health_problems') }}">
                         </div>
                     </div>
                 </div>
@@ -282,8 +282,8 @@
 
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="adm_no">Admission Number:</label>
-                            <input type="text" id="adm_no" name="adm_no" placeholder="Admission Number" class="form-control" placeholder="Eg., 0712" value="{{ old('adm_no') }}">
+                            <label for="admission_number">Admission Number:</label>
+                            <input type="text" id="admission_number" name="admission_number" placeholder="Admission Number" class="form-control" placeholder="Eg., 0712" value="{{ old('admission_number') }}">
                         </div>
                     </div>
                 </div>

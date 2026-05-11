@@ -21,7 +21,7 @@
                 <div class="media">
                     <div class="mr-3">
                         <a href="{{ route('my_account.edit') }}">
-                            <img src="{{ Usr::getTenancyAwarePhoto(auth()->user()->photo) }}" width="38" height="38" class="rounded-circle" alt="photo">
+                            <img src="{{ Usr::getTenancyAwarePhotoUrl(auth()->user()->photo_path) }}" width="38" height="38" class="rounded-circle" alt="photo">
                         </a>
                     </div>
                     <div class="media-body">
@@ -263,8 +263,8 @@
 
                         {{-- Marks (sub‑group) --}}
                         @canany([$tenant_permissions['marks']['batch']['permission'], $tenant_permissions['marks']['manage']['permission'], $tenant_permissions['marks']['convert']['permission']])
-                        <li class="nav-item nav-item-submenu {{ request()->routeIs('marks.batch','marks.manage','marks.convert') ? 'nav-item-expanded' : '' }}">
-                            <a href="#" class="nav-link {{ request()->routeIs('marks.batch','marks.manage','marks.convert') ? 'active' : '' }}">
+                        <li class="nav-item nav-item-submenu {{ request()->routeIs('marks.*') ? 'nav-item-expanded' : '' }}">
+                            <a href="#" class="nav-link {{ request()->routeIs('marks.*') ? 'active' : '' }}">
                                 Marks
                             </a>
                             <ul class="nav nav-group-sub">
@@ -306,7 +306,7 @@
                         @endcanany
 
                         {{-- Assessments (sub‑group) --}}
-                        @canany(array_column($tenant_permissions['assessments'], 'permission'))
+                        @canany([$tenant_permissions['assessments']['list']['permission'], $tenant_permissions['assessments']['index']['permission'], $tenant_permissions['assessments']['progressive']['permission'], $tenant_permissions['assessments']['sheets']['permission']])
                         <li class="nav-item nav-item-submenu {{ request()->routeIs('assessments.*') ? 'nav-item-expanded' : '' }}">
                             <a href="#" class="nav-link {{ request()->routeIs('assessments.*') ? 'active' : '' }}">
                                 Assessments
@@ -342,20 +342,20 @@
 
                         {{-- Results (student/parent only) --}}
                         @if(auth()->user()->hasAnyRole([config('roles.default_roles.tenant.student'), config('roles.default_roles.tenant.parent')]))
-                        @canany([$tenant_permissions['marks']['year_selector']['permission'], $tenant_permissions['marks']['year_selected']['permission'], $tenant_permissions['assessments']['year_selector']['permission'], $tenant_permissions['assessments']['year_selected']['permission']])
+                        @canany([$tenant_permissions['marks']['year_selector']['permission'], $tenant_permissions['assessments']['year_selector']['permission']])
                         <li class="nav-item nav-item-submenu {{ request()->routeIs('marks.year_selector', 'assessments.year_selector') ? 'nav-item-expanded' : '' }}">
                             <a href="#" class="nav-link {{ request()->routeIs('marks.year_selector', 'assessments.year_selector') ? 'active' : '' }}">
                                 Results
                             </a>
                             <ul class="nav nav-group-sub">
-                                @can([$tenant_permissions['marks']['year_selector']['permission'], $tenant_permissions['marks']['year_selected']['permission']])
+                                @can($tenant_permissions['marks']['year_selector']['permission'])
                                 <li class="nav-item">
                                     <a href="{{ route('marks.year_selector', Qs::hash(Auth::user()->id)) }}" class="nav-link {{ request()->routeIs('marks.year_selector') ? 'active' : '' }}">
                                         My Marksheet
                                     </a>
                                 </li>
                                 @endcan
-                                @can([$tenant_permissions['assessments']['year_selector']['permission'], $tenant_permissions['assessments']['year_selected']['permission']])
+                                @can($tenant_permissions['assessments']['year_selector']['permission'])
                                 <li class="nav-item">
                                     <a href="{{ route('assessments.year_selector', Qs::hash(Auth::user()->id)) }}" class="nav-link {{ request()->routeIs('assessments.year_selector') ? 'active' : '' }}">
                                         My Assessment Sheet

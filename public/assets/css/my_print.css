@@ -53,3 +53,18 @@ table.td-left td {
     text-align: left !important;
     padding: 5px;
 }
+
+/******* Background Image *******/
+div.bg-div img {
+    max-width: 500px;
+    max-height: 600px;
+    position: absolute;
+    opacity: 0.1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.text-underline {
+    text-decoration: underline;
+}

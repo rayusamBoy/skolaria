@@ -21,7 +21,7 @@
                 @if(auth()->user()->can($tenant_permissions['marks']['print_view']['permission']))
                 <a class="list-icons-item" target="_blank" href="{{ route('marks.print', [Qs::hash($student_id), $ex->id, $year]) }}" data-action="print"></a>
                 @endcan
-                <a class="list-icons-item" data-action="fullscreen"></a>
+                <a class="list-icons-item disabled" data-action="fullscreen"></a>
                 <a class="list-icons-item" data-action="collapse"></a>
                 <a class="list-icons-item" data-action="remove"></a>
             </div>

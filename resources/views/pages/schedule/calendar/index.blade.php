@@ -1,6 +1,6 @@
 @php
 // Get events from the DB
-$calendar_events = json_encode(['events' => Evt::all() ]);
+$calendar_events = json_encode(['events' => Evt::getAll() ]);
 @endphp
 
 <div class="card-body p-0">

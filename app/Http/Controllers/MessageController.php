@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\Attributes\SkipPermission;
 use App\Events\MessageArrived;
 use App\Events\MessageDeleted;
 use App\Helpers\Usr;
@@ -44,9 +45,9 @@ class MessageController extends Controller
      */
     public function index(): View
     {
-        $threads = $this->thread->getAllLatest()->get();
+        $threads = $this->thread->getThreadsOrderedByLatest()->get();
         $users = $this->getUsersExceptAuth();
-        $user_roles = $this->user->getRoles();
+        $user_roles = $this->user->getRolesByName();
 
         return view('messenger.index', compact('threads', 'users', 'user_roles'));
     }
@@ -65,14 +66,14 @@ class MessageController extends Controller
         }
 
         $user_id = auth()->id();
-        $users = User::whereNotIn('id', $this->thread->getParticipantUserIds($id, $user_id))
+        $users = User::whereNotIn('id', $this->thread->getThreadParticipantIds($id, $user_id))
             ->with(['roles'])
             ->get();
         $extra_messages_to_count = $this->extra_messages_to_count;
-        $unread_messages_count = $this->thread->getUserUnreadMessagesCount($id, $user_id);
+        $unread_messages_count = $this->thread->getUnreadCountForUser($id, $user_id);
         $user_as_participant = Participant::where(['thread_id' => $id, 'user_id' => $user_id])->get();
 
-        $this->thread->markAsRead($id, $user_id);
+        $this->thread->markThreadAsReadForUser($id, $user_id);
 
         return view('messenger.show', compact(
             'thread',
@@ -129,7 +130,7 @@ class MessageController extends Controller
         ]);
 
         if ($request->has('recipients')) {
-            $this->thread->addParticipants($thread->id, $input['recipients']);
+            $this->thread->addParticipantsToThread($thread->id, $input['recipients']);
         }
 
         if ($request->has('user_roles')) {
@@ -170,9 +171,9 @@ class MessageController extends Controller
 
         try {
             $this->broadcastNewMessage($message, $thread);
-            return Usr::jsonWithMsgOnly('scrollToBtn');
+            return Usr::jsonWithSingleKey('scrollToBtn');
         } catch (Throwable $e) {
-            $this->message->deleteMessageForever($message->id);
+            $this->message->forceDeleteMessage($message->id);
             Log::error("Error in MessageController@update while sending a message: " . $e->getMessage());
             return Usr::json(null, false, [
                 'msg' => 'Something went wrong. Cannot send a message.',
@@ -185,9 +186,10 @@ class MessageController extends Controller
     /**
      * Update participant's last read timestamp.
      */
+    #[SkipPermission]
     public function update_participant_last_read(int $thread_id): JsonResponse
     {
-        $this->thread->markAsRead($thread_id, auth()->id());
+        $this->thread->markThreadAsReadForUser($thread_id, auth()->id());
         return Usr::jsonUpdateOk();
     }
 
@@ -197,12 +199,12 @@ class MessageController extends Controller
     public function destroy($id): RedirectResponse
     {
         try {
-            $this->thread->findOrFail($id);
+            $thread = $this->thread->findOrFail($id);
         } catch (ModelNotFoundException $e) {
             return back()->with('flash_error', 'The thread was not found.');
         }
 
-        $this->thread->destroy($id);
+        $thread->delete();
         return redirect()->route('messages.index')->with('flash_success', __('msg.del_ok'));
     }
 
@@ -215,7 +217,7 @@ class MessageController extends Controller
         $participant_id = Usr::decodeHash($participant_id);
 
         try {
-            $thread = $this->thread->findOrFail($thread_id);
+            $this->thread->findOrFail($thread_id);
         } catch (ModelNotFoundException $e) {
             if ($this->thread->exists($thread_id)) {
                 return redirect()->back()->with('flash_info', 'You must restore the thread first to remove the participant.');
@@ -223,7 +225,7 @@ class MessageController extends Controller
             return redirect()->back()->with('flash_error', 'The thread was not found.');
         }
 
-        $this->thread->removeParticipantByUserId($thread_id, $participant_id);
+        $this->thread->removeParticipantFromThread($thread_id, $participant_id);
         return redirect()->back()->with('flash_success', 'Participant has been removed.');
     }
 
@@ -239,21 +241,22 @@ class MessageController extends Controller
         }
 
         try {
-            $this->message->update($msg_id, ['deleted_by' => auth()->id()]);
-            $this->message->deleteMessage($msg_id);
+            $message->deleted_by = auth()->id();
+            $message->save();
+            $message->delete();
 
-            $deleted_message = $this->message->getTrashedWithRelations($msg_id);
-            $deleted_message['user']['photo'] = Usr::getTenancyAwarePhoto($deleted_message['user']['photo']);
+            $deleted_message = $this->message->getTrashedMessageWithRelations($msg_id);
+            $message_html = view('messenger.partials.messages', ['message' => $deleted_message])->render();
 
-            broadcast(new MessageDeleted($deleted_message));
-            return Usr::jsonWithMsgOnly('complete');
+            broadcast(new MessageDeleted($deleted_message, $message_html));
+            return Usr::jsonWithSingleKey('complete');
         } catch (Throwable $e) {
-            $this->message->update($msg_id, ['deleted_by' => null]);
-            $this->message->restore($msg_id);
+            $message->update(['deleted_by' => null]);
+            $message->restore();
 
-            return Usr::json(null, true, [
+            return Usr::json(arr: [
                 'ok' => false,
-                'msg' => "Sorry, something went wrong. Can't delete a message.",
+                'msg' => "Sorry, something went wrong. Can't delete the message.",
                 'complete' => true,
             ]);
         }
@@ -267,12 +270,12 @@ class MessageController extends Controller
         $thread_id = Usr::decodeHash($thread_id);
 
         try {
-            $thread = $this->thread->findOrFail($thread_id);
+            $this->thread->findOrFail($thread_id);
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('flash_error', 'The thread was not found.');
         }
 
-        $this->thread->activateAllParticipants($thread_id);
+        $this->thread->activateAllThreadParticipants($thread_id);
         return redirect()->back()->with('flash_success', 'Participants have been activated successfully.');
     }
 
@@ -281,7 +284,7 @@ class MessageController extends Controller
      */
     public function load_previous(int $thread_id, int $current_first_msg_id_in_view): JsonResponse
     {
-        $messages = $this->message->getMessagesBeforeId(
+        $messages = $this->message->getPreviousMessages(
             $thread_id,
             $current_first_msg_id_in_view,
             $this->extra_messages_to_count
@@ -314,13 +317,13 @@ class MessageController extends Controller
     {
         foreach ($roles as $role) {
             $user_ids = match ($role) {
-                'students_active' => StudentRecord::where('grad', 0)
+                'students_active' => StudentRecord::where('is_graduated', false)
                     ->with('user')
                     ->get()
                     ->where('user.user_type', 'student')
                     ->pluck('user_id')
                     ->toArray(),
-                'students_graduated' => StudentRecord::where('grad', 1)
+                'students_graduated' => StudentRecord::where('is_graduated', true)
                     ->with('user')
                     ->get()
                     ->where('user.user_type', 'student')
@@ -332,7 +335,7 @@ class MessageController extends Controller
             };
 
             if (!empty($user_ids)) {
-                $this->thread->addParticipants($thread->id, $user_ids);
+                $this->thread->addParticipantsToThread($thread->id, $user_ids);
             }
         }
     }
@@ -356,7 +359,7 @@ class MessageController extends Controller
         $participant->save();
 
         if (isset($input['recipients'])) {
-            $this->thread->addParticipants($thread->id, $input['recipients']);
+            $this->thread->addParticipantsToThread($thread->id, $input['recipients']);
         }
 
         return $message;
@@ -368,8 +371,7 @@ class MessageController extends Controller
     protected function broadcastNewMessage($message, $thread): void
     {
         $message->load(['user', 'deletor', 'deletor.roles', 'user.roles']);
-        $message['user']['photo'] = Usr::getTenancyAwarePhoto($message['user']['photo']);
-        $message['body'] = Usr::parsedown($message['body']);
+        $message_html = view('messenger.partials.messages', ['message' => $message])->render();
 
         $recipients = Participant::where('thread_id', $thread->id)
             ->with('user')
@@ -378,6 +380,6 @@ class MessageController extends Controller
             ->filter(fn($u) => $u && $u->id !== auth()->id());
 
         Notification::sendNow($recipients, new NewMessageArrived($message));
-        broadcast(new MessageArrived($message));
+        broadcast(new MessageArrived($message, $message_html));
     }
 }

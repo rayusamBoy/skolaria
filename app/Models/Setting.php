@@ -10,7 +10,7 @@ class Setting extends Eloquent
 {
     use LogsActivity;
 
-    protected $fillable = ['type', 'description'];
+    protected $fillable = ['key', 'value'];
 
     public function getActivitylogOptions(): LogOptions
     {

@@ -20,11 +20,11 @@
                     </tr>
                     <tr>
                         <td class="font-weight-bold">Created</td>
-                        <td><span>{{ Qs::fullDateTimeFormat($ticket->created_at) }}</span></td>
+                        <td><span>{{ Qs::formatDateTime($ticket->created_at) }}</span></td>
                     </tr>
                     <tr>
                         <td class="font-weight-bold">Updated</td>
-                        <td><span class="bread-all">{{ Qs::fullDateTimeFormat($ticket->updated_at) }}</span></td>
+                        <td><span class="bread-all">{{ Qs::formatDateTime($ticket->updated_at) }}</span></td>
                     </tr>
                     @if(Qs::userIsHead())
                     <tr>

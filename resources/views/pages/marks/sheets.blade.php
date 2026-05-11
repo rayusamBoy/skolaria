@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded mr-2">bottom_sheets</i> Select Student Marksheet</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -74,9 +74,9 @@
                 @foreach($students as $s)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhoto($s->user->photo) }}" alt="photo"></td>
+                    <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhotoUrl($s->user->photo_path) }}" alt="photo"></td>
                     <td>{{ $s->user->name }}</td>
-                    <td>{{ $s->adm_no }}</td>
+                    <td>{{ $s->admission_number }}</td>
                     <td><a class="btn btn-danger" href="{{ route('marks.year_selector', Qs::hash($s->user_id)) }}">View Marksheet</a></td>
                 </tr>
                 @endforeach

@@ -93,7 +93,7 @@ class GeneratePermissions extends Command
             if (method_exists($rc, 'getAttributes')) {
                 foreach ($rc->getAttributes() as $attr) {
                     $an = $attr->getName();
-                    if (str_ends_with($an, 'SkipPermissions') || $an === \App\Auth\Attributes\SkipPermissions::class) {
+                    if (str_ends_with($an, 'SkipPermissions') || $an === \App\Auth\Attributes\SkipPermission::class) {
                         continue 2;
                     }
                 }

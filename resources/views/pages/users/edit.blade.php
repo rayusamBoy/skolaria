@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Edit User Details</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -64,28 +64,27 @@
                             <input value="{{ $user->email }}" type="email" id="email" name="email" class="form-control" placeholder="your@email.com">
                         </div>
                     </div>
-                    {{-- PHONE --}}
+                    {{-- MOBILES --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="phone">Phone:</label>
-                            <input value="{{ $user->phone }}" type="text" id="phone" name="phone" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
+                            <label for="primary_mobile">Primary Mobile:</label>
+                            <input value="{{ $user->primary_mobile }}" type="text" id="primary_mobile" name="primary_mobile" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
-                    {{-- TELEPHONE --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="telephone">Telephone:</label>
-                            <input value="{{ $user->phone2 }}" type="text" id="telephone" name="phone2" data-mask="+9999?999999999" class="form-control" placeholder="+255123456789">
+                            <label for="secondary_mobile">Secondary Mobile:</label>
+                            <input value="{{ $user->secondary_mobile }}" type="text" id="secondary_mobile" name="secondary_mobile" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
                     {{-- BLOOD GROUP --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="bg_id">Blood Group: </label>
-                            <select class="select form-control" id="bg_id" name="bg_id" data-placeholder="Choose..">
+                            <label for="blood_group_id">Blood Group: </label>
+                            <select class="select form-control" id="blood_group_id" name="blood_group_id" data-placeholder="Choose..">
                                 <option value=""></option>
                                 @foreach($blood_groups as $bg)
-                                <option @selected($user->bg_id == $bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
+                                <option @selected($user->blood_group_id == $bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -108,11 +107,11 @@
                     {{-- NATIONALITY --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="nal_id">Nationality: <span class="text-danger">*</span></label>
-                            <select onchange="getState(this.value)" data-placeholder="Choose..." required name="nal_id" id="nal_id" class="select-search form-control">
+                            <label for="nationality_id">Nationality: <span class="text-danger">*</span></label>
+                            <select onchange="getState(this.value)" data-placeholder="Choose..." required name="nationality_id" id="nationality_id" class="select-search form-control">
                                 <option value=""></option>
                                 @foreach($nationals as $nal)
-                                <option @selected($user->nal_id == $nal->id) value="{{ $nal->id }}">{{ $nal->name }}</option>
+                                <option @selected($user->nationality_id == $nal->id) value="{{ $nal->id }}">{{ $nal->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -141,15 +140,15 @@
                     {{-- PRIMARY ID --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="primary_id" class="d-block">Primary ID:</label>
-                            <input value="{{ $user->primary_id ?? '' }}" type="text" id="primary_id" name="primary_id" data-mask="www?wwwwwwwwwwwwwwwww" class="form-control" placeholder="123456789">
+                            <label for="primary_identification_number" class="d-block">Primary ID number:</label>
+                            <input value="{{ $user->primary_identification_number ?? '' }}" type="text" id="primary_identification_number" name="primary_identification_number" class="form-control" placeholder="123456789">
                         </div>
                     </div>
                     {{-- SECONDARY ID --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="secondary_id" class="d-block">Secondary ID:</label>
-                            <input value="{{ $user->secondary_id ?? '' }}" type="text" id="secondary_id" name="secondary_id" data-mask="www?wwwwwwwwwwwwwwwww" class="form-control" placeholder="12345678123451234512">
+                            <label for="secondary_identification_number" class="d-block">Secondary ID number:</label>
+                            <input value="{{ $user->secondary_identification_number ?? '' }}" type="text" id="secondary_identification_number" name="secondary_identification_number" class="form-control" placeholder="12345678123451234512">
                         </div>
                     </div>
                     {{-- RELIGION --}}
@@ -167,20 +166,20 @@
                     {{-- DOB --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="dob">Date of Birth:</label>
-                            <input name="dob" value="{{ $user->dob }}" id="dob" type="text" class="form-control date-pick" placeholder="Select Date...">
+                            <label for="date_of_birth">Date of Birth:</label>
+                            <input name="date_of_birth" value="{{ $user->date_of_birth }}" id="date_of_birth" type="text" class="form-control date-pick" placeholder="Select Date...">
                         </div>
                     </div>
                 </div>
 
-                @php $p_relative = Qs::getParentRelative($user->id) @endphp
+                @php $p_relative = Qs::getParentRelativeByUserId($user->id) @endphp
                 <div id="parent-data" @class($user->hasRole(config('roles.default_roles.tenant.parent')) ? [] : ['display-none'])>
                     <div class="row">
                         {{-- CLOSE RELATIVE NAME --}}
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="name2">Close Relative Name: <span class="text-danger">*</span></label>
-                                <input autocomplete="off" id="name2" name="name2" required value="{{ $p_relative->name ?? '' }}" type="text" class="form-control text-capitalize" placeholder="Full name">
+                                <label for="relative_name">Close Relative Name: <span class="text-danger">*</span></label>
+                                <input autocomplete="off" id="relative_name" name="relative_name" required value="{{ $p_relative->name ?? '' }}" type="text" class="form-control text-capitalize" placeholder="Full name">
                             </div>
                         </div>
                         {{-- RELATION WITH PARENT --}}
@@ -193,24 +192,24 @@
                     </div>
 
                     <div class="row">
-                        {{-- PARENT WORK --}}
+                        {{-- PARENT OCCUPATION --}}
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="work">Parent Work: <span class="text-danger">*</span></label>
-                                <input autocomplete="off" id="work" required name="work" value="{{ $user->work ?? '' }}" type="text" class="form-control" placeholder="The Work he/she does">
+                                <label for="occupation">Parent Occupation: <span class="text-danger">*</span></label>
+                                <input autocomplete="off" id="occupation" required name="occupation" value="{{ $user->occupation ?? '' }}" type="text" class="form-control" placeholder="The Occupation of the parent">
                             </div>
                         </div>
-                        {{-- CLOSE RELATIVE NUMBERS --}}
+                        {{-- CLOSE RELATIVE MOBILES --}}
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label for="phone3">Close Relative Phone: <span class="text-danger">*</span></label>
-                                <input value="{{ $p_relative->phone3 ?? ''  }}" required type="text" id="phone3" name="phone3" class="form-control" placeholder="+255123456789">
+                                <label for="relative_primary_mobile">Close Relative Primary Mobile: <span class="text-danger">*</span></label>
+                                <input value="{{ $p_relative->primary_mobile ?? ''  }}" required type="text" id="relative_primary_mobile" name="relative_primary_mobile" class="form-control" placeholder="+255123456789">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label for="phone4">Close Relative Mobile: </label>
-                                <input value="{{ $p_relative->phone4 ?? ''  }}" type="text" id="phone4" name="phone4" class="form-control" placeholder="+255123456789">
+                                <label for="relative_secondary_mobile">Close Relative Secondary Mobile: </label>
+                                <input value="{{ $p_relative->secondary_mobile ?? ''  }}" type="text" id="relative_secondary_mobile" name="relative_secondary_mobile" class="form-control" placeholder="+255123456789">
                             </div>
                         </div>
                     </div>
@@ -234,8 +233,8 @@
                     {{-- DATE OF EMPLOYMENT --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="emp_date">Date of Employment:</label>
-                            <input autocomplete="off" id="emp_date" name="emp_date" value="{{ $staff_rec->emp_date ?? '' }}" type="text" class="form-control date-pick" placeholder="Select Date...">
+                            <label for="employment_date">Date of Employment:</label>
+                            <input autocomplete="off" id="employment_date" name="employment_date" value="{{ $staff_rec->employment_date ?? '' }}" type="text" class="form-control date-pick" placeholder="Select Date...">
                         </div>
                     </div>
                     {{-- DATE OF CONFIRMATION --}}
@@ -265,15 +264,15 @@
                     {{-- SOCIAL SECURITY NUMBER --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="ss_number">Social Security Number:</label>
-                            <input name="ss_number" id="ss_number" value="{{ $staff_rec->ss_number ?? '' }}" type="number" min="1" 0 class="form-control">
+                            <label for="social_security_number">Social Security Number:</label>
+                            <input name="social_security_number" id="social_security_number" value="{{ $staff_rec->social_security_number ?? '' }}" type="number" min="1" 0 class="form-control">
                         </div>
                     </div>
                     {{-- EMPLOYMENT NUMBER --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="emp_no">Employment Number:</label>
-                            <input name="emp_no" id="emp_no" value="{{ $staff_rec->emp_no ?? '' }}" type="number" min="1" class="form-control">
+                            <label for="employment_number">Employment Number:</label>
+                            <input name="employment_number" id="employment_number" value="{{ $staff_rec->employment_number ?? '' }}" type="number" min="1" class="form-control">
                         </div>
                     </div>
                     {{-- TIN NUMBER --}}
@@ -286,8 +285,8 @@
                     {{-- BANK ACCOUNT NUMBER --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="bank_acc_no">Bank Account Number:</label>
-                            <input name="bank_acc_no" id="bank_acc_no" value="{{ $staff_rec->bank_acc_no ?? '' }}" type="number" class="form-control">
+                            <label for="bank_account_number">Bank Account Number:</label>
+                            <input name="bank_account_number" id="bank_account_number" value="{{ $staff_rec->bank_account_number ?? '' }}" type="number" class="form-control">
                         </div>
                     </div>
                 </div>
@@ -332,14 +331,14 @@
                             </select>
                         </div>
                     </div>
-                    {{-- ROLE --}}
+                    {{-- DESIGNATION --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="role">Role: </label>
-                            <select class="select form-control" id="role" name="role" data-placeholder="Choose..">
+                            <label for="designation">Designation: </label>
+                            <select class="select form-control" id="designation" name="designation" data-placeholder="Choose..">
                                 <option value=""></option>
-                                @foreach(Usr::getStaffRoles() as $role)
-                                <option @selected(isset($staff_rec->role) && $staff_rec->role == $role) value="{{ $role }}">{{ $role }}</option>
+                                @foreach(Usr::getStaffDesignations() as $designation)
+                                <option @selected($staff_rec?->designation == $designation) value="{{ $designation }}">{{ $designation }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -347,10 +346,10 @@
                     {{-- NUMBER OF PERIODS --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="no_of_periods">Number of Periods:</label>
-                            <select name="no_of_periods" id="no_of_periods" data-placeholder="Choose..." id="no_of_periods" class="select-search form-control">
+                            <label for="number_of_periods">Number of Periods:</label>
+                            <select name="number_of_periods" id="number_of_periods" data-placeholder="Choose..." id="number_of_periods" class="select-search form-control">
                                 <option value=""></option>
-                                @for($i = 1; $i <= 30; $i++) <option @selected(isset($staff_rec->no_of_periods) && $staff_rec->no_of_periods == $i) value="{{ $i }}">{{ $i }} </option> @endfor
+                                @for($i = 1; $i <= 30; $i++) <option @selected(isset($staff_rec->number_of_periods) && $staff_rec->number_of_periods == $i) value="{{ $i }}">{{ $i }} </option> @endfor
                             </select>
                         </div>
                     </div>

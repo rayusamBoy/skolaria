@@ -68,7 +68,7 @@
         <ul class="navbar-nav">
             <li class="nav-item dropdown dropdown-user">
                 <a href="javascript:;" class="navbar-nav-link" data-toggle="dropdown">
-                    <img src="{{ Usr::getTenancyAwarePhoto(auth()->user()->photo) }}" class="rounded-circle" style="width:38px;height:38px" alt="photo">
+                    <img src="{{ Usr::getTenancyAwarePhotoUrl(auth()->user()->photo_path) }}" class="rounded-circle" style="width:38px;height:38px" alt="photo">
                     <span>{{ auth()->user()->name }}</span>
                     <i class="material-symbols-rounded ml-1">keyboard_arrow_down</i>
                 </a>

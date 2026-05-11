@@ -15,8 +15,8 @@ return new class extends Migration
             $table->increments('id');
             $table->unsignedBigInteger('user_id')->index();
             $table->string('name');
-            $table->string('phone3');
-            $table->string('phone4')->nullable();
+            $table->string('primary_mobile', 16);
+            $table->string('secondary_mobile', 16)->nullable();
             $table->string('relation');
             $table->timestamps();
         });

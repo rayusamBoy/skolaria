@@ -16,8 +16,8 @@ class Exam extends Eloquent
         'term',
         'year',
         'category_id',
-        'published',
-        'locked',
+        'is_published',
+        'is_locked',
         'class_type_id',
         'exam_denominator',
         'exam_student_position_by_value',
@@ -29,8 +29,8 @@ class Exam extends Eloquent
     ];
 
     protected $casts = [
-        'published' => 'boolean',
-        'locked' => 'boolean',
+        'is_published' => 'boolean',
+        'is_locked' => 'boolean',
     ];
 
     public function category()

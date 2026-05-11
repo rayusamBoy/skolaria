@@ -84,7 +84,7 @@
      *-------------------------------------------------------------
      */
     channel.listen('MessageArrived', (e) => {
-        $messagesRow.append(getMessage(authId, e));
+        $messagesRow.append(e.message_html);
         updateParticipantLastRead(e.message.thread_id);
         playNotificationSound('message-notification.mp3', true);
         initializePopover(); // Re-initialize popover for new elements
@@ -98,107 +98,8 @@
      */
     channel.listen('MessageDeleted', (e) => {
         $("#confirm-message-delete").find('.close').click(); // Close modal if open
-        $(`#message-${e.message.id}`).replaceWith(getMessage(authId, e));
+        $(`#message-${e.message.id}`).replaceWith(e.message_html);
     });
-  
-    /**
-     *-------------------------------------------------------------
-     * Build and return a jQuery element representing a message
-     *-------------------------------------------------------------
-     */
-    const getMessage = (authId, e) => {
-        const { message } = e;
-        // Build container using template literal
-        const $container = $(`
-            <div id="message-${message.id}" class="col-lg-8 offset-lg-2 col-xl-6 offset-xl-3">
-                <li class="position-relative ${message.user_id == authId ? 'float-right' : 'float-left'}"></li>
-            </div>
-        `);
-        const $listItem = $container.find("li");
-  
-        // If sender is not the authenticated user, add photo and delete (if super admin)
-        if (message.user.id != authId) {
-            const $userPhoto = $(`
-                <img src="${message.user.photo}" alt="${message.user.name}" class="rounded-circle f-left">
-            `);
-            $listItem.append($userPhoto);
-            if (authUserRoles.includes(superAdminRoleName) && message.deleted_at === null) {
-                const $deleteBtn = $(`
-                    <button data-toggle="popover" data-placement="right" data-html="true" class="material-symbols-rounded position-absolute right-neg-25 text-info-400 opacity-75 opacity-100-on-hover border-0 outline-0 action-btn"
-                        data-content="
-                            <div class='d-flex justify-center'>
-                                <button type='button' data-text='Deleting...' id='${message.id}' onclick='prepareDeleteUserMessageForm(this.id)' data-toggle='modal' data-target='#confirm-message-delete' class='btn btn-sm p-0 pr-1 pl-1 m-auto text-danger-800 w-100 text-left bg-transparent'>
-                                    <span class='text-danger-800'>Delete</span>
-                                </button>
-                            </div>">
-                            more_vert
-                    </button>
-                `);
-                $listItem.append($deleteBtn);
-            }
-        }
-        
-        // Message box and heading
-        const senderName = message.user.id == authId
-            ? "Me"
-            : `${message.user.name} (${message.user.roles.map(r => r.name).join(", ")})`;
-        const $messageBox = $(`<div class="${message.user.id == authId ? 'right' : 'left'}"></div>`);
-        const $messageContent = $(`
-            <span class="media-body break-all">
-                <small class="media-heading" style="color: ${message.user.message_media_heading_color};">
-                    ${senderName}<br>
-                </small>
-            </span>
-        `);
-        $messageBox.append($messageContent);
-        $listItem.append($messageBox);
-  
-        // Append message body or deletion notice
-        if (message.deleted_at) {
-            let deletionNotice = "";
-            if (message.deleted_by == authId) {
-                deletionNotice = `<p class="text-muted"><i class="material-symbols-rounded font-size-sm pb-lg-1">block</i> You deleted this message.</p>`;
-            } else if (authUserRoles.includes(superAdminRoleName) && message.user_id != message.deleted_by) {
-                deletionNotice = `<p class="text-muted"><i class="material-symbols-rounded font-size-sm pb-lg-1">block</i> This message was deleted by super admin ${message.deletor.name}.</p>`;
-            } else {
-                deletionNotice = `<p class="text-muted"><i class="material-symbols-rounded font-size-sm pb-lg-1">block</i> This message was deleted.</p>`;
-            }
-            $messageContent.append(deletionNotice);
-        } else {
-            const formattedTime = moment().parseZone(message.created_at).format('DD MMMM YYYY, h:mm:ss a');
-            const $body = $(`
-                <span>
-                    ${message.body}<br>
-                    <span class="text-muted float-right"><small><i>${formattedTime}</i></small></span>
-                </span>
-            `);
-            $messageContent.append($body);
-        }
-  
-        // If the message is from the authenticated user, add delete option and photo after message box
-        if (message.user.id == authId) {
-            if (!message.deleted_at) {
-                const $deleteBtn = $(`
-                    <button data-toggle="popover" data-placement="left" data-html="true" class="material-symbols-rounded position-absolute left-neg-p5rem text-info-400 opacity-75 opacity-100-on-hover border-0 outline-0 action-btn"
-                        data-content="
-                            <div class='d-flex justify-center'>
-                                <button type='button' data-text='Deleting...' id='${message.id}' onclick='prepareDeleteUserMessageForm(this.id)' data-toggle='modal' data-target='#confirm-message-delete' class='btn btn-sm p-0 pr-1 pl-1 m-auto text-danger-800 w-100 text-left bg-transparent'>
-                                    <span class='text-danger-800'>Delete</span>
-                                </button>
-                            </div>">
-                            more_vert
-                    </button>
-                `);
-                $listItem.append($deleteBtn);
-            }
-            const $userPhoto = $(`
-                <img src="${message.user.photo}" alt="${message.user.name}" class="rounded-circle f-right">
-            `);
-            $listItem.append($userPhoto);
-        }
-  
-        return $container;
-    };
 </script>
 <script type="text/javascript">
     /**
@@ -277,7 +178,8 @@
                 processData: false, 
                 dataType: 'json', 
                 contentType: false, 
-                data: formData
+                data: formData,
+                global: false
             })
             .done((resp) => {
                 if (data.prepend_previous_messages) {

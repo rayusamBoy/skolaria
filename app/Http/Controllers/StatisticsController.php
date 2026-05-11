@@ -44,7 +44,7 @@ class StatisticsController extends Controller
      */
     public function index($exam_id = ''): View|RedirectResponse
     {
-        $exams = $this->exam->getPublishedOrderByLatest();
+        $exams = $this->exam->getLatestPublished();
         if ($exams->isEmpty()) {
             return redirect()->back()->with('flash_error', __('msg.pernf'));
         }
@@ -53,7 +53,7 @@ class StatisticsController extends Controller
         ExamIdValidator::validate($exam_id);
 
         $last_exam = $exam_id
-            ? $this->exam->getById($exam_id)
+            ? $this->exam->findExam($exam_id)
             : $exams->first();
 
 
@@ -91,15 +91,15 @@ class StatisticsController extends Controller
      */
     protected function getParentStatistics($last_exam): array
     {
-        $student_ids = $this->student->activeStudents()
+        $student_ids = $this->student->getActiveStudentsQuery()
             ->where('my_parent_id', auth()->id())
             ->pluck('user_id');
 
-        $exams_records = $this->exam->getRecordsByIds($student_ids)
+        $exams_records = $this->exam->getExamRecordsByStudents($student_ids->toArray())
             ->where('year', $this->year)
-            ->get()->where('exam.published', true);
+            ->get()->where('exam.is_published', true);
 
-        $marks = $this->mark->whereInStudentIdsWith($student_ids)
+        $marks = $this->mark->getMarksForStudents($student_ids->toArray())
             ->where('year', $this->year)->orderByDesc('id')
             ->get();
 
@@ -118,10 +118,10 @@ class StatisticsController extends Controller
     protected function getStudentStatistics($last_exam): array
     {
         return [
-            'exams_recs' => $this->exam->getRecordsByStudentId(auth()->id())
+            'exams_recs' => $this->exam->getExamRecordsByStudent(auth()->id())
                 ->where('year', $this->year)
-                ->get()->where('exam.published', true),
-            'last_exm_marks' => $this->mark->getById(auth()->id())
+                ->get()->where('exam.is_published', true),
+            'last_exm_marks' => $this->mark->getMarksByStudentId(auth()->id())
                 ->where('exam_id', $last_exam->id)
                 ->get(),
         ];
@@ -132,14 +132,14 @@ class StatisticsController extends Controller
      */
     protected function getStaffStatistics($last_exam, $exams): array
     {
-        $exams_records = $this->exam->getRecordsById($last_exam->id)
+        $exams_records = $this->exam->getExamRecordsByExam($last_exam->id)
             ->get()
             ->unique('my_class.id')
             ->sortBy('my_class.id');
 
         $data = [
             'classes_names' => $exams_records->pluck('my_class.name'),
-            'averages' => $exams_records->pluck('class_ave'),
+            'averages' => $exams_records->pluck('class_average'),
             'exams_names' => null,
             'exams_gpas' => null,
         ];
@@ -149,7 +149,7 @@ class StatisticsController extends Controller
         if ($this_year_exams->isNotEmpty()) {
             $exam_names = [];
             $exam_gpas = [];
-            $class_types = $this->class->getTypes();
+            $class_types = $this->class->getAllClassTypes();
 
             foreach ($class_types as $type) {
                 foreach ($this_year_exams as $exam) {

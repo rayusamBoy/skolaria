@@ -118,7 +118,7 @@ class LoginController extends Controller implements HasMiddleware
     protected function authenticated(Request $request, $user)
     {
         $user ??= auth()->user();
-        if ($user->blocked) {
+        if ($user->is_blocked) {
             Auth::logout();
             return redirect()->route('login')->with('access_denied', __('msg.restricted') . ' ACCOUNT BLOCKED.');
         }

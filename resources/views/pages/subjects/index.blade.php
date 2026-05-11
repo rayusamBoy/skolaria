@@ -4,10 +4,16 @@
 
 @section('content')
 
+@php
+$canEdit = auth()->user()->can($tenant_permissions['subjects']['edit']['permission']);
+$canDelete = auth()->user()->can($tenant_permissions['subjects']['destroy']['permission']);
+$hasActions = $canEdit || $canDelete;
+@endphp
+
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Subjects</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -105,46 +111,51 @@
                             <th>S/N</th>
                             <th>Name</th>
                             <th>Short Name</th>
-                            <td>Is Core</td>
-                            <td>Credits</td>
+                            <th>Is Core?</th>
+                            <th>Credits</th>
                             <th>Class</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($subjects->where('my_class_id', $c->id) as $s)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $s->name }} </td>
-                            <td>{{ $s->slug }} </td>
-                            <td>{{ $s->is_core === true ? 'Yes' : 'No' }}</td>
+                            <td>{{ $s->name }}</td>
+                            <td>{{ $s->slug }}</td>
+                            <td>{{ $s->is_core ? 'Yes' : 'No' }}</td>
                             <td>{{ $s->credits }}</td>
                             <td>{{ $s->my_class->name }}</td>
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Edit --}}
-                                            @can($tenant_permissions['subjects']['edit']['permission'])
+                                            @if($canEdit)
                                             <a href="{{ route('subjects.edit', $s->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-                                            @endcan
-                                            {{-- Delete --}}
-                                            @can($tenant_permissions['subjects']['destroy']['permission'])
-                                            <a id="{{ $s->id }}" onclick="confirmDelete(this.id)" href="javascript:;" @class($s->record->isNotEmpty() ? ['dropdown-item text-danger disabled'] : ['dropdown-item text-danger']) @if($s->record->isEmpty()) onclick="confirmDelete(this.id)" @else data-toggle="tooltip" title="{{ __('msg.subject_in_use') }}" @endif>
+                                            @endif
+                                            @if($canDelete)
+                                            @php $inUse = $s->record->isNotEmpty(); @endphp
+                                            <a id="{{ $s->id }}" @if($inUse) class="dropdown-item text-danger disabled" data-toggle="tooltip" title="{{ __('msg.subject_in_use') }}" @else class="dropdown-item text-danger" onclick="confirmDelete(this.id)" @endif href="javascript:;">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
-                                            <form method="post" id="item-delete-{{ $s->id }}" action="{{ route('subjects.destroy', [$s->id]) }}" class="hidden">
+                                            @if(!$inUse)
+                                            <form method="post" id="item-delete-{{ $s->id }}" action="{{ route('subjects.destroy', $s->id) }}" class="hidden">
                                                 @csrf
                                                 @method('delete')
                                             </form>
-                                            @endcan
+                                            @endif
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>

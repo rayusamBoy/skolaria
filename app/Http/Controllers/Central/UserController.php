@@ -42,10 +42,10 @@ class UserController extends Controller
      */
     public function index(): View
     {
-        $data['nationals'] = $this->loc->getAllNationals();
+        $data['nationals'] = $this->loc->getAllNationalities();
         $data['blood_groups'] = $this->user->getBloodGroups();
-        $data['roles'] = $this->permission->getRoles();
-        $data['permissions'] = $this->permission->getPermissions();
+        $data['roles'] = $this->permission->getAllRoles();
+        $data['permissions'] = $this->permission->getAllPermissions();
 
         return view('pages.central.users.index', $data);
     }
@@ -57,13 +57,13 @@ class UserController extends Controller
     {
         $except_roles = $this->getExcludedRolesForEditing();
 
-        $data['roles'] = $roles = $this->permission->getRoles($except_roles);
-        $data['permissions'] = $this->permission->getPermissions();
-        $data['user'] = $this->user->find($central_user);
-        $data['staff_rec'] = $this->user->getStaffRecord(['user_id' => $central_user])->first();
+        $data['roles'] = $roles = $this->permission->getAllRoles($except_roles);
+        $data['permissions'] = $this->permission->getAllPermissions();
+        $data['user'] = $this->user->findUser($central_user);
+        $data['staff_rec'] = $this->user->getStaffRecordsByConditions(['user_id' => $central_user])->first();
         $data['users'] = $this->user->getUsersByRoleNames($roles->pluck('name')->toArray());
         $data['blood_groups'] = $this->user->getBloodGroups();
-        $data['nationals'] = $this->loc->getAllNationals();
+        $data['nationals'] = $this->loc->getAllNationalities();
 
         return view('pages.central.users.edit', $data);
     }
@@ -77,7 +77,7 @@ class UserController extends Controller
             return back()->with('flash_danger', __('msg.denied'));
         }
 
-        $this->user->update($user_id, [
+        $this->user->updateUsersByColumn($user_id, [
             'password' => Hash::make('user'),
             'password_updated_at' => null,
         ]);
@@ -92,7 +92,7 @@ class UserController extends Controller
     {
         $role_names = $req->roles;
         $last_role_name = strtolower(last($role_names));
-        $staff_id = $this->generateStaffId($req->emp_date);
+        $staff_id = $this->generateStaffId($req->employment_date);
         $username = $req->username ?? $staff_id;
 
         // Validate username/email presence
@@ -101,7 +101,7 @@ class UserController extends Controller
         }
 
         $user_data = $this->prepareUserData($req, $last_role_name, $username, $staff_id);
-        $user = $this->user->create($user_data);
+        $user = $this->user->createUser($user_data);
 
         // Sync roles and permissions
         $user->syncRoles($role_names);
@@ -122,7 +122,7 @@ class UserController extends Controller
             return Usr::json(__('msg.denied'), false);
         }
 
-        $user = $this->user->find($user_id);
+        $user = $this->user->findUser($user_id);
         $role_names = $req->roles;
         $last_role_name = strtolower(last($role_names));
 
@@ -152,8 +152,8 @@ class UserController extends Controller
             return back()->with('pop_error', __('msg.denied'));
         }
 
-        $data['user'] = $this->user->find($user_id);
-        $data['staff_rec'] = $this->user->getStaffRecord(where: ['user_id' => $user_id])->first() ?: null;
+        $data['user'] = $this->user->findUser($user_id);
+        $data['staff_rec'] = $this->user->getStaffRecordsByConditions(where: ['user_id' => $user_id])->first() ?: null;
 
         return view('pages.central.users.show', $data);
     }
@@ -163,8 +163,8 @@ class UserController extends Controller
      */
     public function destroy($user_id): RedirectResponse
     {
-        $user = $this->user->find($user_id);
-        $this->user->forceDelete($user->id);
+        $user = $this->user->findUser($user_id);
+        $this->user->forceDeleteUser($user->id);
 
         Usr::deleteUserPhotoDirs($user->roles->pluck('name'), $user->code);
 
@@ -172,11 +172,11 @@ class UserController extends Controller
     }
 
     /**
-     * Toggle blocked status of a user.
+     * Toggle is_blocked status of a user.
      */
     public function toggle_user_block(UserBlockedState $req): JsonResponse
     {
-        $this->user->update($req->id, $req->only('blocked'));
+        $this->user->updateUsersByColumn($req->id, $req->only('is_blocked'));
 
         return Usr::json('ok');
     }
@@ -225,10 +225,10 @@ class UserController extends Controller
     /**
      * Generate a unique staff ID based on employment date.
      */
-    protected function generateStaffId($emp_date = null): string
+    protected function generateStaffId($employment_date = null): string
     {
-        $date = $emp_date ?? now();
-        return Usr::getAppCode() . '/STAFF/' . date('Y/m', strtotime($date)) . '/' . mt_rand(1000, 9999);
+        $date = $employment_date ?? now();
+        return Usr::getSystemShortCode() . '/STAFF/' . date('Y/m', strtotime($date)) . '/' . mt_rand(1000, 9999);
     }
 
     /**
@@ -237,8 +237,8 @@ class UserController extends Controller
     protected function prepareUserData(UserRequest $req, string $last_role_name, ?string $username = null, ?string $staff_id = null): array
     {
         $data = $req->except([
-            ...Usr::getStaffRecord(),
-            ...Usr::getParentRelativeRecord(),
+            ...Usr::getStaffRecordFields(),
+            ...Usr::getParentRelativeRecordFields(),
             '_token',
             '_method',
             'roles'
@@ -248,7 +248,7 @@ class UserController extends Controller
 
         $data['name'] = $name;
         $data['message_media_heading_color'] = Usr::getUserMediaHeadingColor($name);
-        $data['dob'] = $req->dob;
+        $data['date_of_birth'] = $req->date_of_birth;
 
         if ($username !== null) {
             $data['username'] = $username;
@@ -278,10 +278,10 @@ class UserController extends Controller
                 Usr::getUploadPath($last_role_name) . $user_code,
                 $file_meta['name']
             );
-            $data['photo'] = 'storage/' . $file_meta['path'];
+            $data['photo_path'] = 'storage/' . $file_meta['path'];
         } elseif ($req->route()->getActionMethod() === 'store') {
             // Only generate avatar if the request is for creating a new user.
-            $data['photo'] = 'storage/' . Usr::createAvatar($data['name'], $user_code, $last_role_name);
+            $data['photo_path'] = 'storage/' . Usr::createAvatar($data['name'], $user_code, $last_role_name);
         }
     }
 
@@ -300,11 +300,11 @@ class UserController extends Controller
      */
     protected function createStaffRecord(int $user_id, UserRequest $req, string $staff_id): void
     {
-        $staff_data = $req->only(Usr::getStaffRecord());
+        $staff_data = $req->only(Usr::getStaffRecordFields());
         $staff_data['user_id'] = $user_id;
         $staff_data['code'] = $staff_id;
 
-        $this->user->createStaffRecord($staff_data);
+        $this->user->getStaffRecordsQuery($staff_data);
     }
 
     /**
@@ -312,7 +312,7 @@ class UserController extends Controller
      */
     protected function updateStaffRecord(int $user_id, UserRequest $req): void
     {
-        $staff_data = $req->only(Usr::getStaffRecord());
+        $staff_data = $req->only(Usr::getStaffRecordFields());
         $this->user->updateStaffRecord(['user_id' => $user_id], $staff_data);
     }
 }

@@ -41,7 +41,7 @@
                         </i>
                     </span>
                     @endif
-                    <input name="google_analytic_tag_id" type="text" value="{{ old('google_analytic_tag_id') ?? '' }}" data-mask="G-wwwwwwwww?www" class="form-control" placeholder="Ie., G-4BCDFR6HGE">
+                    <input name="google_analytic_tag_id" type="text" value="{{ old('google_analytic_tag_id') ?? '' }}" class="form-control" placeholder="Ie., G-4BCDFR6HGE">
                     @if(empty($google_analytic_tag_id))
                     <span class="form-text text-warning-800">No Tag ID found.</span>
                     @else
@@ -52,7 +52,7 @@
                 {{-- Property ID --}}
                 <div class="col-lg-4">
                     <label class="d-block">Analytic Property ID</label>
-                    <input id="google_analytic_property_id" name="google_analytic_property_id" value="{{ old('google_analytic_property_id') ?? '' }}" type="text" data-mask="999999999" class="form-control" placeholder="Ie., 123456789">
+                    <input id="google_analytic_property_id" name="google_analytic_property_id" value="{{ old('google_analytic_property_id') ?? '' }}" type="text" class="form-control" placeholder="Ie., 123456789">
                     @if(empty($google_analytic_property_id))
                     <span class="form-text text-warning-800">No Property ID found.</span>
                     @else

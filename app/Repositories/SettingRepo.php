@@ -2,39 +2,45 @@
 
 namespace App\Repositories;
 
-
 use App\Models\Setting;
 
 class SettingRepo
 {
-    /*********** Setting ***************/
-    public function create(string $type, string $desc)
+    /*********** Settings ***************/
+
+    /**
+     * Create a new setting key/value pair.
+     *
+     * @param string $key
+     * @param string $value
+     * @return Setting
+     */
+    public function create(string $key, string $value): Setting
     {
-        return Setting::create(['type' => $type, 'description' => $desc]);
+        return Setting::create(['key' => $key, 'value' => $value]);
     }
 
-    public function update($type, $desc)
+    /**
+     * Update the value of an existing setting by its key.
+     *
+     * @param string $key
+     * @param string|null $value
+     * @return int  Number of updated rows
+     */
+    public function update(string $key, string|null $value): int
     {
-        return Setting::where('type', $type)->update(['description' => $desc]);
+        return Setting::where('key', $key)->update(['value' => $value]);
     }
 
-    public function updateType(string $old_type, string $new_type)
+    /**
+     * Change the key name of a setting.
+     *
+     * @param string $old_key
+     * @param string $new_key
+     * @return int  Number of updated rows
+     */
+    public function updateKey(string $old_key, string $new_key): int
     {
-        return Setting::where('type', $old_type)->update(['type' => $new_type]);
-    }
-
-    public function get(string $type)
-    {
-        return Setting::where('type', $type)->get();
-    }
-
-    public function all()
-    {
-        return Setting::all();
-    }
-
-    public function pluck($column, $key = null)
-    {
-        return Setting::pluck($column, $key);
+        return Setting::where('key', $old_key)->update(['key' => $new_key]);
     }
 }

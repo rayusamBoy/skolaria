@@ -48,7 +48,7 @@
                 <tr>
                     <td>
                         <strong><span style="color: #1b0c80; font-size: 25px;">{{ strtoupper(config('app.name')) }}</span></strong><br />
-                        <strong><span style="color: #000; font-size: 15px;"><i>{{ ucwords($settings->firstWhere('type', 'address')->description) }}</i></span></strong><br />
+                        <strong><span style="color: #000; font-size: 15px;"><i>{{ ucwords($settings->firstWhere('key', 'address')->value) }}</i></span></strong><br />
                         <strong><span style="color: #000; text-decoration: underline; font-size: 15px;"><i>{{ url()->current() }}</i></span></strong>
                         <br /> <br />
                         <strong><span style="color: #000; font-size: 15px;"> TIMETABLE FOR {{ strtoupper($my_class->name . ' ' . $ttr->section?->name . ' ') . ' ('.$ttr->year.')'  }}</span></strong>
@@ -58,7 +58,7 @@
 
             {{--Background Logo--}}
             <div style="position: relative;  text-align: center; ">
-                <img src="{{ $settings->firstWhere('type', 'logo')->description }}" style="max-width: 500px; max-height:600px; margin-top: 60px; position:absolute ; opacity: 0.2; margin-left: auto;margin-right: auto; left: 0; right: 0;" />
+                <img src="{{ $settings->firstWhere('key', 'logo')->value }}" style="max-width: 500px; max-height:600px; margin-top: 60px; position:absolute ; opacity: 0.2; margin-left: auto;margin-right: auto; left: 0; right: 0;" />
             </div>
 
             {{-- Tabulation Begins --}}

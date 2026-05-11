@@ -13,7 +13,7 @@
     <div class="container">
         {{--Background Logo--}}
         <div class="text-center">
-            <img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type' , 'logo')) }}" />
+            <img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('key' , 'logo')) }}" />
         </div>
         {{--Print Area--}}
         <div id="print" xmlns:margin-top="http://www.w3.org/1999/xhtml">
@@ -29,7 +29,7 @@
                     </div>
 
                     <div class="col-md-3">
-                        <h4 class="card-title"><strong>TERM: </strong> <span class="border-bottom-1">{!! strtoupper(Mk::getSuffix($m->exam->term)) !!} TERM</span></h4>
+                        <h4 class="card-title"><strong>TERM: </strong> <span class="border-bottom-1">{!! strtoupper(Mk::getOrdinalSuffix($m->exam->term)) !!} TERM</span></h4>
                     </div>
 
                     <div class="col-md-3">
@@ -112,8 +112,8 @@
                             <td>{{ $mk->tt3 ?? '' }}</td>
                             {{--TT Average--}}
                             <td>@php $tt_avg = Mk::getAverage($mk->tt1 + $mk->tt2 + $mk->tt2, 3) @endphp {{ $tt_avg != 0 ? $tt_avg : ''  }}</td>
-                            {{--Exam--}}
-                            <td>{{ $mk->exm ?? '' }}</td>
+                            {{--Exam Mark--}}
+                            <td>{{ $mk->exam_mark ?? '' }}</td>
                             {{--Total--}}
                             <td>{{ data_get($mk, "tex{$exam->term}", '') }}</td>
                             {{--Grade--}}

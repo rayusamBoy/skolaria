@@ -8,10 +8,14 @@ use App\Http\Requests\Division\DivisionCreate;
 use App\Http\Requests\Division\DivisionUpdate;
 use App\Repositories\ExamRepo;
 use App\Repositories\MyClassRepo;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class DivisionController extends Controller
 {
-    protected $exam, $my_class;
+    protected ExamRepo $exam;
+    protected MyClassRepo $my_class;
 
     public function __construct(ExamRepo $exam, MyClassRepo $my_class)
     {
@@ -21,15 +25,21 @@ class DivisionController extends Controller
         $this->my_class = $my_class;
     }
 
-    public function index()
+    /**
+     * Display a listing of divisions.
+     */
+    public function index(): View
     {
-        $d['divisions'] = $this->exam->allDivisions();
-        $d['class_types'] = $this->my_class->getTypes();
+        $data['divisions'] = $this->exam->getAllDivisions();
+        $data['class_types'] = $this->my_class->getAllClassTypes();
 
-        return view('pages.divisions.index', $d);
+        return view('pages.divisions.index', $data);
     }
 
-    public function store(DivisionCreate $req)
+    /**
+     * Store a newly created division.
+     */
+    public function store(DivisionCreate $req): JsonResponse
     {
         $data = $req->all();
         $this->exam->createDivision($data);
@@ -37,14 +47,20 @@ class DivisionController extends Controller
         return Qs::jsonStoreOk();
     }
 
-    public function edit($id)
+    /**
+     * Show the form for editing the specified division.
+     */
+    public function edit($id): View
     {
-        $d['dv'] = $this->exam->getDivision(['id' => $id], ['class_type'])->first();
+        $data['dv'] = $this->exam->getDivisionsByConditions(['id' => $id], ['class_type'])->first();
 
-        return view('pages.divisions.edit', $d);
+        return view('pages.divisions.edit', $data);
     }
 
-    public function update(DivisionUpdate $req, $id)
+    /**
+     * Update the specified division.
+     */
+    public function update(DivisionUpdate $req, $id): JsonResponse
     {
         $data = $req->all();
         $this->exam->updateDivision($id, $data);
@@ -52,7 +68,10 @@ class DivisionController extends Controller
         return Qs::jsonUpdateOk();
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified division.
+     */
+    public function destroy($id): RedirectResponse
     {
         $this->exam->deleteDivision($id);
 

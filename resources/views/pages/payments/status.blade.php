@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title font-weight-bold">Payment Status for {{ $sr->user->name }} </h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -37,11 +37,11 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $uc->payment->title }}</td>
                             <td>{{ $uc->payment->description }}</td>
-                            <td>{{ $uc->payment->ref_no }}</td>
+                            <td>{{ $uc->payment->reference_number }}</td>
                             {{--Amount--}}
                             <td class="font-weight-bold" id="amt-{{ Qs::hash($uc->id) }}" data-amount="{{ $uc->payment->amount }}">{{ $uc->payment->amount }}</td>
                             {{--Amount Paid--}}
-                            <td id="amt_paid-{{ Qs::hash($uc->id) }}" data-amount="{{ $uc->amt_paid ?: 0 }}" class="text-blue font-weight-bold">{{ $uc->amt_paid ?: '0.00' }}</td>
+                            <td id="amount_paid-{{ Qs::hash($uc->id) }}" data-amount="{{ $uc->amount_paid ?: 0 }}" class="text-blue font-weight-bold">{{ $uc->amount_paid ?: '0.00' }}</td>
                             {{--Balance--}}
                             <td id="bal-{{ Qs::hash($uc->id) }}" class="text-danger font-weight-bold">{{ $uc->balance ?: $uc->payment->amount }}</td>
                             {{--Year--}}
@@ -69,11 +69,11 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $cl->payment->title }}</td>
-                            <td>{{ $cl->payment->ref_no }}</td>
+                            <td>{{ $cl->payment->reference_number }}</td>
                             {{--Amount--}}
                             <td class="font-weight-bold">{{ $cl->payment->amount }}</td>
                             {{--Receipt No--}}
-                            <td>{{ $cl->ref_no }}</td>
+                            <td>{{ $cl->reference_number }}</td>
                             {{-- Year --}}
                             <td>{{ $cl->year }}</td>
                         </tr>

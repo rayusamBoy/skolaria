@@ -21,6 +21,8 @@ class DecodeRouteParamsMiddleware
         'book_request',
         'notice',
         'tenant',
+        'ticket',
+        'pin'
     ];
 
     /**

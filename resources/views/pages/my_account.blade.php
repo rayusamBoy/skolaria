@@ -11,7 +11,7 @@ $errors_has_password_error = str_contains($errors->first() ?? '', 'password');
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">My Account</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -122,9 +122,9 @@ $errors_has_password_error = str_contains($errors->first() ?? '', 'password');
 
                             {{-- Date of Birth --}}
                             <div class="form-group row">
-                                <label for="dob" class="col-lg-3 col-form-label font-weight-semibold">Date of Birth</label>
+                                <label for="date_of_birth" class="col-lg-3 col-form-label font-weight-semibold">Date of Birth</label>
                                 <div class="col-lg-9">
-                                    <input id="dob" name="dob" value="{{ $my->dob ?? old('dob') }}" type="text" class="form-control date-pick" placeholder="Select Date...">
+                                    <input id="date_of_birth" name="date_of_birth" value="{{ $my->date_of_birth ?? old('date_of_birth') }}" type="text" class="form-control date-pick" placeholder="Select Date...">
                                 </div>
                             </div>
 
@@ -147,35 +147,35 @@ $errors_has_password_error = str_contains($errors->first() ?? '', 'password');
                                 </div>
                             </div>
 
-                            {{-- Phone --}}
+                            {{-- Primary Mobile --}}
                             <div class="form-group row">
-                                <label for="phone" class="col-lg-3 col-form-label font-weight-semibold">Phone</label>
+                                <label for="primary_mobile" class="col-lg-3 col-form-label font-weight-semibold">Primary Mobile</label>
                                 <div class="col-lg-9">
-                                    <input id="phone" name="phone" type="text" data-mask="+9999?999999999" class="form-control" value="{{ $my->phone ?? old('phone') }}">
+                                    <input id="primary_mobile" name="primary_mobile" type="text" class="form-control" value="{{ $my->primary_mobile ?? old('primary_mobile') }}">
                                 </div>
                             </div>
 
-                            {{-- Secondary Phone --}}
+                            {{-- Secondary Mobile --}}
                             <div class="form-group row">
-                                <label for="phone2" class="col-lg-3 col-form-label font-weight-semibold">Telephone</label>
+                                <label for="secondary_mobile" class="col-lg-3 col-form-label font-weight-semibold">Secondary Mobile</label>
                                 <div class="col-lg-9">
-                                    <input id="phone2" name="phone2" type="text" data-mask="+9999?999999999" class="form-control" value="{{ $my->phone2 ?? old('phone2') }}">
+                                    <input id="secondary_mobile" name="secondary_mobile" type="text" class="form-control" value="{{ $my->secondary_mobile ?? old('secondary_mobile') }}">
                                 </div>
                             </div>
 
                             {{-- Primary ID --}}
                             <div class="form-group row">
-                                <label for="primary_id" class="col-lg-3 col-form-label font-weight-semibold">Primary ID</label>
+                                <label for="primary_identification_number" class="col-lg-3 col-form-label font-weight-semibold">Primary ID number</label>
                                 <div class="col-lg-9">
-                                    <input id="primary_id" name="primary_id" type="text" data-mask="www?wwwwwwwwwwwwwwwww" class="form-control" value="{{ $my->primary_id ?? old('primary_id') }}">
+                                    <input id="primary_identification_number" name="primary_identification_number" type="text" class="form-control" value="{{ $my->primary_identification_number ?? old('primary_identification_number') }}">
                                 </div>
                             </div>
 
                             {{-- Secondary ID --}}
                             <div class="form-group row">
-                                <label for="secondary_id" class="col-lg-3 col-form-label font-weight-semibold">Secondary ID</label>
+                                <label for="secondary_identification_number" class="col-lg-3 col-form-label font-weight-semibold">Secondary ID number</label>
                                 <div class="col-lg-9">
-                                    <input id="secondary_id" name="secondary_id" type="text" data-mask="www?wwwwwwwwwwwwwwwww" class="form-control" value="{{ $my->secondary_id ?? old('secondary_id') }}">
+                                    <input id="secondary_identification_number" name="secondary_identification_number" type="text" class="form-control" value="{{ $my->secondary_identification_number ?? old('secondary_identification_number') }}">
                                 </div>
                             </div>
 

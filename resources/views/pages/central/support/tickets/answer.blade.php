@@ -12,7 +12,7 @@
                 <div class="card card-collapsed card-ticket">
                     <div class="card-header header-elements-inline">
                         <h6 class="card-title">Answer</span></h6>
-                        {!! Qs::getPanelOptions() !!}
+                        {!! Qs::getPanelOptionsHtml() !!}
                     </div>
 
                     <div class="card-body">
@@ -75,7 +75,7 @@
                                         <span>@if($msg->is_from_tenant) {{ $tenant_user->name }} <br><span class="badge bg-success">Owner</span> @else {{ $msg->central_user($msg->user_id)->name }} <br><span class="badge bg-warning">Operator</span> @endif</span>
                                     </div>
                                     <div class="col-5 text-right">
-                                        <small>{{ Qs::fullDateTimeFormat($msg->created_at) }}</small>
+                                        <small>{{ Qs::formatDateTime($msg->created_at) }}</small>
                                     </div>
                                 </div>
 
@@ -85,7 +85,7 @@
                                     <div class="col-12">
                                         <div class="form-group row">
                                             <div class="col-12">
-                                                {!! Qs::parsedown($msg->body) !!}
+                                                {!! Qs::parseMarkdown($msg->body) !!}
                                             </div>
                                         </div>
                                     </div>
@@ -113,8 +113,8 @@
 
                 @if(auth()->user()->hasVerifiedEmail())
                 <p>{{ auth()->user()->email }}</p>
-                @elseif(auth()->user()->phone || auth()->user()->phone2)
-                <p>{{ auth()->user()->phone ?? auth()->user()->phone2 }}</p>
+                @elseif(auth()->user()->primary_mobile || auth()->user()->secondary_mobile)
+                <p>{{ auth()->user()->primary_mobile ?? auth()->user()->secondary_mobile }}</p>
                 @else
                 <p>None</p>
                 @endif
@@ -128,7 +128,7 @@
                 <p>{{ $ticket->categories->name }}</p>
 
                 <span class="text-muted">Submitted</span>
-                <p>{{ Qs::fullDateTimeFormat($ticket->created_at) }}</p>
+                <p>{{ Qs::formatDateTime($ticket->created_at) }}</p>
 
                 <span class="text-muted">Last Updated</span>
                 <p>{{ $ticket->updated_at->diffForHumans() }}</p>

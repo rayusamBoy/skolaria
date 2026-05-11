@@ -10,7 +10,7 @@ class ParentRelative extends Eloquent
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'name', 'phone3', 'phone4', 'relation'];
+    protected $fillable = ['user_id', 'name', 'primary_mobile', 'secondary_mobile', 'relation'];
 
     public function user()
     {

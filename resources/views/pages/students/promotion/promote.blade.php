@@ -13,7 +13,7 @@
                 {{-- If selection was made and the students are graduate --}}
                 @if($selected && $status == 0)
                 <th>Date Admitted</th>
-                <th>Grad Year</th>
+                <th>Graduated Year</th>
                 @endif
                 <th>Current Session</th>
                 <th>Action</th>
@@ -23,18 +23,18 @@
             @foreach($students->sortBy('user.name') as $sr)
             <tr>
                 <td>{{ $loop->iteration }}</td>
-                <td><img class="rounded-circle" style="height: 30px; width: 30px;" src="{{ Usr::getTenancyAwarePhoto($sr->user->photo) }}" alt="img"></td>
+                <td><img class="rounded-circle" style="height: 30px; width: 30px;" src="{{ Usr::getTenancyAwarePhotoUrl($sr->user->photo_path) }}" alt="img"></td>
                 <td>{{ $sr->user->name }}</td>
                 @if($selected && $status == 0)
                 <td>{{ $sr->date_admitted }}</td>
-                <td>{{ $sr->grad_date }}</td>
+                <td>{{ $sr->graduated_session }}</td>
                 @endif
                 <td>{{ $sr->session }}</td>
                 <td>
                     <select class="form-control select" name="p-{{ $sr->id }}" id="p-{{ $sr->id }}">
                         <option value="P">Promote</option>
                         <option value="D">Don't Promote</option>
-                        <option @if ($sr->grad == 1) disabled @endif value="G">Graduated</option>
+                        <option @disabled($sr->grad) value="G">Graduated</option>
                     </select>
                 </td>
             </tr>

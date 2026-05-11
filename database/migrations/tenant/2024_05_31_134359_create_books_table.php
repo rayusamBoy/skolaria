@@ -1,5 +1,6 @@
 <?php
 
+use App\Helpers\Usr;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -21,8 +22,8 @@ return new class extends Migration
             $table->string('url')->nullable();
             $table->string('location')->nullable();
             $table->integer('total_copies')->nullable();
-            $table->integer('issued_copies')->nullable();
-            $table->string('status', 50)->nullable();
+            $table->integer('issued_copies')->default(0);
+            $table->string('status', 50)->default(array_key_first(Usr::getBookStatuses())); // In Library
             $table->timestamps();
         });
     }

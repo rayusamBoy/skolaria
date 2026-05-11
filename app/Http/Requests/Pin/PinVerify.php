@@ -23,12 +23,4 @@ class PinVerify extends FormRequest
             'pin_code' => 'required|exists:pins,code',
         ];
     }
-
-    public function attributes()
-    {
-        return  [
-            'pin_code' => 'Pin Code',
-        ];
-    }
-
 }

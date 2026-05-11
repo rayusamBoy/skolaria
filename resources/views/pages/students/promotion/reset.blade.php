@@ -4,11 +4,11 @@
 
 @section('content')
 
-{{--Reset All--}}
+{{-- Reset All --}}
 @if($promotions->count() > 3)
 <div class="card">
     <div class="card-body text-center">
-        <button id="promotion-reset-all" class="btn btn-danger btn-large">Reset All Promotions for the Session</button>
+        <button id="promotion-reset-all-btn" class="btn btn-danger btn-large">Reset All Promotions for the Session</button>
     </div>
 </div>
 <form class="page-block" id="promotion-reset-all" method="post" action="{{ route('students.promotion_reset_all') }}">@csrf @method('DELETE')</form>
@@ -17,13 +17,15 @@
 {{-- Reset Promotions --}}
 <div class="card">
     <div class="card-header header-elements-inline">
-        <h6 class="card-title font-weight-semibold">Manage Promotions - Students Who Were Promoted From <span class="text-danger">{{ $old_year }}</span> TO <span class="text-success">{{ $new_year }}</span> Session
+        <h6 class="card-title font-weight-semibold">
+            Manage Promotions - Students Who Were Promoted From
+            <span class="text-danger">{{ $old_year }}</span> TO
+            <span class="text-success">{{ $new_year }}</span> Session
         </h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
-
         <table id="promotions-list" class="table datatable-button-html5-columns">
             <thead>
                 <tr>
@@ -42,7 +44,7 @@
                 @foreach($promotions->sortBy('user.name') as $p)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhoto($p->user->photo) }}" alt="photo"></td>
+                    <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhotoUrl($p->user->photo_path) }}" alt="photo"></td>
                     <td>{{ $p->user->name }}</td>
                     <td>{{ $p->fc->name.' '.$p->fs->name }}</td>
                     <td>{{ $p->tc->name.' '.$p->ts->name }}</td>
@@ -53,7 +55,7 @@
                     @else
                     <td><span class="text-primary">Graduated</span></td>
                     @endif
-                    <td>{{ Qs::onlyDateFormat($p->created_at) }}</td>
+                    <td>{{ Qs::formatDate($p->created_at) }}</td>
                     <td>
                         <form id="{{ Qs::hash($p->id) }}" method="post" class="ajax-update" action="{{ route('students.promotion_remarks', Qs::hash($p->id)) }}">
                             @csrf
@@ -75,11 +77,9 @@
         </table>
     </div>
 </div>
-
 @endsection
 
 @pushOnce('scripts')
-
 <script>
     /* Single Reset */
     $('.promotion-reset').on('click', function() {
@@ -89,7 +89,7 @@
     });
 
     /* Reset All Promotions */
-    $('#promotion-reset-all').on('click', function() {
+    $('#promotion-reset-all-btn').on('click', function() {
         confirmReset(null, "all")
         return false;
     });
@@ -100,15 +100,15 @@
         if (type === "all")
             var text = "This will reset all the items to default state";
         Swal.fire({
-            title: "Are you sure?", 
-            text: text, 
-            focusConfirm: false, 
-            returnFocus: false, 
-            reverseButtons: true, 
-            showCancelButton: true, 
-            cancelButtonText: "No, Cancel", 
+            title: "Are you sure?",
+            text: text,
+            focusConfirm: false,
+            returnFocus: false,
+            reverseButtons: true,
+            showCancelButton: true,
+            cancelButtonText: "No, Cancel",
             customClass: {
-                cancelButton: "bg-secondary", 
+                cancelButton: "bg-secondary",
             }
         }).then((result) => {
             if (result.isConfirmed) {
@@ -120,7 +120,5 @@
             };
         });
     }
-
 </script>
-
 @endPushOnce

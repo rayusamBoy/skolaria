@@ -22,7 +22,7 @@
                 <div class="tab-content overflow-auto">
                     @foreach ($class_types as $ct)
                     <div class="{{ $loop->first ? 'tab-pane fade show active' : 'tab-pane fade' }}" id="{{ $ct->code }}">
-                        {!! Usr::renderTable($my_classes->where('class_type_id', $ct->id)) !!}
+                        {!! Usr::renderClassPopulationTable($my_classes->where('class_type_id', $ct->id)) !!}
                     </div>
                     @endforeach
                 </div>

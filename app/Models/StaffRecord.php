@@ -11,7 +11,7 @@ class StaffRecord extends Eloquent
 {
     use LogsActivity;
 
-    protected $fillable = ['code', 'emp_date', 'emp_no', 'user_id', 'confirmation_date', 'licence_number', 'file_number', 'bank_acc_no', 'tin_number', 'education_level', 'year_graduated', 'ss_number', 'college_attended', 'primary_id', 'secondary_id', 'role', 'dob', 'subjects_studied', 'bank_name', 'no_of_periods', 'lga_id'];
+    protected $fillable = ['code', 'employment_date', 'employment_number', 'user_id', 'confirmation_date', 'licence_number', 'file_number', 'bank_account_number', 'tin_number', 'education_level', 'year_graduated', 'social_security_number', 'college_attended', 'primary_identification_number', 'secondary_identification_number', 'designation', 'date_of_birth', 'subjects_studied', 'bank_name', 'number_of_periods', 'lga_id'];
 
     public function user()
     {

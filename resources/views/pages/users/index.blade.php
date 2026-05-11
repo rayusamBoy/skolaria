@@ -4,10 +4,20 @@
 
 @section('content')
 
+@php
+$canEdit = auth()->user()->can($tenant_permissions['users']['edit']['permission']);
+$canView = auth()->user()->can($tenant_permissions['users']['show']['permission']);
+$canResetPassword = auth()->user()->can($tenant_permissions['users']['reset_password']['permission']);
+$canDelete = auth()->user()->can($tenant_permissions['users']['destroy']['permission']);
+$canToggleBlock = auth()->user()->can($tenant_permissions['users']['toggle_user_block']['permission']);
+$canToggleStaffEdit = auth()->user()->can($tenant_permissions['users']['toggle_staff_data_editing']['permission']);
+$hasActions = $canEdit || $canView || $canResetPassword || $canDelete;
+@endphp
+
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Users</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -31,7 +41,6 @@
             <div class="tab-pane fade" id="new-user">
                 <form method="post" enctype="multipart/form-data" class="wizard-form steps-validation ajax-store" action="{{ route('users.store') }}" data-fouc>
                     @csrf
-
                     {{-- PERSONAL DATA --}}
                     <h6 class="text-white">Personal Data</h6>
                     <fieldset>
@@ -62,7 +71,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="row">
                             <div class="col-12">
                                 {{-- PERMISSIONS --}}
@@ -92,18 +100,17 @@
                                     <input value="{{ old('username') }}" type="text" id="username" name="username" class="form-control" placeholder="Username">
                                 </div>
                             </div>
-                            {{-- PHONE --}}
+                            {{-- MOBILES --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label id="phone">Phone:</label>
-                                    <input value="{{ old('phone') }}" type="text" name="phone" id="phone" class="form-control" placeholder="+255123456789">
+                                    <label id="primary_mobile">Primary Mobile:</label>
+                                    <input value="{{ old('primary_mobile') }}" type="text" name="primary_mobile" id="primary_mobile" class="form-control" placeholder="+255123456789">
                                 </div>
                             </div>
-                            {{-- TELEPHONE --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="phone2">Telephone:</label>
-                                    <input value="{{ old('phone2') }}" type="text" id="phone2" name="phone2" class="form-control" placeholder="+255123456789">
+                                    <label for="secondary_mobile">Secondary Mobile:</label>
+                                    <input value="{{ old('secondary_mobile') }}" type="text" id="secondary_mobile" name="secondary_mobile" class="form-control" placeholder="+255123456789">
                                 </div>
                             </div>
                         </div>
@@ -112,11 +119,11 @@
                             {{-- BLOOD GROUP --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="bg_id">Blood Group: </label>
-                                    <select class="select form-control" id="bg_id" name="bg_id" data-placeholder="Choose..">
+                                    <label for="blood_group_id">Blood Group: </label>
+                                    <select class="select form-control" id="blood_group_id" name="blood_group_id" data-placeholder="Choose..">
                                         <option value=""></option>
                                         @foreach ($blood_groups as $bg)
-                                        <option @selected(old('bg_id')==$bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
+                                        <option @selected(old('blood_group_id')==$bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -143,11 +150,11 @@
                             {{-- NATIONALITY --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="nal_id">Nationality: <span class="text-danger">*</span></label>
-                                    <select onchange="getState(this.value)" data-placeholder="Choose..." required name="nal_id" id="nal_id" class="select-search form-control">
+                                    <label for="nationality_id">Nationality: <span class="text-danger">*</span></label>
+                                    <select onchange="getState(this.value)" data-placeholder="Choose..." required name="nationality_id" id="nationality_id" class="select-search form-control">
                                         <option value=""></option>
                                         @foreach ($nationals as $nal)
-                                        <option @if (old('nal_id')==$nal->id) selected @endif value="{{ $nal->id }}">{{ $nal->name }}</option>
+                                        <option @if (old('nationality_id')==$nal->id) selected @endif value="{{ $nal->id }}">{{ $nal->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -176,15 +183,15 @@
                             {{-- PRIMARY ID --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="primary_id" class="d-block">Primary ID:</label>
-                                    <input value="{{ old('primary_id') }}" type="text" id="primary_id" name="primary_id" data-mask="www?wwwwwwwwwwwwwwwww" class="form-control" placeholder="123456789">
+                                    <label for="primary_identification_number" class="d-block">Primary ID number:</label>
+                                    <input value="{{ old('primary_identification_number') }}" type="text" id="primary_identification_number" name="primary_identification_number" class="form-control" placeholder="123456789">
                                 </div>
                             </div>
                             {{-- SECONDARY ID --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="secondary_id" class="d-block">Secondary ID:</label>
-                                    <input value="{{ old('secondary_id') }}" type="text" id="secondary_id" name="secondary_id" data-mask="www?wwwwwwwwwwwwwwwww" class="form-control" placeholder="12345678123451234512">
+                                    <label for="secondary_identification_number" class="d-block">Secondary ID number:</label>
+                                    <input value="{{ old('secondary_identification_number') }}" type="text" id="secondary_identification_number" name="secondary_identification_number" class="form-control" placeholder="12345678123451234512">
                                 </div>
                             </div>
                         </div>
@@ -194,8 +201,8 @@
                                 {{-- CLOSE RELATIVE NAME --}}
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name2">Close Relative Name: <span class="text-danger">*</span></label>
-                                        <input disabled autocomplete="off" id="name2" name="name2" required value="{{ old('name2') }}" type="text" class="form-control text-capitalize" placeholder="Full name">
+                                        <label for="relative_name">Close Relative Name: <span class="text-danger">*</span></label>
+                                        <input disabled autocomplete="off" id="relative_name" name="relative_name" required value="{{ old('relative_name') }}" type="text" class="form-control text-capitalize" placeholder="Full name">
                                     </div>
                                 </div>
                                 {{-- RELATION WITH PARENT --}}
@@ -208,24 +215,24 @@
                             </div>
 
                             <div class="row">
-                                {{-- PARENT WORK --}}
+                                {{-- PARENT OCCUPATION --}}
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="parent_work">Parent Work: <span class="text-danger">*</span></label>
-                                        <input disabled autocomplete="off" id="parent_work" required name="work" value="{{ old('work') }}" type="text" class="form-control" placeholder="The Work he/she does">
+                                        <label for="occupation">Parent Occupation: <span class="text-danger">*</span></label>
+                                        <input disabled autocomplete="off" id="occupation" required name="occupation" value="{{ old('occupation') }}" type="text" class="form-control" placeholder="The Occupation of the parent">
                                     </div>
                                 </div>
-                                {{-- CLOSE RELATIVE NUMBERS --}}
+                                {{-- CLOSE RELATIVE MOBILES --}}
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label for="phone3">Close Relative Phone: <span class="text-danger">*</span></label>
-                                        <input disabled value="{{ old('phone3') }}" required type="text" id="phone3" name="phone3" class="form-control" placeholder="+255123456789">
+                                        <label for="relative_primary_mobile">Close Relative Primary Mobile: <span class="text-danger">*</span></label>
+                                        <input disabled value="{{ old('relative_primary_mobile') }}" required type="text" id="relative_primary_mobile" name="relative_primary_mobile" class="form-control" placeholder="+255123456789">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label for="phone4">Close Relative Mobile: </label>
-                                        <input disabled value="{{ old('phone4') }}" type="text" id="phone4" name="phone4" class="form-control" placeholder="+255123456789">
+                                        <label for="relative_secondary_mobile">Close Relative Secondary Mobile: </label>
+                                        <input disabled value="{{ old('relative_secondary_mobile') }}" type="text" id="relative_secondary_mobile" name="relative_secondary_mobile" class="form-control" placeholder="+255123456789">
                                     </div>
                                 </div>
                             </div>
@@ -247,8 +254,8 @@
                             {{-- DOB --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="dob">Date of Birth:</label>
-                                    <input name="dob" value="{{ old('dob') }}" type="text" id="dob" class="form-control date-pick" placeholder="Select Date...">
+                                    <label for="date_of_birth">Date of Birth:</label>
+                                    <input name="date_of_birth" value="{{ old('date_of_birth') }}" type="text" id="date_of_birth" class="form-control date-pick" placeholder="Select Date...">
                                 </div>
                             </div>
                             {{-- PASSPORT --}}
@@ -269,8 +276,8 @@
                             {{-- DATE OF EMPLOYMENT --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="emp_date">Date of Employment:</label>
-                                    <input type="text" name="emp_date" id="emp_date" class="form-control date-pick" placeholder="Select Date..." value="{{ old('emp_date') }}">
+                                    <label for="employment_date">Date of Employment:</label>
+                                    <input type="text" name="employment_date" id="employment_date" class="form-control date-pick" placeholder="Select Date..." value="{{ old('employment_date') }}">
                                 </div>
                             </div>
                             {{-- DATE OF CONFIRMATION --}}
@@ -299,15 +306,15 @@
                             {{-- SOCIAL SECURITY NUMBER --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="ss_number">Social Security Number:</label>
-                                    <input type="number" name="ss_number" id="ss_number" class="form-control" min="1" value="{{ old('ss_number') }}">
+                                    <label for="social_security_number">Social Security Number:</label>
+                                    <input type="number" name="social_security_number" id="social_security_number" class="form-control" min="1" value="{{ old('social_security_number') }}">
                                 </div>
                             </div>
                             {{-- EMPLOYMENT NUMBER --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="emp_no">Employment Number:</label>
-                                    <input type="number" name="emp_no" id="emp_no" class="form-control" min="1" value="{{ old('emp_no') }}">
+                                    <label for="employment_number">Employment Number:</label>
+                                    <input type="number" name="employment_number" id="employment_number" class="form-control" min="1" value="{{ old('employment_number') }}">
                                 </div>
                             </div>
                             {{-- TIN NUMBER --}}
@@ -320,8 +327,8 @@
                             {{-- BANK ACCOUNT NUMBER --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="bank_acc_no">Bank Account Number:</label>
-                                    <input type="number" name="bank_acc_no" id="bank_acc_no" class="form-control" value="{{ old('bank_acc_no') }}">
+                                    <label for="bank_account_number">Bank Account Number:</label>
+                                    <input type="number" name="bank_account_number" id="bank_account_number" class="form-control" value="{{ old('bank_account_number') }}">
                                 </div>
                             </div>
                         </div>
@@ -365,14 +372,14 @@
                                     </select>
                                 </div>
                             </div>
-                            {{-- ROLE --}}
+                            {{-- DESIGNATION --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="role">Role:</label>
-                                    <select name="role" id="role" class="form-control select" data-placeholder="Choose..">
+                                    <label for="designation">Designation:</label>
+                                    <select name="designation" id="designation" class="form-control select" data-placeholder="Choose..">
                                         <option value=""></option>
-                                        @foreach(Usr::getStaffRoles() as $role)
-                                        <option value="{{ $role }}" @selected(old('role')==$role)>{{ $role }}</option>
+                                        @foreach(Usr::getStaffDesignations() as $designation)
+                                        <option value="{{ $designation }}" @selected(old('designation')==$designation)>{{ $designation }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -380,10 +387,10 @@
                             {{-- NUMBER OF PERIODS --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="no_of_periods">Number of Periods:</label>
-                                    <select name="no_of_periods" id="no_of_periods" class="form-control select-search" data-placeholder="Choose..">
+                                    <label for="number_of_periods">Number of Periods:</label>
+                                    <select name="number_of_periods" id="number_of_periods" class="form-control select-search" data-placeholder="Choose..">
                                         <option value=""></option>
-                                        @for($i=1; $i<=30; $i++) <option value="{{ $i }}" @selected(old('no_of_periods')==$i)>{{ $i }}</option>
+                                        @for($i=1; $i<=30; $i++) <option value="{{ $i }}" @selected(old('number_of_periods')==$i)>{{ $i }}</option>
                                             @endfor
                                     </select>
                                 </div>
@@ -421,60 +428,59 @@
                             <th>Photo</th>
                             <th>Name</th>
                             <th>Username</th>
-                            <th>Phone</th>
+                            <th>Mobile</th>
                             <th>Email</th>
                             <th>Staff Data Editable</th>
                             <th>Blocked</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
 
                     <tbody>
                         @foreach(Usr::getUsersByRoleNames([$role->name], ['staff']) as $u)
+                        @php
+                        $can_be_modified = !Usr::userIsHead($u->id) || Usr::userIsHead();
+                        @endphp
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td><img src="{{ Usr::getTenancyAwarePhoto($u->photo) }}" class="rounded-circle" style="height:40px;width:40px;"></td>
+                            <td><img src="{{ Usr::getTenancyAwarePhotoUrl($u->photo_path) }}" class="rounded-circle" style="height:40px;width:40px;"></td>
                             <td>{{ $u->name }}</td>
                             <td>{{ $u->username }}</td>
-                            <td><a href="tel:{{ $u->phone }}">{{ $u->phone }}</a></td>
+                            <td><a href="tel:{{ $u->primary_mobile ?? $u->secondary_mobile }}">{{ $u->primary_mobile ?? $u->secondary_mobile }}</a></td>
                             <td><a href="mailto:{{ $u->email }}">{{ $u->email }}</a></td>
                             <td>
-                                @if(isset($u->staff->first()->staff_data_edit) && auth()->user()->can($tenant_permissions['users']['toggle_staff_data_editing']['permission']) && !Usr::userIsHead($u->id))
-                                <label class="form-switch m-0"><input type="checkbox" id="checkbox-staff-{{ $u->id }}" onchange="updateStaffDataEdtiState({{ $u->id }},this)" @checked($u->staff->first()->staff_data_edit)><i></i></label>
+                                @if($u->staff?->first()?->allow_staff_data_edit && $canToggleStaffEdit && $can_be_modified)
+                                <label class="form-switch m-0"><input type="checkbox" id="checkbox-staff-{{ $u->id }}" onchange="updateStaffDataEdtiState({{ $u->id }},this)" @checked($u->staff->first()->allow_staff_data_edit)><i></i></label>
                                 @else
                                 <span class="status-styled">Unavailable</span>
                                 @endif
                             </td>
                             <td>
-                                @if(auth()->user()->can($tenant_permissions['users']['toggle_user_block']['permission']) && !Usr::userIsHead($u->id))
-                                <label class="form-switch m-0"><input type="checkbox" id="checkbox-user-{{ $u->id }}" onchange="updateUserBlockedState({{ $u->id }},this)" @checked($u->blocked)><i></i></label>
+                                @if($canToggleBlock && $can_be_modified)
+                                <label class="form-switch m-0"><input type="checkbox" id="checkbox-user-{{ $u->id }}" onchange="updateUserBlockedState({{ $u->id }},this)" @checked($u->is_blocked)><i></i></label>
                                 @else
                                 <span class="status-styled">Unavailable</span>
                                 @endif
                             </td>
+                            @if($hasActions)
                             <td class="text-center">
-                                @php
-                                $user_can_modify_head = !Usr::userIsHead($u->id) || Usr::userIsHead();
-                                @endphp
-                                @if($user_can_modify_head)
+                                @if($can_be_modified)
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Edit --}}
-                                            @if(auth()->user()->can($tenant_permissions['users']['edit']['permission']) && $user_can_modify_head)
+                                            @if($canEdit)
                                             <a href="{{ route('users.edit', Qs::hash($u->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
                                             @endif
-                                            {{-- Show --}}
-                                            @if(auth()->user()->can($tenant_permissions['users']['show']['permission']) && $user_can_modify_head)
+                                            @if($canView)
                                             <a href="{{ route('users.show', Qs::hash($u->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> View Profile</a>
                                             @endif
-                                            {{-- Reset Password --}}
-                                            @if(auth()->user()->can($tenant_permissions['users']['reset_password']['permission']) && $user_can_modify_head)
+                                            @if($canResetPassword)
                                             <a href="javascript:;" data-href="{{ route('users.password.reset', Qs::hash($u->id)) }}" class="dropdown-item needs-reset-pass-confirmation"><i class="material-symbols-rounded">lock_reset</i> Reset Password</a>
                                             @endif
-                                            {{-- Destroy --}}
-                                            @if(auth()->user()->can($tenant_permissions['users']['destroy']['permission']) && $user_can_modify_head)
+                                            @if($canDelete)
                                             <a href="javascript:;" id="{{ Qs::hash($u->id) }}" onclick="confirmDelete(this.id)" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                             <form id="item-delete-{{ Qs::hash($u->id) }}" action="{{ route('users.destroy', Qs::hash($u->id)) }}" method="post" class="hidden">@csrf @method('delete')</form>
                                             @endif
@@ -483,6 +489,7 @@
                                 </div>
                                 @endif
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
@@ -492,5 +499,6 @@
 
         </div>
     </div>
+</div>
 
-    @endsection
+@endsection

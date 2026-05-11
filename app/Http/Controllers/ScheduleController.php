@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
 use App\Repositories\EventRepo;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class ScheduleController extends Controller
 {
-    protected $event;
+    protected EventRepo $event;
 
     public function __construct(EventRepo $event)
     {
@@ -17,42 +20,57 @@ class ScheduleController extends Controller
         $this->event = $event;
     }
 
-    public function index()
+    /**
+     * Display a listing of events.
+     */
+    public function index(): View
     {
-        $data['events'] = $this->event->all();
+        $data['events'] = $this->event->getAllEvents();
         $data['selected'] = false;
 
         return view('pages.schedule.index', $data);
     }
 
-    public function create_event(Request $request)
+    /**
+     * Store a newly created event.
+     */
+    public function create_event(Request $request): JsonResponse
     {
         $data = $request->all();
         $data['user_id'] = auth()->id();
         $this->event->create($data);
 
-        return Qs::json('The event ' . '"' . $data['name'] . '"' . ' added successfully.');
+        return Qs::json('The event "' . $data['name'] . '" added successfully.');
     }
 
-    public function edit_event($event_id)
+    /**
+     * Show the form for editing the specified event.
+     */
+    public function edit_event($event_id): View
     {
-        $d['event'] = $this->event->getRecord(['id' => $event_id])->first();
-        $d['events'] = $this->event->all();
-        $d['selected'] = true;
+        $data['event'] = $this->event->getEventsByConditions(['id' => $event_id])->first();
+        $data['events'] = $this->event->getAllEvents();
+        $data['selected'] = true;
 
-        return view('pages.schedule.index', $d);
+        return view('pages.schedule.index', $data);
     }
 
-    public function update_event(Request $request, $event_id)
+    /**
+     * Update the specified event.
+     */
+    public function update_event(Request $request, $event_id): JsonResponse
     {
-        $this->event->update($event_id, $request->except("_token"));
+        $this->event->update($event_id, $request->except('_token'));
 
         return Qs::jsonUpdateOk();
     }
 
-    public function delete_event(Request $req)
+    /**
+     * Remove the specified event.
+     */
+    public function delete_event(Request $req): RedirectResponse
     {
-        $this->event->delete($req->only("id"));
+        $this->event->delete($req->id);
 
         return back()->with('flash_success', __('msg.del_ok'));
     }

@@ -4,10 +4,16 @@
 
 @section('content')
 
+@php
+$canEdit = auth()->user()->can($tenant_permissions['payments']['edit']['permission']);
+$canDelete = auth()->user()->can($tenant_permissions['payments']['destroy']['permission']);
+$hasActions = $canEdit || $canDelete;
+@endphp
+
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded">price_check</i> Select year</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -47,13 +53,13 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Payments for {{ $year }} Session</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
         @can($tenant_permissions['payments']['index']['permission'])
         <ul class="nav nav-tabs nav-tabs-highlight">
-            <li class="nav-item"><a href="#all-payments" class="nav-link active" data-toggle="tab">All Classes</a></li>
+            <li class="nav-item"><a href="#all-payments" class="nav-link active" data-toggle="tab">All Payments</a></li>
             <li class="nav-item dropdown">
                 <a href="javascript:;" class="nav-link dropdown-toggle" data-toggle="dropdown">Class Payments</a>
                 <div class="dropdown-menu dropdown-menu-right">
@@ -65,7 +71,7 @@
         </ul>
 
         <div class="tab-content">
-            {{-- All Classes --}}
+            {{-- All Payments --}}
             <div class="tab-pane fade show active" id="all-payments">
                 <table class="table datatable-button-html5-columns">
                     <thead>
@@ -77,7 +83,9 @@
                             <th>Class</th>
                             <th>Method</th>
                             <th>Info</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -86,32 +94,34 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $p->title }}</td>
                             <td>{{ $p->amount }}</td>
-                            <td>{{ $p->ref_no }}</td>
+                            <td>{{ $p->reference_number }}</td>
                             <td>{{ $p->my_class_id ? $p->my_class->name : 'All' }}</td>
                             <td>{{ ucwords($p->method) }}</td>
                             <td>{{ $p->description }}</td>
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @can($tenant_permissions['payments']['edit']['permission'])
+                                            @if($canEdit)
                                             <a href="{{ route('payments.edit', $p->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-                                            @endcan
-                                            @can($tenant_permissions['payments']['destroy']['permission'])
+                                            @endif
+                                            @if($canDelete)
                                             <a id="{{ $p->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
                                             <form method="post" id="item-delete-{{ $p->id }}" action="{{ route('payments.destroy', $p->id) }}" class="hidden">
                                                 @csrf @method('delete')
                                             </form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
@@ -131,7 +141,9 @@
                             <th>Class</th>
                             <th>Method</th>
                             <th>Info</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -140,32 +152,28 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $p->title }}</td>
                             <td>{{ $p->amount }}</td>
-                            <td>{{ $p->ref_no }}</td>
+                            <td>{{ $p->reference_number }}</td>
                             <td>{{ $p->my_class->name }}</td>
                             <td>{{ ucwords($p->method) }}</td>
                             <td>{{ $p->description }}</td>
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @can($tenant_permissions['payments']['edit']['permission'])
-                                            <a href="{{ route('payments.edit', $p->id) }}" class="dropdown-item">
-                                                <i class="material-symbols-rounded">edit</i> Edit
-                                            </a>
-                                            @endcan
-                                            @can($tenant_permissions['payments']['destroy']['permission'])
-                                            <a id="{{ $p->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
-                                                <i class="material-symbols-rounded">delete</i> Delete
-                                            </a>
-                                            <form method="post" id="item-delete-{{ $p->id }}" action="{{ route('payments.destroy', $p->id) }}" class="hidden">
-                                                @csrf @method('delete')
-                                            </form>
-                                            @endcan
+                                            @if($canEdit)
+                                            <a href="{{ route('payments.edit', $p->id) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
+                                            @endif
+                                            @if($canDelete)
+                                            <a id="{{ $p->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
+                                            <form method="post" id="item-delete-{{ $p->id }}" action="{{ route('payments.destroy', $p->id) }}" class="hidden">@csrf @method('delete')</form>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>

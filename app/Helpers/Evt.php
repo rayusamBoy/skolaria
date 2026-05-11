@@ -6,13 +6,23 @@ use App\Models\Event;
 
 class Evt
 {
-    public static function all()
+    /**
+     * Get all events (unordered).
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function getAll()
     {
         return Event::all();
     }
 
-    public static function getStatuses()
+    /**
+     * Return the list of possible event statuses.
+     *
+     * @return array
+     */
+    public static function getStatusOptions(): array
     {
-        return ["new", "completed", "cancelled", "active"];
+        return ['new', 'completed', 'cancelled', 'active'];
     }
 }

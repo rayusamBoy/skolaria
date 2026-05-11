@@ -34,7 +34,7 @@ class ClassTypeController extends Controller
      */
     public function index(): View
     {
-        $data['class_types'] = $this->my_class->getTypes();
+        $data['class_types'] = $this->my_class->getAllClassTypes();
 
         return view('pages.class_types.index', $data);
     }
@@ -44,7 +44,7 @@ class ClassTypeController extends Controller
      */
     public function store(ClassTypeCreate $req): JsonResponse
     {
-        $this->my_class->createType($req->validated());
+        $this->my_class->createClassType($req->validated());
         $this->setting->create("next_term_fees_" . strtolower($req->validated('code')), '0000');
 
         return Qs::jsonStoreOk();
@@ -70,7 +70,7 @@ class ClassTypeController extends Controller
 
         $class_type->update($req->validated());
         if (strtolower($current_code) != strtolower($request_code)) {
-            $this->setting->updateType("next_term_fees_" . strtolower($current_code), "next_term_fees_" . strtolower($request_code));
+            $this->setting->updateKey("next_term_fees_" . strtolower($current_code), "next_term_fees_" . strtolower($request_code));
         }
 
         return Qs::jsonUpdateOk();

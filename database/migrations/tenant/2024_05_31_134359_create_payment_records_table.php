@@ -15,10 +15,10 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->unsignedInteger('payment_id')->index();
             $table->unsignedBigInteger('student_id')->index();
-            $table->string('ref_no', 100)->nullable()->unique();
-            $table->integer('amt_paid')->nullable();
+            $table->string('reference_number', 100)->nullable()->unique();
+            $table->integer('amount_paid')->nullable();
             $table->integer('balance')->nullable();
-            $table->boolean('paid')->default(false);
+            $table->boolean('is_paid')->default(false);
             $table->string('year');
             $table->timestamps();
         });

@@ -109,7 +109,7 @@ class SettingController extends Controller
             try {
                 $dominant_color = (array) ColorThief::getColor($file->getPathname());
                 $bg_color = \sprintf('rgb(%d,%d,%d)', ...$dominant_color);
-                $texts_color = Qs::get_color_from_color($bg_color);
+                $texts_color = Qs::getContrastColor($bg_color);
                 $colors = $texts_color . Qs::getDelimiter() . $bg_color;
 
                 $this->setting->update('login_and_related_pgs_txts_and_bg_colors', $colors);

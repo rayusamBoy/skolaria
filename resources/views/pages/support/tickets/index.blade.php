@@ -4,10 +4,17 @@
 
 @section('content')
 
+@php
+$canReply = auth()->user()->can($tenant_permissions['tickets']['reply']['permission']);
+$canArchive = auth()->user()->can($tenant_permissions['tickets']['archive_ticket']['permission']);
+$canUnarchive = auth()->user()->can($tenant_permissions['tickets']['unarchive_ticket']['permission']);
+$hasActions = $canReply || $canArchive;
+@endphp
+
 <div class="card card-collapsed card-ticket">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Open a Ticket</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -25,8 +32,8 @@
                             <label for="contact">Contact</label>
                             @if(auth()->user()->hasVerifiedEmail())
                             <input type="text" name="email" id="contact" disabled class="form-control" value="{{ auth()->user()->email }}" readonly>
-                            @elseif(auth()->user()->phone || auth()->user()->phone2)
-                            <input type="text" name="phone" id="contact" disabled class="form-control" value="{{ auth()->user()->phone ?? auth()->user()->phone2 }}" readonly>
+                            @elseif(auth()->user()->primary_mobile || auth()->user()->secondary_mobile)
+                            <input type="text" name="mobile" id="contact" disabled class="form-control" value="{{ auth()->user()->primary_mobile ?? auth()->user()->secondary_mobile }}" readonly>
                             @else
                             <input type="text" id="contact" disabled class="form-control" placeholder="Not provided" readonly>
                             @endif
@@ -105,7 +112,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Active Tickets</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -119,7 +126,9 @@
                             <th>Subject</th>
                             <th>Status</th>
                             <th>Last Updated</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -129,31 +138,31 @@
                             <td>{{ $ticket->department }}</td>
                             <td>{{ $ticket->subject }}</td>
                             <td>{{ ucwords($ticket->status) }}</td>
-                            <td>{{ Qs::fullDateTimeFormat($ticket->updated_at) }}</td>
+                            <td>{{ Qs::formatDateTime($ticket->updated_at) }}</td>
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Reply --}}
-                                            @can($tenant_permissions['tickets']['reply']['permission'])
+                                            @if($canReply)
                                             <a href="{{ route('tickets.reply', Qs::hash($ticket->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">reply</i> Reply
                                             </a>
-                                            @endcan
-                                            {{-- Archive --}}
-                                            @can($tenant_permissions['tickets']['archive_ticket']['permission'])
+                                            @endif
+                                            @if($canArchive)
                                             <a id="{{ $ticket->id }}" onclick="confirmArchive(this.id)" href="javascript:;" class="dropdown-item text-warning">
                                                 <i class="material-symbols-rounded">archive</i> Archive
                                             </a>
                                             <form class="d-none" method="post" id="item-archive-{{ $ticket->id }}" action="{{ route('tickets.archive', $ticket->id) }}">
                                                 @method('patch') @csrf
                                             </form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
@@ -163,16 +172,16 @@
     </div>
 </div>
 
-@if ($archived_tickets->isNotEmpty() && auth()->user()->can($tenant_permissions['tickets']['unarchive_ticket']['permission']))
+@if ($archived_tickets->isNotEmpty() && $canUnarchive)
 <div class="card card-collapsed">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Archived Tickets</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
         <div class="tab-content">
-            <div class="tab-pane fade show active" id="all-users">
+            <div class="tab-pane fade show active" id="all-archived">
                 <table class="table datatable">
                     <thead>
                         <tr>
@@ -181,7 +190,9 @@
                             <th>Subject</th>
                             <th>Status</th>
                             <th>Last Updated</th>
+                            @if($canUnarchive)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -191,7 +202,8 @@
                             <td>{{ $ticket->department }}</td>
                             <td>{{ $ticket->subject }}</td>
                             <td>{{ ucwords($ticket->status) }}</td>
-                            <td>{{ Qs::fullDateTimeFormat($ticket->updated_at) }}</td>
+                            <td>{{ Qs::formatDateTime($ticket->updated_at) }}</td>
+                            @if($canUnarchive)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
@@ -207,6 +219,7 @@
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>

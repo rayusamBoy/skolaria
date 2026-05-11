@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('pins', function (Blueprint $table) {
             $table->increments('id');
             $table->string('code', 40)->unique();
-            $table->string('used')->default('0');
-            $table->string('times_used')->default('0');
+            $table->boolean('is_used')->default(false);
+            $table->integer('usage_count')->default(0);
             $table->unsignedBigInteger('user_id')->nullable()->index();
             $table->unsignedBigInteger('student_id')->nullable()->index();
             $table->timestamps();

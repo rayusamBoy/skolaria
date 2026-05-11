@@ -34,14 +34,6 @@ class SubjectUpdate extends FormRequest
         ];
     }
 
-    public function attributes()
-    {
-        return [
-            'slug' => 'short name',
-            'is_core' => 'is core'
-        ];
-    }
-
     public function messages()
     {
         return [

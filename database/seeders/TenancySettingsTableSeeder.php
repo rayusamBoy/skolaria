@@ -21,232 +21,232 @@ class TenancySettingsTableSeeder extends Seeder
         \DB::table('settings')->insert(array(
             0 =>
                 array(
-                    'type' => 'current_session',
-                    'description' => date("Y") - 1 . '-' . date('Y'),
+                    'key' => 'current_session',
+                    'value' => date("Y") - 1 . '-' . date('Y'),
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             1 =>
                 array(
-                    'type' => 'system_title',
-                    'description' => 'TITLE',
+                    'key' => 'system_title',
+                    'value' => 'TITLE',
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             2 =>
                 array(
-                    'type' => 'system_name',
-                    'description' => 'YOUR SCHOOL NAME',
+                    'key' => 'system_name',
+                    'value' => 'YOUR SCHOOL NAME',
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             3 =>
                 array(
-                    'type' => 'term_ends',
-                    'description' => '01/07' . date('Y'),
+                    'key' => 'term_ends',
+                    'value' => '01/07' . date('Y'),
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             4 =>
                 array(
-                    'type' => 'term_begins',
-                    'description' => '01/01/' . date('Y'),
+                    'key' => 'term_begins',
+                    'value' => '01/01/' . date('Y'),
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             5 =>
                 array(
-                    'type' => 'phone',
-                    'description' => '0123456789',
+                    'key' => 'phone',
+                    'value' => '0123456789',
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             6 =>
                 array(
-                    'type' => 'address',
-                    'description' => 'Address',
+                    'key' => 'address',
+                    'value' => 'Address',
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             7 =>
                 array(
-                    'type' => 'system_email',
-                    'description' => 'example@example.domain',
+                    'key' => 'system_email',
+                    'value' => 'example@example.domain',
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             8 =>
                 array(
-                    'type' => 'alt_email',
-                    'description' => NULL,
+                    'key' => 'alt_email',
+                    'value' => NULL,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             9 =>
                 array(
-                    'type' => 'email_host',
-                    'description' => NULL,
+                    'key' => 'email_host',
+                    'value' => NULL,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             10 =>
                 array(
-                    'type' => 'email_pass',
-                    'description' => NULL,
+                    'key' => 'email_pass',
+                    'value' => NULL,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             11 =>
                 array(
-                    'type' => 'lock_exam',
-                    'description' => '0',
+                    'key' => 'lock_exam',
+                    'value' => '0',
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             12 =>
                 array(
-                    'type' => 'logo',
-                    'description' => NULL,
+                    'key' => 'logo',
+                    'value' => NULL,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             13 =>
                 array(
-                    'type' => 'next_term_fees_j',
-                    'description' => '0000',
+                    'key' => 'next_term_fees_j',
+                    'value' => '0000',
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             14 =>
                 array(
-                    'type' => 'next_term_fees_pn',
-                    'description' => '0000',
+                    'key' => 'next_term_fees_pn',
+                    'value' => '0000',
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             15 =>
                 array(
-                    'type' => 'next_term_fees_pe',
-                    'description' => '0000',
+                    'key' => 'next_term_fees_pe',
+                    'value' => '0000',
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             16 =>
                 array(
-                    'type' => 'next_term_fees_n',
-                    'description' => '0000',
+                    'key' => 'next_term_fees_n',
+                    'value' => '0000',
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             17 =>
                 array(
-                    'type' => 'next_term_fees_se',
-                    'description' => '0000',
+                    'key' => 'next_term_fees_se',
+                    'value' => '0000',
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             18 =>
                 array(
-                    'type' => 'next_term_fees_ase',
-                    'description' => '0000',
+                    'key' => 'next_term_fees_ase',
+                    'value' => '0000',
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             19 =>
                 array(
-                    'type' => 'login_and_related_pages_bg',
-                    'description' => NULL,
+                    'key' => 'login_and_related_pages_bg',
+                    'value' => NULL,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             20 =>
                 array(
-                    'type' => 'admin_email',
-                    'description' => 'admin@example.domain',
+                    'key' => 'admin_email',
+                    'value' => 'admin@example.domain',
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             21 =>
                 array(
-                    'type' => 'admin_whatsapp_link',
-                    'description' => NULL,
+                    'key' => 'admin_whatsapp_link',
+                    'value' => NULL,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             22 =>
                 array(
-                    'type' => 'admin_x_link',
-                    'description' => NULL,
+                    'key' => 'admin_x_link',
+                    'value' => NULL,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             23 =>
                 array(
-                    'type' => 'admin_facebook_link',
-                    'description' => NULL,
+                    'key' => 'admin_facebook_link',
+                    'value' => NULL,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             24 =>
                 array(
-                    'type' => 'admin_github_link',
-                    'description' => NULL,
+                    'key' => 'admin_github_link',
+                    'value' => NULL,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             25 =>
                 array(
-                    'type' => 'analytics_enabled',
-                    'description' => true,
+                    'key' => 'analytics_enabled',
+                    'value' => true,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             26 =>
                 array(
-                    'type' => 'google_analytic_tag_id',
-                    'description' => NULL,
+                    'key' => 'google_analytic_tag_id',
+                    'value' => NULL,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             27 =>
                 array(
-                    'type' => 'google_analytic_property_id',
-                    'description' => NULL,
+                    'key' => 'google_analytic_property_id',
+                    'value' => NULL,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             28 =>
                 array(
-                    'type' => 'google_analytic_service_account_credential_file',
-                    'description' => NULL,
+                    'key' => 'google_analytic_service_account_credential_file',
+                    'value' => NULL,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             29 =>
                 array(
-                    'type' => 'login_and_related_pgs_txts_and_bg_colors',
-                    'description' => NULL,
+                    'key' => 'login_and_related_pgs_txts_and_bg_colors',
+                    'value' => NULL,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             30 =>
                 array(
-                    'type' => 'enable_email_notification',
-                    'description' => 1,
+                    'key' => 'enable_email_notification',
+                    'value' => 1,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             31 =>
                 array(
-                    'type' => 'enable_sms_notification',
-                    'description' => 1,
+                    'key' => 'enable_sms_notification',
+                    'value' => 1,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),
             32 =>
                 array(
-                    'type' => 'enable_push_notification',
-                    'description' => 1,
+                    'key' => 'enable_push_notification',
+                    'value' => 1,
                     'created_at' => NULL,
                     'updated_at' => NULL,
                 ),

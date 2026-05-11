@@ -11,7 +11,11 @@ class Pin extends Eloquent
 {
     use LogsActivity;
 
-    protected $fillable = ['code', 'user_id', 'student_id', 'times_used', 'used'];
+    protected $fillable = ['code', 'user_id', 'student_id', 'usage_count', 'is_used'];
+
+    protected $casts = [
+        'is_used' => 'boolean',
+    ];
 
     public function user($foreign = NULL)
     {

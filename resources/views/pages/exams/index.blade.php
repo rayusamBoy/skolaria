@@ -4,10 +4,19 @@
 
 @section('content')
 
+@php
+$canEdit = auth()->user()->can($tenant_permissions['exams']['edit']['permission']);
+$canPublish = auth()->user()->can($tenant_permissions['exams']['publish']['permission']);
+$canDelete = auth()->user()->can($tenant_permissions['exams']['destroy']['permission']);
+$canToggleLock = auth()->user()->can($tenant_permissions['exams']['update_lock_state']['permission']);
+$canAnnounce = auth()->user()->can($tenant_permissions['exams']['announce']['permission']);
+$hasActions = $canEdit || $canPublish || $canDelete;
+@endphp
+
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Exams</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -19,8 +28,8 @@
             <li class="nav-item"><a href="#new-exam" class="{{ $errors->any() ? 'nav-link active' : 'nav-link' }}" data-toggle="tab">Add Exam</a></li>
             @endcan
             {{-- Announce exam item --}}
-            @if (session('announce_exam') && auth()->user()->can($tenant_permissions['exams']['announce']['permission']))
-            <li class="nav-item"><a href="#announce-exam" class="nav-link active" data-toggle="tab"></i> Announce the Exam</a></li>
+            @if (session('announce_exam') && $canAnnounce)
+            <li class="nav-item"><a href="#announce-exam" class="nav-link active" data-toggle="tab"><i></i> Announce the Exam</a></li>
             @endif
         </ul>
 
@@ -37,52 +46,53 @@
                             <th>Category</th>
                             <th>Class Type</th>
                             <th>Locked</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($exams as $ex)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $ex->name }}@if($ex->published) <span class="badge bg-success">published</span> @endif @if($ex->hasAssessment()) <span class="badge bg-info">has assessment</span> @endif</td>
+                            <td>{{ $ex->name }}@if($ex->is_published) <span class="badge bg-success">published</span> @else <span class="badge bg-danger">not published</span> @endif @if($ex->hasAssessment()) <span class="badge bg-info">has assessment</span> @endif</td>
                             <td>{{ Number::spellOrdinal($ex->term) . "Term" }}</td>
                             <td>{{ $ex->year }}</td>
                             <td>{{ $ex->category->name }}</td>
                             <td>{{ $class_types->where('id', $ex->class_type_id)->first()->name }}</td>
 
-                            @if(auth()->user()->can($tenant_permissions['exams']['update_lock_state']['permission']))
-                            <td><label class="form-switch m-0"><input id="checkbox-exam-lock-{{ $ex->id }}" onchange="updateExamLockState({{ $ex->id }}, this)" type="checkbox" @checked($ex->locked)><i></i></label></td>
+                            {{-- Locked toggle --}}
+                            @if($canToggleLock)
+                            <td><label class="form-switch m-0"><input id="checkbox-exam-lock-{{ $ex->id }}" onchange="updateExamLockState({{ $ex->id }}, this)" type="checkbox" @checked($ex->is_locked)><i></i></label></td>
                             @else
-                            <td><label class="form-switch disabled m-0"><input type="checkbox" @checked($ex->locked)><i></i></label></td>
+                            <td><label class="form-switch disabled m-0"><input type="checkbox" @checked($ex->is_locked)><i></i></label></td>
                             @endif
 
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a href="javascript:;" data-toggle="dropdown" class="material-symbols-rounded">lists</a>
-
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Edit --}}
-                                            @if(auth()->user()->can($tenant_permissions['exams']['store']['permission']) && !$ex->locked)
+                                            @if($canEdit && !$ex->is_locked)
                                             <a href="{{ route('exams.edit', $ex->id) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
                                             @endif
-                                            {{-- Publish --}}
-                                            @if (!$ex->published && auth()->user()->can($tenant_permissions['exams']['publish']['permission']))
+                                            @if(!$ex->is_published && $canPublish)
                                             <a id="{{ $ex->id }}" onclick="confirmPublish(this.id)" href="javascript:;" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> Publish</a>
                                             <form method="post" id="item-publish-{{ $ex->id }}" action="{{ route('exams.publish', $ex->id) }}" class="hidden">@csrf</form>
                                             @endif
-                                            {{-- Delete --}}
-                                            @can($tenant_permissions['exams']['destroy']['permission'])
+                                            @if($canDelete && !$ex->is_published)
                                             <a id="{{ $ex->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                             <form method="post" id="item-delete-{{ $ex->id }}" action="{{ route('exams.destroy', $ex->id) }}" class="hidden">
                                                 @csrf
                                                 @method('delete')
                                             </form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
@@ -164,8 +174,8 @@
                                 <div class="col-lg-7">
                                     @foreach (Mk::getStudentExamPositionByValues() as $key => $value)
                                     <div class="d-flex mb-2">
-                                        <span><input type="radio" id="exm-pos-by-{{ $key }}" name="exam_student_position_by_value" value="{{ $key }}" class="form-input-styled text-center"></span>
-                                        <label for="exm-pos-by-{{ $key }}" class="ml-2 w-50 m-auto-0">{{ $value }}</label>
+                                        <span><input type="radio" id="exam_mark-pos-by-{{ $key }}" name="exam_student_position_by_value" value="{{ $key }}" class="form-input-styled text-center"></span>
+                                        <label for="exam_mark-pos-by-{{ $key }}" class="ml-2 w-50 m-auto-0">{{ $value }}</label>
                                     </div>
                                     @endforeach
                                 </div>
@@ -265,7 +275,7 @@
             @endcan
 
             {{-- Announce exam tab --}}
-            @if (session('announce_exam') && auth()->user()->can($tenant_permissions['exams']['announce']['permission']))
+            @if (session('announce_exam') && $canAnnounce)
             <div class="tab-pane fade show active" id="announce-exam">
                 <div class="row">
                     <div class="col-md-12">

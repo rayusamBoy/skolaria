@@ -12,15 +12,15 @@
                 <table class="table table-bordered table-responsive">
                     <tr>
                         <td class="font-weight-bold">Name</td>
-                        <td>{{ $owner->name }} ({{ $owner->role }})</td>
+                        <td>{{ $owner->name }} ({{ $owner->roles->pluck('name')->implode(', ') }})</td>
                     </tr>
                     <tr>
                         <td class="font-weight-bold">Email</td>
                         <td><a href="mailto: {{ $owner->email }}">{{ $owner->email }}</a></td>
                     </tr>
                     <tr>
-                        <td class="font-weight-bold">Phone</td>
-                        <td><a href="tel: {{ $owner->phone ?? $owner->phone2 }}">{{ $owner->phone ?? $owner->phone2 }}</a></td>
+                        <td class="font-weight-bold">Mobile</td>
+                        <td><a href="tel: {{ $owner->primary_mobile ?? $owner->secondary_mobile }}">{{ $owner->primary_mobile ?? $owner->secondary_mobile }}</a></td>
                     </tr>
                 </table>
             </div>

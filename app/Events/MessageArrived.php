@@ -14,13 +14,15 @@ class MessageArrived implements ShouldBroadcastNow
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $message;
+    public $message_html;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($message)
+    public function __construct($message, $message_html)
     {
         $this->message = $message;
+        $this->message_html = $message_html;
     }
 
     /**

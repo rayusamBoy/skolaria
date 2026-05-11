@@ -27,7 +27,7 @@ class Thread extends OriginalThread
      */
     public function messagesWithTrashed()
     {
-        return $this->hasMany(Models::classname(Message::class), 'thread_id', 'id')->orderBy('created_at')->with('user')->withTrashed();
+        return $this->hasMany(Models::classname(Message::class), 'thread_id', 'id')->orderBy('created_at')->with(['user', 'deletor'])->withTrashed();
     }
 
     /**

@@ -16,7 +16,7 @@
             </tr>
         </thead>
         <tbody>
-            {!! Mk::renderSubsPerformanceSummary($section_id, $ex->id, $my_class) !!}
+            {!! Mk::renderSubjectPerformanceSummary($section_id, $ex->id, $my_class) !!}
         </tbody>
     </table>
     <p style="margin-top: 10px;">

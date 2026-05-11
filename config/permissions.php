@@ -272,12 +272,7 @@ return [
                 'year_selector' => [
                     'permission' => 'assessments.year_selector',
                     'label' => 'View Year Selector',
-                    'description' => 'Access the year selection interface for assessments.',
-                ],
-                'year_selected' => [
-                    'permission' => 'assessments.year_selected',
-                    'label' => 'Selected Assessments Year',
-                    'description' => 'View assessments for a selected year.',
+                    'description' => 'Access the year selection form for assessments.',
                 ],
             ],
 
@@ -492,7 +487,7 @@ return [
                 ],
                 'sheets' => [
                     'permission' => 'marks.sheets',
-                    'label' => 'Marks Sheets',
+                    'label' => 'Select Student Marksheets',
                     'description' => 'View student marks sheets.',
                 ],
                 'sheets_select' => [
@@ -527,13 +522,13 @@ return [
                 ],
                 'selector' => [
                     'permission' => 'marks.selector',
-                    'label' => 'Marks Selector',
-                    'description' => 'Fill manage marks form.',
+                    'label' => 'Marksheets Selector',
+                    'description' => 'Fill students marksheets selection form.',
                 ],
                 'show' => [
                     'permission' => 'marks.view',
-                    'label' => 'View Mark Details',
-                    'description' => 'View detailed information of a single mark.',
+                    'label' => 'View Marksheet(s)',
+                    'description' => 'View detailed information of a marksheet(s).',
                 ],
                 'skills_update' => [
                     'permission' => 'marks.skills_update',
@@ -555,15 +550,10 @@ return [
                     'label' => 'Update Marks',
                     'description' => 'Save changes to marks.',
                 ],
-                'year_selected' => [
-                    'permission' => 'marks.year_selected',
-                    'label' => 'Selected Marks Year',
-                    'description' => 'View marks for a selected year.',
-                ],
                 'year_selector' => [
                     'permission' => 'marks.year_selector',
-                    'label' => 'Marks Year Selector',
-                    'description' => 'Access the year selection interface for marks.',
+                    'label' => 'Marks Exam Year Selector',
+                    'description' => 'Access the year selection form for marks.',
                 ],
             ],
 
@@ -654,11 +644,6 @@ return [
                     'label' => 'Update Preferences',
                     'description' => 'Change account preferences.',
                 ],
-                'update_hidden_alerts' => [
-                    'permission' => 'my_accounts.update.hidden_alerts',
-                    'label' => 'Update Hidden Alerts',
-                    'description' => 'Manage hidden alert settings.',
-                ],
                 'update_profile' => [
                     'permission' => 'my_accounts.update.profile',
                     'label' => 'Update Profile',
@@ -707,13 +692,8 @@ return [
                 ],
                 'index' => [
                     'permission' => 'notices.view',
-                    'label' => 'View Notices',
-                    'description' => 'List all notices.',
-                ],
-                'mark_as_viewed' => [
-                    'permission' => 'notices.mark_as_viewed',
-                    'label' => 'Mark Notice Viewed',
-                    'description' => 'Mark a notice as viewed.',
+                    'label' => 'Manage Notices',
+                    'description' => 'Manage own/all notices.',
                 ],
                 'store' => [
                     'permission' => 'notices.store',
@@ -748,8 +728,8 @@ return [
                     'label' => 'Mark Notification Read',
                     'description' => 'Mark a single notification as read.',
                 ],
-                'update_is_notifiable' => [
-                    'permission' => 'notifications.update.is_notifiable',
+                'update_notification_preferences' => [
+                    'permission' => 'notifications.update.notification_preferences',
                     'label' => 'Update Notifiable Status',
                     'description' => 'Change whether user receives notifications.',
                 ],
@@ -846,8 +826,8 @@ return [
                 ],
                 'enter_pin' => [
                     'permission' => 'pins.enter_pin',
-                    'label' => 'Enter PIN',
-                    'description' => 'Submit a PIN for verification.',
+                    'label' => 'Enter PIN for Results View',
+                    'description' => 'Submit a PIN for verification to view results.',
                 ],
                 'index' => [
                     'permission' => 'pins.view',
@@ -858,11 +838,6 @@ return [
                     'permission' => 'pins.store',
                     'label' => 'Store Pins',
                     'description' => 'Save new pins.',
-                ],
-                'verify' => [
-                    'permission' => 'pins.verify',
-                    'label' => 'Verify PIN',
-                    'description' => 'Verify a PIN.',
                 ],
             ],
 
@@ -1270,20 +1245,10 @@ return [
                     'label' => 'Close Ticket',
                     'description' => 'Mark a ticket as closed.',
                 ],
-                'delete' => [
-                    'permission' => 'tickets.delete',
-                    'label' => 'Delete Ticket',
-                    'description' => 'Remove a ticket.',
-                ],
                 'index' => [
                     'permission' => 'tickets.view',
                     'label' => 'View Tickets',
                     'description' => 'List all tickets.',
-                ],
-                'lock_ticket' => [
-                    'permission' => 'tickets.lock_ticket',
-                    'label' => 'Lock Ticket',
-                    'description' => 'Lock a ticket to prevent changes.',
                 ],
                 'reply' => [
                     'permission' => 'tickets.reply',
@@ -1300,30 +1265,10 @@ return [
                     'label' => 'Store Ticket Message',
                     'description' => 'Add a message to a ticket.',
                 ],
-                'store_operator_message' => [
-                    'permission' => 'tickets.store.operator_message',
-                    'label' => 'Store Operator Message',
-                    'description' => 'Add an operator message to a ticket.',
-                ],
                 'unarchive_ticket' => [
                     'permission' => 'tickets.unarchive_ticket',
                     'label' => 'Unarchive Ticket',
                     'description' => 'Restore an archived ticket.',
-                ],
-                'unlock_ticket' => [
-                    'permission' => 'tickets.unlock_ticket',
-                    'label' => 'Unlock Ticket',
-                    'description' => 'Unlock a locked ticket.',
-                ],
-                'update_assignee' => [
-                    'permission' => 'tickets.update.assignee',
-                    'label' => 'Update Ticket Assignee',
-                    'description' => 'Change the assigned user for a ticket.',
-                ],
-                'update_properties' => [
-                    'permission' => 'tickets.update.properties',
-                    'label' => 'Update Ticket Properties',
-                    'description' => 'Modify ticket attributes.',
                 ],
             ],
 
@@ -1437,6 +1382,105 @@ return [
                     'description' => 'Clear all login history records.',
                 ],
             ],
+            'dashboard_statistics' => [
+                'active_students' => [
+                    'permission' => 'dashboard.stats.active_students',
+                    'label' => 'View Active Students statistic',
+                    'description' => 'Shows the Active Students card with male/female breakdown.'
+                ],
+                'graduated_students' => [
+                    'permission' => 'dashboard.stats.graduated_students',
+                    'label' => 'View Graduated Students statistic',
+                    'description' => 'Shows the Graduated Students card.'
+                ],
+                'overall_students' => [
+                    'permission' => 'dashboard.stats.overall_students',
+                    'label' => 'View Overall Students statistic',
+                    'description' => 'Shows the Overall Students card with sparkline and gender counts.'
+                ],
+                'administrators' => [
+                    'permission' => 'dashboard.stats.administrators',
+                    'label' => 'View Administrators statistic',
+                    'description' => 'Shows the Total Administrators card.'
+                ],
+                'teachers' => [
+                    'permission' => 'dashboard.stats.teachers',
+                    'label' => 'View Teachers statistic',
+                    'description' => 'Shows the Total Teachers card.'
+                ],
+                'accountants_librarians' => [
+                    'permission' => 'dashboard.stats.accountants_librarians',
+                    'label' => 'View Accountants & Librarians statistic',
+                    'description' => 'Shows the combined Accountants and Librarians card.'
+                ],
+                'assessments_declared' => [
+                    'permission' => 'dashboard.stats.assessments_declared',
+                    'label' => 'View Assessments Declared statistic',
+                    'description' => 'Shows the number of declared assessments.'
+                ],
+                'parents' => [
+                    'permission' => 'dashboard.stats.parents',
+                    'label' => 'View Parents statistic',
+                    'description' => 'Shows the Total Parents card.'
+                ],
+                'subjects' => [
+                    'permission' => 'dashboard.stats.subjects',
+                    'label' => 'View Subjects statistic',
+                    'description' => 'Shows the Total Subjects card.'
+                ],
+                'classes' => [
+                    'permission' => 'dashboard.stats.classes',
+                    'label' => 'View Classes statistic',
+                    'description' => 'Shows the Total Classes card.'
+                ],
+                'results_declared' => [
+                    'permission' => 'dashboard.stats.results_declared',
+                    'label' => 'View Results Declared statistic',
+                    'description' => 'Shows the number of published exam results.'
+                ],
+                'payments_done' => [
+                    'permission' => 'dashboard.stats.payments_done',
+                    'label' => 'View Payments Done statistic',
+                    'description' => 'Shows the Total Payments Done card.'
+                ],
+                'books' => [
+                    'permission' => 'dashboard.stats.books',
+                    'label' => 'View Books statistic',
+                    'description' => 'Shows the Total Books card.'
+                ],
+                'book_requests' => [
+                    'permission' => 'dashboard.stats.book_requests',
+                    'label' => 'View Book Requests statistic',
+                    'description' => 'Shows the Book Requests card with returned/out breakdown.'
+                ],
+                'gender_chart' => [
+                    'permission' => 'dashboard.charts.gender',
+                    'label' => 'View Gender Distribution chart',
+                    'description' => 'Access to the Gender Distribution chart.'
+                ],
+                'payments_chart' => [
+                    'permission' => 'dashboard.charts.payments',
+                    'label' => 'View Payments (12 months) chart',
+                    'description' => 'Access to the Payments trend chart.'
+                ],
+                'students_per_class_chart' => [
+                    'permission' => 'dashboard.charts.students_per_class',
+                    'label' => 'View Students per Class chart',
+                    'description' => 'Access to the Students per Class chart.'
+                ],
+                'student_breakdown_modal' => [
+                    'permission' => 'dashboard.modal.students_breakdown',
+                    'label' => 'View Student number breakdown modal',
+                    'description' => 'Allows opening the detailed student breakdown modal.'
+                ],
+            ],
+            'system' => [
+                'view_warnings' => [
+                    'permission' => 'system.view_warnings',
+                    'label' => 'View system warnings',
+                    'description' => 'Shows session/year mismatch warnings.'
+                ],
+            ],
         ],
 
         // ----------------------------------------------------------------------
@@ -1525,16 +1569,6 @@ return [
                     'label' => 'Answer Central Tickets',
                     'description' => 'Provide answers to central tickets.',
                 ],
-                'archive_ticket' => [
-                    'permission' => 'tickets.archive_ticket',
-                    'label' => 'Archive Central Ticket',
-                    'description' => 'Archive a central ticket.',
-                ],
-                'close_ticket' => [
-                    'permission' => 'tickets.close_ticket',
-                    'label' => 'Close Central Ticket',
-                    'description' => 'Mark a central ticket as closed.',
-                ],
                 'delete' => [
                     'permission' => 'tickets.delete',
                     'label' => 'Delete Central Ticket',
@@ -1560,20 +1594,10 @@ return [
                     'label' => 'Create Central Ticket',
                     'description' => 'Submit a new central ticket.',
                 ],
-                'store_message' => [
-                    'permission' => 'tickets.store.message',
-                    'label' => 'Store Central Ticket Message',
-                    'description' => 'Add a message to a central ticket.',
-                ],
                 'store_operator_message' => [
                     'permission' => 'tickets.store.operator_message',
                     'label' => 'Store Central Operator Message',
                     'description' => 'Add an operator message to a central ticket.',
-                ],
-                'unarchive_ticket' => [
-                    'permission' => 'tickets.unarchive_ticket',
-                    'label' => 'Unarchive Central Ticket',
-                    'description' => 'Restore an archived central ticket.',
                 ],
                 'unlock_ticket' => [
                     'permission' => 'tickets.unlock_ticket',

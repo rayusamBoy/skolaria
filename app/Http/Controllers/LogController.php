@@ -8,11 +8,16 @@ use App\Repositories\LogRepo;
 use App\Repositories\MyClassRepo;
 use App\Repositories\UserRepo;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\View\View;
 
 class LogController extends Controller
 {
-    protected $user, $my_class, $log;
+    protected UserRepo $user;
+    protected MyClassRepo $my_class;
+    protected LogRepo $log;
 
     public function __construct(UserRepo $user, MyClassRepo $my_class, LogRepo $log)
     {
@@ -23,47 +28,54 @@ class LogController extends Controller
         $this->log = $log;
     }
 
-    public function index()
+    /**
+     * Display login histories and activity logs.
+     */
+    public function index(): View
     {
-        $d['activities'] = $this->log->getActivites(['causer'])->sortBy('id', SORT_REGULAR, TRUE);
-        $d['login_histories'] = $this->log->getLoginHistories()->sortBy('last_login', SORT_REGULAR, TRUE);
-        $d['user_roles'] = $this->user->getRoles();
+        $data['activities'] = $this->log->getActivities(['causer'])->sortByDesc('id');
+        $data['login_histories'] = $this->log->getLoginHistories()->sortByDesc('last_login');
+        $data['user_roles'] = $this->user->getRolesByName();
 
-        return view('pages.logs', $d);
+        return view('pages.logs', $data);
     }
 
-    public function reset_login_histories($user_id)
+    /**
+     * Reset login history for a specific user.
+     */
+    public function reset_login_histories($user_id): RedirectResponse
     {
-        $current_timestamp = Carbon::now()->toDateTimeString();
-        $data = ['login_times' => 0, 'last_reset' => $current_timestamp, 'last_login' => NULL];
-
-        $this->log->updateLoginHist(['user_id' => $user_id], $data);
+        $data = [
+            'login_count' => 0,
+            'last_reset' => Carbon::now(),
+            'last_login' => null,
+        ];
+        $this->log->updateLoginHistory(['user_id' => $user_id], $data);
 
         return redirect()->back()->with('flash_success', __('msg.login_history_reset_success'));
     }
 
-    public function delete_activity($log_id)
+    /**
+     * Delete an activity log entry.
+     */
+    public function delete_activity($log_id): RedirectResponse
     {
-        $this->log->deleteActivityLog($log_id);
+        $this->log->deleteActivityById($log_id);
 
         return back()->with('flash_success', __('msg.del_ok'));
     }
 
-    // Clean activity log
-    public function clean_activity_log()
+    /**
+     * Clean the activity log (Artisan command).
+     */
+    public function clean_activity_log(): JsonResponse
     {
         $status = Artisan::call('activitylog:clean --force');
 
-        switch ($status) {
-            case 0:
-                $ok = true;
-                $message = 'All recorded activity older than ' . config('activitylog.delete_records_older_than_days') . ' deleted successfully.';
-                break;
-            default;
-                $ok = false;
-                $message = 'Activity log cleaning failed.';
-                break;
-        }
+        $ok = $status === 0;
+        $message = $ok
+            ? 'All recorded activity older than ' . config('activitylog.delete_records_older_than_days') . ' days deleted successfully.'
+            : 'Activity log cleaning failed.';
 
         return Qs::json($message, $ok);
     }

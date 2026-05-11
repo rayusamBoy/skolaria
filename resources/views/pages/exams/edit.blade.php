@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Edit Exam</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="row">
@@ -95,8 +95,8 @@
                         <div class="col-lg-7">
                             @foreach(Mk::getStudentExamPositionByValues() as $key => $value)
                             <div class="d-flex mb-2">
-                                <span><input @checked($key==$ex->exam_student_position_by_value) type="radio" id="exm-pos-by-{{ $key }}" name="exam_student_position_by_value" value="{{ $key }}" class="form-input-styled text-center"></span>
-                                <label for="exm-pos-by-{{ $key }}" class="ml-2 w-50 m-auto-0">{{ $value }}</label>
+                                <span><input @checked($key==$ex->exam_student_position_by_value) type="radio" id="exam_mark-pos-by-{{ $key }}" name="exam_student_position_by_value" value="{{ $key }}" class="form-input-styled text-center"></span>
+                                <label for="exam_mark-pos-by-{{ $key }}" class="ml-2 w-50 m-auto-0">{{ $value }}</label>
                             </div>
                             @endforeach
                         </div>

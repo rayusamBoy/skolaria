@@ -1281,3 +1281,13 @@
 :root[data-skin="slateglass"] .swal2-popup.swal2-toast {
     backdrop-filter: blur(8px);
 }
+
+:root[data-skin="slateglass"][data-theme=dark] .nav-tabs .nav-item.show .nav-link,
+:root[data-skin="slateglass"][data-theme=dark] .nav-tabs .nav-link.active {
+    border-color: var(--border-muted) var(--border-muted) rgb(22 29 45);
+}
+
+:root[data-skin="slateglass"][data-theme=light] .nav-tabs .nav-item.show .nav-link,
+:root[data-skin="slateglass"][data-theme=light] .nav-tabs .nav-link.active {
+    border-color: var(--border-muted) var(--border-muted) rgb(252 253 254);
+}

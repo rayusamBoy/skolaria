@@ -33,8 +33,8 @@ class TicketCreate extends FormRequest
     public function attributes()
     {
         return [
-            'category_id' => 'Category',
-            'labels_ids' => 'Labels',
+            'category_id' => 'category',
+            'labels_ids' => 'labels',
         ];
     }
 }

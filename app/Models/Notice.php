@@ -11,7 +11,7 @@ class Notice extends Eloquent
 {
     use LogsActivity;
 
-    protected $fillable = ['from_id', 'editor_id', 'viewers_ids', 'title', 'body'];
+    protected $fillable = ['creator_id', 'editor_id', 'viewers_ids', 'title', 'body'];
 
     protected $casts = [
         'viewers_ids' => 'array',
@@ -19,7 +19,7 @@ class Notice extends Eloquent
 
     public function user()
     {
-        return $this->belongsTo(User::class, "from_id");
+        return $this->belongsTo(User::class, "creator_id");
     }
 
     public function editor()

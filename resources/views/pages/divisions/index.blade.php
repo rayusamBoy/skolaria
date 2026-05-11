@@ -4,10 +4,16 @@
 
 @section('content')
 
+@php
+$canEdit = auth()->user()->can($tenant_permissions['divisions']['edit']['permission']);
+$canDelete = auth()->user()->can($tenant_permissions['divisions']['destroy']['permission']);
+$hasActions = $canEdit || $canDelete;
+@endphp
+
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Divisions</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -34,7 +40,9 @@
                             <th>Class Type</th>
                             <th>Range</th>
                             <th>Remark</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -50,20 +58,19 @@
                                 }}
                             </td>
                             <td>{{ "{$dv->points_from} - {$dv->points_to}" }}</td>
-                            <td>{{ $dv->remark }}</td>
+                            <td>{{ $dv->remarks }}</td>
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Edit --}}
-                                            @can($tenant_permissions['divisions']['edit']['permission'])
+                                            @if($canEdit)
                                             <a href="{{ route('divisions.edit', $dv->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-                                            @endcan
-                                            {{-- Delete --}}
-                                            @can($tenant_permissions['divisions']['destroy']['permission'])
+                                            @endif
+                                            @if($canDelete)
                                             <a id="division-delete-{{ $dv->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -71,11 +78,12 @@
                                                 @csrf
                                                 @method('delete')
                                             </form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
@@ -140,16 +148,14 @@
                                     <input name="points_to" type="number" min="0" max="100" value="{{ old('points_to') }}" required class="form-control" placeholder="0">
                                 </div>
                             </div>
-                            {{-- Remark --}}
+                            {{-- Remarks --}}
                             <div class="form-group row">
-                                <label for="remark" class="col-lg-3 col-form-label font-weight-semibold">
-                                    Remark
-                                </label>
+                                <label for="remarks" class="col-lg-3 col-form-label font-weight-semibold">Remarks</label>
                                 <div class="col-lg-9">
-                                    <select name="remark" id="remark" class="form-control select" data-placeholder="Select Remark">
-                                        <option value="">Select Remark</option>
+                                    <select name="remarks" id="remarks" class="form-control select" data-placeholder="Select Remark">
+                                        <option value="">Select Remarks</option>
                                         @foreach(Mk::getRemarks() as $rem)
-                                        <option value="{{ $rem }}" @selected(old('remark')==$rem)>
+                                        <option value="{{ $rem }}" @selected(old('remarks')==$rem)>
                                             {{ $rem }}
                                         </option>
                                         @endforeach
@@ -172,4 +178,3 @@
 </div>
 
 @endsection
-{{-- Class List Ends --}}

@@ -1708,6 +1708,10 @@
     color: #999;
 }
 
+.wizard > .steps > ul > li a {
+    opacity: 1 !important;
+}
+
 .wizard > .steps > ul > li:before,
 .wizard > .steps > ul > li:after {
     content: "";
@@ -4458,7 +4462,7 @@ body.swal2-toast-shown .swal2-container.swal2-bottom-right {
 .file-input .btn:not(.btn-default),
 .input-group-text:not(.default) {
     color: #fff;
-    border: 1px solid var(--navbar-border-color);
+    border: 1px solid var(--border-state);
 }
 
 .dt-button.buttons-html5:not(.button-default),

@@ -4,10 +4,16 @@
 
 @section('content')
 
+@php
+$canEdit = auth()->user()->can($tenant_permissions['book_requests']['edit']['permission']);
+$canDelete = auth()->user()->can($tenant_permissions['book_requests']['destroy']['permission']);
+$hasActions = $canEdit || $canDelete;
+@endphp
+
 <div class="card w-fit wmin-100-pcnt">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Book Requests</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -21,6 +27,7 @@
                 </div>
             </li>
 
+            {{-- Only show the “Add Request” tab if the user can create requests --}}
             @can($tenant_permissions['book_requests']['store']['permission'])
             <li class="nav-item">
                 <a href="#new-request" class="nav-link" data-toggle="tab">Add Request</a>
@@ -93,12 +100,14 @@
                             <th>S/N</th>
                             <th>Book</th>
                             <th>Borrower</th>
-                            <th>Returned</th>
+                            <th>Is Returned?</th>
                             <th>Remarks</th>
                             <th>Start Date</th>
                             <th>End Date</th>
                             <th>Issued By</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -109,26 +118,25 @@
                             <td>
                                 <a href="{{ route('users.show', Qs::hash($book_req->borrower->id)) }}">{{ $book_req->borrower->name }}</a>
                             </td>
-                            <td>{{ $book_req->returned ? 'Yes' : 'No' }}</td>
-                            <td>{{ $book_req->remarks }}</td>
+                            <td>{{ $book_req->is_returned ? 'Yes' : 'No' }}</td>
+                            <td>{{ $book_req->remarks ?? '—' }}</td>
                             <td>{{ $book_req->start_date }}</td>
                             <td>{{ $book_req->end_date }}</td>
                             <td>
                                 <a href="{{ route('users.show', Qs::hash($book_req->user->id)) }}">{{ $book_req->user->name }}</a>
                             </td>
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Edit --}}
-                                            @can($tenant_permissions['book_requests']['edit']['permission'])
+                                            @if($canEdit)
                                             <a href="{{ route('book_requests.edit', Qs::hash($book_req->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-                                            @endcan
-                                            {{-- Delete --}}
-                                            @can($tenant_permissions['book_requests']['destroy']['permission'])
+                                            @endif
+                                            @if($canDelete)
                                             <a id="br-delete-{{ Qs::hash($book_req->id) }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -136,11 +144,12 @@
                                                 @csrf
                                                 @method('delete')
                                             </form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>

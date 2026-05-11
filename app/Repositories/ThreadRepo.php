@@ -3,22 +3,25 @@
 namespace App\Repositories;
 
 use App\Models\Thread;
-use Cmgmyr\Messenger\Models\Participant;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 
 class ThreadRepo
 {
     /**
-     * Get all threads (latest first).
+     * Get a query builder for all threads ordered by latest update.
+     *
+     * @return Builder
      */
-    public function getAllLatest(): Builder|Thread
+    public function getThreadsOrderedByLatest(): Builder|Thread
     {
         return Thread::latest('updated_at');
     }
 
     /**
      * Find a thread by ID.
+     *
+     * @param int $id
+     * @return Thread|null
      */
     public function find(int $id): ?Thread
     {
@@ -26,7 +29,12 @@ class ThreadRepo
     }
 
     /**
-     * Find a thread or fail.
+     * Find a thread or throw a 404 exception.
+     *
+     * @param int $id
+     * @return Thread
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function findOrFail(int $id): Thread
     {
@@ -34,15 +42,12 @@ class ThreadRepo
     }
 
     /**
-     * Find a thread with trashed.
-     */
-    public function findWithTrashed(int $id): ?Thread
-    {
-        return Thread::withTrashed()->find($id);
-    }
-
-    /**
-     * Find a thread with trashed or fail.
+     * Find a thread with trashed or throw a 404.
+     *
+     * @param int $id
+     * @return Thread
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function findWithTrashedOrFail(int $id): Thread
     {
@@ -50,7 +55,10 @@ class ThreadRepo
     }
 
     /**
-     * Create a new thread.
+     * Create a new message thread.
+     *
+     * @param array $data
+     * @return Thread
      */
     public function create(array $data): Thread
     {
@@ -58,23 +66,13 @@ class ThreadRepo
     }
 
     /**
-     * Delete a thread (soft delete).
+     * Mark all messages in a thread as read for a user.
+     *
+     * @param int $thread_id
+     * @param int $user_id
+     * @return void
      */
-    public function destroy(int $id): bool
-    {
-        $thread = $this->find($id);
-        if (!$thread) {
-            return false;
-        }
-        // Using Cmgmyr\Messenger's destroy method (soft delete)
-        $thread->destroy($id);
-        return true;
-    }
-
-    /**
-     * Mark thread as read for a user.
-     */
-    public function markAsRead(int $thread_id, int $user_id): void
+    public function markThreadAsReadForUser(int $thread_id, int $user_id): void
     {
         $thread = $this->find($thread_id);
         if ($thread) {
@@ -83,18 +81,26 @@ class ThreadRepo
     }
 
     /**
-     * Get participant user IDs for a thread, excluding a specific user.
+     * Get participant user IDs for a thread, optionally excluding a user.
+     *
+     * @param int      $thread_id
+     * @param int|null $exclude_user_id
+     * @return array
      */
-    public function getParticipantUserIds(int $thread_id, ?int $exclude_user_id = null): array
+    public function getThreadParticipantIds(int $thread_id, ?int $exclude_user_id = null): array
     {
         $thread = $this->find($thread_id);
         return $thread ? $thread->participantsUserIds($exclude_user_id) : [];
     }
 
     /**
-     * Get unread messages count for a user in a thread.
+     * Get the number of unread messages for a user in a thread.
+     *
+     * @param int $thread_id
+     * @param int $user_id
+     * @return int
      */
-    public function getUserUnreadMessagesCount(int $thread_id, int $user_id): int
+    public function getUnreadCountForUser(int $thread_id, int $user_id): int
     {
         $thread = $this->find($thread_id);
         return $thread ? $thread->userUnreadMessagesCount($user_id) : 0;
@@ -102,8 +108,12 @@ class ThreadRepo
 
     /**
      * Add participants to a thread.
+     *
+     * @param int   $thread_id
+     * @param array $user_ids
+     * @return void
      */
-    public function addParticipants(int $thread_id, array $user_ids): void
+    public function addParticipantsToThread(int $thread_id, array $user_ids): void
     {
         $thread = $this->find($thread_id);
         if ($thread) {
@@ -112,9 +122,13 @@ class ThreadRepo
     }
 
     /**
-     * Remove a participant from a thread.
+     * Remove a participant from a thread by user ID.
+     *
+     * @param int $thread_id
+     * @param int $user_id
+     * @return void
      */
-    public function removeParticipantByUserId(int $thread_id, int $user_id): void
+    public function removeParticipantFromThread(int $thread_id, int $user_id): void
     {
         $thread = $this->find($thread_id);
         if ($thread) {
@@ -123,9 +137,12 @@ class ThreadRepo
     }
 
     /**
-     * Activate all participants in a thread.
+     * Activate all participants (un‑deactivate them) in a thread.
+     *
+     * @param int $thread_id
+     * @return void
      */
-    public function activateAllParticipants(int $thread_id): void
+    public function activateAllThreadParticipants(int $thread_id): void
     {
         $thread = $this->find($thread_id);
         if ($thread) {
@@ -134,36 +151,13 @@ class ThreadRepo
     }
 
     /**
-     * Check if a thread exists (including trashed).
+     * Check if a thread exists (including soft‑deleted).
+     *
+     * @param int $id
+     * @return bool
      */
     public function exists(int $id): bool
     {
         return Thread::withTrashed()->where('id', $id)->exists();
-    }
-
-    /**
-     * Get participants of a thread with their user data.
-     */
-    public function getParticipantsWithUser(int $thread_id): Collection
-    {
-        return Participant::where('thread_id', $thread_id)
-            ->with('user')
-            ->get();
-    }
-
-    /**
-     * Get threads for a specific user.
-     */
-    public function getForUser(int $user_id): Builder
-    {
-        return Thread::forUser($user_id)->latest('updated_at');
-    }
-
-    /**
-     * Get threads for a user with new messages.
-     */
-    public function getForUserWithNewMessages(int $user_id): Builder
-    {
-        return Thread::forUserWithNewMessages($user_id)->latest('updated_at');
     }
 }

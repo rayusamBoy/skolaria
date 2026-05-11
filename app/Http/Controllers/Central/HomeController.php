@@ -25,8 +25,8 @@ class HomeController extends Controller
 
     public function dashboard(Request $request)
     {
-        $data['tenants'] = $this->tenant->getAll();
-        $data['users'] = $this->user->all();
+        $data['tenants'] = $this->tenant->getAllTenants();
+        $data['users'] = $this->user->getAllUsers();
 
         return view('pages.central.dashboard', $data);
     }

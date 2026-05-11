@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Edit Book </h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -31,7 +31,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Name: <span class="text-danger">*</span></label>
-                                <input value="{{ $book->name }}" required type="text" name="name" placeholder="Book Name" class="form-control text-capitalize">
+                                <input value="{{ $book->name }}" required type="text" name="name" placeholder="Book Name" class="form-control">
                             </div>
                         </div>
                         {{--Description--}}

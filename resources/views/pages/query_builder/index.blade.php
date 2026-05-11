@@ -9,7 +9,7 @@
 <div class="card card-collapsed">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded mr-2">print</i> Query Print</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -59,7 +59,7 @@
 <div class="card card-collapsed" id="query-box">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded mr-2">lasso_select</i> Query Select</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -68,6 +68,16 @@
 
             {{-- First row --}}
             <div class="row">
+
+                <div class="col-md-2 form-group">
+                    <select name="from" id="from" required onchange="getTableColumns(this.value);document.getElementById('select').dispatchEvent(new Event('change'));" class="form-control select">
+                        <option disabled selected>from *</option>
+                        @foreach(Qs::getTableNames() as $table => $label)
+                        <option value="{{ $table }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
                 <div class="col-md-1 form-group">
                     <input type="text" disabled class="form-control" value="select">
                     <input type="hidden" name="type" value="select">
@@ -75,15 +85,6 @@
 
                 <div class="col-md-2 form-group">
                     <select name="select[]" id="select" multiple required class="form-control select"></select>
-                </div>
-
-                <div class="col-md-2 form-group">
-                    <select name="from" id="from" required onchange="getTableColumns(this.value)" class="form-control select">
-                        <option disabled selected>from *</option>
-                        @foreach(Qs::getTableNames() as $table => $label)
-                        <option value="{{ $table }}">{{ $label }}</option>
-                        @endforeach
-                    </select>
                 </div>
 
                 <div class="col-md-2 form-group">
@@ -173,7 +174,7 @@
 <div class="card w-fit wmin-100-pcnt">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Query Results</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
     <div class="alert alert-info border-0 alert-dismissible">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -204,7 +205,7 @@
                             $field = trim(collect(explode(' ',$s))->last(), '[]"' );
                             @endphp
 
-                            @if($field==='photo')
+                            @if($field==='photo_path')
                             <td><img src="{{ asset($record->$field) }}" width="60" height="60"></td>
                             @else
                             <td>{{ Str::of($record->$field)->replace('"','') ?? '—' }}</td>
@@ -219,21 +220,5 @@
     </div>
 </div>
 @endif
-
-{{-- Inline JS for select validation --}}
-<script>
-    $("select#select").on("change", function() {
-        let vals = $(this).val() || [];
-        let btn = $(this).closest('form').find("button[type=submit]");
-        if (vals.includes('*') && vals.length > 1) {
-            $(this).siblings('.select2').find('.select2-selection').addClass('border-danger');
-            btn.prop('disabled', true);
-            return alert('Cannot combine default (*) with specific columns.');
-        }
-        $(this).siblings('.select2').find('.select2-selection').removeClass('border-danger');
-        btn.prop('disabled', false);
-    });
-
-</script>
 
 @endsection

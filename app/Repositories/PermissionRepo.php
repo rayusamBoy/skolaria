@@ -2,60 +2,61 @@
 
 namespace App\Repositories;
 
+use Illuminate\Database\Eloquent\Collection;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class PermissionRepo
 {
-    /*********** Permission ***************/
-    public function getPermissions()
+    /*********** Permissions ***************/
+
+    /**
+     * Get all permissions ordered by name.
+     *
+     * @return Collection
+     */
+    public function getAllPermissions(): Collection
     {
         return Permission::orderBy('name')->get();
     }
 
-    public function create(array $attributes)
+    /*********** Roles ***************/
+
+    /**
+     * Get roles optionally excluding some by name and eager loading relations.
+     *
+     * @param array $except  Role names to exclude
+     * @param array $with    Relations to eager load
+     * @return Collection
+     */
+    public function getAllRoles(array $except = [], array $with = ['permissions']): Collection
     {
-        return Permission::create($attributes);
+        return Role::with($with)
+            ->whereNotIn('name', $except)
+            ->orderBy('name')
+            ->get();
     }
 
-    public function get(array $where)
-    {
-        return Permission::where($where)->first();
-    }
-
-    public function update(array $where, array $attributes)
-    {
-        return Permission::where($where)->update($attributes);
-    }
-
-    public function delete(array $where)
-    {
-        return Permission::where($where)->delete();
-    }
-
-    /*********** Role ***************/
-    public function getRoles(array $except = [], array $with = ['permissions'])
-    {
-        return Role::with($with)->whereNotIn('name', $except)->orderBy('name')->get();
-    }
-
-    public function createRole(array $attributes)
+    /**
+     * Create a new role.
+     *
+     * @param array $attributes
+     * @return Role
+     */
+    public function createRole(array $attributes): Role
     {
         return Role::create($attributes);
     }
 
-    public function getRole(array $where, array $with = ['permissions'])
+    /**
+     * Get a single role by conditions, with its permissions.
+     *
+     * @param array $where
+     * @param array $with
+     * @return Role|null
+     */
+    public function getRoleByConditions(array $where, array $with = ['permissions']): ?Role
     {
         return Role::where($where)->with($with)->first();
-    }
-
-    public function updateRole(array $where, array $attributes)
-    {
-        return Role::where($where)->update($attributes);
-    }
-
-    public function deleteRole(array $where)
-    {
-        return Role::where($where)->delete();
     }
 }

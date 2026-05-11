@@ -39,9 +39,9 @@ class AjaxController extends Controller
     /**
      * Get states by nationality ID.
      */
-    public function get_state($nal_id): array
+    public function get_state($nationality_id): array
     {
-        $lgas = $this->loc->getStateByNationalityID($nal_id);
+        $lgas = $this->loc->getStatesByCountryId($nationality_id);
 
         return $lgas->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
     }
@@ -51,7 +51,7 @@ class AjaxController extends Controller
      */
     public function get_lga($state_id): array
     {
-        $lgas = $this->loc->getLGAs($state_id);
+        $lgas = $this->loc->getStateById($state_id);
 
         return $lgas->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
     }
@@ -71,7 +71,7 @@ class AjaxController extends Controller
      */
     public function get_class_students($class_id): array
     {
-        $students = $this->student->whereRecord(['my_class_id' => $class_id])->get()->whereNotNull('user');
+        $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class_id])->get()->whereNotNull('user');
 
         return $students->map(fn($q) => ['id' => $q->user->id, 'name' => $q->user->name])->values()->all();
     }
@@ -99,7 +99,7 @@ class AjaxController extends Controller
      */
     public function get_year_exams($year): array
     {
-        $exams = $this->exam->getExam(['year' => $year], false);
+        $exams = $this->exam->getExamsByConditions(['year' => $year], false);
 
         return $exams->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
     }
@@ -130,7 +130,7 @@ class AjaxController extends Controller
         $has_session_flag = session()->has($session_key);
 
         $subjects = auth()->user()->hasRole(config('roles.default_roles.tenant.teacher')) && $has_session_flag
-            ? $this->my_class->findSubjectByRecord(auth()->id(), $class_id)
+            ? $this->my_class->findSubjectsByTeacherAndClass(auth()->id(), $class_id)
             : $this->my_class->findSubjectByClass($class_id);
 
         if ($has_session_flag) {

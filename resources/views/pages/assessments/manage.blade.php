@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title font-weight-bold">Fill The Form To Manage Assessments</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -44,7 +44,7 @@
         </div>
     </div>
 
-    @php $is_restricted = $asmnt_records->first()->exam->locked && auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')); @endphp
+    @php $is_restricted = $asmnt_records->first()->exam->is_locked && auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')); @endphp
 
     <div class="card-body">
         @include('pages.assessments.edit')

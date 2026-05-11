@@ -9,7 +9,7 @@
         <div class="card">
             <div class="card-header header-elements-inline">
                 <h6 class="card-title">Tenant Information</h6>
-                {!! Qs::getPanelOptions() !!}
+                {!! Qs::getPanelOptionsHtml() !!}
             </div>
             <div class="card-body">
                 <table class="table table-bordered">

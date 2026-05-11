@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Edit Grade</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -53,14 +53,14 @@
                         </div>
                         <div class="col-lg-6 m-lg-auto"><span class="font-weight-bold font-italic text-info-800">{{ __('msg.point_info') }}</span></div>
                     </div>
-                    {{-- Remark --}}
+                    {{-- Remarks --}}
                     <div class="form-group row">
-                        <label for="remark" class="col-lg-3 col-form-label font-weight-semibold">Remark</label>
+                        <label for="remarks" class="col-lg-3 col-form-label font-weight-semibold">Remarks</label>
                         <div class="col-lg-9">
-                            <select class="form-control select" data-placeholder="Select Remark" name="remark" id="remark">
-                                <option value="">Select Remark</option>
+                            <select class="form-control select" data-placeholder="Select Remark" name="remarks" id="remarks">
+                                <option value="">Select Remarks</option>
                                 @foreach(Mk::getRemarks() as $rem)
-                                <option @selected($gr->remark == $rem) value="{{ $rem }}">{{ $rem }}</option>
+                                <option @selected($gr->remarks == $rem) value="{{ $rem }}">{{ $rem }}</option>
                                 @endforeach
                             </select>
                         </div>

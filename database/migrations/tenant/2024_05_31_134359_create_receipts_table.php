@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('receipts', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedBigInteger('pr_id')->index();
-            $table->integer('amt_paid');
+            $table->unsignedBigInteger('payment_record_id')->index();
+            $table->integer('amount_paid');
             $table->integer('balance');
             $table->string('year');
             $table->timestamps();

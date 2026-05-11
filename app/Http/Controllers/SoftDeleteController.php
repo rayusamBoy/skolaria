@@ -5,139 +5,182 @@ namespace App\Http\Controllers;
 use App\Helpers\Usr;
 use App\Http\Controllers\Controller;
 use App\Models\Thread;
+use App\User;
 use App\Repositories\ExamRepo;
 use App\Repositories\MyClassRepo;
 use App\Repositories\PaymentRepo;
 use App\Repositories\StudentRepo;
 use App\Repositories\UserRepo;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class SoftDeleteController extends Controller
 {
-    protected $pay, $my_class, $user, $exm, $year, $student;
+    protected MyClassRepo $my_class;
+    protected PaymentRepo $pay;
+    protected UserRepo $user;
+    protected ExamRepo $exam;
+    protected StudentRepo $student;
+    protected string $year;   // not actively used in this controller
 
-    public function __construct(MyClassRepo $my_class, PaymentRepo $pay, UserRepo $user, ExamRepo $exm, StudentRepo $student)
-    {
+    public function __construct(
+        MyClassRepo $my_class,
+        PaymentRepo $pay,
+        UserRepo $user,
+        ExamRepo $exam,
+        StudentRepo $student
+    ) {
         $this->permissionMap = config('permissions.names.tenant.soft_deletes');
         parent::__construct();
         $this->my_class = $my_class;
         $this->pay = $pay;
         $this->user = $user;
-        $this->exm = $exm;
+        $this->exam = $exam;
         $this->student = $student;
         $this->year = Usr::getCurrentSession();
     }
 
-    public function bin()
+    /**
+     * Display the recycle bin with all trashed items.
+     */
+    public function bin(): View
     {
-        $data['payments'] = $this->pay->getTrashed();
-        $data['users'] = $this->user->getTrashed();
-        $data['trashed_my_classes'] = $this->my_class->getTrashed();
-        $data['exams'] = $this->exm->getTrashed();
+        $data['payments'] = $this->pay->getTrashedPayments();
+        $data['users'] = $this->user->getTrashedUsers();
+        $data['trashed_my_classes'] = $this->my_class->getTrashedClasses();
+        $data['exams'] = $this->exam->getTrashed();
         $data['threads'] = Thread::getTrashed();
 
         return view('pages.bin', $data);
     }
 
-    public function empty_soft_deleted_model($model_name)
+    /**
+     * Permanently delete all soft‑deleted records of a given model.
+     */
+    public function empty_soft_deleted_model($model_name): RedirectResponse
     {
-        $can_soft_delete_models = Usr::getCanSoftDeleteModelNames();
+        $allowed_models = Usr::getCanSoftDeleteModelNames();
         $model_name = strtolower($model_name);
 
-        if (!\in_array($model_name, $can_soft_delete_models, true) || !auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
+        if (!\in_array($model_name, $allowed_models, true) || !auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin'))) {
             return back()->with('pop_error', __('msg.denied'));
+        }
 
         if ($model_name === 'users') {
-            $soft_deleted_users_query = $this->user->where([])->onlyTrashed();
-            $soft_deleted_users = $soft_deleted_users_query->get();
+            // Delete user photos before force‑deleting
+            $soft_deleted_users = User::onlyTrashed()->get();
             foreach ($soft_deleted_users as $user) {
                 Usr::deleteUserPhotoDirs($user->roles->pluck('name'), $user->code);
             }
-            $soft_deleted_users_query->forceDelete();
+            User::onlyTrashed()->forceDelete();
         } else {
-            Usr::getDbFacadesTable($model_name)->whereNotNull("deleted_at")->delete();
+            Usr::getDbFacadesTable($model_name)->whereNotNull('deleted_at')->delete();
         }
 
         $model_name = str_replace('_', ' ', $model_name);
-
         return redirect()->back()->with('flash_success', ucfirst($model_name) . ' ' . __('msg.force_del_ok'));
     }
 
-    /** Payments */
-    public function payment_restore($id)
-    {
-        $this->pay->restore($id);
+    /********** Payments **********/
 
-        return redirect()->route('bin')->with('flash_success', 'Payments ' . __('msg.restore_ok'));
+    /**
+     * Restore a soft‑deleted payment.
+     */
+    public function payment_restore(int $id): RedirectResponse
+    {
+        $this->pay->restorePayment($id);
+        return redirect()->route('bin')->with('flash_success', 'Payment ' . __('msg.restore_ok'));
     }
 
-    public function payment_force_delete($id)
+    /**
+     * Permanently delete a soft‑deleted payment.
+     */
+    public function payment_force_delete(int $id): RedirectResponse
     {
-        $this->pay->forceDelete($id);
-
-        return redirect()->route('bin')->with('flash_success', 'Payments ' . __('msg.force_del_ok'));
+        $this->pay->forceDeletePayment($id);
+        return redirect()->route('bin')->with('flash_success', 'Payment ' . __('msg.force_del_ok'));
     }
 
-    /** Users */
-    public function user_restore($id)
-    {
-        $this->user->restore($id);
+    /********** Users **********/
 
+    /**
+     * Restore a soft‑deleted user.
+     */
+    public function user_restore(int $id): RedirectResponse
+    {
+        $this->user->restoreUser($id);
         return redirect()->route('bin')->with('flash_success', 'User ' . __('msg.restore_ok'));
     }
 
-    public function user_force_delete($id)
+    /**
+     * Permanently delete a soft‑deleted user and their photos.
+     */
+    public function user_force_delete(int $id): RedirectResponse
     {
         $user = $this->user->findOnlyTrashed($id);
-
-        $this->user->forceDelete($id);
-        // Delete user's photo(s) from storage if exists
+        $this->user->forceDeleteUser($id);
         Usr::deleteUserPhotoDirs($user->roles->pluck('name'), $user->code);
 
         return redirect()->route('bin')->with('flash_success', 'User ' . __('msg.force_del_ok'));
     }
 
-    /** My Classes */
-    public function my_class_restore($id)
-    {
-        $this->my_class->restore($id);
+    /********** Classes **********/
 
+    /**
+     * Restore a soft‑deleted class.
+     */
+    public function my_class_restore(int $id): RedirectResponse
+    {
+        $this->my_class->restoreClass($id);
         return redirect()->route('bin')->with('flash_success', 'Class ' . __('msg.restore_ok'));
     }
 
-    public function my_class_force_delete($id)
+    /**
+     * Permanently delete a soft‑deleted class.
+     */
+    public function my_class_force_delete(int $id): RedirectResponse
     {
-        $this->my_class->forceDelete($id);
-
+        $this->my_class->forceDeleteClass($id);
         return redirect()->route('bin')->with('flash_success', 'Class ' . __('msg.force_del_ok'));
     }
 
-    /** Exams */
-    public function exam_restore($id)
-    {
-        $this->exm->restore($id);
+    /********** Exams **********/
 
+    /**
+     * Restore a soft‑deleted exam.
+     */
+    public function exam_restore(int $id): RedirectResponse
+    {
+        $this->exam->restore($id);
         return redirect()->route('bin')->with('flash_success', 'Exam ' . __('msg.restore_ok'));
     }
 
-    public function exam_force_delete($id)
+    /**
+     * Permanently delete a soft‑deleted exam.
+     */
+    public function exam_force_delete(int $id): RedirectResponse
     {
-        $this->exm->forceDelete($id);
-
+        $this->exam->forceDelete($id);
         return redirect()->route('bin')->with('flash_success', 'Exam ' . __('msg.force_del_ok'));
     }
 
-    /** Message Threads */
-    public function thread_restore($id)
+    /********** Message Threads **********/
+
+    /**
+     * Restore a soft‑deleted message thread.
+     */
+    public function thread_restore(int $id): RedirectResponse
     {
         Thread::restoreThread($id);
-
         return redirect()->route('bin')->with('flash_success', 'Message Thread ' . __('msg.restore_ok'));
     }
 
-    public function thread_force_delete($id)
+    /**
+     * Permanently delete a soft‑deleted message thread.
+     */
+    public function thread_force_delete(int $id): RedirectResponse
     {
         Thread::force_delete($id);
-
         return redirect()->route('bin')->with('flash_success', 'Message Thread ' . __('msg.force_del_ok'));
     }
 }

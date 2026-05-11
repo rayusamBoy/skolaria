@@ -15,7 +15,7 @@ return new class extends Migration
             $table->increments('id');
             $table->unsignedInteger('exam_id')->index()->unique('exam_id');
             $table->string('message', 100);
-            $table->integer('duration');
+            $table->integer('duration')->comment('duration in seconds from creation time');
             $table->timestamps();
         });
     }

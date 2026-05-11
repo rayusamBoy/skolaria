@@ -4,10 +4,16 @@
 
 @section('content')
 
+@php
+$canEdit = auth()->user()->can($tenant_permissions['grades']['edit']['permission']);
+$canDelete = auth()->user()->can($tenant_permissions['grades']['destroy']['permission']);
+$hasActions = $canEdit || $canDelete;
+@endphp
+
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Grades</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -29,7 +35,9 @@
                             <th>Range</th>
                             <th>Point</th>
                             <th>Remark</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -40,26 +48,25 @@
                             <td>{{ $gr->class_type_id ? $class_types->where('id', $gr->class_type_id)->first()->name : 'Not Applicable'}}</td>
                             <td>{{ "{$gr->mark_from} - {$gr->mark_to}" }}</td>
                             <td>{{ $gr->point }}</td>
-                            <td>{{ $gr->remark }}</td>
+                            <td>{{ $gr->remarks }}</td>
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
-
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Edit --}}
-                                            @can($tenant_permissions['grades']['edit']['permission'])
+                                            @if($canEdit)
                                             <a href="{{ route('grades.edit', $gr->id) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
-                                            @endcan
-                                            {{-- Delete --}}
-                                            @can($tenant_permissions['grades']['destroy']['permission'])
+                                            @endif
+                                            @if($canDelete)
                                             <a id="{{ $gr->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                             <form method="post" id="item-delete-{{ $gr->id }}" action="{{ route('grades.destroy', $gr->id) }}" class="hidden">@csrf @method('delete')</form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
@@ -123,15 +130,14 @@
                                 </div>
                                 <div class="col-lg-6 m-lg-auto"><span class="font-weight-bold font-italic text-info-800">{{ __('msg.point_info') }}</span></div>
                             </div>
-     
-                            {{-- Remark --}}
+                            {{-- Remarks --}}
                             <div class="form-group row">
-                                <label for="remark" class="col-lg-3 col-form-label font-weight-semibold">Remark</label>
+                                <label for="remarks" class="col-lg-3 col-form-label font-weight-semibold">Remarks</label>
                                 <div class="col-lg-9">
-                                    <select class="form-control select" data-placeholder="Select Remark" name="remark" id="remark">
+                                    <select class="form-control select" data-placeholder="Select Remarks" name="remarks" id="remarks">
                                         <option value="">Select Remark</option>
                                         @foreach(Mk::getRemarks() as $rem)
-                                        <option @selected(old('remark')==$rem) value="{{ $rem }}">{{ $rem }}</option>
+                                        <option @selected(old('remarks')==$rem) value="{{ $rem }}">{{ $rem }}</option>
                                         @endforeach
                                     </select>
                                 </div>

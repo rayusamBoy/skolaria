@@ -28,7 +28,7 @@ class Section extends Eloquent
         return $this->hasMany(StudentRecord::class);
     }
 
-    public function scopeHasStudentRecord($q)
+    public function scopeHasStudentRecord()
     {
         return $this->student_record()->exists();
     }

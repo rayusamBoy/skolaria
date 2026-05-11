@@ -36,8 +36,8 @@ class TTRecordRequest extends FormRequest
     public function attributes()
     {
         return [
-            'my_class_id' => 'Class',
-            'section_id' => 'Section',
+            'my_class_id' => 'class',
+            'section_id' => 'section',
         ];
     }
 

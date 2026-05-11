@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Usr;
 use App\Http\Controllers\Controller;
 use App\Notifications\NotificationMarkedAsRead;
 use App\Repositories\UserRepo;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use NotificationChannels\Fcm\FcmChannel;
+use Illuminate\View\View;
 
 class NotificationController extends Controller
 {
-    protected $user;
+    protected UserRepo $user;
 
     public function __construct(UserRepo $user)
     {
@@ -19,13 +23,13 @@ class NotificationController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * Display notification preferences and channels.
      */
-    public function index()
+    public function index(): View
     {
         $channels = Usr::getActiveNotificationChannels(auth()->user(), false, true, true, true);
 
-        $data['is_notifiable'] = auth()->user()->is_notifiable['status'] ?? Usr::getDefaultIsNotifiableUserColumnValues()['status'];
+        $data['notification_preferences'] = auth()->user()->notification_preferences['status'] ?? Usr::getDefaultNotificationPreferences()['status'];
         $data['email_channel_on'] = \in_array('mail', $channels);
         $data['sms_channel_on'] = \in_array('vonage', $channels);
         $data['push_channel_on'] = \in_array(FcmChannel::class, $channels);
@@ -34,30 +38,26 @@ class NotificationController extends Controller
     }
 
     /**
-     * Update user notifications status & channels
+     * Update user notification preferences.
      */
-    public function update_is_notifiable(Request $request)
+    public function update_notification_preferences(Request $request): RedirectResponse
     {
-        $user = auth()->user();
-
-        $data = [
-            'is_notifiable' => [
+        auth()->user()->update([
+            'notification_preferences' => [
                 'status' => $request->boolean('status'),
                 'on_email_channel' => $request->boolean('on_email_channel'),
                 'on_sms_channel' => $request->boolean('on_sms_channel'),
                 'on_push_channel' => $request->boolean('on_push_channel'),
             ],
-        ];
-
-        $user->update($data);
+        ]);
 
         return back()->with('flash_success', __('msg.update_ok'));
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete a notification.
      */
-    public function destroy(string $id)
+    public function destroy(string $id): RedirectResponse
     {
         $this->user->deleteNotification($id);
 
@@ -65,14 +65,19 @@ class NotificationController extends Controller
     }
 
     /**
-     * Mark the notification as read.
+     * Mark a single notification as read.
+     *
+     * @param  string $id
+     * @param  bool   $flash  If false, returns true instead of a redirect (used internally)
+     * @return RedirectResponse|bool
      */
-    public function mark_as_read(string $id, $flash = true)
+    public function mark_as_read(string $id, bool $flash = true): RedirectResponse|bool
     {
         $notification = auth()->user()->unreadNotifications()->where('id', $id)->first();
 
-        if ($notification === null)
+        if ($notification === null) {
             return back()->with('flash_error', 'Notification not found.');
+        }
 
         $notification->markAsRead();
         auth()->user()->notify(new NotificationMarkedAsRead($id));
@@ -81,27 +86,26 @@ class NotificationController extends Controller
     }
 
     /**
-     * Mark all user's notifications as read.
+     * Mark all unread notifications as read.
      */
-    public function mark_all_read(Request $request)
+    public function mark_all_read(Request $request): RedirectResponse
     {
-        $request->user()->unreadNotifications()->get()->each(function ($n) {
-            $n->markAsRead();
-        });
+        $request->user()->unreadNotifications->each->markAsRead();
 
         return back()->with('flash_success', __('msg.update_ok'));
     }
 
     /**
-     * Update the user's web push subscription/device token.
+     * Update or delete a Firebase device token for push notifications.
      */
-    public function update_firebase_device_token(Request $request)
+    #[SkipPermission]
+    public function update_firebase_device_token(Request $request): JsonResponse
     {
         $user = auth()->user();
 
-        // DELETE request; remove token
-        if ($request->isMethod('delete')) {
-            $this->delete_device_token([$request->token]);
+        // DELETE request: remove token(s)
+        if ($request->isMethod('DELETE')) {
+            $this->deleteDeviceToken([$request->token], $user);
             return Usr::jsonUpdateOk();
         }
 
@@ -110,27 +114,20 @@ class NotificationController extends Controller
 
         if (!\in_array($incoming_token, $current_tokens, true)) {
             $current_tokens[] = $incoming_token;
-
-            $user->update([
-                'firebase_device_tokens' => $current_tokens,
-            ]);
+            $user->update(['firebase_device_tokens' => $current_tokens]);
         }
 
         return Usr::jsonUpdateOk();
     }
 
     /**
-     * Delete the user's web push subscription/device token.
+     * Delete specific device tokens from the authenticated user.
      */
-    public function delete_device_token(array $tokensToRemove)
+    protected function deleteDeviceToken(array $tokens_to_remove, $user): int
     {
-        $user = auth()->user();
+        $current_tokens = $user->firebase_device_tokens ?? [];
+        $new_tokens = array_values(array_diff($current_tokens, $tokens_to_remove));
 
-        $currentTokens = $user->firebase_device_tokens ?? [];
-        $newTokens = array_values(array_diff($currentTokens, $tokensToRemove));
-
-        return $user->update([
-            'firebase_device_tokens' => $newTokens,
-        ]);
+        return $user->update(['firebase_device_tokens' => $new_tokens]);
     }
 }

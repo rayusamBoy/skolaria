@@ -9,7 +9,7 @@
         <h6 class="media-heading card-title status-styled pr-2 pl-2">
             <strong>{{ $thread->subject }}</strong>
         </h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
     <div class="card-body pt-2">
         <div class="row">
@@ -49,11 +49,6 @@
                             </div>
                         </div>
                     </div>
-
-                    @if (auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')))
-                    <button id="{{ $thread->id }}" type="button" onclick="confirmDelete(this.id)" class="btn btn-danger btn-sm position-absolute left-neg-4 bottom-0"><i class="material-symbols-rounded">delete</i> Delete Thread</button>
-                    <form method="post" id="item-delete-{{ $thread->id }}" action="{{ route('messages.destroy', $thread->id) }}" class="hidden">@csrf @method('delete')</form>
-                    @endif
                 </div>
             </div>
         </div>

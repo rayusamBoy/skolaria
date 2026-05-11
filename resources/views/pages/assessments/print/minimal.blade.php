@@ -10,7 +10,7 @@
     {{--Background Logo--}}
 
     <div style="position: relative;  text-align: center; ">
-        <img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'logo')) }}" style="max-width: 500px; max-height:600px; margin-top: 60px; position:absolute ; opacity: 0.1; margin-left: auto;margin-right: auto; left: 0; right: 0;" />
+        <img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('key', 'logo')) }}" style="max-width: 500px; max-height:600px; margin-top: 60px; position:absolute ; opacity: 0.1; margin-left: auto;margin-right: auto; left: 0; right: 0;" />
     </div>
 
     <div style="margin: 2em;">
@@ -24,8 +24,8 @@
 
             <h3 style="text-align: center;"><strong> {{ Number::spellOrdinal($asr->exam->term) }} TERM REPORT</strong></h3>
             <div style="display: flow-root;">
-                <em style="float: left;">Term Begins: <span style="text-decoration: underline;">{{ $settings->firstWhere('type', 'term_begins')->description ?? '' }}</span></em>
-                <em style="float: right;">Term Ends: <span style="text-decoration: underline;">{{ $settings->firstWhere('type', 'term_ends')->description ?? '' }}</span></em>
+                <em style="float: left;">Term Begins: <span style="text-decoration: underline;">{{ $settings->firstWhere('key', 'term_begins')->value ?? '' }}</span></em>
+                <em style="float: right;">Term Ends: <span style="text-decoration: underline;">{{ $settings->firstWhere('key', 'term_ends')->value ?? '' }}</span></em>
             </div>
         </div>
         {{--Body--}}
@@ -67,7 +67,7 @@
                     @endforeach
 
                     <td>{{ $assessments_records->first()->total }}</td>
-                    <td>{{ $average = $assessments_records->first()->ave }}</td>
+                    <td>{{ $average = $assessments_records->first()->average }}</td>
                 </tr>
                 <tr>
                     <td>Assessment</td>
@@ -84,7 +84,7 @@
                     @endforeach
 
                     <td></td>
-                    <td>{{ Mk::getGrade($average) }}</td>
+                    <td>{{ Mk::getGradeNameByScore($average) }}</td>
                 </tr>
                 <tr>
                     <td>Position</td>
@@ -92,7 +92,7 @@
                     @foreach($subjects as $sub)
                     @if($assessments_records->where('subject_id', $sub->id)->first())
                     @foreach($assessments_records->where('subject_id', $sub->id) as $as)
-                    <td>{{ $as->sub_pos ?? "—" }}</td>
+                    <td>{{ $as->subject_position ?? "—" }}</td>
                     @endforeach
                     @else
                     <td>—</td>
@@ -100,7 +100,7 @@
                     @endforeach
 
                     <td></td>
-                    <td>{{ $assessments_records->first()->pos }} / {{ Mk::getSectionCount($asr->exam->id, $my_class->id, $sr->section->id) }}</td>
+                    <td>{{ $assessments_records->first()->section_position }} / {{ Mk::getSectionCount($asr->exam->id, $my_class->id, $sr->section->id) }}</td>
                 </tr>
             </tbody>
         </table>

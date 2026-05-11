@@ -2,86 +2,106 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Qs;
 use App\Helpers\Usr;
 use App\Http\Requests\UserChangePass;
 use App\Http\Requests\UserProfileUpdate;
 use App\Repositories\UserRepo;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\View\View;
 
 class MyAccountController extends Controller
 {
-    protected $user;
+    protected UserRepo $user;
 
     public function __construct(UserRepo $user)
     {
         $this->user = $user;
     }
 
-    public function edit_profile()
+    /**
+     * Show the profile edit form.
+     */
+    public function edit_profile(): View
     {
-        $d['my'] = $user = auth()->user();
-        $where = ['user_id' => $user->id];
-        $d['staff_rec'] = $this->user->getStaffRecord($where)->first();
+        $current_user = auth()->user();
 
-        return view('pages.my_account', $d);
+        $data['my'] = $current_user;
+        $data['staff_rec'] = $this->user->getStaffRecordsByConditions(['user_id' => $current_user->id])->first();
+
+        return view('pages.my_account', $data);
     }
 
-    public function update_profile(UserProfileUpdate $req)
+    /**
+     * Update the authenticated user's profile.
+     */
+    public function update_profile(UserProfileUpdate $req): RedirectResponse
     {
-        $user = auth()->user();
+        $current_user = auth()->user();
 
-        if (!$user->username && !$req->username && !$req->email)
+        if (!$current_user->username && !$req->username && !$req->email) {
             return back()->with('pop_error', __('msg.user_invalid'));
+        }
 
         $except = ['_token', '_method'];
-        $d = $user->username ? $req->except([...Qs::getStaffRecord(['username']), ...$except]) : $req->except([...Qs::getStaffRecord(), ...$except]);
+        $staff_fields = Qs::getStaffRecordFields($current_user->username ? ['username'] : []);
+        $profile_data = $req->except([...$staff_fields, ...$except]);
 
-        $user_role = $user->role;
-        $code = $user->code;
+        $user_role = $current_user->role;
+        $user_code = $current_user->code;
 
         if ($req->hasFile('photo')) {
             $photo = $req->file('photo');
-            $f = Qs::getFileMetaData($photo);
-            $f['name'] = 'photo.' . $f['ext'];
+            $file_meta = Qs::getFileMetaData($photo);
+            $file_meta['name'] = 'photo.' . $file_meta['ext'];
 
             if (Usr::tenancyInitialized()) {
-                $f['path'] = $d['photo'] = Qs::getUploadPath($user_role) . '/' . $code . '/' . $f['name'];
-                $photo->storeAs($f['path']);
+                $file_meta['path'] = $profile_data['photo_path'] = Qs::getUploadPath($user_role) . '/' . $user_code . '/' . $file_meta['name'];
+                $photo->storeAs($file_meta['path']);
             } else {
-                $f['path'] = $photo->storeAs(Qs::getUploadPath($user_role) . $code, $f['name']);
-                $d['photo'] = 'storage/' . $f['path'];
+                $file_meta['path'] = $photo->storeAs(Qs::getUploadPath($user_role) . $user_code, $file_meta['name']);
+                $profile_data['photo_path'] = 'storage/' . $file_meta['path'];
             }
         }
 
-        // If email changes on update; must verify again.
-        if ($user->email !== $d['email'])
-            $d['email_verified_at'] = NULL;
+        // Must re‑verify email if it changed
+        if ($current_user->email !== $profile_data['email']) {
+            $profile_data['email_verified_at'] = null;
+        }
 
-        $user->update($d);
-        $staff_data_edit = $this->user->whereStaffRecord(['user_id' => $user->id])->first()->staff_data_edit;
+        $current_user->update($profile_data);
 
-        if ($staff_data_edit == true || $user->hasRole(config('roles.default_roles.central.root'))) {
-            $d2 = $req->only(Qs::getStaffRecord());
-            $this->user->updateStaffRecord(['user_id' => $user->id], $d2);
+        $staff_record = $this->user->whereStaffRecord(['user_id' => $current_user->id])->first();
+        $allow_staff_edit = $staff_record->allow_staff_data_edit ?? false;
+
+        if ($allow_staff_edit || $current_user->hasAnyRole(Usr::getTenancyAwareRootRoles())) {
+            $staff_data = $req->only(Qs::getStaffRecordFields());
+            $this->user->updateStaffRecord(['user_id' => $current_user->id], $staff_data);
         }
 
         return back()->with('flash_success', __('msg.update_ok'));
     }
 
-    public function change_pass(UserChangePass $req)
+    /**
+     * Change the authenticated user's password.
+     */
+    public function change_pass(UserChangePass $req): RedirectResponse
     {
-        $user = auth()->user();
-        $current_pass = $user->password;
-        $old_pass = $req->current_password;
-        $new_pass = $req->new_password;
+        $current_user = auth()->user();
+        $current_password = $current_user->password;
+        $old_password = $req->current_password;
+        $new_password = $req->new_password;
 
-        if (password_verify($old_pass, $current_pass)) {
-            $data['password'] = Hash::make($new_pass);
-            $data['password_updated_at'] = Carbon::now();
-            $user->update($data);
+        if (password_verify($old_password, $current_password)) {
+            $current_user->update([
+                'password' => Hash::make($new_password),
+                'password_updated_at' => Carbon::now(),
+            ]);
 
             return back()->with('flash_success', __('msg.p_changed'));
         }
@@ -89,11 +109,12 @@ class MyAccountController extends Controller
         return back()->with('flash_danger', __('msg.p_reset_fail'));
     }
 
-    public function update_preferences(Request $request)
+    /**
+     * Update user interface preferences.
+     */
+    public function update_preferences(Request $request): RedirectResponse
     {
-        $user = auth()->user();
-
-        $user->update([
+        auth()->user()->update([
             'preferences' => [
                 'always_minimize_sidebar' => $request->boolean('always_minimize_sidebar'),
                 'allow_system_sounds' => $request->boolean('allow_system_sounds'),
@@ -104,22 +125,24 @@ class MyAccountController extends Controller
         return back()->with('flash_success', __('msg.update_ok'));
     }
 
-    public function update_hidden_alerts(Request $request)
+    /**
+     * Update hidden alert IDs (AJAX).
+     */
+    #[SkipPermission]
+    public function update_hidden_alerts(Request $request): JsonResponse
     {
-        $user = auth()->user();
-
-        $data = ['hidden_alert_ids' => $request->input('hidden_alert_ids')];
-        $user->update($data);
+        auth()->user()->update(['hidden_alert_ids' => $request->input('hidden_alert_ids')]);
 
         return Qs::jsonUpdateOk();
     }
 
-    public function clear_hidden_alerts()
+    /**
+     * Clear all hidden alert IDs (AJAX).
+     */
+    #[SkipPermission]
+    public function clear_hidden_alerts(): JsonResponse
     {
-        $user = auth()->user();
-
-        $data = ['hidden_alert_ids' => []];
-        $user->update($data);
+        auth()->user()->update(['hidden_alert_ids' => []]);
 
         return Qs::jsonUpdateOk();
     }

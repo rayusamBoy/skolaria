@@ -5,47 +5,91 @@ namespace App\Repositories;
 use App\Models\Lga;
 use App\Models\Nationality;
 use App\Models\State;
+use Illuminate\Database\Eloquent\Collection;
 
 class LocationRepo
 {
-    /*********** State ***************/
+    /*********** States ***************/
 
-    public function getStates()
+    /**
+     * Get all states without ordering.
+     *
+     * @return Collection
+     */
+    public function getStates(): Collection
     {
         return State::all();
     }
 
-    public function getAllStates()
+    /**
+     * Get all states ordered by name ascending.
+     *
+     * @return Collection
+     */
+    public function getAllStates(): Collection
     {
         return State::orderBy('name', 'asc')->get();
     }
 
-    public function getStateByNationalityID($nal_id)
+    /**
+     * Get states belonging to a given nationality (country).
+     *
+     * @param int $country_id
+     * @return Collection
+     */
+    public function getStatesByCountryId(int $country_id): Collection
     {
-        return State::where('country_id', $nal_id)->orderBy('name', 'asc')->get();
+        return State::where('country_id', $country_id)
+            ->orderBy('name', 'asc')
+            ->get();
     }
 
-    public function getState($id)
+    /**
+     * Get a single state by its ID.
+     *
+     * @param int $id
+     * @return State|null
+     */
+    public function getState(int $id): ?State
     {
-        return State::where('id', $id)->first();
+        return State::find($id);
     }
 
-    /*********** Nationals ***************/
+    /*********** Nationalities ***************/
 
-    public function getAllNationals()
+    /**
+     * Get all nationalities ordered by name ascending.
+     *
+     * @return Collection
+     */
+    public function getAllNationalities(): Collection
     {
         return Nationality::orderBy('name', 'asc')->get();
     }
 
-    public function getNationality($id)
+    /**
+     * Get a single nationality by its ID.
+     *
+     * @param int $id
+     * @return Nationality|null
+     */
+    public function getNationalityById(int $id): ?Nationality
     {
-        return Nationality::where('id', $id)->first();
+        return Nationality::find($id);
     }
 
-    /*********** Lgas ***************/
+    /*********** LGAs ***************/
 
-    public function getLGAs($state_id)
+    /**
+     * Get all LGAs/States for a given state, ordered by name ascending.
+     *
+     * @param int $state_id
+     * @return Collection
+     */
+    public function getStateById(int $state_id): Collection
     {
-        return Lga::where('state_id', $state_id)->orderBy('name', 'asc')->get();
+        return Lga::where('state_id', $state_id)
+            ->orderBy('name', 'asc')
+            ->get();
     }
 }

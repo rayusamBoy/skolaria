@@ -3,54 +3,111 @@
 namespace App\Repositories;
 
 use App\Models\Pin;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class PinRepo
 {
-    /*********** Pin ***************/
+    /*********** Pins ***************/
 
-    public function create($data)
+    /**
+     * Insert one or more pins via the DB facade.
+     *
+     * @param array $values  single or multi‑dimensional array
+     * @return bool
+     */
+    public function insertPins(array $values): bool
     {
-        return DB::table('pins')->insert($data);
+        return DB::table('pins')->insert($values);
     }
 
-    public function countValid()
+    /**
+     * Count currently valid (unused) pins.
+     *
+     * @return int
+     */
+    public function countValidPins(): int
     {
-        return $this->getPin(['used' => 0])->count();
+        return $this->getPinBuilder(['is_used' => false])->count();
     }
 
-    public function update($id, $data)
+    /**
+     * Update a pin by its primary key.
+     *
+     * @param int   $id
+     * @param array $data
+     * @return int  Number of updated rows
+     */
+    public function updatePin(int $id, array $data): int
     {
-        return Pin::find($id)->update($data);
+        return Pin::where('id', $id)->update($data);
     }
 
-    public function getUserPin($code, $user_id, $st_id)
+    /**
+     * Get a query builder for a specific user/student pin.
+     *
+     * @param string $code
+     * @param int    $user_id
+     * @param int    $st_id
+     * @return Builder
+     */
+    public function getUserPinBuilder(string $code, int $user_id, int $st_id): Builder
     {
-        return $this->getPin(['code' => $code, 'user_id' => $user_id, 'student_id' => $st_id])->get();
+        return $this->getPinBuilder(['code' => $code, 'user_id' => $user_id, 'student_id' => $st_id]);
     }
 
-    public function findValidCode($code)
+    /**
+     * Get a query builder for a valid (unused) pin by its code.
+     *
+     * @param string $code
+     * @return Builder
+     */
+    public function getValidPinByCode(string $code): Builder
     {
-        return $this->getPin(['code' => $code, 'used' => 0])->get();
+        return $this->getPinBuilder(['code' => $code, 'is_used' => false]);
     }
 
-    public function deleteUsed()
+    /**
+     * Delete all used pins.
+     *
+     * @return int  Number of deleted rows
+     */
+    public function deleteUsedPins(): int
     {
-        return $this->getPin(['used' => 1])->delete();
+        return $this->getPinBuilder(['is_used' => true])->delete();
     }
 
-    public function getPin($data)
+    /**
+     * Raw query builder for pins matching conditions.
+     *
+     * @param array $where
+     * @return Builder
+     */
+    public function getPinBuilder(array $where): Builder
     {
-        return Pin::where($data);
+        return Pin::where($where);
     }
 
-    public function getValid()
+    /**
+     * Get all valid (unused) pins.
+     *
+     * @return Collection
+     */
+    public function getValidPins(): Collection
     {
-        return $this->getPin(['used' => 0])->get();
+        return $this->getPinBuilder(['is_used' => false])->get();
     }
 
-    public function getInValid()
+    /**
+     * Get all used pins with user and student relations.
+     *
+     * @return Collection
+     */
+    public function getUsedPins(): Collection
     {
-        return $this->getPin(['used' => 1])->with(['user', 'student'])->get();
+        return $this->getPinBuilder(['is_used' => true])
+            ->with(['user', 'student'])
+            ->get();
     }
 }

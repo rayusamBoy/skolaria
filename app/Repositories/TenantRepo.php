@@ -3,46 +3,56 @@
 namespace App\Repositories;
 
 use App\Models\Tenant;
+use Illuminate\Database\Eloquent\Collection;
 use Stancl\Tenancy\Database\Models\Domain;
 
 class TenantRepo
 {
     /*********** Tenant ***************/
 
-    public function getAll()
+    /**
+     * Get all tenants with their domain.
+     *
+     * @return Collection
+     */
+    public function getAllTenants(): Collection
     {
         return Tenant::with('domain')->get();
     }
 
-    public function create(array $data)
+    /**
+     * Create a new tenant.
+     *
+     * @param array $data
+     * @return Tenant
+     */
+    public function createTenant(array $data): Tenant
     {
         return Tenant::create($data);
     }
 
-    public function find(int $id)
+    /**
+     * Find a tenant by ID, including its domain.
+     *
+     * @param int $id
+     * @return Tenant|null
+     */
+    public function findTenant(int $id): ?Tenant
     {
         return Tenant::with('domain')->find($id);
     }
 
-    public function update(int $id, array $data)
-    {
-        return Tenant::find($id)->update($data);
-    }
-
-    public function delete(int $id)
-    {
-        return Tenant::find($id)->delete();
-    }
-
     /*********** Domain ***************/
 
-    public function updateOrCreateDomain(array $attributes, array $values)
+    /**
+     * Update an existing domain or create a new one for a tenant.
+     *
+     * @param array $attributes  Conditions to find the domain
+     * @param array $values      Values to set/update
+     * @return Domain
+     */
+    public function updateOrCreateDomain(array $attributes, array $values): Domain
     {
         return Domain::updateOrCreate($attributes, $values);
-    }
-
-    public function deleteDomain(array $where)
-    {
-        return Domain::where($where)->delete();
     }
 }

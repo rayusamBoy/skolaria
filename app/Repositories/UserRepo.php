@@ -7,164 +7,290 @@ use App\Models\Notification;
 use App\Models\ParentRelative;
 use App\Models\StaffRecord;
 use App\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Spatie\Permission\Models\Role;
 
 class UserRepo
 {
     /*********** User ***************/
 
-    public function getIds()
+    /**
+     * Update users matching a column value.
+     *
+     * @param int    $value   The value to match
+     * @param array  $data    Columns to update
+     * @param string $column  Column to filter by (default 'id')
+     * @return int            Number of updated rows
+     */
+    public function updateUsersByColumn(int $value, array $data, string $column = 'id'): int
     {
-        return User::pluck('id');
+        return $this->getUsersQuery([$column => $value])->update($data);
     }
 
-    public function update(int $value, array $data, $column = 'id')
-    {
-        return $this->where([$column => $value])->update($data);
-    }
-
-    public function updateByIds(mixed $ids, array $data)
+    /**
+     * Update multiple users by their IDs.
+     *
+     * @param mixed $ids   Array or collection of user IDs
+     * @param array $data  Columns to update
+     * @return int
+     */
+    public function updateByIds(mixed $ids, array $data): int
     {
         return User::whereIn('id', $ids)->update($data);
     }
 
-    public function delete(int $id)
+    /**
+     * Restore a soft‑deleted user by ID.
+     *
+     * @param int $id
+     * @return int
+     */
+    public function restoreUser(int $id): int
     {
-        return User::destroy($id);
+        return $this->getUsersQuery(['id' => $id])->restore();
     }
 
-    public function restore(int $id)
+    /**
+     * Permanently delete a user.
+     *
+     * @param int $id
+     * @return int
+     */
+    public function forceDeleteUser(int $id): int
     {
-        return $this->where(['id' => $id])->restore();
+        return $this->getUsersQuery(['id' => $id])->forceDelete();
     }
 
-    public function forceDelete(int $id)
-    {
-        return $this->where(['id' => $id])->forceDelete();
-    }
-
-    public function get(array $where)
-    {
-        return $this->where($where)->get();
-    }
-
-    public function create(array $data)
+    /**
+     * Create a new user.
+     *
+     * @param array $data
+     * @return User
+     */
+    public function createUser(array $data): User
     {
         return User::create($data);
     }
 
-    public function firstOrCreate(array $data)
+    /**
+     * Find a user by attributes or create one.
+     *
+     * @param array $data
+     * @return User
+     */
+    public function firstOrCreate(array $data): User
     {
         return User::firstOrCreate($data);
     }
 
-    public function updateOrCreate(array $where, array $data)
+    /**
+     * Update an existing user or create a new one.
+     *
+     * @param array $where
+     * @param array $data
+     * @return User
+     */
+    public function updateOrCreate(array $where, array $data): User
     {
         return User::updateOrCreate($where, $data);
     }
 
-    public function firstOrNew(array $data)
+    /**
+     * Get the first user matching attributes, or return a new instance.
+     *
+     * @param array $data
+     * @return User
+     */
+    public function firstOrNew(array $data): User
     {
         return User::firstOrNew($data);
     }
 
-    public function find(int $id)
+    /**
+     * Find a user by primary key.
+     *
+     * @param int $id
+     * @return User|null
+     */
+    public function findUser(int $id): ?User
     {
         return User::find($id);
     }
 
-    public function findOnlyTrashed(int $id)
+    /**
+     * Find a soft‑deleted user by ID.
+     *
+     * @param int $id
+     * @return User|null
+     */
+    public function findOnlyTrashed(int $id): ?User
     {
         return User::onlyTrashed()->where('id', $id)->first();
     }
 
-    public function all($with = [])
+    /**
+     * Get all users, optionally with eager‑loaded relations.
+     *
+     * @param array $with
+     * @return Collection
+     */
+    public function getAllUsers(array $with = []): Collection
     {
         return $with ? User::with($with)->get() : User::all();
     }
 
-    public function getUsersByRoleNames(array $role_names, array $with = [])
+    /**
+     * Get users having any of the given role names, ordered by name.
+     *
+     * @param array $role_names
+     * @param array $with
+     * @return Collection
+     */
+    public function getUsersByRoleNames(array $role_names, array $with = []): Collection
     {
         return User::role($role_names)->with($with)->orderBy('name', 'asc')->get();
     }
 
-    public function getTrashed()
+    /**
+     * Get all soft‑deleted users with their roles.
+     *
+     * @return Collection
+     */
+    public function getTrashedUsers(): Collection
     {
         return User::with('roles')->onlyTrashed()->get();
     }
 
-    public function where(array $where)
+    /**
+     * Query builder for users matching conditions.
+     *
+     * @param array $where
+     * @return Builder|User
+     */
+    public function getUsersQuery(array $where): Builder|User
     {
         return User::where($where);
     }
 
-    /********** STAFF RECORD ********/
+    /********** STAFF RECORD **********/
 
-    public function whereStaffRecord($where)
+    /**
+     * Query builder for staff records matching conditions.
+     *
+     * @param array $where
+     * @return Builder
+     */
+    public function whereStaffRecord(array $where): Builder
     {
         return StaffRecord::where($where);
     }
 
-    public function createStaffRecord(array $data)
+    /**
+     * Create a new staff record.
+     *
+     * @param array $data
+     * @return StaffRecord
+     */
+    public function getStaffRecordsQuery(array $data): StaffRecord
     {
         return StaffRecord::create($data);
     }
 
-    public function updateStaffRecord(array $where, array $data)
+    /**
+     * Update staff records matching conditions.
+     *
+     * @param array $where
+     * @param array $data
+     * @return int
+     */
+    public function updateStaffRecord(array $where, array $data): int
     {
         return StaffRecord::where($where)->update($data);
     }
 
-    public function getStaffRecord(array $where)
+    /**
+     * Get staff records matching conditions, with user and LGA.
+     *
+     * @param array $where
+     * @return Collection
+     */
+    public function getStaffRecordsByConditions(array $where): Collection
     {
         return StaffRecord::where($where)->with(['user', 'lga'])->get();
     }
 
-    public function deleteStaffRecord(array $where)
+    /**
+     * Delete staff records matching conditions.
+     *
+     * @param array $where
+     * @return int
+     */
+    public function deleteStaffRecords(array $where): int
     {
         return StaffRecord::where($where)->delete();
     }
 
-    /********** BLOOD GROUPS ********/
+    /********** BLOOD GROUPS **********/
 
-    public function getBloodGroups()
+    /**
+     * Get all blood groups ordered by name.
+     *
+     * @return Collection
+     */
+    public function getBloodGroups(): Collection
     {
         return BloodGroup::orderBy('name')->get();
     }
 
-    /********** PARENT CLOSE RELATIVE ********/
+    /********** PARENT RELATIVE **********/
 
-    public function createParentRelativeRecord($data)
+    /**
+     * Create a new parent/relative record.
+     *
+     * @param array $data
+     * @return ParentRelative
+     */
+    public function createParentRelativeRecord(array $data): ParentRelative
     {
         return ParentRelative::create($data);
     }
 
-    public function updateOrCreateParentRelativeRec(array $attributes, array $values)
+    /**
+     * Update or create a parent/relative record.
+     *
+     * @param array $attributes
+     * @param array $values
+     * @return ParentRelative
+     */
+    public function updateOrCreateParentRelative(array $attributes, array $values): ParentRelative
     {
         return ParentRelative::updateOrCreate($attributes, $values);
     }
 
-    /********** Notifications ********/
+    /********** NOTIFICATIONS **********/
 
-    public function deleteNotification(mixed $id)
+    /**
+     * Delete a notification by primary key.
+     *
+     * @param mixed $id
+     * @return bool|null
+     */
+    public function deleteNotification(mixed $id): ?bool
     {
-        return Notification::find($id)->delete();
+        return Notification::find($id)?->delete();
     }
 
-    public function getNotification(array $where)
-    {
-        return Notification::where($where)->get();
-    }
+    /********** ROLES **********/
 
-    /********** Roles ********/
-    public function getRoles($except = [])
+    /**
+     * Get roles optionally excluding some by name.
+     *
+     * @param array $except
+     * @return Collection
+     */
+    public function getRolesByName(array $except = []): Collection
     {
-        $roles = Role::whereNotIn('name', $except)->get();
-        return $roles;
-    }
-
-    public function findRoleByName(string $role_name)
-    {
-        return Role::where('name', $role_name)->with('users')->first();
+        return Role::whereNotIn('name', $except)->get();
     }
 }

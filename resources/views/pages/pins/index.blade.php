@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Exam Pins</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -80,7 +80,7 @@
                                             {{ $up->user->name }}
                                         </a>
                                     </td>
-                                    <td>{{ $up->times_used }}</td>
+                                    <td>{{ $up->usage_count }}</td>
                                     <td>{{ $up->user->role }}</td>
                                     <td>
                                         <a href="{{ route('students.show', Qs::hash(Qs::getSRByUserID($up->student->id)->id)) }}">

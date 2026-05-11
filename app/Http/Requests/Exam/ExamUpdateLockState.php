@@ -21,7 +21,7 @@ class ExamUpdateLockState extends FormRequest
     {
         return [
             'id' => 'required|integer|bail',
-            'locked' => 'required|in:0,1',
+            'is_locked' => 'required|boolean',
         ];
     }
 }

@@ -10,10 +10,10 @@
     <div class="container position-relative">
         {{-- Background Logo --}}
         <div class="text-center">
-            <img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type', 'logo')) }}" />
+            <img src="{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('key', 'logo')) }}" />
         </div>
         {{-- Headers --}}
-        <h2 class="text-center">{{ $settings->firstWhere('type', 'system_name')->description }}</h2>
+        <h2 class="text-center">{{ $settings->firstWhere('key', 'system_name')->value }}</h2>
         <h3 class="text-center">PROGRESSIVE SHEET FOR {{ strtoupper($my_class->name) }} @if(isset($section)) {{ strtoupper($section->name) }} @endif - {{ strtoupper($ex->name) }} ({{ strtoupper(Number::spellOrdinal($asr->first()->exam->term)) }} TERM, {{ $year }})</h3>
         {{-- Print Area --}}
         <div id="print">

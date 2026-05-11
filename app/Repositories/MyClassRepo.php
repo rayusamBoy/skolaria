@@ -7,213 +7,425 @@ use App\Models\MyClass;
 use App\Models\Section;
 use App\Models\Subject;
 use App\Models\SubjectRecord;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 
 class MyClassRepo
 {
     /*********** My class ***************/
 
-    public function all()
-    {
-        return MyClass::with(['class_type', 'section'])->orderBy('name', 'asc')->get();
-    }
-
-    public function get($where)
+    /**
+     * Get classes matching the given conditions.
+     *
+     * @param array $where
+     * @return EloquentCollection
+     */
+    public function getClassesByConditions(array $where): EloquentCollection
     {
         return MyClass::where($where)->get();
     }
 
-    public function getMC($where)
+    /**
+     * Get a query builder for classes matching conditions, including sections.
+     *
+     * @param array $where
+     * @return Builder
+     */
+    public function getClassesWithSections(array $where): Builder
     {
         return MyClass::where($where)->with('section');
     }
 
-    public function getMCByIds($ids)
-    {
-        return MyClass::whereIn("id", $ids)->get();
-    }
-
-    public function getTrashed()
+    /**
+     * Get only soft‑deleted classes.
+     *
+     * @return EloquentCollection
+     */
+    public function getTrashedClasses(): EloquentCollection
     {
         return MyClass::onlyTrashed()->get();
     }
 
-    public function restore($id)
+    /**
+     * Restore a soft‑deleted class by ID.
+     *
+     * @param int $id
+     * @return int  Number of restored rows
+     */
+    public function restoreClass(int $id): int
     {
         return MyClass::where('id', $id)->restore();
     }
 
-    public function forceDelete($id)
+    /**
+     * Permanently delete a soft‑deleted class.
+     *
+     * @param int $id
+     * @return int  Number of deleted rows
+     */
+    public function forceDeleteClass(int $id): int
     {
         return MyClass::where('id', $id)->forceDelete();
     }
 
-    public function find($id)
+    /**
+     * Find a class by its primary key.
+     *
+     * @param int $id
+     * @return MyClass|null
+     */
+    public function findClass(int $id): ?MyClass
     {
         return MyClass::find($id);
     }
 
-    public function create($data)
+    /**
+     * Create a new class.
+     *
+     * @param array $data
+     * @return MyClass
+     */
+    public function createClass(array $data): MyClass
     {
         return MyClass::create($data);
     }
 
-    public function update($id, $data)
+    /**
+     * Update a class by ID.
+     *
+     * @param int   $id
+     * @param array $data
+     * @return int
+     */
+    public function updateClass(int $id, array $data): int
     {
-        return MyClass::find($id)->update($data);
+        return MyClass::where('id', $id)->update($data);
     }
 
-    public function delete($id)
+    /**
+     * Delete a class by ID (soft delete).
+     *
+     * @param int $id
+     * @return int
+     */
+    public function deleteClass(int $id): int
     {
         return MyClass::destroy($id);
     }
 
-    public function hasStudents()
+    /**
+     * Check if any class has student records.
+     *
+     * @return bool
+     */
+    public function hasAnyClassStudents(): bool
     {
         return MyClass::whereHas('student_record')->exists();
     }
 
     /*********** Class type ***************/
 
-    public function getTypes()
+    /**
+     * Get all class types ordered by name ascending.
+     *
+     * @return EloquentCollection
+     */
+    public function getAllClassTypes(): EloquentCollection
     {
         return ClassType::orderBy('name', 'asc')->get();
     }
 
-    public function findType($class_type_id)
+    /**
+     * Find a class type by its primary key.
+     *
+     * @param int $class_type_id
+     * @return ClassType|null
+     */
+    public function findClassType(int $class_type_id): ?ClassType
     {
         return ClassType::find($class_type_id);
     }
 
-    public function findTypeByClass($class_id)
+    /**
+     * Get the class type associated with a given class ID.
+     *
+     * @param int $class_id
+     * @return ClassType|null
+     */
+    public function findClassTypeByClassId(int $class_id): ?ClassType
     {
-        return ClassType::find($this->find($class_id)->class_type_id);
+        $class = $this->findClass($class_id);
+        return $class ? $this->findClassType($class->class_type_id) : null;
     }
 
-    public function createType($data)
+    /**
+     * Create a new class type.
+     *
+     * @param array $data
+     * @return ClassType
+     */
+    public function createClassType(array $data): ClassType
     {
         return ClassType::create($data);
     }
 
-    public function updateType($id, $data)
-    {
-        return ClassType::find($id)->update($data);
-    }
-
-    public function deleteType($id)
-    {
-        return ClassType::destroy($id);
-    }
-
     /************* Section *******************/
 
-    public function createSection(array $data)
+    /**
+     * Create a new section.
+     *
+     * @param array $data
+     * @return Section
+     */
+    public function createSection(array $data): Section
     {
         return Section::create($data);
     }
 
-    public function getSections(array $data)
+    /**
+     * Get sections matching the given conditions.
+     *
+     * @param array $data
+     * @return EloquentCollection
+     */
+    public function getSectionsByConditions(array $data): EloquentCollection
     {
         return Section::where($data)->get();
     }
 
-    public function findSection(int $id)
+    /**
+     * Find a section by its primary key.
+     *
+     * @param int $id
+     * @return Section|null
+     */
+    public function findSection(int $id): ?Section
     {
         return Section::find($id);
     }
 
-    public function updateSection(int $id, array $data)
+    /**
+     * Update a section by ID.
+     *
+     * @param int   $id
+     * @param array $data
+     * @return int
+     */
+    public function updateSection(int $id, array $data): int
     {
-        return Section::find($id)->update($data);
+        return Section::where('id', $id)->update($data);
     }
 
-    public function deleteSection(int $id)
+    /**
+     * Delete a section by ID.
+     *
+     * @param int $id
+     * @return int
+     */
+    public function deleteSection(int $id): int
     {
         return Section::destroy($id);
     }
 
-    public function getAllSections()
+    /**
+     * Get all sections with their class and teacher, ordered by name ascending.
+     *
+     * @return EloquentCollection
+     */
+    public function getAllSections(): EloquentCollection
     {
         return Section::orderBy('name', 'asc')->with(['my_class', 'teacher'])->get();
     }
 
-    public function getClassSections($class_id)
+    /**
+     * Get all sections belonging to a specific class, ordered by name ascending.
+     *
+     * @param int $class_id
+     * @return EloquentCollection
+     */
+    public function getClassSections(int $class_id): EloquentCollection
     {
-        return Section::where(['my_class_id' => $class_id])->orderBy('name', 'asc')->get();
+        return Section::where('my_class_id', $class_id)
+            ->orderBy('name', 'asc')
+            ->get();
     }
 
-    public function getTeacherClassSections($class_id, $teacher_id)
+    /**
+     * Get sections belonging to a class and assigned to a specific teacher.
+     *
+     * @param int $class_id
+     * @param int $teacher_id
+     * @return EloquentCollection
+     */
+    public function getTeacherClassSections(int $class_id, int $teacher_id): EloquentCollection
     {
-        return Section::where(['my_class_id' => $class_id, 'teacher_id' => $teacher_id])->orderBy('name', 'asc')->get();
+        return Section::where('my_class_id', $class_id)
+            ->where('teacher_id', $teacher_id)
+            ->orderBy('name', 'asc')
+            ->get();
     }
 
     /************* Subject *******************/
 
-    public function createSubject(array $data)
+    /**
+     * Create a new subject.
+     *
+     * @param array $data
+     * @return Subject
+     */
+    public function createSubject(array $data): Subject
     {
         return Subject::create($data);
     }
 
-    public function findSubject(int $id)
+    /**
+     * Find a subject by its primary key.
+     *
+     * @param int $id
+     * @return Subject|null
+     */
+    public function findSubject(int $id): ?Subject
     {
         return Subject::find($id);
     }
 
-    public function findSubjectByClass(int $class_id, string $order_by = 'name')
+    /**
+     * Get subjects for a class, ordered by a given column.
+     *
+     * @param int    $class_id
+     * @param string $order_by
+     * @return EloquentCollection
+     */
+    public function findSubjectByClass(int $class_id, string $order_by = 'name'): EloquentCollection
     {
-        return $this->whereSubject(['my_class_id' => $class_id])->orderBy($order_by)->get();
+        return $this->whereSubject(['my_class_id' => $class_id])
+            ->orderBy($order_by)
+            ->get();
     }
 
-    public function findSubjectsByTeacher(int $user_id)
+    /**
+     * Get all subjects taught by a specific teacher.
+     *
+     * @param int $user_id
+     * @return EloquentCollection
+     */
+    public function findSubjectsByTeacher(int $user_id): EloquentCollection
     {
-        $subject_ids = $this->whereSubjectRecord(['teacher_id' => $user_id])->get()->pluck('subject_id');
+        $subject_ids = $this->whereSubjectRecord(['teacher_id' => $user_id])
+            ->pluck('subject_id');
         return Subject::whereIn('id', $subject_ids)->get();
     }
 
-    public function whereSubject(array $where)
+    /**
+     * Get a query builder for subjects matching conditions.
+     *
+     * @param array $where
+     * @return Builder
+     */
+    public function whereSubject(array $where): Builder
     {
         return Subject::where($where);
     }
 
-    public function getSubjectWithRecsWhereHas($section_id, $class_id)
+    /**
+     * Get subjects that have a record in a given section, or are global (NULL section).
+     *
+     * @param int $section_id
+     * @param int $class_id
+     * @return EloquentCollection
+     */
+    public function getSubjectsWithRecordsInSection(int $section_id, int $class_id): EloquentCollection
     {
-        return Subject::with('record')->whereHas('record', function ($query) use ($section_id) {
-            $query->where('section_id', $section_id)->orWhere('section_id', NULL);
-        })->where('my_class_id', $class_id)->get();
+        return Subject::with('record')
+            ->whereHas('record', fn($q) => $q->where('section_id', $section_id)
+                ->orWhereNull('section_id'))
+            ->where('my_class_id', $class_id)
+            ->get();
     }
 
-    public function getSubjectsByIDs(array|Collection $ids, array $with = ['record'])
+    /**
+     * Get subjects by a list of IDs, with optional relations.
+     *
+     * @param array|Collection $ids
+     * @param array            $with
+     * @return EloquentCollection
+     */
+    public function getSubjectsByIds(array|Collection $ids, array $with = ['record']): EloquentCollection
     {
-        return Subject::with($with)->whereIn('id', $ids)->orderBy('name')->get();
+        return Subject::with($with)
+            ->whereIn('id', $ids instanceof Collection ? $ids->toArray() : $ids)
+            ->orderBy('name')
+            ->get();
     }
 
-    public function updateSubject(int $id, array $data)
+    /**
+     * Update a subject by ID.
+     *
+     * @param int   $id
+     * @param array $data
+     * @return int
+     */
+    public function updateSubject(int $id, array $data): int
     {
-        return Subject::find($id)->update($data);
+        return Subject::where('id', $id)->update($data);
     }
 
-    public function deleteSubject(int $id)
+    /**
+     * Delete a subject by ID.
+     *
+     * @param int $id
+     * @return int
+     */
+    public function deleteSubject(int $id): int
     {
         return Subject::destroy($id);
     }
 
-    public function getAllSubjects(array $with = ['my_class', 'record'])
+    /**
+     * Get all subjects with optional relations, ordered by name ascending.
+     *
+     * @param array $with
+     * @return EloquentCollection
+     */
+    public function getAllSubjects(array $with = ['my_class', 'record']): EloquentCollection
     {
         return Subject::orderBy('name', 'asc')->with($with)->get();
     }
 
-    public function getUniqueSubjectsNames()
+    /**
+     * Get distinct subject names with their class.
+     *
+     * @return EloquentCollection
+     */
+    public function getUniqueSubjectsNames(): EloquentCollection
     {
-        return Subject::select('name')->orderBy('name', 'asc')->distinct()->with('my_class')->get();
+        return Subject::select('name')
+            ->orderBy('name', 'asc')
+            ->distinct()
+            ->with('my_class')
+            ->get();
     }
 
-    public function getSubjectData($remove = [])
+    /**
+     * Get the array of column names for a subject (for imports/exports).
+     *
+     * @param array $remove
+     * @return array
+     */
+    public function getSubjectData(array $remove = []): array
     {
         $data = ['name', 'slug', 'my_class_id', 'is_core', 'credits'];
         return $remove ? array_values(array_diff($data, $remove)) : $data;
     }
 
-    public function getSubjectRecordData($remove = [])
+    /**
+     * Get the array of column names for a subject record.
+     *
+     * @param array $remove
+     * @return array
+     */
+    public function getSubjectRecordData(array $remove = []): array
     {
         $data = ['subject_id', 'section_id', 'teacher_id', 'students_ids'];
         return $remove ? array_values(array_diff($data, $remove)) : $data;
@@ -221,53 +433,116 @@ class MyClassRepo
 
     /************* Subject records *******************/
 
-    public function findSubjectRecord($id)
+    /**
+     * Find a subject record by ID.
+     *
+     * @param int $id
+     * @return SubjectRecord|null
+     */
+    public function findSubjectRecord(int $id): ?SubjectRecord
     {
         return SubjectRecord::with('subject')->find($id);
     }
 
-    public function createSubjectRecord(array $data)
+    /**
+     * Create a new subject record.
+     *
+     * @param array $data
+     * @return SubjectRecord
+     */
+    public function createSubjectRecord(array $data): SubjectRecord
     {
         return SubjectRecord::create($data);
     }
 
-    public function whereSubjectRecord(array $where)
+    /**
+     * Get a query builder for subject records matching conditions.
+     *
+     * @param array $where
+     * @return Builder
+     */
+    public function whereSubjectRecord(array $where): Builder
     {
         return SubjectRecord::where($where);
     }
 
-    public function getSubjectRecord(array $where, array $with = ['subject'])
+    /**
+     * Get subject records matching conditions with optional relations.
+     *
+     * @param array $where
+     * @param array $with
+     * @return EloquentCollection
+     */
+    public function getSubjectRecord(array $where, array $with = ['subject']): EloquentCollection
     {
         return $this->whereSubjectRecord($where)->with($with)->get();
     }
 
-    public function findSubjectRecByTeacher($teacher_id, $order_by = 'id')
+    /**
+     * Get subject records for a teacher, ordered by a column.
+     *
+     * @param int    $teacher_id
+     * @param string $order_by
+     * @return EloquentCollection
+     */
+    public function findSubjectRecordsByTeacher(int $teacher_id, string $order_by = 'id'): EloquentCollection
     {
-        return SubjectRecord::where(['teacher_id' => $teacher_id])->with('subject')->orderBy($order_by)->get();
+        return SubjectRecord::where('teacher_id', $teacher_id)
+            ->with('subject')
+            ->orderBy($order_by)
+            ->get();
     }
 
-    public function updateSubjectRecord(array $where, array $data)
+    /**
+     * Update subject records matching conditions.
+     *
+     * @param array $where
+     * @param array $data
+     * @return int
+     */
+    public function updateSubjectRecords(array $where, array $data): int
     {
         return SubjectRecord::where($where)->update($data);
     }
 
-    public function deleteSubjectRecord(array $where)
+    /**
+     * Delete subject records matching conditions.
+     *
+     * @param array $where
+     * @return int
+     */
+    public function deleteSubjectRecords(array $where): int
     {
         return SubjectRecord::where($where)->delete();
     }
 
-    public function getSubjectRecByTeacher($teacher_id, $relations)
+    /**
+     * Get distinct subject records for a teacher with additional relations.
+     *
+     * @param int   $teacher_id
+     * @param array $relations
+     * @return EloquentCollection
+     */
+    public function getSubjectRecordsForTeacher(int $teacher_id, array $relations): EloquentCollection
     {
-        return SubjectRecord::where('teacher_id', $teacher_id)->with($relations)->distinct()->get();
+        return SubjectRecord::where('teacher_id', $teacher_id)
+            ->with($relations)
+            ->distinct()
+            ->get();
     }
 
-    public function findSubjectByRecord($teacher_id, $class_id, $sort_by = 'subject.name')
+    /**
+     * Get subjects taught by a teacher in a specific class, sorted by subject name.
+     *
+     * @param int    $teacher_id
+     * @param int    $class_id
+     * @param string $sort_by
+     * @return EloquentCollection
+     */
+    public function findSubjectsByTeacherAndClass(int $teacher_id, int $class_id, string $sort_by = 'subject.name'): EloquentCollection
     {
-        return $this->getSubjectRecByTeacher($teacher_id, 'subject')->where('subject.my_class_id', $class_id)->sortBy($sort_by);
-    }
-
-    public function getClassSectionsBySubjectRec($teacher_id, $class_id, $sort_by = 'section.name')
-    {
-        return $this->getSubjectRecByTeacher($teacher_id, ['section', 'subject'])->where('subject.my_class_id', $class_id)->sortBy($sort_by);
+        return $this->getSubjectRecordsForTeacher($teacher_id, ['subject'])
+            ->where('subject.my_class_id', $class_id)
+            ->sortBy($sort_by);
     }
 }

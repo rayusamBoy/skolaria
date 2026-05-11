@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Mk;
 use App\Helpers\Usr;
 use App\Http\Controllers\Controller;
@@ -52,7 +53,7 @@ class AssessmentController extends Controller
      */
     public function list(): View
     {
-        $data['assessments'] = $this->assessment->getAssessmentsWithExam(['exam', 'exam.category']);
+        $data['assessments'] = $this->assessment->getAssessmentsWithValidExam([], ['exam', 'exam.category']);
         $data['exams_cat'] = $this->exam->getCategories();
 
         return view('pages.assessments.list', $data);
@@ -63,7 +64,7 @@ class AssessmentController extends Controller
      */
     public function index(): View
     {
-        $data['assessments'] = $this->assessment->getAssessmentsWithExam([]);
+        $data['assessments'] = $this->assessment->getAssessmentsWithValidExam([]);
         $data['subjects'] = $this->my_class->getAllSubjects();
         $data['selected'] = false;
 
@@ -87,8 +88,8 @@ class AssessmentController extends Controller
         }
 
         $students = ($req->section_id === null && $sub_record->students_ids !== null)
-            ? $this->student->getRecordByUserIDs($sub_record->students_ids)->get()
-            : $this->student->whereRecord($classSection)->get();
+            ? $this->student->getActiveStudentsByUserIds($sub_record->students_ids)->get()
+            : $this->student->getActiveStudentsQueryWithRelations($classSection)->get();
 
         if ($students->isEmpty()) {
             return back()->with('pop_error', __('msg.rnf'));
@@ -111,7 +112,7 @@ class AssessmentController extends Controller
             ? ['assessment_id' => $assessment_id, 'my_class_id' => $class_id, 'subject_id' => $subject_id, 'year' => $this->year]
             : ['assessment_id' => $assessment_id, 'my_class_id' => $class_id, 'section_id' => $section_id, 'subject_id' => $subject_id, 'year' => $this->year];
 
-        $records = $this->assessment->getRecords($where, ['exam', 'user', 'subject', 'my_class', 'section']);
+        $records = $this->assessment->getAssessmentRecordsWithRelations($where, ['exam', 'user', 'subject', 'my_class', 'section']);
 
         if ($records->isEmpty()) {
             return back()->with('flash_danger', __('msg.srnf'));
@@ -123,15 +124,15 @@ class AssessmentController extends Controller
             'assessment_id' => $assessment_id,
             'asmnt_records' => $records,
             'm' => $first,
-            'assessments' => $this->assessment->getAssessmentsWithExam([])->where('exam.year', $this->year),
+            'assessments' => $this->assessment->getAssessmentsWithValidExam([])->where('exam.year', $this->year),
             'sections' => $this->my_class->getAllSections(),
             'subjects' => auth()->user()->hasRole(config('roles.default_roles.tenant.teacher'))
-                ? $this->my_class->findSubjectByRecord(auth()->id(), $class_id)->pluck('subject')
+                ? $this->my_class->findSubjectsByTeacherAndClass(auth()->id(), $class_id)->pluck('subject')
                 : $this->my_class->whereSubject(['my_class_id' => $class_id])->get(),
             'selected' => true,
-            'class_type' => $this->my_class->findTypeByClass($class_id),
-            'created_at' => Mk::onlyDateFormat($this->assessment->getRecordValue($where, 'created_at')),
-            'updated_at' => Mk::onlyDateFormat($this->assessment->getRecordValue($where, 'updated_at')),
+            'class_type' => $this->my_class->findClassTypeByClassId($class_id),
+            'created_at' => Mk::formatDate($this->assessment->getAssessmentRecordValue($where, 'created_at')),
+            'updated_at' => Mk::formatDate($this->assessment->getAssessmentRecordValue($where, 'updated_at')),
             'section_id' => $section_id,
         ];
 
@@ -143,7 +144,7 @@ class AssessmentController extends Controller
      */
     public function sheets($class_id = null, $section_id = null): View|RedirectResponse
     {
-        if (!$this->assessment->isNotEmpty()) {
+        if (!$this->assessment->hasAnyAssessmentWithExam()) {
             return $this->noAssessmentRecord();
         }
 
@@ -151,7 +152,7 @@ class AssessmentController extends Controller
 
         if ($class_id && $section_id) {
             $data['sections'] = $this->my_class->getAllSections()->where('my_class_id', $class_id);
-            $students = $this->student->whereRecord(['my_class_id' => $class_id, 'section_id' => $section_id])
+            $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class_id, 'section_id' => $section_id])
                 ->get()
                 ->sortBy('user.name');
 
@@ -175,10 +176,10 @@ class AssessmentController extends Controller
     {
         set_time_limit(300);
 
-        $assessments = $this->assessment->getAssessmentsWithExam([])->where('exam.year', $this->year);
+        $assessments = $this->assessment->getAssessmentsWithValidExam([])->where('exam.year', $this->year);
         $data = [
             'assessments' => $assessments,
-            'teacher_class_ids' => $this->my_class->getSections(["teacher_id" => auth()->id()])->pluck("my_class_id"),
+            'teacher_class_ids' => $this->my_class->getSectionsByConditions(["teacher_id" => auth()->id()])->pluck("my_class_id"),
             'selected' => false,
             'user_is_class_section_teacher' => Mk::userIsClassSectionTeacher(),
         ];
@@ -192,7 +193,7 @@ class AssessmentController extends Controller
         }
 
         if (isset($class_id)) {
-            $data['class_type_id'] = $this->my_class->find($class_id)->class_type_id;
+            $data['class_type_id'] = $this->my_class->findClass($class_id)->class_type_id;
         }
 
         return view('pages.assessments.progressive.index', $data);
@@ -216,7 +217,7 @@ class AssessmentController extends Controller
         }
 
         if (isset($class_id)) {
-            $data['class_type_id'] = $this->my_class->find($class_id)->class_type_id;
+            $data['class_type_id'] = $this->my_class->findClass($class_id)->class_type_id;
         }
 
         return view('pages.assessments.progressive.print', $data);
@@ -258,6 +259,7 @@ class AssessmentController extends Controller
     /**
      * Handle year selection and redirect to assessment sheet.
      */
+    #[SkipPermission]
     public function year_selected(Request $req, $student_id): RedirectResponse
     {
         $year = $req->year;
@@ -268,7 +270,7 @@ class AssessmentController extends Controller
 
         $hashed = Mk::hash($student_id);
 
-        if ($this->assessment->getAssessmentsWithExam([])->where('exam.year', $year)->isEmpty()) {
+        if ($this->assessment->getAssessmentsWithValidExam([])->where('exam.year', $year)->isEmpty()) {
             return redirect()->route('assessments.year_selector', $hashed)
                 ->with('flash_info', "Oops! There are no published exam assessments for the selected year $year");
         }
@@ -284,7 +286,7 @@ class AssessmentController extends Controller
         $user = auth()->user();
         $is_staff = $user->hasAnyRole(Usr::getTenancyAwareStaffRoles());
 
-        if (!$is_staff && $user->id != $student && !Mk::userIsMyChild($student, $user->id)) {
+        if (!$is_staff && $user->id != $student && !Mk::isStudentChildOfParent($student, $user->id)) {
             return redirect()->route('dashboard')->with('pop_error', __('msg.denied'));
         }
 
@@ -313,30 +315,30 @@ class AssessmentController extends Controller
             return $redirect;
 
         $where = ['student_id' => $student_id, 'year' => $year];
-        $asrs = $this->assessment->getRecords($where, ['my_class', 'grade']);
+        $asrs = $this->assessment->getAssessmentRecordsWithRelations($where, ['my_class', 'grade']);
 
         if ($asrs->isEmpty()) {
             return back()->with('flash_danger', __('msg.srnf'));
         }
 
         $class_type_ids = $asrs->pluck('my_class.class_type_id')->unique()->toArray();
-        $assessments = $this->assessment->getAssessmentsWithExam(['exam', 'record'])
+        $assessments = $this->assessment->getAssessmentsWithValidExam(['exam', 'record'])
             ->where('exam.year', $year)
             ->whereIn('exam.class_type_id', $class_type_ids);
 
-        $mc = $this->my_class->getMC(['id' => $asrs->value('my_class_id')])->first();
+        $mc = $this->my_class->getClassesWithSections(['id' => $asrs->value('my_class_id')])->first();
 
         $data = [
             'assessments_records' => $asrs,
             'assessments' => $assessments,
-            'sr' => $this->student->whereRecord(['user_id' => $student_id])->first()
-                ?? $this->student->whereGraduatesRecord(['user_id' => $student_id])->first(),
+            'sr' => $this->student->getActiveStudentsQueryWithRelations(['user_id' => $student_id])->first()
+                ?? $this->student->getGraduatedStudentsQuery(['user_id' => $student_id])->first(),
             'my_class' => $mc,
-            'class_type' => $this->my_class->findTypeByClass($mc->id),
+            'class_type' => $this->my_class->findClassTypeByClassId($mc->id),
             'subjects' => $this->my_class->findSubjectByClass($mc->id),
             'year' => $year,
             'student_id' => $student_id,
-            'skills' => $this->exam->getSkillByClassType() ?: null,
+            'skills' => $this->exam->getSkillsByClassType() ?: null,
         ];
 
         return view('pages.assessments.show.index', $data);
@@ -355,14 +357,14 @@ class AssessmentController extends Controller
      */
     public function update(Request $req, $assessment_id, $class_id, $subject_id, $section_id = null): JsonResponse
     {
-        $assessment = $this->assessment->getAssessmentsWithExam(['id' => $assessment_id])->first();
-        if ($this->exam->isLocked($assessment->exam->id) && !Mk::userIsHead(auth()->id())) {
+        $assessment = $this->assessment->getAssessmentsWithValidExam(['id' => $assessment_id])->first();
+        if ($assessment->exam->is_locked && !Mk::userIsHead(auth()->id())) {
             return Mk::jsonUpdateDenied();
         }
 
         $exam = $this->exam->find($assessment->exam->id);
 
-        if ($exam->locked && !auth()->user()->hasAnyRole($this->getAdminRoles())) {
+        if ($exam->is_locked && !auth()->user()->hasAnyRole($this->getAdminRoles())) {
             return Mk::jsonUpdateDenied();
         }
 
@@ -370,8 +372,8 @@ class AssessmentController extends Controller
             ? ['assessment_id' => $assessment_id, 'my_class_id' => $class_id, 'subject_id' => $subject_id, 'year' => $this->year]
             : ['assessment_id' => $assessment_id, 'my_class_id' => $class_id, 'section_id' => $section_id, 'subject_id' => $subject_id, 'year' => $this->year];
 
-        $asmnt_records = $this->assessment->getRecords($where, ['user', 'exam']);
-        $class_type = $this->my_class->findTypeByClass($class_id);
+        $asmnt_records = $this->assessment->getAssessmentRecordsWithRelations($where, ['user', 'exam']);
+        $class_type = $this->my_class->findClassTypeByClassId($class_id);
         $input = $req->all();
 
         $record_updates = [];
@@ -383,7 +385,7 @@ class AssessmentController extends Controller
             $record_updates[] = $d;
         }
 
-        $this->assessment->massUpdateRecs($record_updates);
+        $this->assessment->massUpdateRecords($record_updates);
 
         // Update summary/position records
         $summary_updates = [];
@@ -391,13 +393,13 @@ class AssessmentController extends Controller
         foreach (array_unique($student_ids) as $st_id) {
             $summary_updates[] = [
                 'student_id' => $st_id,
-                'ave' => $this->assessment->getAssessmentAvgTerm($assessment->exam, $st_id, $class_id, $section_id, $this->year),
-                'class_ave' => $this->assessment->getClassAvg($assessment->exam, $class_id, $this->year),
-                'total' => $this->assessment->getAssessmentTotalTerm($assessment->exam, $st_id, $class_id, $this->year),
-                'pos' => $this->assessment->getStudentPos($st_id, $assessment->exam->id, $class_id, $this->year, $assessment->exam->ca_student_position_by_value, $section_id),
+                'average' => $this->assessment->getAverageTermMark($assessment->exam, $st_id, $class_id, $section_id, $this->year),
+                'class_average' => $this->assessment->getClassAverageTermMark($assessment->exam, $class_id, $this->year),
+                'total' => $this->assessment->getTotalTermMark($assessment->exam, $st_id, $class_id, $this->year),
+                'section_position' => $this->assessment->getStudentPositionByColumn($st_id, $assessment->exam->id, $class_id, $this->year, $assessment->exam->ca_student_position_by_value, $section_id),
             ];
         }
-        $this->assessment->massUpdateRecs($summary_updates, ['student_id']);
+        $this->assessment->massUpdateRecords($summary_updates, ['student_id']);
 
         return Mk::jsonUpdateOk();
     }
@@ -434,20 +436,20 @@ class AssessmentController extends Controller
             ? null
             : round($cw_avg + $hw_avg + $tt_avg, 1);
 
-        $exm = $input["exm_{$as->id}"] ?? null;
+        $exam = $input["exm_{$as->id}"] ?? null;
         $d['tca'] = $tca;
-        $d['exm'] = $exm;
+        $d['evaluated_exam_mark'] = $exam;
 
-        $total = ($tca === null && $exm === null) ? null : $tca + $exm;
+        $total = ($tca === null && $exam === null) ? null : $tca + $exam;
         $term = $exam->term;
         $d["tex$term"] = ($total > 100) ? (function () use (&$d) {
-            $d['t1'] = $d['t2'] = $d['t3'] = $d['t4'] = $d['tca'] = $d['exm'] = null;
+            $d['t1'] = $d['t2'] = $d['t3'] = $d['t4'] = $d['tca'] = $d['evaluated_exam_mark'] = null;
             return null;
         })() : $total;
 
-        $grade = $this->mark->getGrade($total, $class_type->id);
+        $grade = $this->mark->getGradeByTotal($total, $class_type->id);
         $d['grade_id'] = $grade->id ?? null;
-        $d['sub_pos'] = $this->assessment->getSubPos($as->student_id, $exam, $class_id, $subject_id, $this->year);
+        $d['subject_position'] = $this->assessment->getSubjectPosition($as->student_id, $exam, $class_id, $subject_id, $this->year);
 
         return $d;
     }
@@ -485,15 +487,15 @@ class AssessmentController extends Controller
      */
     public function print($assessment_id, $class_id, $subject_id, $year, $section_id = null): View|RedirectResponse
     {
-        $assessment = $this->assessment->getAssessmentsWithExam(['id' => $assessment_id])->first();
+        $assessment = $this->assessment->getAssessmentsWithValidExam(['id' => $assessment_id])->first();
         $d = $section_id === null
             ? ['exam_id' => $assessment->exam->id, 'my_class_id' => $class_id, 'subject_id' => $subject_id, 'year' => $year]
             : ['exam_id' => $assessment->exam->id, 'my_class_id' => $class_id, 'section_id' => $section_id, 'subject_id' => $subject_id, 'year' => $year];
 
-        $marks_updated_at = $this->mark->getRecordValue($d, 'updated_at');
-        $asmnts_updated_at = $this->assessment->getRecordValue($d, 'updated_at');
+        $marks_updated_at = $this->mark->getMarkValue($d, 'updated_at');
+        $asmnts_updated_at = $this->assessment->getAssessmentRecordValue($d, 'updated_at');
 
-        $assessment_records = $this->assessment->getRecords($d, ['exam', 'user', 'subject', 'my_class', 'section', 'grade']);
+        $assessment_records = $this->assessment->getAssessmentRecordsWithRelations($d, ['exam', 'user', 'subject', 'my_class', 'section', 'grade']);
 
         if ($assessment_records->isEmpty()) {
             return $this->noStudentRecord();
@@ -513,11 +515,11 @@ class AssessmentController extends Controller
             'assessments' => $assessment_records->sortBy('user.name')->sortBy('user.gender'),
             'm' => $assessment_records->first(),
             'exam' => $assessment->exam,
-            'my_class' => $this->my_class->find($class_id),
+            'my_class' => $this->my_class->findClass($class_id),
             'selected' => true,
-            'asr' => $this->assessment->getRecords($wh, ['exam', 'user', 'subject', 'my_class', 'section']),
+            'asr' => $this->assessment->getAssessmentRecordsWithRelations($wh, ['exam', 'user', 'subject', 'my_class', 'section']),
             'tex' => $tex,
-            'stds_texs' => $this->assessment->getStudentsTotals($d, $tex),
+            'stds_texs' => $this->assessment->getTermTotalsDescending($d, $tex),
             'section_id' => $section_id,
         ]);
     }
@@ -532,15 +534,15 @@ class AssessmentController extends Controller
             return $redirect;
 
         $wh = ['student_id' => $student_id, 'assessment_id' => $assessment_id, 'year' => $year];
-        $asrs = $this->assessment->getRecords($wh);
+        $asrs = $this->assessment->getAssessmentRecordsWithRelations($wh);
 
         if ($asrs->isEmpty()) {
             return back()->with('flash_danger', __('msg.srnf'));
         }
 
         $asr = $asrs->first();
-        $mc = $this->my_class->find($asr->my_class_id);
-        $class_type = $this->my_class->findTypeByClass($mc->id);
+        $mc = $this->my_class->findClass($asr->my_class_id);
+        $class_type = $this->my_class->findClassTypeByClassId($mc->id);
 
         return view('pages.assessments.print.detailed', [
             'assessments_records' => $asrs,
@@ -548,14 +550,14 @@ class AssessmentController extends Controller
             'my_class' => $mc,
             'section' => $this->my_class->findSection($asr->section_id),
             'tex' => "tex{$asr->exam->term}",
-            'sr' => $this->student->whereRecord(['user_id' => $student_id])->first(),
+            'sr' => $this->student->getActiveStudentsQueryWithRelations(['user_id' => $student_id])->first(),
             'class_type' => $class_type,
             'subjects' => $this->my_class->findSubjectByClass($mc->id),
             'ct' => $class_type->code,
             'year' => $year,
             'student_id' => $student_id,
             'assessment_id' => $assessment_id,
-            'skills' => $this->exam->getSkillByClassType() ?: null,
+            'skills' => $this->exam->getSkillsByClassType() ?: null,
         ]);
     }
 
@@ -569,14 +571,14 @@ class AssessmentController extends Controller
             return $redirect;
 
         $wh = ['student_id' => $student_id, 'assessment_id' => $assessment_id, 'year' => $year];
-        $asrs = $this->assessment->getRecords($wh);
+        $asrs = $this->assessment->getAssessmentRecordsWithRelations($wh);
 
         if ($asrs->isEmpty()) {
             return back()->with('flash_danger', __('msg.srnf'));
         }
 
         $asr = $asrs->first();
-        $mc = $this->my_class->find($asr->my_class_id);
+        $mc = $this->my_class->findClass($asr->my_class_id);
 
         return view('pages.assessments.print.minimal', [
             'assessments_records' => $asrs,
@@ -584,10 +586,10 @@ class AssessmentController extends Controller
             'my_class' => $mc,
             'section' => $this->my_class->findSection($asr->section_id),
             'tex' => "tex{$asr->exam->term}",
-            'sr' => $this->student->whereRecord(['user_id' => $student_id])->first(),
+            'sr' => $this->student->getActiveStudentsQueryWithRelations(['user_id' => $student_id])->first(),
             'subjects' => $this->my_class->findSubjectByClass($mc->id),
             'year' => $year,
-            'skills' => $this->exam->getSkillByClassType() ?: null,
+            'skills' => $this->exam->getSkillsByClassType() ?: null,
         ]);
     }
 
@@ -620,7 +622,7 @@ class AssessmentController extends Controller
      */
     public function print_cover($student): View
     {
-        $data['student'] = $this->student->whereRecord(["user_id" => $student], ['user'])->first();
+        $data['student'] = $this->student->getActiveStudentsQueryWithRelations(["user_id" => $student], ['user'])->first();
         return view('pages/assessments/print/cover', $data);
     }
 
@@ -669,8 +671,8 @@ class AssessmentController extends Controller
     protected function getProgressiveCoreData(int $class_id, $exam, int $section_id, bool $validateExamClassType = false): ?array
     {
         if ($validateExamClassType) {
-            $class_type = $this->my_class->findTypeByClass($class_id);
-            $examBelongsToClass = $this->assessment->getAssessmentsWithExam([])
+            $class_type = $this->my_class->findClassTypeByClassId($class_id);
+            $examBelongsToClass = $this->assessment->getAssessmentsWithValidExam([])
                 ->where('exam.class_type_id', $class_type->id)
                 ->where('exam_id', $exam->id)
                 ->isNotEmpty();
@@ -687,16 +689,16 @@ class AssessmentController extends Controller
             'year' => $this->year,
         ];
 
-        $sub_ids = $this->mark->getSubjectIDs($where);
-        $st_ids = $this->mark->getStudentIDs($where);
-        $asr = $this->assessment->getRecords($where, ['user', 'exam', 'grade']);
+        $sub_ids = $this->mark->getDistinctSubjectIds($where);
+        $st_ids = $this->mark->getDistinctStudentIds($where);
+        $asr = $this->assessment->getAssessmentRecordsWithRelations($where, ['user', 'exam', 'grade']);
 
         if ($sub_ids->isEmpty() || $st_ids->isEmpty() || $asr->isEmpty()) {
             return null;
         }
 
-        $class_type_id = $this->my_class->find($class_id)->class_type_id; // get from previous
-        $subjects = $this->my_class->getSubjectsByIDs($sub_ids);
+        $class_type_id = $this->my_class->findClass($class_id)->class_type_id; // get from previous
+        $subjects = $this->my_class->getSubjectsByIds($sub_ids);
 
         $sections = Mk::userIsClassSectionTeacher()
             ? $this->my_class->getTeacherClassSections($class_id, auth()->id())
@@ -704,7 +706,7 @@ class AssessmentController extends Controller
 
         return [
             'students_summary' => $this->buildProgressiveStudentData($asr, $subjects, "tex{$exam->term}", $class_type_id),
-            'students' => $this->student->getRecordByUserIDs2($st_ids)
+            'students' => $this->student->getStudentsByUserIds($st_ids->toArray())
                 ->get()
                 ->whereNotNull('user')
                 ->sortBy('user.name')
@@ -717,7 +719,7 @@ class AssessmentController extends Controller
             'exam_id' => $exam->id,
             'year' => $this->year,
             'asr' => $asr,
-            'my_class' => $this->my_class->find($class_id),
+            'my_class' => $this->my_class->findClass($class_id),
             'section' => $this->my_class->findSection($section_id),
             'ex' => $exam,
             'tex' => "tex{$exam->term}",
@@ -735,7 +737,7 @@ class AssessmentController extends Controller
         $asr_grouped = $asr->groupBy('student_id');
 
         foreach ($asr_grouped as $student_id => $records) {
-            $summary = $records->first(); // Contains total, ave, pos, etc.
+            $summary = $records->first(); // Contains total, average, section_position, etc.
 
             $sub_marks = [];
             foreach ($subjects as $sub) {
@@ -743,7 +745,7 @@ class AssessmentController extends Controller
                 $sub_marks[$sub->id] = [
                     'mark' => $mark->$tex ?? null,
                     'grade' => $mark->grade->name ?? null,
-                    'pos' => $mark->sub_pos ?? null,
+                    'pos' => $mark->subject_position ?? null,
                 ];
             }
 
@@ -751,9 +753,9 @@ class AssessmentController extends Controller
                 'name' => optional($summary->user)->name,
                 'gender' => optional($summary->user)->gender,
                 'total' => $summary->total,
-                'ave' => $summary->ave,
-                'grade' => $summary->grade_id ? $this->mark->getGrade($summary->ave, $class_type_id)->name ?? null : null,
-                'pos' => $summary->pos,
+                'average' => $summary->average,
+                'grade' => $summary->grade_id ? $this->mark->getGradeByTotal($summary->average, $class_type_id)->name ?? null : null,
+                'pos' => $summary->section_position,
                 'sub_marks' => $sub_marks,
             ];
         }

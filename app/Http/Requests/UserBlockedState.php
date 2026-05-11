@@ -21,7 +21,7 @@ class UserBlockedState extends FormRequest
     {
         return [
             'id' => 'required|integer|bail',
-            'blocked' => 'required|in:0,1',
+            'is_blocked' => 'required|boolean',
         ];
     }
 }

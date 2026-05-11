@@ -103,18 +103,18 @@ class HomeController extends Controller
             return view('pages/notices/show', $data);
         }
 
-        $student_recs = $this->student->getRecord([], ['section', 'user'])->whereNotNull('user');
-        $books_requests = $this->book->allRequests();
+        $student_recs = $this->student->getStudentRecords([], ['section', 'user'])->whereNotNull('user');
+        $books_requests = $this->book->getAllBookRequests();
         $parents = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.parent')]);
 
-        $active_students = $student_recs->where('grad', 0);
-        $grad_students = $student_recs->where('grad', 1);
+        $active_students = $student_recs->where('is_graduated', false);
+        $grad_students = $student_recs->where('is_graduated', true);
 
         $months_count = 12;
         ['months' => $months, 'periods' => $periods] = $this->buildMonths($months_count);
 
         $students_by_month = $this->countByPeriods($periods, $student_recs, fn($s) => $s->user->created_at);
-        $payments_collection = $this->payment->allCleanPaidRecs();
+        $payments_collection = $this->payment->getPaidRecordsWithValidPayment();
         $payments_by_month = $this->countByPeriods($periods, $payments_collection, fn($p) => $p->created_at);
 
         $gender_counts = $this->getGenderCounts($student_recs, 'user.gender');
@@ -132,12 +132,12 @@ class HomeController extends Controller
             'viewed_notices' => $vn_paginated,
             'subjects' => $this->class->getUniqueSubjectsNames(),
             'section' => $this->section->getAllSections(),
-            'exams_count' => $this->exam->getPublishedExamsCount(),
-            'assessments_count' => $this->assessment->getAssessmentsWithExam([])->count(),
+            'exams_count' => $this->exam->countPublishedExams(),
+            'assessments_count' => $this->assessment->getAssessmentsWithValidExam([])->count(),
             'total_pay_records' => $payments_collection->count(),
-            'books_count' => $this->book->countAll(),
+            'books_count' => $this->book->countBooks(),
             'book_requests_count' => $books_requests->count(),
-            'book_requests_returned_count' => $books_requests->where('returned', 1)->count(),
+            'book_requests_returned_count' => $books_requests->where('is_returned', true)->count(),
             'chart_months' => $months,
             'students_monthly' => $students_by_month,
             'payments_monthly' => $payments_by_month,
@@ -170,7 +170,7 @@ class HomeController extends Controller
      */
     protected function splitNoticesByViewed(): array
     {
-        $notices = $this->notice->allExceptAuth()->sortByDesc('id');
+        $notices = $this->notice->getAllExceptOwn()->sortByDesc('id');
         $auth_id = auth()->id();
 
         [$unviewed, $viewed] = $notices->partition(function ($notice) use ($auth_id) {

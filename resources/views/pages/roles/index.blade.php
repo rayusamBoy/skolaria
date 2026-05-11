@@ -3,10 +3,18 @@
 @section('page_title', 'Manage Roles')
 
 @section('content')
+
+@php
+$canEdit = auth()->user()->can($tenant_permissions['roles']['edit']['permission']);
+$canDelete = auth()->user()->can($tenant_permissions['roles']['destroy']['permission']);
+$rootRoles = Usr::getTenancyAwareRootRoles();
+$defaultRoles = Usr::getTenancyAwareDefaultRoles();
+@endphp
+
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Roles</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -44,7 +52,7 @@
                                         <h2 class="mb-0">
                                             <button class="btn btn-link btn-block text-left d-flex justify-content-between align-items-center" type="button" data-toggle="collapse" data-target="#collapse-{{ Str::slug($group) }}" aria-expanded="true" aria-controls="collapse-{{ Str::slug($group) }}">
                                                 <span class="font-weight-bold">{{ ucfirst(str_replace('_', ' ', $group)) }}</span>
-                                                <span class="badge badge-primary badge-pill">{{ count($perms) }}</span>
+                                                <span class="badge badge-primary badge-pill badge-default">{{ count($perms) }}</span>
                                             </button>
                                         </h2>
                                     </div>
@@ -95,39 +103,50 @@
                             <th># Users</th>
                             <th>Created</th>
                             <th>Updated</th>
+                            @if($canEdit || $canDelete)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($roles as $role)
+                        @php
+                        $role_permissions = $role->permissions->pluck('name');
+                        $isRootRole = in_array($role->name, $rootRoles, true);
+                        $isDefaultRole = in_array($role->name, $defaultRoles, true);
+                        $canDeleteRole = $canDelete && !$isDefaultRole && $role->users->isEmpty();
+                        @endphp
                         <tr>
-                            @php
-                            $permissions = $role->permissions->pluck('name');
-                            @endphp
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $role->name }}</td>
-                            <td>{{ in_array($role->name, Usr::getTenancyAwareRootRoles(), true) ? "All" : $permissions->count() }}</td>
+                            <td>{{ $isRootRole ? "All" : $role_permissions->count() }}</td>
                             <td>{{ $role->users->count() }}</td>
                             <td>{{ $role->created_at->diffForHumans() }}</td>
                             <td>{{ $role->updated_at->diffForHumans() }}</td>
-                            @if(!\in_array($role->name, Usr::getTenancyAwareRootRoles(), true))
+
+                            @if(!$isRootRole && ($canEdit || $canDelete))
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a href="#" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Edit --}}
-                                            @can($tenant_permissions['roles']['edit']['permission'])
+                                            @if($canEdit)
                                             <a href="{{ route('roles.edit', $role->id) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
-                                            @endcan
-                                            {{-- Delete --}}
-                                            @if(!\in_array($role->name, Usr::getTenancyAwareDefaultRoles(), true) && auth()->user()->can($tenant_permissions['roles']['destroy']['permission']))
-                                            <a href="javascript:;" id="{{ $role->id }}" @class($role->users->isNotEmpty() ? ['dropdown-item text-danger disabled'] : ['dropdown-item text-danger']) @if($role->users->isEmpty()) onclick="confirmDelete(this.id)" @else data-toggle="tooltip" title="{{ __('msg.role_in_use') }}" @endif>
+                                            @endif
+                                            @if($canDeleteRole)
+                                            <a href="javascript:;" id="{{ $role->id }}" class="dropdown-item text-danger" onclick="confirmDelete(this.id)">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
                                             <form method="POST" action="{{ route('roles.destroy', $role->id) }}" id="item-delete-{{ $role->id }}" class="d-none">
                                                 @csrf @method('DELETE')
                                             </form>
+                                            @elseif($isDefaultRole)
+                                            {{-- Default roles cannot be deleted --}}
+                                            @continue
+                                            @elseif($canDelete && !$canDeleteRole)
+                                            <a href="javascript:;" class="dropdown-item text-danger disabled" data-toggle="tooltip" title="{{ __('msg.role_in_use') }}">
+                                                <i class="material-symbols-rounded">delete</i> Delete
+                                            </a>
                                             @endif
                                         </div>
                                     </div>
@@ -139,7 +158,6 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
 </div>

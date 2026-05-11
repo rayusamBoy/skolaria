@@ -9,7 +9,7 @@ $grade_list = Mk::getGradeList($class_type->id)
             @if($grade_list->isNotEmpty())
             @foreach($grade_list as $gr)
             <td>
-                <strong>{{ $gr->name }}</strong>{{ ($gr->point === 1) ? '[1 point]' : '[' . $gr->point . ' points]' }} => {{ $gr->mark_from.' - '.$gr->mark_to }}
+                <strong>{{ $gr->name }}</strong>{{ ($gr->point === 1) ? '[1 point]' : "[{$gr->point} points]" }} => {{ $gr->mark_from.' - '.$gr->mark_to }}
             </td>
             @endforeach
             @endif

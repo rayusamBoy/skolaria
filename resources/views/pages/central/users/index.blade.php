@@ -4,10 +4,19 @@
 
 @section('content')
 
+@php
+$canEdit = auth()->user()->can($central_permissions['central_users']['edit']['permission']);
+$canShow = auth()->user()->can($central_permissions['central_users']['show']['permission']);
+$canResetPassword = auth()->user()->can($central_permissions['central_users']['reset_password']['permission']);
+$canDelete = auth()->user()->can($central_permissions['central_users']['destroy']['permission']);
+$canToggleBlock = auth()->user()->can($central_permissions['central_users']['toggle_user_block']['permission']);
+$hasActions = $canEdit || $canShow || $canResetPassword || $canDelete;
+@endphp
+
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Users</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -91,18 +100,17 @@
                                     <input value="{{ old('username') }}" type="text" name="username" id="username" class="form-control" placeholder="Username">
                                 </div>
                             </div>
-                            {{-- PHONE --}}
+                            {{-- MOBILES --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="phone">Phone:</label>
-                                    <input value="{{ old('phone') }}" type="text" name="phone" id="phone" class="form-control" placeholder="+255123456789">
+                                    <label for="primary_mobile">Primary Mobile:</label>
+                                    <input value="{{ old('primary_mobile') }}" type="text" name="primary_mobile" id="primary_mobile" class="form-control" placeholder="+255123456789">
                                 </div>
                             </div>
-                            {{-- TELEPHONE --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="phone2">Telephone:</label>
-                                    <input value="{{ old('phone2') }}" type="text" name="phone2" id="phone2" class="form-control" placeholder="+255123456789">
+                                    <label for="secondary_mobile">Secondary Mobile:</label>
+                                    <input value="{{ old('secondary_mobile') }}" type="text" name="secondary_mobile" id="secondary_mobile" class="form-control" placeholder="+255123456789">
                                 </div>
                             </div>
                         </div>
@@ -111,11 +119,11 @@
                             {{-- BLOOD GROUP --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="bg_id">Blood Group: </label>
-                                    <select class="select form-control" id="bg_id" name="bg_id" data-placeholder="Choose..">
+                                    <label for="blood_group_id">Blood Group: </label>
+                                    <select class="select form-control" id="blood_group_id" name="blood_group_id" data-placeholder="Choose..">
                                         <option value=""></option>
                                         @foreach ($blood_groups as $bg)
-                                        <option @selected(old('bg_id')==$bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
+                                        <option @selected(old('blood_group_id')==$bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -142,11 +150,11 @@
                             {{-- NATIONALITY --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="nal_id">Nationality: <span class="text-danger">*</span></label>
-                                    <select onchange="getState(this.value)" data-placeholder="Choose..." required name="nal_id" id="nal_id" class="select-search form-control">
+                                    <label for="nationality_id">Nationality: <span class="text-danger">*</span></label>
+                                    <select onchange="getState(this.value)" data-placeholder="Choose..." required name="nationality_id" id="nationality_id" class="select-search form-control">
                                         <option value=""></option>
                                         @foreach ($nationals as $nal)
-                                        <option @selected(old('nal_id')==$nal->id) value="{{ $nal->id }}">{{ $nal->name }}</option>
+                                        <option @selected(old('nationality_id')==$nal->id) value="{{ $nal->id }}">{{ $nal->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -175,15 +183,15 @@
                             {{-- PRIMARY ID --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="primary_id" class="d-block">Primary ID:</label>
-                                    <input value="{{ old('primary_id') }}" type="text" name="primary_id" id="primary_id" data-mask="www?wwwwwwwwwwwwwwwww" class="form-control" placeholder="123456789">
+                                    <label for="primary_identification_number" class="d-block">Primary ID number:</label>
+                                    <input value="{{ old('primary_identification_number') }}" type="text" name="primary_identification_number" id="primary_identification_number" class="form-control" placeholder="123456789">
                                 </div>
                             </div>
                             {{-- SECONDARY ID --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="secondary_id" class="d-block">Secondary ID:</label>
-                                    <input value="{{ old('secondary_id') }}" type="text" name="secondary_id" id="secondary_id" data-mask="www?wwwwwwwwwwwwwwwww" class="form-control" placeholder="12345678123451234512">
+                                    <label for="secondary_identification_number" class="d-block">Secondary ID number:</label>
+                                    <input value="{{ old('secondary_identification_number') }}" type="text" name="secondary_identification_number" id="secondary_identification_number" class="form-control" placeholder="12345678123451234512">
                                 </div>
                             </div>
                         </div>
@@ -204,8 +212,8 @@
                             {{-- DOB --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="dob">Date of Birth:</label>
-                                    <input name="dob" id="dob" value="{{ old('dob') }}" type="text" class="form-control date-pick" placeholder="Select Date...">
+                                    <label for="date_of_birth">Date of Birth:</label>
+                                    <input name="date_of_birth" id="date_of_birth" value="{{ old('date_of_birth') }}" type="text" class="form-control date-pick" placeholder="Select Date...">
                                 </div>
                             </div>
                             {{-- PASSPORT --}}
@@ -226,8 +234,8 @@
                             {{-- DATE OF EMPLOYMENT --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="emp_date">Date of Employment:</label>
-                                    <input autocomplete="off" id="emp_date" name="emp_date" value="{{ old('emp_date') }}" type="text" class="form-control date-pick" placeholder="Select Date...">
+                                    <label for="employment_date">Date of Employment:</label>
+                                    <input autocomplete="off" id="employment_date" name="employment_date" value="{{ old('employment_date') }}" type="text" class="form-control date-pick" placeholder="Select Date...">
                                 </div>
                             </div>
                             {{-- DATE OF CONFIRMATION --}}
@@ -257,15 +265,15 @@
                             {{-- SOCIAL SECURITY NUMBER --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="ss_number">Social Security Number:</label>
-                                    <input name="ss_number" id="ss_number" value="{{ old('ss_number') }}" type="number" min="1" class="form-control">
+                                    <label for="social_security_number">Social Security Number:</label>
+                                    <input name="social_security_number" id="social_security_number" value="{{ old('social_security_number') }}" type="number" min="1" class="form-control">
                                 </div>
                             </div>
                             {{-- EMPLOYMENT NUMBER --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="emp_no">Employment Number:</label>
-                                    <input name="emp_no" id="emp_no" value="{{ old('emp_no') }}" type="number" min="1" class="form-control">
+                                    <label for="employment_number">Employment Number:</label>
+                                    <input name="employment_number" id="employment_number" value="{{ old('employment_number') }}" type="number" min="1" class="form-control">
                                 </div>
                             </div>
                             {{-- TIN NUMBER --}}
@@ -278,8 +286,8 @@
                             {{-- BANK ACCOUNT NUMBER --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="bank_acc_no">Bank Account Number:</label>
-                                    <input name="bank_acc_no" id="bank_acc_no" value="{{ old('bank_acc_no') }}" type="number" class="form-control">
+                                    <label for="bank_account_number">Bank Account Number:</label>
+                                    <input name="bank_account_number" id="bank_account_number" value="{{ old('bank_account_number') }}" type="number" class="form-control">
                                 </div>
                             </div>
                         </div>
@@ -331,14 +339,14 @@
                                     </select>
                                 </div>
                             </div>
-                            {{-- ROLE --}}
+                            {{-- DESIGNATION --}}
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label for="role">Role: </label>
-                                    <select class="select form-control" id="role" name="role" data-placeholder="Choose..">
+                                    <label for="designation">Designation: </label>
+                                    <select class="select form-control" id="designation" name="designation" data-placeholder="Choose..">
                                         <option value=""></option>
-                                        @foreach (Usr::getStaffRoles() as $role)
-                                        <option @selected(old('role')==$role) value="{{ $role }}">{{ $role }}</option>
+                                        @foreach (Usr::getStaffDesignations() as $designation)
+                                        <option @selected(old('designation')==$designation) value="{{ $designation }}">{{ $designation }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -368,47 +376,51 @@
                             <th>Photo</th>
                             <th>Name</th>
                             <th>Username</th>
-                            <th>Phone</th>
+                            <th>Mobile</th>
                             <th>Email</th>
                             <th>Blocked</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
                         @foreach(Usr::getUsersByRoleNames([$role->name]) as $u)
+                        @php
+                        $can_be_modified = !Usr::userIsHead($u->id) || Usr::userIsHead();
+                        $user_has_any_action = $can_be_modified && ($canEdit || $canShow || $canResetPassword || $canDelete);
+                        @endphp
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhoto($u->photo) }}" alt="photo"></td>
+                            <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhotoUrl($u->photo_path) }}" alt="photo"></td>
                             <td>{{ $u->name }}</td>
                             <td>{{ $u->username }}</td>
-                            <td><a href="tel: {{ $u->phone }}">{{ $u->phone }}</a></td>
+                            <td><a href="tel: {{ $u->primary_mobile ?? $u->secondary_mobile }}">{{ $u->primary_mobile ?? $u->secondary_mobile }}</a></td>
                             <td><a href="mailto: {{ $u->email }}">{{ $u->email }}</a></td>
                             <td>
-                                @if(isset($u->staff->first()->staff_data_edit) && auth()->user()->can($central_permissions['central_users']['toggle_user_block']['permission']) && !Usr::userIsHead($u->id))
-                                <label class="form-switch m-0"><input id="checkbox-user-{{ $u->id }}" onchange="updateUserBlockedState({{ $u->id }}, this)" type="checkbox" @checked($u->blocked)><i></i></label>
+                                @if($canToggleBlock && $can_be_modified)
+                                <label class="form-switch m-0"><input id="checkbox-user-{{ $u->id }}" onchange="updateUserBlockedState({{ $u->id }}, this)" type="checkbox" @checked($u->is_blocked)><i></i></label>
                                 @else
                                 <span class="status-styled">Unavailable</span>
                                 @endif
                             </td>
+                            @if($hasActions)
                             <td class="text-center">
-                                @php
-                                $user_can_modify_head = !Usr::userIsHead($u->id) || Usr::userIsHead();
-                                @endphp
-                                @if($user_can_modify_head)
+                                @if($user_has_any_action)
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @if(auth()->user()->can($central_permissions['central_users']['edit']['permission']) && $user_can_modify_head)
+                                            @if($canEdit && $can_be_modified)
                                             <a href="{{ route('central_users.edit', Qs::hash($u->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
                                             @endif
-                                            @if(auth()->user()->can($central_permissions['central_users']['show']['permission']) && $user_can_modify_head)
+                                            @if($canShow && $can_be_modified)
                                             <a href="{{ route('central_users.show', Qs::hash($u->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> View Profile</a>
                                             @endif
-                                            @if(auth()->user()->can($central_permissions['central_users']['reset_password']['permission']) && $user_can_modify_head)
+                                            @if($canResetPassword && $can_be_modified)
                                             <a href="javascript:;" data-href="{{ route('central_users.password.reset',Qs::hash($u->id)) }}" class="dropdown-item needs-reset-pass-confirmation"><i class="material-symbols-rounded">lock_reset</i> Reset Password</a>
                                             @endif
-                                            @if(auth()->user()->can($central_permissions['central_users']['destroy']['permission']) && $user_can_modify_head)
+                                            @if($canDelete && $can_be_modified)
                                             <a href="javascript:;" id="{{ Qs::hash($u->id) }}" onclick="confirmDelete(this.id)" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                             <form id="item-delete-{{ Qs::hash($u->id) }}" action="{{ route('central_users.destroy', Qs::hash($u->id)) }}" method="post" class="hidden">@csrf @method('delete')</form>
                                             @endif
@@ -417,17 +429,15 @@
                                 </div>
                                 @endif
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
             @endforeach
-
         </div>
     </div>
 </div>
-
-{{-- Users List Ends --}}
 
 @endsection

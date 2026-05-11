@@ -4,10 +4,19 @@
 
 @section('content')
 
+@php
+$canAnswer = auth()->user()->can($central_permissions['tickets']['answer']['permission']);
+$canLock = auth()->user()->can($central_permissions['tickets']['lock_ticket']['permission']);
+$canUnlock = auth()->user()->can($central_permissions['tickets']['unlock_ticket']['permission']);
+$canDelete = auth()->user()->can($central_permissions['tickets']['delete']['permission']);
+$hasActions = $canAnswer || $canLock || $canUnlock || $canDelete;
+@endphp
+
+@can($central_permissions['tickets']['update_properties']['permission'])
 <div class="card card-collapsed card-ticket">
     <div class="card-header header-elements-inline">
-        <h6 class="card-title">Define Properties</h6>
-        {!! Qs::getPanelOptions() !!}
+        <h6 class="card-title">Manage Properties</h6>
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -29,8 +38,8 @@
                             </div>
                             <div class="col-md-2 form-group">
                                 <select name="categories[is_visible][]" class="form-control select">
-                                    <option value="1" {{ $cat->is_visible == 1 ? 'selected' : '' }}>Visible</option>
-                                    <option value="0" {{ $cat->is_visible == 0 ? 'selected' : '' }}>Hidden</option>
+                                    <option value="1" {{ $cat->is_visible ? 'selected' : '' }}>Visible</option>
+                                    <option value="0" {{ !$cat->is_visible ? 'selected' : '' }}>Hidden</option>
                                 </select>
                             </div>
                             <div class="col-md-1">
@@ -56,8 +65,8 @@
                             </div>
                             <div class="col-md-2 form-group">
                                 <select name="labels[is_visible][]" class="form-control select">
-                                    <option value="1" {{ $lab->is_visible == 1 ? 'selected' : '' }}>Visible</option>
-                                    <option value="0" {{ $lab->is_visible == 0 ? 'selected' : '' }}>Hidden</option>
+                                    <option value="1" {{ $lab->is_visible ? 'selected' : '' }}>Visible</option>
+                                    <option value="0" {{ !$lab->is_visible ? 'selected' : '' }}>Hidden</option>
                                 </select>
                             </div>
                             <div class="col-md-1">
@@ -81,11 +90,12 @@
         </form>
     </div>
 </div>
+@endcan
 
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Tickets</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -103,7 +113,9 @@
                             <th>Locked</th>
                             <th>Created</th>
                             <th>Updated</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -115,13 +127,12 @@
                         @foreach($tickets as $ticket)
                         @php
                         $tenant = json_decode($ticket->tenant);
+                        $isClosed = $ticket->is_closed();
                         @endphp
                         <tr>
                             <td>
                                 @if(!in_array($tenant->id, $displayed_tenants))
-                                @php
-                                $displayed_tenants[] = $tenant->id;
-                                @endphp
+                                @php $displayed_tenants[] = $tenant->id @endphp
                                 <a target="_blank" href="{{ route('tenants.show', Qs::hash($tenant->id)) }}">{{ $tenant->name }}</a>
                                 @else
                                 <span>{{ $tenant->name }}</span>
@@ -132,9 +143,7 @@
                             <td>
                                 @if($ticket->assigned_user)
                                 @if(!in_array($ticket->assigned_user->id, $displayed_assignees))
-                                @php
-                                $displayed_assignees[] = $ticket->assigned_user->id;
-                                @endphp
+                                @php $displayed_assignees[] = $ticket->assigned_user->id @endphp
                                 <a target="_blank" href="{{ route('users.show', Qs::hash($ticket->assigned_user->id)) }}">{{ $ticket->assigned_user->name }}</a>
                                 @else
                                 <span>{{ $ticket->assigned_user->name }}</span>
@@ -148,55 +157,46 @@
                                 $owner = $ticket->get_tenant_user($tenant->tenancy_db_name, $ticket->user_id);
                                 @endphp
                                 @if(!in_array($ticket->user_id, $displayed_owners))
-                                @php
-                                $displayed_owners[] = $ticket->user_id;
-                                @endphp
+                                @php $displayed_owners[] = $ticket->user_id @endphp
                                 @include("pages.modals.ticket_owner")
                                 <a href="javascript:;" data-toggle="modal" data-target="#ticket-owner-modal-{{ $owner->id }}">{{ $owner->name }}</a>
                                 @else
                                 <span>{{ $owner->name }}</span>
                                 @endif
                             </td>
-                            <td>{{ $ticket->is_archived == 1 ? 'Yes' : 'No' }}</td>
-                            <td>{{ $ticket->is_locked == 1 ? 'Yes' : 'No' }}</td>
+                            <td>{{ $ticket->is_archived ? 'Yes' : 'No' }}</td>
+                            <td>{{ $ticket->is_locked ? 'Yes' : 'No' }}</td>
                             <td>{{ $ticket->created_at->diffForHumans() }}</td>
                             <td>{{ $ticket->updated_at->diffForHumans() }}</td>
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
-                                        {{-- Information Modal --}}
-                                        @include('pages.modals.ticket_information')
-
                                         <div class="dropdown-menu dropdown-menu-left">
-
-                                            @if(!$ticket->is_closed())
-                                            {{-- Answer --}}
+                                            {{-- Answer (only if not closed and user has permission) --}}
+                                            @if(!$isClosed && $canAnswer)
                                             <a href="{{ route('tickets.answer', Qs::hash($ticket->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">person_raised_hand</i> Answer</a>
                                             @endif
-
                                             {{-- Information --}}
                                             <a href="javascript:;" data-toggle="modal" data-target="#ticket-info-modal-{{ $ticket->id }}" class="dropdown-item"><i class="material-symbols-rounded">info</i> Information</a>
-
-                                            @if(Usr::userIsHead())
-
-                                            @if($ticket->is_locked())
-                                            {{-- Unlock --}}
+                                            {{-- Lock / Unlock --}}
+                                            @if($ticket->is_locked() && $canUnlock)
                                             <a href="{{ route('tickets.unlock', $ticket->id) }}" class="dropdown-item text-success"><i class="material-symbols-rounded">lock_open</i> UnLock</a>
-                                            @else
-                                            {{-- Lock --}}
+                                            @elseif(!$ticket->is_locked() && $canLock)
                                             <a href="{{ route('tickets.lock', $ticket->id) }}" class="dropdown-item text-warning"><i class="material-symbols-rounded">lock</i> Lock</a>
                                             @endif
-
-                                            {{-- Delete --}}
+                                            @if($canDelete)
                                             <a id="{{ $ticket->id }}" onclick="confirmPermanentDelete(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
-                                            <form class="d-none" method="post" id="item-delete-{{ $ticket->id }}" action="{{ route('tickets.delete', $ticket->id) }}" class="hidden">@csrf</form>
-
+                                            <form class="d-none" method="post" id="item-delete-{{ $ticket->id }}" action="{{ route('tickets.delete', $ticket->id) }}">@csrf</form>
                                             @endif
                                         </div>
                                     </div>
                                 </div>
+                                {{-- Ticket information modal --}}
+                                @include('pages.modals.ticket_information')
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>
@@ -232,7 +232,7 @@
                     </div>
                 </div>`;
             $('#categories-wrapper').append(new_row);
-            Select2Selects.init(); // Initialize newly created select element
+            Select2Selects.init();
         });
 
         // Append a new label row
@@ -256,7 +256,7 @@
                     </div>
                 </div>`;
             $('#labels_wrapper').append(new_row);
-            Select2Selects.init(); // Initialize newly created select element
+            Select2Selects.init();
         });
 
         // Remove a category row

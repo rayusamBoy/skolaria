@@ -20,23 +20,23 @@ class StudentRecord extends Eloquent
         'my_parent_id',
         'dorm_id',
         'dorm_room_no',
-        'adm_no',
+        'admission_number',
         'date_admitted',
-        'grad',
-        'grad_date',
-        'house_no',
+        'is_graduated',
+        'graduated_session',
+        'house_number',
         'age',
-        'ps_name',
-        'ss_name',
+        'primary_school_name',
+        'secondary_school_name',
         'birth_certificate',
         'disability',
-        'chp',
-        'p_status',
+        'chronic_health_problems',
+        'parent_status',
         'food_taboos'
     ];
 
     protected $casts = [
-        'grad' => 'boolean',
+        'is_graduated' => 'boolean',
     ];
 
     public function user()

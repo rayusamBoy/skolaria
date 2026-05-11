@@ -9,7 +9,7 @@
         <h6 class="card-title font-weight-bold">
             {{ "{$ttr->name} ({$my_class->name}" }}{{ $ttr->section ? " " . $ttr->section->name . ") {$ttr->year}" : ") {$ttr->year}" }}
         </h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">

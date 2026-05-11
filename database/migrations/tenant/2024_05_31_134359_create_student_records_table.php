@@ -13,25 +13,25 @@ return new class extends Migration {
         Schema::create('student_records', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id')->index();
-            $table->string('ps_name');
-            $table->string('ss_name')->nullable();
+            $table->string('primary_school_name');
+            $table->string('secondary_school_name')->nullable();
             $table->string('birth_certificate')->nullable();
             $table->string('disability')->nullable();
             $table->string('food_taboos')->nullable();
-            $table->string('chp')->nullable();
-            $table->string('p_status', 155);
-            $table->string('house_no')->nullable();
+            $table->string('chronic_health_problems')->nullable();
+            $table->string('parent_status', 155);
+            $table->string('house_number')->nullable();
             $table->unsignedInteger('my_class_id')->index('student_records_my_class_id_foreign');
             $table->unsignedInteger('section_id')->index('student_records_section_id_foreign');
-            $table->string('adm_no', 30)->nullable()->unique();
+            $table->string('admission_number', 30)->nullable()->unique();
             $table->unsignedBigInteger('my_parent_id')->nullable()->index('student_records_my_parent_id_foreign');
             $table->unsignedInteger('dorm_id')->nullable()->index('student_records_dorm_id_foreign');
             $table->string('dorm_room_no')->nullable();
             $table->string('session');
             $table->tinyInteger('age')->nullable();
-            $table->string('date_admitted')->nullable();
-            $table->boolean('grad')->default(false);
-            $table->string('grad_date')->nullable();
+            $table->date('date_admitted')->nullable();
+            $table->boolean('is_graduated')->default(false);
+            $table->string('graduated_session')->nullable();
             $table->timestamps();
         });
     }

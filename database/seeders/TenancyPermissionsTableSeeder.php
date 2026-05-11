@@ -17,7 +17,7 @@ class TenancyPermissionsTableSeeder extends Seeder
         $table = config('permission.table_names.permissions', 'permissions');
         $now = now();
 
-        DB::table($table)->delete();
+      //  DB::table($table)->delete();
 
         if (empty($tenantPerms)) {
             $this->command->error("Permissions not found in config('permissions.names.tenant')");
@@ -63,7 +63,7 @@ class TenancyPermissionsTableSeeder extends Seeder
         }
 
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-        $this->command->info('Central permissions seeded.');
+        $this->command->info('Tenant permissions seeded.');
     }
 
     /**

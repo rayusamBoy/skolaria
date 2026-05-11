@@ -21,7 +21,7 @@ class UserStaffDataEditState extends FormRequest
     {
         return [
             'id' => 'required|integer|bail',
-            'staff_data_edit' => 'required|in:0,1',
+            'allow_staff_data_edit' => 'required|boolean',
         ];
     }
 }

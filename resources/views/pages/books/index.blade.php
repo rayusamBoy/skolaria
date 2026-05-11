@@ -4,10 +4,16 @@
 
 @section('content')
 
+@php
+$canEdit = auth()->user()->can($tenant_permissions['books']['edit']['permission']);
+$canDelete = auth()->user()->can($tenant_permissions['books']['destroy']['permission']);
+$hasActions = $canEdit || $canDelete;
+@endphp
+
 <div class="card w-fit wmin-100-pcnt">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Books</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -29,6 +35,7 @@
         </ul>
 
         <div class="tab-content">
+            {{-- Add New Book Form --}}
             @can($tenant_permissions['books']['store']['permission'])
             <div class="tab-pane fade" id="new-book">
                 <form method="post" enctype="multipart/form-data" class="ajax-store" action="{{ route('books.store') }}">
@@ -49,7 +56,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Name: <span class="text-danger">*</span></label>
-                                <input type="text" name="name" value="{{ old('name') }}" class="form-control text-capitalize" placeholder="Book Name" required>
+                                <input type="text" name="name" value="{{ old('name') }}" class="form-control" placeholder="Book Name" required>
                             </div>
                         </div>
                         {{-- Description --}}
@@ -60,7 +67,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="row">
                         {{-- Author --}}
                         <div class="col-md-3">
@@ -84,7 +90,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="row">
                         {{-- Total Copies --}}
                         <div class="col-md-3">
@@ -99,9 +104,7 @@
                                 <label>Status:</label>
                                 <select name="status" id="status" class="form-control select" required data-placeholder="Select...">
                                     @foreach(Usr::getBookStatuses() as $key => $value)
-                                    <option value="{{ $key }}" title="{{ $value }}" @selected(old('status')==$key)>
-                                        {{ $key }}
-                                    </option>
+                                    <option value="{{ $key }}" title="{{ $value }}" @selected(old('status')==$key)>{{ $key }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -114,7 +117,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="text-right">
                         <button id="ajax-btn" type="submit" class="btn btn-primary">
                             Submit <i class="material-symbols-rounded ml-2">send</i>
@@ -124,56 +126,57 @@
             </div>
             @endcan
 
+            {{-- Book List per Class --}}
             @foreach($my_classes as $mc)
             <div class="tab-pane fade show" id="book-{{ $mc->id }}">
                 <strong class="status-styled">{{ $mc->name }}</strong>
-                
+
                 <table class="table datatable-button-html5-columns w-100">
                     <thead>
                         <tr>
                             <th>S/N</th>
-                            <th>Author</th>
                             <th>Name</th>
-                            <th>Description</th>
                             <th>Class</th>
                             <th>Type</th>
-                            <th>URL</th>
-                            <th>Total Copies</th>
-                            <th>Issued Copies</th>
-                            <th>Location</th>
+                            <th>Copies</th>
                             <th>Status</th>
-                            <th>Created At</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($books->where('my_class.id', $mc->id) as $book)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $book->author }}</td>
-                            <td>{{ $book->name }}</td>
-                            <td>{{ $book->description }}</td>
+                            <td>
+                                <span data-toggle="tooltip" title="{{ $book->description ?? '' }}">
+                                    {{ $book->name }} <small class="text-muted">({{ $book->author }})</small>
+                                </span>
+                            </td>
                             <td>{{ $book->my_class->name }}</td>
-                            <td>{{ $book->book_type }}</td>
-                            <td>{{ $book->url }}</td>
-                            <td>{{ $book->total_copies }}</td>
-                            <td>{{ $book->issued_copies }}</td>
-                            <td>{{ $book->location }}</td>
+                            <td>{{ $book->book_type ?: '—' }}</td>
+                            <td>
+                                {{ $book->total_copies }} / {{ $book->issued_copies }}
+                                <small class="text-muted">(total / issued)</small>
+                            </td>
                             <td>{{ $book->status }}</td>
-                            <td>{{ Qs::fullDateTimeFormat($book->created_at) }}</td>
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Edit --}}
-                                            @can($tenant_permissions['books']['edit']['permission'])
+                                            {{-- If can view then can show --}}
+                                            <a href="{{ route('books.show', Qs::hash($book->id)) }}" class="dropdown-item">
+                                                <i class="material-symbols-rounded">visibility</i> View
+                                            </a>
+                                            @if($canEdit)
                                             <a href="{{ route('books.edit', Qs::hash($book->id)) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-                                            @endcan
-                                            {{-- Delete --}}
-                                            @can($tenant_permissions['books']['destroy']['permission'])
+                                            @endif
+                                            @if($canDelete)
                                             <a id="book-delete-{{ Qs::hash($book->id) }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -181,11 +184,12 @@
                                                 @csrf
                                                 @method('delete')
                                             </form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>

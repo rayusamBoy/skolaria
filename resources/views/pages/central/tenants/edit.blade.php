@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 id="ajax-title" class="card-title">Edit Tenant Details</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -46,7 +46,7 @@
                     <div class="form-group">
                         <label for="payment_status"> Payment Status: <span class="text-danger">*</span></label>
                         <select required class="form-control select" name="payment_status" id="payment_status">
-                            @foreach (Pay::getPaymentStatuses() as $key => $status)
+                            @foreach (Pay::getPaymentStatusOptions() as $key => $status)
                             <option @selected($tenant->payment_status === $status) value="{{ $status }}">{{ ucfirst($status) }}</option>
                             @endforeach
                         </select>

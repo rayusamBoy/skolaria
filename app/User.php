@@ -34,26 +34,26 @@ class User extends Authenticatable implements MustVerifyEmail
         'username',
         'email',
         'phone',
-        'phone2',
-        'dob',
+        'secondary_mobile',
+        'date_of_birth',
         'gender',
-        'photo',
+        'photo_path',
         'address',
-        'bg_id',
+        'blood_group_id',
         'password',
-        'nal_id',
+        'nationality_id',
         'state_id',
         'lga_id',
         'code',
         'email_verified_at',
-        'work',
+        'occupation',
         'religion',
-        'blocked',
-        'primary_id',
-        'secondary_id',
+        'is_blocked',
+        'primary_identification_number',
+        'secondary_identification_number',
         'twofa_secret_code',
         'twofa_recovery_codes',
-        'is_notifiable',
+        'notification_preferences',
         'preferences',
         'message_media_heading_color',
         'firebase_device_tokens',
@@ -63,11 +63,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'is_notifiable' => 'array',
+        'notification_preferences' => 'array',
         'preferences' => 'array',
         'firebase_device_tokens' => 'array',
         'hidden_alert_ids' => 'array',
         'twofa_recovery_codes' => 'array',
+        'is_blocked' => 'boolean',
     ];
 
     public const string GENDER_MALE = 'Male';
@@ -103,12 +104,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function nationality()
     {
-        return $this->belongsTo(Nationality::class, 'nal_id');
+        return $this->belongsTo(Nationality::class);
     }
 
     public function blood_group()
     {
-        return $this->belongsTo(BloodGroup::class, 'bg_id');
+        return $this->belongsTo(BloodGroup::class);
     }
 
     public function staff()
@@ -121,7 +122,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return LogOptions::defaults()
             ->logFillable()
             ->dontSubmitEmptyLogs()
-            ->logOnlyDirty();
+            ->logOnlyDirty()
+            ->dontLogIfAttributesChangedOnly(['password', 'password_updated_at', 'hidden_alert_ids']);
     }
 
     public function getDeviceTokens()
@@ -144,7 +146,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function routeNotificationForVonage(): string
     {
-        return $this->phone ?? $this->phone2;
+        return $this->primary_mobile ?? $this->secondary_mobile;
     }
 
     public function loginHistory()

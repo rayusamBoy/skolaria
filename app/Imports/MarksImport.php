@@ -84,7 +84,7 @@ class MarksImport implements ToCollection, WithHeadingRow, WithValidation
                 'year' => $this->data['year'],
                 'subject_id' => $subject_id,
             ],
-            'values' => ['exm' => $mark_value],
+            'values' => ['exam_mark' => $mark_value],
         ];
     }
 

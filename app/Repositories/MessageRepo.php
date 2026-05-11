@@ -9,6 +9,9 @@ class MessageRepo
 {
     /**
      * Create a new message.
+     *
+     * @param array $data
+     * @return Message
      */
     public function create(array $data): Message
     {
@@ -17,6 +20,9 @@ class MessageRepo
 
     /**
      * Find a message by ID.
+     *
+     * @param int $id
+     * @return Message|null
      */
     public function find(int $id): ?Message
     {
@@ -24,7 +30,11 @@ class MessageRepo
     }
 
     /**
-     * Find a message or fail.
+     * Find a message or throw a 404 exception.
+     *
+     * @param int $id
+     * @return Message
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function findOrFail(int $id): Message
     {
@@ -32,53 +42,26 @@ class MessageRepo
     }
 
     /**
-     * Find a message with relationships.
+     * Permanently delete a message (including soft‑deleted ones).
+     *
+     * @param int $id
+     * @return bool
      */
-    public function findWith(int $id, array $with = []): ?Message
-    {
-        return Message::with($with)->find($id);
-    }
-
-    /**
-     * Soft delete a message.
-     */
-    public function deleteMessage(int $id): bool
-    {
-        $message = $this->find($id);
-        return $message ? $message->delete() : false;
-    }
-
-    /**
-     * Permanently delete a message.
-     */
-    public function deleteMessageForever(int $id): bool
+    public function forceDeleteMessage(int $id): bool
     {
         $message = Message::withTrashed()->find($id);
-        return $message ? $message->forceDelete() : false;
+        return $message ? (bool) $message->forceDelete() : false;
     }
 
     /**
-     * Update a message's attributes.
+     * Get messages before a given ID for pagination (infinite scroll).
+     *
+     * @param int $thread_id
+     * @param int $before_id
+     * @param int $limit
+     * @return Collection
      */
-    public function update(int $id, array $data): bool
-    {
-        $message = $this->find($id);
-        return $message ? $message->update($data) : false;
-    }
-
-    /**
-     * Restore a soft-deleted message.
-     */
-    public function restore(int $id): bool
-    {
-        $message = Message::onlyTrashed()->find($id);
-        return $message ? $message->restore() : false;
-    }
-
-    /**
-     * Get messages before a given ID (for pagination).
-     */
-    public function getMessagesBeforeId(int $thread_id, int $before_id, int $limit = 5): Collection
+    public function getPreviousMessages(int $thread_id, int $before_id, int $limit = 5): Collection
     {
         return Message::withTrashed()
             ->with(['user', 'deletor', 'deletor.roles'])
@@ -90,20 +73,15 @@ class MessageRepo
     }
 
     /**
-     * Get only trashed message with relations.
+     * Get a single trashed message with its relationships.
+     *
+     * @param int $id
+     * @return Message|null
      */
-    public function getTrashedWithRelations(int $id): ?Message
+    public function getTrashedMessageWithRelations(int $id): ?Message
     {
         return Message::onlyTrashed()
             ->with(['user', 'deletor', 'deletor.roles', 'user.roles'])
             ->find($id);
-    }
-
-    /**
-     * Delete all messages in a thread.
-     */
-    public function deleteByThreadId(int $thread_id): int
-    {
-        return Message::where('thread_id', $thread_id)->delete();
     }
 }

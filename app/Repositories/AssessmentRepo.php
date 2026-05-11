@@ -4,12 +4,16 @@ namespace App\Repositories;
 
 use App\Models\Assessment;
 use App\Models\AssessmentRecord;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AssessmentRepo
 {
+    /** @var string */
+    protected string $assessments_table;
+    /** @var string */
+    protected string $assessments_records_table;
 
-    protected $assessments_table, $assessments_records_table;
     public function __construct()
     {
         $this->assessments_table = 'assessments';
@@ -18,54 +22,119 @@ class AssessmentRepo
 
     /*********** Assessments ***************/
 
-    public function getAssessmentsWithExam(array $where)
+    /**
+     * Get assessments with their related exam and other relations, filtered by conditions.
+     * Excludes assessments whose exam relation is null.
+     *
+     * @param array $where
+     * @return Collection
+     */
+    public function getAssessmentsWithValidExam(array $where, $with = []): Collection
     {
-        return Assessment::with('exam')->where($where)->get()->whereNotNull('exam');
+        return Assessment::with($with)
+            ->with('exam')
+            ->where($where)
+            ->get()
+            ->whereNotNull('exam');
     }
 
-    public function isNotEmpty()
+    /**
+     * Check if there is at least one assessment with a valid exam.
+     *
+     * @return bool
+     */
+    public function hasAnyAssessmentWithExam(): bool
     {
-        return Assessment::with('exam')->get()->whereNotNull('exam')->isNotEmpty();
+        return Assessment::with('exam')
+            ->get()
+            ->whereNotNull('exam')
+            ->isNotEmpty();
     }
 
-    public function getAssessment($data)
+    /**
+     * Get a single assessment by conditions.
+     *
+     * @param array $data
+     * @return Assessment|null
+     */
+    public function getAssessmentByConditions(array $data): ?Assessment
     {
         return Assessment::where($data)->first();
     }
 
-    public function create($data)
+    /**
+     * Create a new assessment.
+     *
+     * @param array $data
+     * @return Assessment
+     */
+    public function create(array $data): Assessment
     {
         return Assessment::create($data);
     }
 
-    public function firstOrCreate($data)
+    /**
+     * Find an assessment matching the given data or create it.
+     *
+     * @param array $data
+     * @return Assessment
+     */
+    public function firstOrCreate(array $data): Assessment
     {
         return Assessment::firstOrCreate($data);
     }
 
-    public function delete($data)
+    /**
+     * Delete assessments matching the given conditions.
+     *
+     * @param array $data
+     * @return int Number of deleted rows
+     */
+    public function delete(array $data): int
     {
         return Assessment::where($data)->delete();
     }
 
-    /*********** Assessments records ***************/
+    /*********** Assessment records ***************/
 
-    public function createRecord($data)
+    /**
+     * Create a new assessment record if it doesn't already exist.
+     *
+     * @param array $data
+     * @return AssessmentRecord
+     */
+    public function createRecord(array $data): AssessmentRecord
     {
         return AssessmentRecord::firstOrCreate($data);
     }
 
-    public function getRecords($where, $with = ['grade'])
+    /**
+     * Get assessment records with related exam, user, and optionally other relations.
+     * Only records whose exam and user are not null are returned, and duplicates by mark_id are removed.
+     *
+     * @param array $where
+     * @param array $with   Additional relations to eager load
+     * @return Collection
+     */
+    public function getAssessmentRecordsWithRelations(array $where, array $with = ['grade']): Collection
     {
-        return AssessmentRecord::where($where)->with($with)->with(['exam', 'user'])->get()->whereNotNull('exam')->whereNotNull('user')->unique('mark_id');
+        return AssessmentRecord::where($where)
+            ->with($with)
+            ->with(['exam', 'user'])
+            ->get()
+            ->whereNotNull('exam')
+            ->whereNotNull('user')
+            ->unique('mark_id');
     }
 
-    public function getRecordById($id)
-    {
-        return AssessmentRecord::where('exam_id', $id)->with('exam')->first()->whereNotNull('exam');
-    }
-
-    public function massUpdateRecs(array $values, array $unique_by = ['id'])
+    /**
+     * Mass update (upsert) assessment records.
+     *
+     * @param array $values      Array of record arrays
+     * @param array $unique_by   Columns that identify each record
+     * @return int               Number of affected rows
+     */
+    public function massUpdateRecords(array $values, array $unique_by = ['id']): int
     {
         return AssessmentRecord::massUpdate(
             values: $values,
@@ -73,142 +142,255 @@ class AssessmentRepo
         );
     }
 
-    public function updateDBFacades(array $data, array $value)
-    {
-        return DB::table($$this->assessment_records_table)->where($data)->update($value);
-    }
-
-    public function getValueOutOfQuantity($value, $quantity, $precision = 0)
+    /**
+     * Calculate a value proportionally out of a given quantity.
+     *
+     * @param float $value
+     * @param float $quantity
+     * @param int   $precision
+     * @return float
+     */
+    public function calculateProportionalValue(float $value, float $quantity, int $precision = 0): float
     {
         return round($value / 100 * $quantity, $precision);
     }
 
-    public function updateRecord(array $where, array $data)
+    /**
+     * Update a single assessment record.
+     *
+     * @param array $where
+     * @param array $data
+     * @return int
+     */
+    public function updateRecord(array $where, array $data): int
     {
         return AssessmentRecord::where($where)->update($data);
     }
 
-    public function updateRecordDBFacades(array $where, array $data)
+    /**
+     * Update assessments table via DB facade.
+     *
+     * @param array $where
+     * @param array $data
+     * @return int
+     */
+    public function updateRecordDBFacades(array $where, array $data): int
     {
         return DB::table($this->assessments_table)->where($where)->update($data);
     }
 
-    public function getExamYears($student_id)
+    /**
+     * Get distinct exam years for a student from their assessment records.
+     *
+     * @param int $student_id
+     * @return Collection
+     */
+    public function getExamYears(int $student_id): Collection
     {
-        return AssessmentRecord::where('student_id', $student_id)->select('year')->distinct()->get();
+        return AssessmentRecord::where('student_id', $student_id)
+            ->select('year')
+            ->distinct()
+            ->get();
     }
 
-    public function getRecordValue($data, $value)
+    /**
+     * Get a single column value from the first matching assessment record.
+     *
+     * @param array  $data   Conditions
+     * @param string $value  Column name
+     * @return mixed
+     */
+    public function getAssessmentRecordValue(array $data, string $value): mixed
     {
         return AssessmentRecord::where($data)->value($value);
     }
 
-    public function getSubjectIDs($data)
-    {
-        return AssessmentRecord::distinct()->select('subject_id')->where($data)->get()->pluck('subject_id');
-    }
-
-    public function getStudentIDs($data)
-    {
-        return AssessmentRecord::distinct()->select('student_id')->where($data)->get()->pluck('student_id');
-    }
-
-    public function getAssessmentTotalTerm($exam, $st_id, $class_id, $year)
+    /**
+     * Sum of term marks for a student in a specific exam and class.
+     *
+     * @param mixed $exam      Exam model
+     * @param int   $st_id
+     * @param int   $class_id
+     * @param string $year
+     * @return float
+     */
+    public function getTotalTermMark($exam, int $st_id, int $class_id, string $year): float
     {
         $d = ['student_id' => $st_id, 'exam_id' => $exam->id, 'my_class_id' => $class_id, 'year' => $year];
-
         $tex = "tex{$exam->term}";
-        $mk = AssessmentRecord::where($d);
-
-        return $mk->select($tex)->sum($tex);
+        return AssessmentRecord::where($d)->select($tex)->sum($tex);
     }
 
-    public function getAssessmentAvgTerm($exam, $st_id, $class_id, $sec_id, $year)
+    /**
+     * Average of term marks for a student in a specific exam, class, and section.
+     *
+     * @param mixed $exam
+     * @param int   $st_id
+     * @param int   $class_id
+     * @param int   $sec_id
+     * @param string $year
+     * @return float
+     */
+    public function getAverageTermMark($exam, int $st_id, int $class_id, int $sec_id, string $year): float
     {
-        $d = ['student_id' => $st_id, 'exam_id' => $exam->id, 'my_class_id' => $class_id, 'section_id' => $sec_id, 'year' => $year];
-
+        $d = [
+            'student_id' => $st_id,
+            'exam_id' => $exam->id,
+            'my_class_id' => $class_id,
+            'section_id' => $sec_id,
+            'year' => $year
+        ];
         $tex = "tex{$exam->term}";
-
-        $mk = AssessmentRecord::where($d)->where($tex, '>=', 0);
-        $avg = $mk->select($tex)->avg($tex);
-
-        return round($avg, 1);
+        $avg = AssessmentRecord::where($d)
+            ->where($tex, '>=', 0)
+            ->avg($tex);
+        return round((float) $avg, 1);
     }
 
-    public function getClassAvg($exam, $class_id, $year)
+    /**
+     * Class average for a given exam.
+     *
+     * @param mixed $exam
+     * @param int   $class_id
+     * @param string $year
+     * @return float
+     */
+    public function getClassAverageTermMark($exam, int $class_id, string $year): float
     {
         $d = ['exam_id' => $exam->id, 'my_class_id' => $class_id, 'year' => $year];
         $tex = "tex{$exam->term}";
-
         $avg = AssessmentRecord::where($d)->select($tex)->avg($tex);
-
-        return round($avg, 1);
+        return round((float) $avg, 1);
     }
 
-    public function getPos($st_id, $exam, $class_id, $sec_id, $year)
+    /**
+     * Get a specific value from the first assessment record matching conditions.
+     *
+     * @param array  $where
+     * @param string $value  Column name
+     * @return mixed
+     */
+    public function getStudentColumnValue(array $where, string $value): mixed
     {
-        $d = ['student_id' => $st_id, 'exam_id' => $exam->id, 'my_class_id' => $class_id, 'section_id' => $sec_id, 'year' => $year];
-        $all_mks = [];
-        $tex = "tex{$exam->term}";
-
-        $my_mk = AssessmentRecord::where($d)->select($tex)->sum($tex);
-
-        unset($d['student_id']);
-        $mk = AssessmentRecord::where($d);
-        $students = $mk->select('student_id')->distinct()->get();
-        foreach ($students as $s) {
-            $all_mks[] = $this->getAssessmentTotalTerm($exam, $s->student_id, $class_id, $year);
-        }
-
-        rsort($all_mks);
-
-        return array_search($my_mk, $all_mks) + 1;
+        return AssessmentRecord::where($where)
+            ->select('average')
+            ->first()
+        ->$value;
     }
 
-    public function getStudentValue($where, $value)
-    {
-        return AssessmentRecord::where($where)->select('ave')->get()->first()->$value;
-    }
-
-    public function getStudentPos($st_id, $exam_id, $class_id, $year, $value, $section_id = null)
+    /**
+     * Calculate a student's position (global, by class or section) based on a given value column.
+     *
+     * @param int      $st_id
+     * @param int      $exam_id
+     * @param int      $class_id
+     * @param string   $year
+     * @param string   $value        Column to compare (e.g., 'total', 'ave')
+     * @param int|null $section_id   If provided, limits to that section
+     * @return int|null
+     */
+    public function getStudentPositionByColumn(int $st_id, int $exam_id, int $class_id, string $year, string $value, ?int $section_id = null): ?int
     {
         $where = ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'student_id' => $st_id, 'year' => $year];
-        $std_value = $this->getStudentValue($where, $value);
-        $data = $section_id != null
+        $std_value = $this->getStudentColumnValue($where, $value);
+
+        $data = $section_id !== null
             ? ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'section_id' => $section_id, 'year' => $year]
             : ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'year' => $year];
-        $std_values = AssessmentRecord::where($data)->whereNotNull($value)->orderBy($value, 'DESC')->select($value)->get()->pluck($value);
+
+        $std_values = AssessmentRecord::where($data)
+            ->whereNotNull($value)
+            ->orderByDesc($value)
+            ->select($value)
+            ->get()
+            ->pluck($value);
 
         $position = $std_values->isNotEmpty() ? $std_values->search($std_value) : false;
         return ($position !== false) ? $position + 1 : null;
     }
 
-    public function getStudentsTotals($where, $tex)
+    /**
+     * Get the list of term totals for a set of records, sorted descending.
+     *
+     * @param array  $where
+     * @param string $tex   Column name like "tex1"
+     * @return Collection
+     */
+    public function getTermTotalsDescending(array $where, string $tex): Collection
     {
-        return AssessmentRecord::where($where)->whereNotNull($tex)->orderBy($tex, 'DESC')->select($tex)->get()->pluck($tex);
+        return AssessmentRecord::where($where)
+            ->whereNotNull($tex)
+            ->orderByDesc($tex)
+            ->select($tex)
+            ->get()
+            ->pluck($tex);
     }
 
-    public function getSubjectMark($exam, $class_id, $sub_id, $st_id, $year)
+    /**
+     * Get the term mark for a specific subject, student, exam, and class.
+     *
+     * @param mixed  $exam
+     * @param int    $class_id
+     * @param int    $sub_id
+     * @param int    $st_id
+     * @param string $year
+     * @return float|null
+     */
+    public function getSubjectTermMark($exam, int $class_id, int $sub_id, int $st_id, string $year): ?float
     {
-        $d = ['exam_id' => $exam->id, 'my_class_id' => $class_id, 'subject_id' => $sub_id, 'student_id' => $st_id, 'year' => $year];
+        $d = [
+            'exam_id' => $exam->id,
+            'my_class_id' => $class_id,
+            'subject_id' => $sub_id,
+            'student_id' => $st_id,
+            'year' => $year
+        ];
         $tex = "tex{$exam->term}";
-
-        return AssessmentRecord::where($d)->select($tex)->get()->first()->$tex;
+        $record = AssessmentRecord::where($d)->select($tex)->first();
+        return $record ? $record->$tex : null;
     }
 
-    public function getSubPos($st_id, $exam, $class_id, $sub_id, $year)
+    /**
+     * Get a student's subject position (rank) within a class.
+     *
+     * @param int   $st_id
+     * @param mixed $exam
+     * @param int   $class_id
+     * @param int   $sub_id
+     * @param string $year
+     * @return int|null
+     */
+    public function getSubjectPosition(int $st_id, $exam, int $class_id, int $sub_id, string $year): ?int
     {
         $d = ['exam_id' => $exam->id, 'my_class_id' => $class_id, 'subject_id' => $sub_id, 'year' => $year];
         $tex = "tex{$exam->term}";
 
-        $sub_mk = $this->getSubjectMark($exam, $class_id, $sub_id, $st_id, $year);
-        $sub_mks = AssessmentRecord::where($d)->whereNotNull($tex)->orderBy($tex, 'DESC')->select($tex)->get()->pluck($tex);
+        $sub_mk = $this->getSubjectTermMark($exam, $class_id, $sub_id, $st_id, $year);
+        $sub_mks = AssessmentRecord::where($d)
+            ->whereNotNull($tex)
+            ->orderByDesc($tex)
+            ->select($tex)
+            ->get()
+            ->pluck($tex);
 
         $position = $sub_mks->search($sub_mk);
         return ($position !== false) ? $position + 1 : null;
     }
 
-    public function firstOrCreateRec($sid, $class_id, $sec_id, $exam_id, $year, $sub_id, $mark_id, $assessment_id)
+    /**
+     * Create an assessment record if it doesn't already exist.
+     *
+     * @param int $sid          student_id
+     * @param int $class_id     my_class_id
+     * @param int $sec_id       section_id
+     * @param int $exam_id
+     * @param string $year
+     * @param int $sub_id       subject_id
+     * @param int $mark_id
+     * @param int $assessment_id
+     * @return AssessmentRecord
+     */
+    public function firstOrCreateAssessmentRecord(int $sid, int $class_id, int $sec_id, int $exam_id, string $year, int $sub_id, int $mark_id, int $assessment_id): AssessmentRecord
     {
         return AssessmentRecord::firstOrCreate([
             'student_id' => $sid,

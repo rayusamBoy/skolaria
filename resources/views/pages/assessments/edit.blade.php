@@ -111,7 +111,7 @@
                     </table>
                 </td>
                 {{-- Exam --}}
-                <td class="termed-test-data"><input readonly="readonly" title="TERMED TEST ({{ $exam->tdt_denominator }})" min="0" max="{{ $exam->tdt_denominator }}" class="text-center cursor-not-allowed" name="exm_{{ $asmnt->id }}" value="{{ $asmnt->exm }}" type="number"></td>
+                <td class="termed-test-data"><input readonly="readonly" title="TERMED TEST ({{ $exam->tdt_denominator }})" min="0" max="{{ $exam->tdt_denominator }}" class="text-center cursor-not-allowed" name="exm_{{ $asmnt->id }}" value="{{ $asmnt->evaluated_exam_mark }}" type="number"></td>
             </tr>
             @endforeach
         </tbody>

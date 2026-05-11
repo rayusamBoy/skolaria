@@ -5,7 +5,7 @@
 @pushOnce('css')
 <style>
     .page-content.app-cover {
-        background-image: url("{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('type' , 'logo')) }}");
+        background-image: url("{{ Usr::getTenancyAwareImgOrDefaultBgUrl($settings->firstWhere('key' , 'logo')) }}");
         background-repeat: no-repeat;
         background-position: center;
         background-size: contain;
@@ -59,7 +59,7 @@
                                 </div>
 
                                 <div class="col-6">
-                                    <a class="btn btn-link" href="{{ (url()->previous() == url()->current()) ? url('/dashboard') : url()->previous() }}">
+                                    <a class="btn btn-link" href="{{ (url()->previous() === url()->current()) ? route('dashboard') : url()->previous() }}">
                                         Return Back
                                     </a>
                                 </div>

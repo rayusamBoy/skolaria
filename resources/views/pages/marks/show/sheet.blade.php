@@ -21,8 +21,8 @@
             <td>{{ data_get($mk, "tex{$ex->term}", '—') }}</td>
             {{--Grade, Subject Position & Remarks--}}
             <td>{{ $mk->grade?->name ?? '—' }}</td>
-            <td>{!! $mk->grade ? Mk::getSuffix($mk->sub_pos) : '—' !!}</td>
-            <td>{{ $mk->grade?->remark ?? '—' }}</td>
+            <td>{!! $mk->grade ? Mk::getOrdinalSuffix($mk->subject_position) : '—' !!}</td>
+            <td>{{ $mk->grade?->remarks ?? '—' }}</td>
             @endforeach
         </tr>
         @endif
@@ -30,17 +30,17 @@
         <tr>
             <td colspan="1"><strong>TOTAL SCORES: </strong> {{ $exr->total ?? 'N/A' }}</td>
             <td colspan="1"><strong>GPA: </strong> {{ $exr->gpa }} of 5</td>
-            <td colspan="2"><strong>FINAL AVERAGE: </strong> {{ $exr->ave ?? 'N/A' }}</td>
-            <td colspan="2"><strong>CLASS AVERAGE: </strong> {{ $exr->class_ave ?? 'N/A' }}</td>
+            <td colspan="2"><strong>FINAL AVERAGE: </strong> {{ $exr->average ?? 'N/A' }}</td>
+            <td colspan="2"><strong>CLASS AVERAGE: </strong> {{ $exr->class_average ?? 'N/A' }}</td>
         </tr>
         <tr>
             <td colspan="2"><strong>DIVISION: </strong>{{ $exr->division->name ?? 'N/A' }} <strong> of points </strong>{{ $exr->points ?? 'N/A' }}</td>
             <td colspan="2"><strong>FINAL AVERAGE GRADE: </strong> {{ $exr->grade?->name ?? 'N/A' }}</td>
-            <td colspan="2"><strong>CLASS AVERAGE GRADE: </strong> {{ Mk::getGrade($exr->class_ave) ?? 'N/A' }}</td>
+            <td colspan="2"><strong>CLASS AVERAGE GRADE: </strong> {{ Mk::getGradeNameByScore($exr->class_average) ?? 'N/A' }}</td>
         </tr>
         <tr>
-            <td colspan="3"><strong>FINAL POSITION SECTIONWISE ({{ $exr->section->name }}): </strong>{{ $exr->pos }} of {{ Mk::getSectionCount($ex->id, $exr->my_class_id, $exr->section_id) }}</td>
-            <td colspan="3"><strong>FINAL POSITION CLASSWISE: </strong>{{ $exr->class_pos }} of {{ Mk::getClassCount($ex->id, $exr->my_class_id) }}</td>
+            <td colspan="3"><strong>FINAL POSITION SECTIONWISE ({{ $exr->section->name }}): </strong>{{ $exr->section_position }} of {{ Mk::getSectionCount($ex->id, $exr->my_class_id, $exr->section_id) }}</td>
+            <td colspan="3"><strong>FINAL POSITION CLASSWISE: </strong>{{ $exr->class_position }} of {{ Mk::getClassCount($ex->id, $exr->my_class_id) }}</td>
         </tr>
     </tbody>
 </table>

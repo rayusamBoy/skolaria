@@ -12,7 +12,7 @@
     @endforeach
 
     <td class="text-center text-red-600">{{ $row['total'] ?? '—' }}</td>
-    <td class="text-center text-blue-800">{{ $row['ave'] ?? '—' }}</td>
+    <td class="text-center text-blue-800">{{ $row['average'] ?? '—' }}</td>
     <td class="text-center text-orange-800">{{ $row['grade'] ?? '—' }}</td>
     <td class="text-center text-green-800">{{ $row['pos'] ?? '—' }}</td>
 </tr>
@@ -34,6 +34,6 @@
     <td class="pl-2" colspan="3">SUBJECT GRADE</td>
     @foreach ($subjects as $sub)
     @php $avg = round($asr->where('subject_id', $sub->id)->avg($tex), 2) @endphp
-    <td class="text-center" colspan="3">{{ $avg !== null ? Mk::getGrade($avg) : '' }}</td>
+    <td class="text-center" colspan="3">{{ $avg !== null ? Mk::getGradeNameByScore($avg) : '' }}</td>
     @endforeach
 </tr>

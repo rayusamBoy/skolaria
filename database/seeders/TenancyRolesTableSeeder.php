@@ -49,100 +49,119 @@ class TenancyRolesTableSeeder extends Seeder
                 'patterns' => ['/.*/'],
                 'exclude' => [
                     '/^messages\.(delete)/',
-                    // Admin does not manage roles beyond viewing
-                    '/^roles\.(create|update|delete)/',
+                    '/^roles\.(store|update|delete)/',
+                    '/^bin\.(empty_soft_deleted_model|user_force_delete)/',
                 ],
             ],
 
             config('roles.default_roles.tenant.teacher') => [
                 'patterns' => [
-                    '/^my_classes?\.view/',          // view class list
-                    '/^sections?\.view/',            // view sections
-                    '/^student_records?\.view/',     // view student details
-                    '/^student_records?\.list_by_class/', // see students by class
-                    '/^marks?\./',                   // enter / update marks for own subjects
-                    '/^assessments?\./',             // enter / update assessments
-                    '/^grades?\.view/',              // view grade definitions
-                    '/^divisions?\.view/',           // view division definitions
-                    '/^subjects?\.view/',            // view subjects (assigned subjects are filtered by controller)
-                    '/^exams?\.view/',               // view exams list
-                    '/^time_tables?\.(view)/', // manage own timetable
-                    '/^schedules?\.view/',           // view calendar events
-                    '/^my_accounts?\./',             // own profile & password
-                    '/^messages?\.(view|create|store)/', // message students/parents
-                    '/^notices?\.view/',             // view notices
-                    '/^statistics?\.view/',          // view statistics
+                    '/^my_classes?\.view/',
+                    '/^sections?\.view/',
+                    '/^student_records?\.view/',
+                    '/^student_records?\.list_by_class/',
+                    '/^marks?\./',
+                    '/^assessments?\./',
+                    '/^grades?\.view/',
+                    '/^divisions?\.view/',
+                    '/^subjects?\.view/',
+                    '/^exams?\.view/',
+                    '/^time_tables?\.(view)/',
+                    '/^schedules?\.view/',
+                    '/^my_accounts?\./',
+                    '/^messages?\.(view|create|store)/',
+                    '/^statistics?\.view/',
+                    '/^dashboard\.stats\.active_students/',
+                    '/^dashboard\.stats\.overall_students/',
+                    '/^dashboard\.stats\.assessments_declared/',
+                    '/^dashboard\.stats\.subjects/',
+                    '/^dashboard\.stats\.classes/',
+                    '/^dashboard\.stats\.results_declared/',
+                    '/^dashboard\.charts\.students_per_class/',
+                    '/^dashboard\.modal\.student_breakdown_modal/',
+                    '/^pins\.enter_pin/',
                 ],
                 'exclude' => [
                     '/^messages\.(delete|update|user_delete|remove_participant)/',
                     '/^marks\.(batch_delete)/',
-                    '/^assessments\.(print_progressive|progressive_select)/', // no progressive sheet admin
+                    '/^assessments\.(print_progressive|progressive_select)/',
                 ],
             ],
 
             config('roles.default_roles.tenant.student') => [
                 'patterns' => [
-                    '/^my_accounts?\./',               // profile & password
-                    '/^marks?\.year_selector/',        // view own marksheet
-                    '/^marks?\.year_selected/',
-                    '/^marks?\.show/',
-                    '/^assessments?\.year_selector/',
-                    '/^assessments?\.year_selected/',
-                    '/^assessments?\.show/',
-                    '/^subjects?\.view/',              // available subjects
-                    '/^books?\.view/',                 // library catalogue
-                    '/^book_requests?\.view/', // request books
-                    '/^notices?\.view/',               // view notices
-                    '/^schedules?\.view/',             // calendar events
-                    '/^time_tables?\.view/',           // own timetable
-                    '/^statistics?\.view/',            // own performance charts
-                ],
-                'exclude' => [],
-            ],
-
-            config('roles.default_roles.tenant.parent') => [
-                'patterns' => [
-                    '/^my_accounts?\./',               // profile & password
+                    '/^my_accounts?\./',
                     '/^marks?\.year_selector/',
                     '/^marks?\.year_selected/',
                     '/^marks?\.show/',
                     '/^assessments?\.year_selector/',
                     '/^assessments?\.year_selected/',
                     '/^assessments?\.show/',
-                    '/^time_tables?\.view/',           // child's timetable
+                    '/^subjects?\.view/',
+                    '/^books?\.view/',
+                    '/^book_requests?\.view/',
                     '/^notices?\.view/',
                     '/^schedules?\.view/',
-                    '/^childrens?\./',                 // my children list
+                    '/^time_tables?\.view/',
                     '/^statistics?\.view/',
+                    '/^pins\.enter_pin/',
+                ],
+                'exclude' => [],
+            ],
+
+            config('roles.default_roles.tenant.parent') => [
+                'patterns' => [
+                    '/^my_accounts?\./',
+                    '/^marks?\.year_selector/',
+                    '/^marks?\.year_selected/',
+                    '/^marks?\.show/',
+                    '/^assessments?\.year_selector/',
+                    '/^assessments?\.year_selected/',
+                    '/^assessments?\.show/',
+                    '/^time_tables?\.view/',
+                    '/^notices?\.view/',
+                    '/^schedules?\.view/',
+                    '/^childrens?\./',
+                    '/^statistics?\.view/',
+                    '/^pins\.enter_pin/',
                 ],
                 'exclude' => [],
             ],
 
             config('roles.default_roles.tenant.accountant') => [
                 'patterns' => [
-                    '/^payments?\./',                  // full payment management
-                    '/^student_records?\.view/',       // view student details
-                    '/^student_records?\.list_by_class/', // list students by class
-                    '/^my_accounts?\./',               // profile & password
-                    '/^notices?\./',                   // manage own notices
-                    '/^statistics?\./',                // financial reports
-                    '/^query_builders?\.(view|select|print_users_data)/', // optional reporting
+                    '/^payments?\./',
+                    '/^student_records?\.view/',
+                    '/^student_records?\.list_by_class/',
+                    '/^my_accounts?\./',
+                    '/^notices?\./',
+                    '/^query_builders?\.(view|select)/',
                     '/^schedules?\.view/',
+                    '/^dashboard\.stats\.active_students/',
+                    '/^dashboard\.stats\.payments_done/',
+                    '/^dashboard\.charts\.payments/',
+                    '/^pins\.enter_pin/',
                 ],
-                'exclude' => [],
+                'exclude' => [
+                    '/^query_builders?\.(print_users_data)/',
+                ],
             ],
 
             config('roles.default_roles.tenant.librarian') => [
                 'patterns' => [
                     '/^books?\./',
                     '/^book_requests?\./',
+                    '/^student_records?\.view/',
+                    '/^student_records?\.list_by_class/',
                     '/^my_accounts?\./',
-                    '/^schedules?\.view/',   // see events
+                    '/^schedules?\.view/',
                     '/^notices?\.view/',
+                    '/^dashboard\.stats\.books/',
+                    '/^dashboard\.stats\.book_requests/',
+                    '/^pins\.enter_pin/',
                 ],
                 'exclude' => [],
             ],
-
         ];
 
         // Helper: collect permission names matching any of the patterns, then exclude those matching exclude patterns

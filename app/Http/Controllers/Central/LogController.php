@@ -30,9 +30,9 @@ class LogController extends Controller
      */
     public function index(): View
     {
-        $data['activities'] = $this->log->getActivites(['causer']);
+        $data['activities'] = $this->log->getActivities(['causer']);
         $data['login_histories'] = $this->log->getLoginHistories(['user'], 'last_login');
-        $data['user_roles'] = $this->user->getRoles();
+        $data['user_roles'] = $this->user->getRolesByName();
 
         return view('pages.central.logs', $data);
     }
@@ -43,11 +43,11 @@ class LogController extends Controller
     public function reset_login_hist($user): RedirectResponse
     {
         $data = [
-            'login_times' => 0,
+            'login_count' => 0,
             'last_reset' => Carbon::now(),
         ];
 
-        $this->log->updateLoginHist(['user_id' => $user], $data);
+        $this->log->updateLoginHistory(['user_id' => $user], $data);
 
         return back()->with('flash_success', __('msg.login_history_reset_success'));
     }
@@ -57,7 +57,7 @@ class LogController extends Controller
      */
     public function delete_activity($log_id): RedirectResponse
     {
-        $this->log->deleteActivityLog($log_id);
+        $this->log->deleteActivityById($log_id);
 
         return back()->with('flash_success', __('msg.del_ok'));
     }

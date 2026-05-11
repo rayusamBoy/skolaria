@@ -47,7 +47,7 @@ class AccountSecurityController extends Controller
         $data['QR_Image'] = $qr_image;
         $data['recovery_codes'] = $this->get_recovery_codes();
         $data['browser_sessions'] = $this->get_browser_sessions();
-        $data['users_with_2fa_enabled'] = $this->user->all(['roles'])->whereNotNull('twofa_secret_code');
+        $data['users_with_2fa_enabled'] = $this->user->getAllUsers(['roles'])->whereNotNull('twofa_secret_code');
 
         return view('auth.2fa.account_security', $data);
     }
@@ -117,7 +117,7 @@ class AccountSecurityController extends Controller
             'twofa_recovery_codes' => $twofa_recovery_codes,
         ];
 
-        $this->user->update(auth()->id(), $data);
+        $this->user->updateUsersByColumn(auth()->id(), $data);
         session()->forget('twofa_recovery_codes');
 
         // Mark 2FA as verified for current session
@@ -138,7 +138,7 @@ class AccountSecurityController extends Controller
             return back()->with('pop_error', __('msg.denied'));
         }
 
-        $this->user->update($user_id, ['twofa_secret_code' => null]);
+        $this->user->updateUsersByColumn($user_id, ['twofa_secret_code' => null]);
 
         return back()->with('flash_success', __('msg.update_ok'));
     }

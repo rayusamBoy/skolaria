@@ -4,14 +4,19 @@
 
 @section('content')
 
+@php
+$canEdit = auth()->user()->can($tenant_permissions['sections']['edit']['permission']);
+$canDelete = auth()->user()->can($tenant_permissions['sections']['destroy']['permission']);
+$hasActions = $canEdit || $canDelete;
+@endphp
+
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Class Sections</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
-        {{-- only users who can create sections see the Create tab --}}
         <ul class="nav nav-tabs nav-tabs-highlight">
             <li class="nav-item dropdown">
                 <a href="javascript:;" class="nav-link active dropdown-toggle" data-toggle="dropdown">
@@ -101,7 +106,9 @@
                             <th>Name</th>
                             <th>Class</th>
                             <th>Teacher</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -124,19 +131,18 @@
                                 &mdash;
                                 @endif
                             </td>
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            {{-- Edit --}}
-                                            @can($tenant_permissions['sections']['edit']['permission'])
+                                            @if($canEdit)
                                             <a href="{{ route('sections.edit', $s->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-                                            @endcan
-                                            {{-- Delete --}}
-                                            @can($tenant_permissions['sections']['destroy']['permission'])
+                                            @endif
+                                            @if($canDelete)
                                             <a id="{{ $s->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -144,11 +150,12 @@
                                                 @csrf
                                                 @method('delete')
                                             </form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>

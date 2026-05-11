@@ -10,7 +10,7 @@ class Mark extends Eloquent
 {
     use MassUpdatable;
     
-    protected $fillable = ['exm', 'tex1', 'tex2', 'tex3', 'sub_pos', 'cum', 'cum_ave', 'grade_id', 'year', 'exam_id', 'subject_id', 'my_class_id', 'student_id', 'section_id'];
+    protected $fillable = ['exam_mark', 'tex1', 'tex2', 'tex3', 'subject_position', 'cumulative', 'cumulative_average', 'grade_id', 'year', 'exam_id', 'subject_id', 'my_class_id', 'student_id', 'section_id'];
 
     public function exam()
     {

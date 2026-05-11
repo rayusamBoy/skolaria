@@ -20,8 +20,8 @@ class StartsWithProperPhoneCode implements ValidationRule, DataAwareRule
         // Attempt to get the ID from the data (as usual for form request validation), 
         // or take one value for Excel validation, since the Excel package validates in batches 
         // and the value is the same for all rows.
-        $nal_id = $this->data['nal_id'] ?? array_column($this->data, 'nal_id')[0];
-        $phone_code = Nationality::where('id', $nal_id)->value('phone_code');
+        $nationality_id = $this->data['nationality_id'] ?? array_column($this->data, 'nationality_id')[0];
+        $phone_code = Nationality::where('id', $nationality_id)->value('phone_code');
         $phone_code = "+$phone_code";
 
         if (!Str::startsWith($value, $phone_code))

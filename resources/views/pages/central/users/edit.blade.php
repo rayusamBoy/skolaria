@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Edit User Details</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -64,28 +64,27 @@
                             <input id="email" value="{{ $user->email }}" type="email" name="email" class="form-control" placeholder="your@email.com">
                         </div>
                     </div>
-                    {{-- PHONE --}}
+                    {{-- MOBILES --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="phone">Phone:</label>
-                            <input id="phone" value="{{ $user->phone }}" type="text" name="phone" class="form-control" placeholder="+255123456789">
+                            <label for="primary_mobile">Primary Mobile:</label>
+                            <input id="primary_mobile" value="{{ $user->primary_mobile }}" type="text" name="primary_mobile" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
-                    {{-- TELEPHONE --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="phone2">Telephone:</label>
-                            <input id="phone2" value="{{ $user->phone2 }}" type="text" name="phone2" class="form-control" placeholder="+255123456789">
+                            <label for="secondary_mobile">Secondary Mobile:</label>
+                            <input id="secondary_mobile" value="{{ $user->secondary_mobile }}" type="text" name="secondary_mobile" class="form-control" placeholder="+255123456789">
                         </div>
                     </div>
                     {{-- BLOOD GROUP --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="bg_id">Blood Group: </label>
-                            <select class="select form-control" id="bg_id" name="bg_id" data-placeholder="Choose..">
+                            <label for="blood_group_id">Blood Group: </label>
+                            <select class="select form-control" id="blood_group_id" name="blood_group_id" data-placeholder="Choose..">
                                 <option value=""></option>
                                 @foreach($blood_groups as $bg)
-                                <option @selected($user->bg_id == $bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
+                                <option @selected($user->blood_group_id == $bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -108,11 +107,11 @@
                     {{-- NATIONALITY --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="nal_id">Nationality: <span class="text-danger">*</span></label>
-                            <select onchange="getState(this.value)" data-placeholder="Choose..." required name="nal_id" id="nal_id" class="select-search form-control">
+                            <label for="nationality_id">Nationality: <span class="text-danger">*</span></label>
+                            <select onchange="getState(this.value)" data-placeholder="Choose..." required name="nationality_id" id="nationality_id" class="select-search form-control">
                                 <option value=""></option>
                                 @foreach($nationals as $nal)
-                                <option @selected($user->nal_id == $nal->id) value="{{ $nal->id }}">{{ $nal->name }}</option>
+                                <option @selected($user->nationality_id == $nal->id) value="{{ $nal->id }}">{{ $nal->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -137,15 +136,15 @@
                     {{-- PRIMARY ID --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="primary_id" class="d-block">Primary ID:</label>
-                            <input id="primary_id" value="{{ $user->primary_id ?? '' }}" type="text" name="primary_id" data-mask="www?wwwwwwwwwwwwwwwww" class="form-control" placeholder="123456789">
+                            <label for="primary_identification_number" class="d-block">Primary ID number:</label>
+                            <input id="primary_identification_number" value="{{ $user->primary_identification_number ?? '' }}" type="text" name="primary_identification_number" class="form-control" placeholder="123456789">
                         </div>
                     </div>
                     {{-- SECONDARY ID --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="secondary_id" class="d-block">Secondary ID:</label>
-                            <input id="secondary_id" value="{{ $user->secondary_id ?? '' }}" type="text" name="secondary_id" data-mask="www?wwwwwwwwwwwwwwwww" class="form-control" placeholder="12345678123451234512">
+                            <label for="secondary_identification_number" class="d-block">Secondary ID number:</label>
+                            <input id="secondary_identification_number" value="{{ $user->secondary_identification_number ?? '' }}" type="text" name="secondary_identification_number" class="form-control" placeholder="12345678123451234512">
                         </div>
                     </div>
                     {{-- RELIGION --}}
@@ -163,8 +162,8 @@
                     {{-- DOB --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="dob">Date of Birth:</label>
-                            <input id="dob" name="dob" value="{{ $user->dob }}" type="text" class="form-control date-pick" placeholder="Select Date...">
+                            <label for="date_of_birth">Date of Birth:</label>
+                            <input id="date_of_birth" name="date_of_birth" value="{{ $user->date_of_birth }}" type="text" class="form-control date-pick" placeholder="Select Date...">
                         </div>
                     </div>
                 </div>
@@ -188,7 +187,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="emp-date">Date of Employment:</label>
-                            <input autocomplete="off" id="emp-date" name="emp_date" value="{{ $staff_rec->emp_date ?? '' }}" type="text" class="form-control date-pick" placeholder="Select Date...">
+                            <input autocomplete="off" id="emp-date" name="employment_date" value="{{ $staff_rec->employment_date ?? '' }}" type="text" class="form-control date-pick" placeholder="Select Date...">
                         </div>
                     </div>
                     {{-- DATE OF CONFIRMATION --}}
@@ -218,15 +217,15 @@
                     {{-- SOCIAL SECURITY NUMBER --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="ss_number">Social Security Number:</label>
-                            <input id="ss_number" name="ss_number" value="{{ $staff_rec->ss_number ?? '' }}" type="number" min="1" class="form-control">
+                            <label for="social_security_number">Social Security Number:</label>
+                            <input id="social_security_number" name="social_security_number" value="{{ $staff_rec->social_security_number ?? '' }}" type="number" min="1" class="form-control">
                         </div>
                     </div>
                     {{-- EMPLOYMENT NUMBER --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="emp_no">Employment Number:</label>
-                            <input id="emp_no" name="emp_no" value="{{ $staff_rec->emp_no ?? '' }}" type="number" min="1" class="form-control">
+                            <label for="employment_number">Employment Number:</label>
+                            <input id="employment_number" name="employment_number" value="{{ $staff_rec->employment_number ?? '' }}" type="number" min="1" class="form-control">
                         </div>
                     </div>
                     {{-- TIN NUMBER --}}
@@ -240,7 +239,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label>Bank Account Number:</label>
-                            <input name="bank_acc_no" value="{{ $staff_rec->bank_acc_no ?? '' }}" type="number" class="form-control">
+                            <input name="bank_account_number" value="{{ $staff_rec->bank_account_number ?? '' }}" type="number" class="form-control">
                         </div>
                     </div>
                 </div>
@@ -292,14 +291,14 @@
                             </select>
                         </div>
                     </div>
-                    {{-- ROLE --}}
+                    {{-- DESIGNATION --}}
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="role">Role: </label>
+                            <label for="role">Designation: </label>
                             <select class="select form-control" id="role" name="role" data-placeholder="Choose..">
                                 <option value=""></option>
-                                @foreach(Usr::getStaffRoles() as $role)
-                                <option @selected($staff_rec?->role == $role) value="{{ $role }}">{{ $role }}</option>
+                                @foreach(Usr::getStaffDesignations() as $designation)
+                                <option @selected($staff_rec?->designation == $designation) value="{{ $designation }}">{{ $designation }}</option>
                                 @endforeach
                             </select>
                         </div>

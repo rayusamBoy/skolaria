@@ -8,7 +8,7 @@
     <div class="col-md-3 text-center">
         <div class="card">
             <div class="card-body">
-                <img style="width: 90%; height:90%" src="{{ Usr::getTenancyAwarePhoto($user->photo) }}" alt="photo" class="rounded-circle">
+                <img style="width: 90%; height:90%" src="{{ Usr::getTenancyAwarePhotoUrl($user->photo_path) }}" alt="photo" class="rounded-circle">
                 <br>
                 <h3 class="mt-3">{{ $user->name }}</h3>
             </div>
@@ -53,16 +53,16 @@
                                     <td class="break-all">{{ $user->email }}</td>
                                 </tr>
                                 @endif
-                                @if($user->primary_id)
+                                @if($user->primary_identification_number)
                                 <tr>
-                                    <td class="font-weight-bold">Primary ID</td>
-                                    <td class="break-all">{{ $user->primary_id ?? '—' }}</td>
+                                    <td class="font-weight-bold">Primary ID number</td>
+                                    <td class="break-all">{{ $user->primary_identification_number ?? '—' }}</td>
                                 </tr>
                                 @endif
-                                @if($user->secondary_id)
+                                @if($user->secondary_identification_number)
                                 <tr>
-                                    <td class="font-weight-bold">Secondary ID</td>
-                                    <td class="break-all">{{ $user->secondary_id ?? '—' }}</td>
+                                    <td class="font-weight-bold">Secondary ID number</td>
+                                    <td class="break-all">{{ $user->secondary_identification_number ?? '—' }}</td>
                                 </tr>
                                 @endif
                                 @if($user->username)
@@ -71,25 +71,25 @@
                                     <td class="break-all">{{ $user->username }}</td>
                                 </tr>
                                 @endif
-                                @if($user->phone)
+                                @if($user->primary_mobile || $user->secondary_mobile)
                                 <tr>
-                                    <td class="font-weight-bold">Phone</td>
-                                    <td>{{ $user->phone.' '.$user->phone2 }}</td>
+                                    <td class="font-weight-bold">Mobile</td>
+                                    <td>{{ $user->primary_mobile.' '.$user->secondary_mobile }}</td>
                                 </tr>
                                 @endif
-                                @if($user->dob)
+                                @if($user->date_of_birth)
                                 <tr>
                                     <td class="font-weight-bold">Birthdate</td>
-                                    <td class="break-all">{{ $user->dob }}</td>
+                                    <td class="break-all">{{ $user->date_of_birth }}</td>
                                 </tr>
                                 @endif
-                                @if($user->bg_id)
+                                @if($user->blood_group_id)
                                 <tr>
                                     <td class="font-weight-bold">Blood Group</td>
                                     <td>{{ $user->blood_group->name }}</td>
                                 </tr>
                                 @endif
-                                @if($user->nal_id)
+                                @if($user->nationality_id)
                                 <tr>
                                     <td class="font-weight-bold">Nationality</td>
                                     <td>{{ $user->nationality->name }}</td>
@@ -124,7 +124,7 @@
                             <tbody>
                                 <tr>
                                     <td class="font-weight-bold">Date of Employment</td>
-                                    <td class="break-all">{{ $staff_rec->emp_date ?? '—' }}</td>
+                                    <td class="break-all">{{ $staff_rec->employment_date ?? '—' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">Confirmation Date</td>
@@ -140,11 +140,11 @@
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">ZSSSF Number</td>
-                                    <td class="break-all">{{ $staff_rec->ss_number ?? '—' }}</td>
+                                    <td class="break-all">{{ $staff_rec->social_security_number ?? '—' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">Employment Number</td>
-                                    <td class="break-all">{{ $staff_rec->emp_no ?? '—' }}</td>
+                                    <td class="break-all">{{ $staff_rec->employment_number ?? '—' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">TIN Number</td>
@@ -152,7 +152,7 @@
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">Bank Account</td>
-                                    <td class="break-all">{{ $staff_rec->bank_acc_no ?? '—' }} {{ $staff_rec->bank_name ?? '' }}</td>
+                                    <td class="break-all">{{ $staff_rec->bank_account_number ?? '—' }} {{ $staff_rec->bank_name ?? '' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">Education Level</td>
@@ -167,8 +167,8 @@
                                     <td class="break-all">{{ $staff_rec->year_graduated ?? '—' }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="font-weight-bold">Role</td>
-                                    <td class="break-all">{{ $staff_rec->role ?? '—' }}</td>
+                                    <td class="font-weight-bold">Designation</td>
+                                    <td class="break-all">{{ $staff_rec->designation ?? '—' }}</td>
                                 </tr>
                                 @if(isset($staff_rec->subjects_studied))
                                 <tr>

@@ -39,7 +39,6 @@ class SubjectCreate extends FormRequest
     {
         return [
             'my_class_id' => 'class',
-            'slug' => 'short name',
         ];
     }
 

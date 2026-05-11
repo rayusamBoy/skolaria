@@ -31,10 +31,10 @@ class MarkSelector extends FormRequest
     public function attributes()
     {
         return [
-            'exam_id' => 'Exam',
-            'my_class_id' => 'Class',
-            'section_id' => 'Section',
-            'subject_id' => 'Subject',
+            'exam_id' => 'exam',
+            'my_class_id' => 'class',
+            'section_id' => 'section',
+            'subject_id' => 'subject',
         ];
     }
 }

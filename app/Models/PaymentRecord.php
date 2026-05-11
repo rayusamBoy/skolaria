@@ -11,10 +11,10 @@ class PaymentRecord extends Eloquent
 {
     use LogsActivity;
 
-    protected $fillable =['student_id', 'payment_id', 'amt_paid', 'year', 'paid', 'balance', 'ref_no'];
+    protected $fillable =['student_id', 'payment_id', 'amount_paid', 'year', 'is_paid', 'balance', 'reference_number'];
 
     protected $casts = [
-        'paid' => 'boolean',
+        'is_paid' => 'boolean',
     ];
     
     public function payment()
@@ -29,7 +29,7 @@ class PaymentRecord extends Eloquent
 
     public function receipt()
     {
-        return $this->hasMany(Receipt::class, 'pr_id');
+        return $this->hasMany(Receipt::class);
     }
 
     public function getActivitylogOptions(): LogOptions

@@ -1,7 +1,7 @@
 <div class="card">
     <div class="card-header header-elements-inline bg-dark">
         <h6 class="card-title font-weight-bold">Assessment Comments</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body collapse">

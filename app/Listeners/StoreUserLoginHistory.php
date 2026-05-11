@@ -20,6 +20,6 @@ class StoreUserLoginHistory
         $current_timestamp = Carbon::now()->toDateTimeString();
         
         $saved_hist = LoginHistory::firstOrCreate(['user_id' => $user->id]);
-        $saved_hist->update(['last_login' => $current_timestamp, 'login_times' => (int) $saved_hist->login_times + 1]);
+        $saved_hist->update(['last_login' => $current_timestamp, 'login_count' => (int) $saved_hist->login_count + 1]);
     }
 }

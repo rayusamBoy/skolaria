@@ -4,10 +4,16 @@
 
 @section('content')
 
+@php
+$canEdit = auth()->user()->can($tenant_permissions['my_classes']['edit']['permission']);
+$canDelete = auth()->user()->can($tenant_permissions['my_classes']['destroy']['permission']);
+$hasActions = $canEdit || $canDelete;
+@endphp
+
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Classes</h6>
-        {!! Qs::getPanelOptions() !!}
+        {!! Qs::getPanelOptionsHtml() !!}
     </div>
 
     <div class="card-body">
@@ -31,7 +37,9 @@
                             <th>S/N</th>
                             <th>Name</th>
                             <th>Class Type</th>
+                            @if($hasActions)
                             <th class="text-center">Action</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -40,18 +48,18 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $c->name }}</td>
                             <td>{{ $c->class_type->name }}</td>
+                            @if($hasActions)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
                                         <a class="material-symbols-rounded" href="javascript:;" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @can($tenant_permissions['my_classes']['edit']['permission'])
+                                            @if($canEdit)
                                             <a href="{{ route('classes.edit', $c->id) }}" class="dropdown-item">
                                                 <i class="material-symbols-rounded">edit</i> Edit
                                             </a>
-                                            @endcan
-
-                                            @can($tenant_permissions['my_classes']['destroy']['permission'])
+                                            @endif
+                                            @if($canDelete)
                                             <a id="class-delete-{{ $c->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
@@ -59,11 +67,12 @@
                                                 @csrf
                                                 @method('delete')
                                             </form>
-                                            @endcan
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>

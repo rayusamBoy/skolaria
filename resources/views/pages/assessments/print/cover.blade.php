@@ -87,7 +87,7 @@
         <table class="photo" width="100%">
             <tr>
                 <td style="width: 120px; height: 120px; float: right;">
-                    <img src="{{ Usr::getTenancyAwarePhoto($student->user->photo) }}" alt="{{ $student->user->name }}" width="120" height="120">
+                    <img src="{{ Usr::getTenancyAwarePhotoUrl($student->user->photo_path) }}" alt="{{ $student->user->name }}" width="120" height="120">
                 </td>
             </tr>
         </table>
@@ -103,7 +103,7 @@
                     <h4><strong>Name of School:</strong></h4>
                 </td>
                 <td class="student-info">
-                    <h5>{{ ucwords(strtolower($settings->firstWhere('type', 'system_name')->description)) }}</h5>
+                    <h5>{{ ucwords(strtolower($settings->firstWhere('key', 'system_name')->value)) }}</h5>
                 </td>
             </tr>
 
@@ -121,7 +121,7 @@
                     <h4><strong>Race and Religion:</strong></h4>
                 </td>
                 <td class="student-info">
-                    <h5>{{ Usr::getNationality($student->user->nal_id)->value('subregion') . ' - ' . $student->user->religion }}</h5>
+                    <h5>{{ Usr::getNationality($student->user->nationality_id)->value('subregion') . ' - ' . $student->user->religion }}</h5>
                 </td>
             </tr>
 
@@ -130,7 +130,7 @@
                     <h4><strong>House Number:</strong></h4>
                 </td>
                 <td class="student-info">
-                    <h5>{{ $student->house_no }}</h5>
+                    <h5>{{ $student->house_number }}</h5>
                 </td>
             </tr>
 
@@ -148,7 +148,7 @@
                     <h4><strong>Date Graduated:</strong></h4>
                 </td>
                 <td class="student-info">
-                    <h5>{{ $student->grad_date }}</h5>
+                    <h5>{{ $student->graduated_session }}</h5>
                 </td>
             </tr>
 
@@ -157,7 +157,7 @@
                     <h4><strong>School Admission Number:</strong></h4>
                 </td>
                 <td class="student-info">
-                    <h5>{{ $student->adm_no }}</h5>
+                    <h5>{{ $student->admission_number }}</h5>
                 </td>
             </tr>
 
@@ -166,7 +166,7 @@
                     <h4><strong>Date of Birth:</strong></h4>
                 </td>
                 <td class="student-info">
-                    <h5>{{ $student->user->dob }}</h5>
+                    <h5>{{ $student->user->date_of_birth }}</h5>
                 </td>
             </tr>
         </table>

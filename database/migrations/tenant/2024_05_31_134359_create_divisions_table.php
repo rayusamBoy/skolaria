@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name', 40);
             $table->tinyInteger('points_from');
             $table->tinyInteger('points_to');
-            $table->string('remark', 40)->nullable();
+            $table->string('remarks', 40)->nullable();
             $table->unsignedInteger('class_type_id')->nullable()->index();
             $table->timestamps();
         });

@@ -40,9 +40,9 @@ class ExamController extends Controller
      */
     public function index(): View
     {
-        $data['exams'] = $this->exam->all(['category']);
+        $data['exams'] = $this->exam->getAllExams(['category']);
         $data['exams_cat'] = $this->exam->getCategories();
-        $data['class_types'] = $this->exam->getClassTypes();
+        $data['class_types'] = $this->exam->getAllClassTypes();
         $data['current_session'] = $this->year;
 
         return view('pages.exams.index', $data);
@@ -58,7 +58,7 @@ class ExamController extends Controller
         $data['year'] = $this->year;
 
         $exam = $this->exam->firstOrCreate($data);
-        $classes = $this->my_class->get(['class_type_id' => $class_type_id]);
+        $classes = $this->my_class->getClassesByConditions(['class_type_id' => $class_type_id]);
 
         $this->validateAndSaveNumberFormats($req, $classes, $exam->id);
 
@@ -74,7 +74,7 @@ class ExamController extends Controller
      */
     public function edit($id): View
     {
-        $data['ex'] = $this->exam->getById($id, false, ['category', 'class_type']);
+        $data['ex'] = $this->exam->findExam($id, false, ['category', 'class_type']);
         $data['exams_cat'] = $this->exam->getCategories();
 
         return view('pages.exams.edit', $data);
@@ -85,16 +85,16 @@ class ExamController extends Controller
      */
     public function update(ExamUpdate $req, $id): JsonResponse
     {
-        $exam = $this->exam->getExam(['id' => $id], true, ['assessment'])->first();
+        $exam = $this->exam->getExamsByConditions(['id' => $id], true, ['assessment'])->first();
 
-        if ($exam->locked) {
+        if ($exam->is_locked) {
             return Mk::jsonUpdateDenied();
         }
 
         $data = $req->only($this->getExamDataKeys($req));
         $this->exam->update($id, $data);
 
-        $classes = $this->my_class->get(['class_type_id' => $exam->class_type_id]);
+        $classes = $this->my_class->getClassesByConditions(['class_type_id' => $exam->class_type_id]);
         $this->validateAndUpdateNumberFormats($req, $classes, $exam->id);
         $this->handleAssessmentForExam($req, $exam);
 
@@ -106,6 +106,11 @@ class ExamController extends Controller
      */
     public function destroy($id): RedirectResponse
     {
+        $exam = $this->exam->findExam($id);
+        if ($exam->is_locked) {
+            return back()->with('flash_danger', __('msg.denied'));
+        }
+
         $this->exam->delete($id);
         return back()->with('flash_success', __('msg.del_ok'));
     }
@@ -115,7 +120,12 @@ class ExamController extends Controller
      */
     public function update_lock_state(ExamUpdateLockState $req): JsonResponse
     {
-        $this->exam->update($req->id, $req->only('locked'));
+        $exam = $this->exam->findExam($req->id);
+        if ($exam->is_published) {
+            return Mk::jsonUpdateDenied();
+        }
+
+        $this->exam->update($req->id, $req->only('is_locked'));
         return Mk::json('ok');
     }
 
@@ -124,8 +134,8 @@ class ExamController extends Controller
      */
     public function publish($exam_id): RedirectResponse
     {
-        $this->exam->update($exam_id, ['published' => true, 'locked' => true]);
-        $exam = $this->exam->getById($exam_id);
+        $this->exam->update($exam_id, ['is_published' => true, 'is_locked' => true]);
+        $exam = $this->exam->findExam($exam_id);
 
         return back()
             ->with('flash_success', __('msg.exam_published'))
@@ -157,8 +167,8 @@ class ExamController extends Controller
     {
         $has_assessment = $req->boolean('has_assessment');
         return $has_assessment
-            ? Mk::getExamData()
-            : Mk::getExamData(['ca_student_position_by_value', 'cw_denominator', 'hw_denominator', 'tt_denominator', 'tdt_denominator']);
+            ? Mk::getExamFieldNames()
+            : Mk::getExamFieldNames(['ca_student_position_by_value', 'cw_denominator', 'hw_denominator', 'tt_denominator', 'tdt_denominator']);
     }
 
     /**
@@ -229,7 +239,7 @@ class ExamController extends Controller
     protected function createAssessmentForExam(int $exam_id): void
     {
         $assessment = $this->assessment->firstOrCreate(['exam_id' => $exam_id]);
-        $this->exam->firstOrCreateExamHasAssessment(['exam_id' => $exam_id, 'assessment_id' => $assessment->id]);
+        $this->exam->firstOrCreateExamAssessment(['exam_id' => $exam_id, 'assessment_id' => $assessment->id]);
     }
 
     /**

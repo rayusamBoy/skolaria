@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\StudentRepo;
+use Illuminate\View\View;
 
 class ChildrenController extends Controller
 {
-    protected $student;
+    protected StudentRepo $student;
+
     public function __construct(StudentRepo $student)
     {
         $this->permissionMap = config('permissions.names.tenant.childrens');
@@ -15,9 +17,15 @@ class ChildrenController extends Controller
         $this->student = $student;
     }
 
-    public function children()
+    /**
+     * Display a listing of the authenticated parent's children.
+     */
+    public function children(): View
     {
-        $data['students'] = $this->student->whereRecord(['my_parent_id' => auth()->id()])->with(['my_class', 'section'])->get();
+        $data['students'] = $this->student
+            ->getActiveStudentsQueryWithRelations(['my_parent_id' => auth()->id()])
+            ->with(['my_class', 'section'])
+            ->get();
 
         return view('pages.children', $data);
     }
