@@ -50,8 +50,8 @@
                 </div>
 
                 @if(Usr::tenancyInitialized())
-                @can($tenant_permissions['messages']['index']['permission'])
-                <a class="breadcrumb-elements-item d-none d-md-block" data-toggle="tooltip" title="Messages" href="/messages">@include('messenger.unread-count')</a>
+                @can($tenant_permissions['message_threads']['index']['permission'])
+                <a class="breadcrumb-elements-item d-none d-md-block" data-toggle="tooltip" title="Messages" href="{{ route('message_threads.index') }}">@include('messenger.unread-count')</a>
                 @endcan
                 @can($tenant_permissions['tickets']['index']['permission'])
                 <div class="breadcrumb-elements-item dropdown">

@@ -3,14 +3,14 @@
 <div class="{{ $unread == 0 ? 'card card-collapsed' : 'card' }}">
     <div class="card-header header-elements-inline">
         <h6 class="media-heading card-title">
-            <a href="{{ route('messages.show', Qs::hash($thread->id)) }}">{{ $thread->subject }}</a>
+            <a href="{{ route('message_threads.show', Qs::hash($thread->id)) }}">{{ $thread->subject }}</a>
             <small> ({{ $unread }} unread)</small>
         </h6>
         <div class="header-elements print-none">
             <div class="list-icons">
-                @can($tenant_permissions['messages']['destroy']['permission'])
+                @can($tenant_permissions['message_threads']['destroy']['permission'])
                 <a id="{{ $thread->id }}" type="button" onclick="confirmDelete(this.id)" title="Delete Thread" class="btn btn-danger btn-sm"><i class="material-symbols-rounded">delete</i></button>
-                <form method="post" id="item-delete-{{ $thread->id }}" action="{{ route('messages.destroy', $thread->id) }}" class="hidden">@csrf @method('delete')</form>
+                <form method="post" id="item-delete-{{ $thread->id }}" action="{{ route('message_threads.destroy', $thread->id) }}" class="hidden">@csrf @method('delete')</form>
                 @endcan
                 <a class="list-icons-item" data-action="collapse"></a>
                 <a class="list-icons-item" data-action="remove"></a>
@@ -35,12 +35,12 @@
             <div class="col-md-5">
                 <small><strong>Participants:</strong></small>
                 <p>
-                    @include('pages/modals/participants')
                     <td><a href="javascript:;" data-toggle="modal" data-target="#thread-participants-{{ $thread->id }}">View Participants</a></td>
                 </p>
             </div>
         </div>
     </div>
+    @include('pages/modals/participants')
 </div>
 
 @elseif($thread->isDirtyParticipant(auth()->id()))

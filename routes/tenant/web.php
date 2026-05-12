@@ -16,7 +16,7 @@ use App\Http\Controllers\GradeController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\MarkController;
-use App\Http\Controllers\MessageController;
+use App\Http\Controllers\MessageThreadController;
 use App\Http\Controllers\MyAccountController;
 use App\Http\Controllers\MyClassController;
 use App\Http\Controllers\ChildrenController;
@@ -135,6 +135,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             Route::get('graduated', [StudentRecordController::class, 'graduated'])->name('students.graduated');
             Route::put('{student}/{prom_id}/mark-not-graduated', [StudentRecordController::class, 'mark_not_graduated'])->name('students.mark_not_graduated')->middleware('decodeRouteParams');
             Route::get('class/{class_id}/list', [StudentRecordController::class, 'list_by_class'])->name('students.list_by_class');
+            Route::get('my-profile/{student}', [StudentRecordController::class, 'show_profile'])->name('students.show_profile')->middleware('decodeRouteParams');
 
             /* ID Cards */
             Route::get('id-cards', [StudentIDCardController::class, 'index'])->name('students.id_cards');
@@ -162,11 +163,12 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             Route::put('batch', [StudentRecordController::class, 'batch_store'])->name('students.batch_add');
         });
 
-        /*************** Users (admin operations) *****************/
+        /*************** Users *****************/
         Route::prefix('users')->group(function () {
             Route::get('password/reset/{user}', [UserController::class, 'reset_password'])->name('users.password.reset');
             Route::post('toggle/staff-data-editing', [UserController::class, 'toggle_staff_data_editing'])->name('users.toggle_staff_data_editing');
             Route::post('update/blocked-state', [UserController::class, 'toggle_user_block'])->name('users.toggle_user_block');
+            Route::get('my-profile/{user}', [UserController::class, 'show_profile'])->name('users_profile.show')->middleware('decodeRouteParams');
         });
 
         /*************** Query Builder (reports / printing) *****************/
@@ -306,12 +308,15 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         });
 
         /*************** Messages (threads & participants) **************/
-        Route::prefix('messages')->group(function () {
-            Route::delete('participant/{thread}/{participant}', [MessageController::class, 'remove_participant'])->name('messages.remove_participant');
-            Route::post('participant/activate/all/thread/{thread}', [MessageController::class, 'activate_all_participants'])->name('messages.activate_all_participants');
-            Route::delete('delete/{message}', [MessageController::class, 'user_delete'])->name('messages.user_delete');
-            Route::post('participant/{thread}/last-read', [MessageController::class, 'update_participant_last_read'])->name('messages.update_participant_last_read');
-            Route::post('previous/fetch/{thread}/{current_first_msg_id_in_view}', [MessageController::class, 'load_previous'])->name('messages.load_previous');
+        Route::prefix('threads')->group(function () {
+            // Participants
+            Route::delete('{thread}/participants/{participant}', [MessageThreadController::class, 'remove_participant'])->name('threads.participants.remove');
+            Route::post('{thread}/participants/activate-all', [MessageThreadController::class, 'activate_all_participants'])->name('threads.participants.activate_all');
+            Route::post('{thread}/participants/update/last-read', [MessageThreadController::class, 'update_participant_last_read'])->name('threads.participants.update.last_read');
+            // Messages
+            Route::delete('messages/{message}/user-delete', [MessageThreadController::class, 'user_delete_message'])->name('threads.messages.user_delete');
+            Route::post('{thread}/messages/previous/{current_first_msg_id}', [MessageThreadController::class, 'load_previous_messages'])->name('threads.messages.previous');
+            Route::post('{thread}/add-message', [MessageThreadController::class, 'add_message'])->name('threads.messages.add');
         });
 
         /*************** Subject Record operations **********************/
@@ -336,7 +341,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         Route::resource('dorms', DormController::class);
         Route::resource('payments', PaymentController::class);
         Route::resource('divisions', DivisionController::class);
-        Route::resource('messages', MessageController::class);
+        Route::resource('message_threads', MessageThreadController::class);
         Route::resource('notifications', NotificationController::class)->middleware('universal');
         Route::resource('class_types', ClassTypeController::class);
 

@@ -11,10 +11,10 @@ return [
     */
     'method_map' => [
         'index' => 'view',
-        'show' => 'view',
+        'show' => 'show',
         'list' => 'view',
         'create' => 'create',
-        'store' => 'store',
+        'store' => 'create',
         'edit' => 'update',
         'update' => 'update',
         'destroy' => 'delete',
@@ -71,7 +71,6 @@ return [
     | List of controller paths to be ignored during permission generation.
     */
     'ignore_paths' => [
-        'Controllers\Concerns',
         'Controllers\Auth',
     ],
 
@@ -106,12 +105,12 @@ return [
                     'description' => 'Display a list of all users.',
                 ],
                 'show' => [
-                    'permission' => 'users.view',
-                    'label' => 'View User Details',
+                    'permission' => 'users.show',
+                    'label' => 'View User Details / Profile',
                     'description' => 'View detailed information about a specific user.',
                 ],
                 'store' => [
-                    'permission' => 'users.store',
+                    'permission' => 'users.create',
                     'label' => 'Create Users',
                     'description' => 'Add new user accounts.',
                 ],
@@ -154,7 +153,7 @@ return [
                     'description' => 'Display a list of all roles.',
                 ],
                 'store' => [
-                    'permission' => 'roles.store',
+                    'permission' => 'roles.create',
                     'label' => 'Create Roles',
                     'description' => 'Add new roles.',
                 ],
@@ -255,7 +254,7 @@ return [
                     'description' => 'Use the assessment selection tool.',
                 ],
                 'show' => [
-                    'permission' => 'assessments.view',
+                    'permission' => 'assessments.show',
                     'label' => 'View Assessment Details',
                     'description' => 'View detailed information of a single assessment.',
                 ],
@@ -293,7 +292,7 @@ return [
                     'description' => 'List all book requests.',
                 ],
                 'store' => [
-                    'permission' => 'book_requests.store',
+                    'permission' => 'book_requests.create',
                     'label' => 'Create Book Request',
                     'description' => 'Submit a new book request.',
                 ],
@@ -321,7 +320,7 @@ return [
                     'description' => 'List all books.',
                 ],
                 'store' => [
-                    'permission' => 'books.store',
+                    'permission' => 'books.create',
                     'label' => 'Create Book',
                     'description' => 'Add a new book.',
                 ],
@@ -349,7 +348,7 @@ return [
                     'description' => 'List all divisions.',
                 ],
                 'store' => [
-                    'permission' => 'divisions.store',
+                    'permission' => 'divisions.create',
                     'label' => 'Create Division',
                     'description' => 'Add a new division.',
                 ],
@@ -377,7 +376,7 @@ return [
                     'description' => 'List all dormitories.',
                 ],
                 'store' => [
-                    'permission' => 'dorms.store',
+                    'permission' => 'dorms.create',
                     'label' => 'Create Dorm',
                     'description' => 'Add a new dormitory.',
                 ],
@@ -415,7 +414,7 @@ return [
                     'description' => 'Make exams publicly available.',
                 ],
                 'store' => [
-                    'permission' => 'exams.store',
+                    'permission' => 'exams.create',
                     'label' => 'Create Exam',
                     'description' => 'Add a new exam.',
                 ],
@@ -448,7 +447,7 @@ return [
                     'description' => 'List all grades.',
                 ],
                 'store' => [
-                    'permission' => 'grades.store',
+                    'permission' => 'grades.create',
                     'label' => 'Create Grade',
                     'description' => 'Add a new grade.',
                 ],
@@ -521,7 +520,7 @@ return [
                     'description' => 'Fill students marksheets selection form.',
                 ],
                 'show' => [
-                    'permission' => 'marks.view',
+                    'permission' => 'marks.show',
                     'label' => 'View Marksheet(s)',
                     'description' => 'View detailed information of a marksheet(s).',
                 ],
@@ -552,61 +551,46 @@ return [
                 ],
             ],
 
-            'messages' => [
+            'message_threads' => [
                 'activate_all_participants' => [
-                    'permission' => 'messages.activate_all_participants',
+                    'permission' => 'message_threads.activate_all_participants',
                     'label' => 'Activate All Participants',
                     'description' => 'Activate all participants in a message thread.',
                 ],
                 'create' => [
-                    'permission' => 'messages.create',
-                    'label' => 'Create Messages',
-                    'description' => 'Start new message conversations.',
+                    'permission' => 'message_threads.create',
+                    'label' => 'Create New Messages Thread',
+                    'description' => 'Store a newly created message thread.',
                 ],
                 'destroy' => [
-                    'permission' => 'messages.delete',
+                    'permission' => 'message_threads.delete',
                     'label' => 'Delete Messages Thread',
                     'description' => 'Remove message threads.',
                 ],
-                'load_previous' => [
-                    'permission' => 'messages.load_previous',
-                    'label' => 'Load Previous Messages',
-                    'description' => 'Load older messages in a conversation.',
-                ],
-                'get_users' => [
-                    'permission' => 'messages.get_users',
-                    'label' => 'Get Message Users',
-                    'description' => 'Retrieve list of users for messaging.',
-                ],
                 'index' => [
-                    'permission' => 'messages.view',
-                    'label' => 'View Messages',
-                    'description' => 'List all message conversations.',
+                    'permission' => 'message_threads.view',
+                    'label' => 'View Messages Threads',
+                    'description' => 'View all message threads.',
                 ],
                 'remove_participant' => [
-                    'permission' => 'messages.remove_participant',
+                    'permission' => 'message_threads.remove_participant',
                     'label' => 'Remove Participant',
                     'description' => 'Remove a participant from a conversation.',
                 ],
                 'show' => [
-                    'permission' => 'messages.view',
-                    'label' => 'View Message Details',
-                    'description' => 'View a specific message conversation.',
+                    'permission' => 'message_threads.show',
+                    'label' => 'View Message Thread',
+                    'description' => 'View a specific message thread.',
                 ],
                 'store' => [
-                    'permission' => 'messages.store',
-                    'label' => 'Send Message',
-                    'description' => 'Send a new message.',
+                    'permission' => 'message_threads.create',
+                    'label' => 'Create New Messages Thread',
+                    'description' => 'Store a newly created message thread.',
                 ],
-                'update' => [
-                    'permission' => 'messages.update',
-                    'label' => 'Update Messages',
-                    'description' => 'Edit message content.',
-                ],
-                'user_delete' => [
-                    'permission' => 'messages.user_delete',
-                    'label' => 'User Delete Messages',
-                    'description' => 'Allow users to delete their own messages.',
+                'add_message' => [
+                    'permission' => 'message_threads.add_message',
+                    'label' => 'Add New Message',
+                    'description' => 'Add a new message to an existing thread.',
                 ],
             ],
 
@@ -663,7 +647,7 @@ return [
                     'description' => 'List personal classes.',
                 ],
                 'store' => [
-                    'permission' => 'my_classes.store',
+                    'permission' => 'my_classes.create',
                     'label' => 'Add My Classes',
                     'description' => 'Add classes to personal list.',
                 ],
@@ -691,7 +675,7 @@ return [
                     'description' => 'Manage own/all notices.',
                 ],
                 'store' => [
-                    'permission' => 'notices.store',
+                    'permission' => 'notices.create',
                     'label' => 'Create Notice',
                     'description' => 'Add a new notice.',
                 ],
@@ -787,7 +771,7 @@ return [
                     'description' => 'Choose an academic year for payments.',
                 ],
                 'show' => [
-                    'permission' => 'payments.view',
+                    'permission' => 'payments.show',
                     'label' => 'View Payment Details',
                     'description' => 'View detailed payment information.',
                 ],
@@ -797,7 +781,7 @@ return [
                     'description' => 'Check payment status.',
                 ],
                 'store' => [
-                    'permission' => 'payments.store',
+                    'permission' => 'payments.create',
                     'label' => 'Store Payment',
                     'description' => 'Save payment record.',
                 ],
@@ -830,7 +814,7 @@ return [
                     'description' => 'List all pins.',
                 ],
                 'store' => [
-                    'permission' => 'pins.store',
+                    'permission' => 'pins.create',
                     'label' => 'Store Pins',
                     'description' => 'Save new pins.',
                 ],
@@ -937,7 +921,7 @@ return [
                     'description' => 'List all sections.',
                 ],
                 'store' => [
-                    'permission' => 'sections.store',
+                    'permission' => 'sections.create',
                     'label' => 'Create Section',
                     'description' => 'Add a new section.',
                 ],
@@ -965,7 +949,7 @@ return [
                     'description' => 'List all class types.',
                 ],
                 'store' => [
-                    'permission' => 'class_types.store',
+                    'permission' => 'class_types.create',
                     'label' => 'Create Class Type',
                     'description' => 'Add a new class type.',
                 ],
@@ -1122,12 +1106,12 @@ return [
                     'description' => 'Reset a student\'s password.',
                 ],
                 'show' => [
-                    'permission' => 'student_records.view',
+                    'permission' => 'student_records.show',
                     'label' => 'View Student Details',
                     'description' => 'View detailed student information.',
                 ],
                 'store' => [
-                    'permission' => 'student_records.store',
+                    'permission' => 'student_records.create',
                     'label' => 'Store Student Record',
                     'description' => 'Save new student record.',
                 ],
@@ -1203,12 +1187,12 @@ return [
                     'description' => 'List subject records.',
                 ],
                 'store' => [
-                    'permission' => 'subjects.store',
+                    'permission' => 'subjects.create',
                     'label' => 'Create Subject',
                     'description' => 'Add a new subject.',
                 ],
                 'store_record' => [
-                    'permission' => 'subjects.store.record',
+                    'permission' => 'subjects.create.record',
                     'label' => 'Create Subject Record',
                     'description' => 'Add a new subject record.',
                 ],
@@ -1251,12 +1235,12 @@ return [
                     'description' => 'Reply to a ticket.',
                 ],
                 'store' => [
-                    'permission' => 'tickets.store',
+                    'permission' => 'tickets.create',
                     'label' => 'Create Ticket',
                     'description' => 'Submit a new ticket.',
                 ],
                 'store_message' => [
-                    'permission' => 'tickets.store.message',
+                    'permission' => 'tickets.create.message',
                     'label' => 'Store Ticket Message',
                     'description' => 'Add a message to a ticket.',
                 ],
@@ -1314,17 +1298,17 @@ return [
                     'description' => 'View a specific timetable record.',
                 ],
                 'store' => [
-                    'permission' => 'time_tables.store',
+                    'permission' => 'time_tables.create',
                     'label' => 'Create Timetable',
                     'description' => 'Add a new timetable.',
                 ],
                 'store_record' => [
-                    'permission' => 'time_tables.store.record',
+                    'permission' => 'time_tables.create.record',
                     'label' => 'Create Timetable Record',
                     'description' => 'Add a new timetable record.',
                 ],
                 'store_time_slot' => [
-                    'permission' => 'time_tables.store.time_slot',
+                    'permission' => 'time_tables.create.time_slot',
                     'label' => 'Create Time Slot',
                     'description' => 'Add a new time slot.',
                 ],
@@ -1504,12 +1488,12 @@ return [
                     'description' => 'Reset password for a central user.',
                 ],
                 'show' => [
-                    'permission' => 'central_users.view',
+                    'permission' => 'central_users.show',
                     'label' => 'View Central User Details',
                     'description' => 'View detailed central user information.',
                 ],
                 'store' => [
-                    'permission' => 'central_users.store',
+                    'permission' => 'central_users.create',
                     'label' => 'Create Central User',
                     'description' => 'Add a new central user.',
                 ],
@@ -1547,7 +1531,7 @@ return [
                     'description' => 'List all central roles.',
                 ],
                 'store' => [
-                    'permission' => 'roles.store',
+                    'permission' => 'roles.create',
                     'label' => 'Create Role (Central)',
                     'description' => 'Add a new central role.',
                 ],
@@ -1585,12 +1569,12 @@ return [
                     'description' => 'Reply to a central ticket.',
                 ],
                 'store' => [
-                    'permission' => 'tickets.store',
+                    'permission' => 'tickets.create',
                     'label' => 'Create Central Ticket',
                     'description' => 'Submit a new central ticket.',
                 ],
                 'store_operator_message' => [
-                    'permission' => 'tickets.store.operator_message',
+                    'permission' => 'tickets.create.operator_message',
                     'label' => 'Store Central Operator Message',
                     'description' => 'Add an operator message to a central ticket.',
                 ],
@@ -1762,12 +1746,12 @@ return [
                     'description' => 'List all tenants.',
                 ],
                 'show' => [
-                    'permission' => 'tenants.view',
+                    'permission' => 'tenants.show',
                     'label' => 'View Tenant Details',
                     'description' => 'View detailed tenant information.',
                 ],
                 'store' => [
-                    'permission' => 'tenants.store',
+                    'permission' => 'tenants.create',
                     'label' => 'Create Tenant',
                     'description' => 'Add a new tenant.',
                 ],

@@ -33,7 +33,7 @@ class NewMessageArrived extends Notification
 
     public function toFcm(): FcmMessage
     {
-        $url = route('messages.show', Qs::hash($this->message->thread_id));
+        $url = route('message_threads.show', Qs::hash($this->message->thread_id));
         $data = [
             'title' => mb_strimwidth("New message from {$this->message->user->name}", 0, 35, '...'),
             'body' => mb_strimwidth($this->message->body, 0, 50, "..."),

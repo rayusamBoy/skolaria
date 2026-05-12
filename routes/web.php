@@ -74,6 +74,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         Route::prefix('central-users')->group(function () {
             Route::get('password/reset/{user}', [CentralUserController::class, 'reset_password'])->name('central_users.password.reset')->middleware('decodeRouteParams');
             Route::post('update/blocked-state', [CentralUserController::class, 'toggle_user_block'])->name('central_users.toggle_user_block');
+            Route::get('my-profile/{user}', [CentralUserController::class, 'show_profile'])->name('central_users_profile.show')->middleware('decodeRouteParams');
         });
 
         /*************** Tenants ***************/

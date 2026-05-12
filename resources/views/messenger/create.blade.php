@@ -1,6 +1,6 @@
 <div id="create-message" class="card position-fixed right-3 bottom-15px mw-md-50 wmax-sm-500 wmin-300 display-none">
     <div class="card-body">
-        <form action="{{ route('messages.store') }}" method="post">
+        <form action="{{ route('message_threads.store') }}" method="post">
             {{ csrf_field() }}
             <div>
                 <!-- Subject Form Input -->

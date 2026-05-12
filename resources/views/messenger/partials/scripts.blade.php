@@ -118,7 +118,7 @@
      */
     function prepareDeleteUserMessageForm(messageId) {
         hideAllPopover();
-        const actionUrl = '{{ route("messages.user_delete", ":message_id") }}'.replace(':message_id', messageId);
+        const actionUrl = '{{ route("threads.messages.user_delete", ":message_id") }}'.replace(':message_id', messageId);
         $("form#delete-user-message").attr("action", actionUrl);
         popOutIntendedMesg(messageId);
     }
@@ -136,7 +136,7 @@
     $loadPrevBtn.on('click', (e) => {
         e.preventDefault();
         const currentFirstMsgId = $messagesRow.children(":first").attr('id').split('-')[1];
-        let url = '{{ route("messages.load_previous", [":thread_id", ":current_first_msg_id_in_view"]) }}'.replace(':thread_id', '{{ $thread->id }}').replace(':current_first_msg_id_in_view', currentFirstMsgId);
+        let url = '{{ route("threads.messages.previous", [":thread_id", ":current_first_msg_id_in_view"]) }}'.replace(':thread_id', '{{ $thread->id }}').replace(':current_first_msg_id_in_view', currentFirstMsgId);
         const requestData = {
             url, 
             prepend_previous_messages: true, 
@@ -152,7 +152,7 @@
      */
     function updateParticipantLastRead(threadId) {
         if (document.hidden) return;
-        let url = '{{ route("messages.update_participant_last_read", [":thread_id"]) }}'.replace(':thread_id', threadId);
+        let url = '{{ route("threads.participants.update.last_read", [":thread_id"]) }}'.replace(':thread_id', threadId);
         processRequest({
             url: url
         });

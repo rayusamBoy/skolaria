@@ -12,8 +12,8 @@
         </span>
 
         @if(Usr::tenancyInitialized())
-        @can($tenant_permissions['messages']['index']['permission'])
-        <a class="navbar-toggler text-default" title="Messages" href="{{ route('messages.index') }}">
+        @can($tenant_permissions['message_threads']['index']['permission'])
+        <a class="navbar-toggler text-default" title="Messages" href="{{ route('message_threads.index') }}">
             @include('messenger.unread-count')
         </a>
         @endcan
@@ -77,8 +77,8 @@
 
                     {{-- Profile --}}
                     <a href="{{ auth()->user()->hasRole(config('roles.default_roles.tenant.student'))
-                                  ? route('students.show',  Qs::hash(Qs::findStudentRecord(auth()->id())->id))
-                                  : route(Usr::tenancyInitialized() ? 'users.show' : 'central_users.show', Qs::hash(auth()->id())) }}" class="dropdown-item {{ request()->routeIs('students.show', 'users.show', 'central_users.show') ? 'active' : '' }}">
+                                  ? route('students.show_profile',  Qs::hash(Qs::findStudentRecord(auth()->id())->id))
+                                  : route(Usr::tenancyInitialized() ? 'users_profile.show' : 'central_users_profile.show', Qs::hash(auth()->id())) }}" class="dropdown-item {{ request()->routeIs('students.show_profile', 'users_profile.show', 'central_users_profile.show') ? 'active' : '' }}">
                         <i class="material-symbols-rounded">person</i>My Profile
                     </a>
 

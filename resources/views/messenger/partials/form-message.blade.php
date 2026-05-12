@@ -1,6 +1,6 @@
 @if($user_as_participant->isNotEmpty())
 <!-- Message Form Input -->
-<form class="message ajax-store ajax-not-global" action="{{ route('messages.update', $thread->id) }}" method="post">
+<form class="message ajax-store ajax-not-global" action="{{ route('threads.messages.add', $thread->id) }}" method="post">
     @method('PUT')
     @csrf
 

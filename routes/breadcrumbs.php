@@ -95,14 +95,18 @@ Breadcrumbs::for('students.id_cards.manage', function (BreadcrumbTrail $trail): 
     $trail->push('Manage Students ID Cards', route('students.id_cards.manage'));
 });
 
-Breadcrumbs::for('students.show', function (BreadcrumbTrail $trail, $student): void {
-    $class_id = StudentRepo::getStudentRecordColumn(['id' => $student], 'my_class_id');
+Breadcrumbs::for('students.show_profile', function (BreadcrumbTrail $trail, $student): void {
     $trail->parent(
         auth()->user()->hasExactRoles([config('roles.default_roles.tenant.parent')])
         ? 'parent.my_children'
-        : 'students.list_by_class',
-        $class_id
+        : 'dashboard'
     );
+    $trail->push('My Profile', route('students.show_profile', $student));
+});
+
+Breadcrumbs::for('students.show', function (BreadcrumbTrail $trail, $student): void {
+    $class_id = StudentRepo::getStudentRecordColumn(['id' => $student], 'my_class_id');
+    $trail->parent('students.list_by_class', $class_id);
     $trail->push('View Student Profile', route('students.show', $student));
 });
 
@@ -141,6 +145,11 @@ Breadcrumbs::for('users.show', function (BreadcrumbTrail $trail, $user): void {
     $trail->push('View User Profile', route('users.show', $user));
 });
 
+Breadcrumbs::for('users_profile.show', function (BreadcrumbTrail $trail, $user): void {
+    $trail->parent('dashboard');
+    $trail->push('My Profile', route('users_profile.show', $user));
+});
+
 // Central users
 Breadcrumbs::for('central_users.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('central_dashboard');
@@ -155,6 +164,11 @@ Breadcrumbs::for('central_users.edit', function (BreadcrumbTrail $trail, $user):
 Breadcrumbs::for('central_users.show', function (BreadcrumbTrail $trail, $user): void {
     $trail->parent('central_users.index');
     $trail->push('View User Profile', route('central_users.show', $user));
+});
+
+Breadcrumbs::for('central_users_profile.show', function (BreadcrumbTrail $trail, $user): void {
+    $trail->parent('dashboard');
+    $trail->push('My Profile', route('central_users_profile.show', $user));
 });
 
 // ----------------------------------------------------------------------
@@ -532,24 +546,19 @@ Breadcrumbs::for('notices.edit', function (BreadcrumbTrail $trail, $notice_id): 
 // Messages
 // ----------------------------------------------------------------------
 
-Breadcrumbs::for('messages', function (BreadcrumbTrail $trail): void {
+Breadcrumbs::for('message_threads.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('home');
-    $trail->push('Messages', route('messages'));
+    $trail->push('Threads', route('message_threads.index'));
 });
 
-Breadcrumbs::for('messages.index', function (BreadcrumbTrail $trail): void {
-    $trail->parent('home');
-    $trail->push('Messages', route('messages.index'));
+Breadcrumbs::for('message_threads.show', function (BreadcrumbTrail $trail, $message_id): void {
+    $trail->parent('message_threads.index');
+    $trail->push('Thread Messages', route('message_threads.show', $message_id));
 });
 
-Breadcrumbs::for('messages.show', function (BreadcrumbTrail $trail, $message_id): void {
-    $trail->parent('messages.index');
-    $trail->push('View Thread(s)', route('messages.show', $message_id));
-});
-
-Breadcrumbs::for('messages.create', function (BreadcrumbTrail $trail): void {
-    $trail->parent('messages.index');
-    $trail->push('New Message', route('messages.create'));
+Breadcrumbs::for('message_threads.create', function (BreadcrumbTrail $trail): void {
+    $trail->parent('message_threads.index');
+    $trail->push('New Message', route('message_threads.create'));
 });
 
 // ----------------------------------------------------------------------

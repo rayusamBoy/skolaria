@@ -15,7 +15,7 @@ $deletor = $message->deletor; // may be null
 
         {{-- Super admin "delete" button for other people's messages --}}
         @if (!$isOwnMessage && $message->deleted_at === null)
-        @can($tenant_permissions['messages']['user_delete']['permission'])
+        @can($tenant_permissions['message_threads']['user_delete']['permission'])
         <button data-toggle="popover" data-placement="right" data-html="true" class="material-symbols-rounded position-absolute right-neg-25 text-info-400 opacity-75 opacity-100-on-hover border-0 outline-0 action-btn" data-content='
             <div class="d-flex justify-center">
                 <button type="button" data-text="Deleting..." id="{{ $message->id }}"

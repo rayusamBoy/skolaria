@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 use Throwable;
 
-class MessageController extends Controller
+class MessageThreadController extends Controller
 {
     protected int $extra_messages_to_count;
     protected UserRepo $user;
@@ -62,7 +62,7 @@ class MessageController extends Controller
         try {
             $thread = $this->thread->findWithTrashedOrFail($id);
         } catch (ModelNotFoundException $e) {
-            return redirect()->route('messages.index')->with('flash_error', 'The thread was not found.');
+            return redirect()->route('message_threads.index')->with('flash_error', 'The thread was not found.');
         }
 
         $user_id = auth()->id();
@@ -82,14 +82,6 @@ class MessageController extends Controller
             'extra_messages_to_count',
             'unread_messages_count'
         ));
-    }
-
-    /**
-     * Get all users except the authenticated one.
-     */
-    public function get_users()
-    {
-        return User::where('id', '!=', auth()->id())->get();
     }
 
     /**
@@ -137,13 +129,13 @@ class MessageController extends Controller
             $this->addParticipantsByRole($thread, $input['user_roles']);
         }
 
-        return redirect()->route('messages.index')->with('flash_success', __('msg.msg_thread_created'));
+        return redirect()->route('message_threads.index')->with('flash_success', __('msg.msg_thread_created'));
     }
 
     /**
      * Add a new message to an existing thread.
      */
-    public function update(Request $request, $id): JsonResponse
+    public function add_message(Request $request, $thread_id): JsonResponse
     {
         $input = $request->all();
 
@@ -153,7 +145,7 @@ class MessageController extends Controller
         ])->validate();
 
         try {
-            $thread = $this->thread->findOrFail($id);
+            $thread = $this->thread->findOrFail($thread_id);
         } catch (ModelNotFoundException $e) {
             return Usr::json('The thread was not found.', false);
         }
@@ -205,7 +197,7 @@ class MessageController extends Controller
         }
 
         $thread->delete();
-        return redirect()->route('messages.index')->with('flash_success', __('msg.del_ok'));
+        return redirect()->route('message_threads.index')->with('flash_success', __('msg.del_ok'));
     }
 
     /**
@@ -232,7 +224,8 @@ class MessageController extends Controller
     /**
      * Soft-delete a user-created message.
      */
-    public function user_delete(int $msg_id): JsonResponse
+    #[SkipPermission]
+    public function user_delete_message(int $msg_id): JsonResponse
     {
         try {
             $message = $this->message->findOrFail($msg_id);
@@ -282,7 +275,8 @@ class MessageController extends Controller
     /**
      * Load previous messages via AJAX.
      */
-    public function load_previous(int $thread_id, int $current_first_msg_id_in_view): JsonResponse
+    #[SkipPermission]
+    public function load_previous_messages(int $thread_id, int $current_first_msg_id_in_view): JsonResponse
     {
         $messages = $this->message->getPreviousMessages(
             $thread_id,
