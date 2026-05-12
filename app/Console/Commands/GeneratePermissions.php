@@ -119,6 +119,14 @@ class GeneratePermissions extends Command
                     continue;
                 if (\in_array($mname, ['__construct', '__call', 'callAction', 'middleware', 'authorize', 'middlewarePriority'], true))
                     continue;
+                if (method_exists($m, 'getAttributes')) {
+                    foreach ($m->getAttributes() as $attr) {
+                        $an = $attr->getName();
+                        if ($an === \App\Auth\Attributes\SkipPermission::class || str_ends_with($an, 'SkipPermission')) {
+                            continue 2;
+                        }
+                    }
+                }
 
                 $perm = $this->buildPermissionName($resource, $m, $short, $methodMap, $useDots, $overrides);
                 $permissions[$resource][$mname] = $perm;
