@@ -21,7 +21,7 @@
                     <li class="nav-item">
                         <a href="#basic-info" class="nav-link active" data-toggle="tab">Basic Info</a>
                     </li>
-                    @if(isset($staff_rec) && $staff_rec != null && $user->id == auth()->id())
+                    @if(isset($staff_rec) && $staff_rec->exists())
                     <li class="nav-item">
                         <a href="#staff-info" class="nav-link" data-toggle="tab">Staff Info</a>
                     </li>
@@ -141,7 +141,7 @@
                     </div>
 
                     {{--Staff Info--}}
-                    @if(isset($staff_rec) && $staff_rec !== null && $user->id === auth()->id())
+                    @if(isset($staff_rec) && $staff_rec->exists())
                     <div class="tab-pane fade" id="staff-info">
                         <table class="table table-bordered">
                             <tbody>
