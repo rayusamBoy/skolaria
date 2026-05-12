@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Central;
 
+use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Usr;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserBlockedState;
@@ -10,8 +11,8 @@ use App\Repositories\LocationRepo;
 use App\Repositories\MyClassRepo;
 use App\Repositories\PermissionRepo;
 use App\Repositories\UserRepo;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -140,6 +141,15 @@ class UserController extends Controller
     }
 
     /**
+     * Show own profile.
+     */
+    #[SkipPermission]
+    public function show_profile($user_id)
+    {
+        return $this->show($user_id);
+    }
+
+    /**
      * Show details of a specific user.
      */
     public function show($user_id): View|RedirectResponse
@@ -215,11 +225,7 @@ class UserController extends Controller
     {
         $user = auth()->user();
 
-        if ($user_id != $user->id || $user->hasAnyRole(Usr::getTenancyAwareStaffRoles())) {
-            return false;
-        }
-
-        return true;
+        return $user_id != $user->id && !$user->hasAnyRole(Usr::getTenancyAwareStaffRoles());
     }
 
     /**

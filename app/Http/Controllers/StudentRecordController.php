@@ -22,6 +22,7 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use App\Auth\Attributes\SkipPermission;
 
 class StudentRecordController extends Controller
 {
@@ -239,6 +240,15 @@ class StudentRecordController extends Controller
     }
 
     /**
+     * Show own profile.
+     */
+    #[SkipPermission]
+    public function show_profile($student)
+    {
+        return $this->show($student);
+    }
+
+    /**
      * Show student record details.
      */
     public function show($student): View|RedirectResponse
@@ -410,11 +420,7 @@ class StudentRecordController extends Controller
     {
         $user = auth()->user();
 
-        if ($student != $user->id || $user->hasAnyRole(Usr::getTenancyAwareStaffRoles())) {
-            return false;
-        }
-
-        return true;
+        return $student != $user->id && !$user->hasAnyRole(Usr::getTenancyAwareStaffRoles());
     }
 
     /**
