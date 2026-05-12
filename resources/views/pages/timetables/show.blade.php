@@ -5,22 +5,23 @@
 @section('content')
 
 <div class="card">
-    <div class="card-header">
-        <div class="row">
-            <div class="col-md-4">
-                <h6 class="card-title"><strong>Name: </strong> {{ $ttr->name }}</h6>
-            </div>
-            <div class="col-md-4">
-                <h6 class="card-title"><strong>Class: </strong> {{ $my_class->name }} {{ $ttr->section->name ?? '' }}</h6>
-            </div>
-            <div class="col-md-4">
-                <h6 class="card-title"><strong>Year: </strong> {{ $ttr->exam_id ? 'Exam TimeTable' : 'Class TimeTable' }} {{ "({$ttr->year})" }}</h6>
+    <div class="card-header header-elements-inline">
+        <h6 class="font-weight-bold"><strong>Name: </strong> {{ $ttr->name }}</h6>
+        <h6 class="card-title"><strong>Class: </strong> {{ $my_class->name }} {{ $ttr->section->name ?? '' }}</h6>
+        <h6 class="card-title"><strong>Year: </strong> {{ $ttr->exam_id ? 'Exam TimeTable' : 'Class TimeTable' }} {{ "({$ttr->year})" }}</h6>
+
+        <div class="header-elements pt-0">
+            <div class="list-icons">
+                @can($tenant_permissions['time_tables']['print_record']['permission'])
+                <a class="list-icons-item" target="_blank" href="{{ route('ttr.print', $ttr->id) }}" data-action="print"></a>
+                @endcan
+                <a class="list-icons-item" data-action="fullscreen"></a>
             </div>
         </div>
     </div>
     <div class="card-body">
         <table class="table table-responsive table-striped">
-           <thead>
+            <thead>
                 <tr>
                     <th rowspan="2">Time <i class="icon-arrow-right7 ml-2"></i> <br> Date<i class="icon-arrow-down7 ml-2"></i></th>
                     @foreach($time_slots as $tms)
@@ -47,11 +48,6 @@
                 @endforeach
             </tbody>
         </table>
-
-        {{--Print Button--}}
-        <div class="text-center mt-4">
-            <a target="_blank" href="{{ route('ttr.print', $ttr->id) }}" class="btn btn-danger btn-lg"><i class="material-symbols-rounded mr-2">print</i> Print Timetable</a>
-        </div>
     </div>
 </div>
 
