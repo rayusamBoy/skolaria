@@ -12,49 +12,64 @@
             </div>
 
             <div class="card-body">
-                <dl class="row">
-                    <dt class="col-sm-4">Name</dt>
-                    <dd class="col-sm-8">{{ $book->name }}</dd>
-
-                    <dt class="col-sm-4">Class</dt>
-                    <dd class="col-sm-8">{{ $book->my_class->name }} {{ $book->section->name ?? '' }}</dd>
-
-                    <dt class="col-sm-4">Author</dt>
-                    <dd class="col-sm-8">{{ $book->author }}</dd>
-
-                    <dt class="col-sm-4">Book Type</dt>
-                    <dd class="col-sm-8">{{ $book->book_type }}</dd>
-
-                    <dt class="col-sm-4">Status</dt>
-                    <dd class="col-sm-8">{{ $book->status }}</dd>
-
-                    <dt class="col-sm-4">Description</dt>
-                    <dd class="col-sm-8">{{ $book->description ?: '—' }}</dd>
-
-                    <dt class="col-sm-4">URL</dt>
-                    <dd class="col-sm-8">
-                        @if($book->url)
-                        <a href="{{ $book->url }}" target="_blank">{{ $book->url }}</a>
-                        @else
-                        —
-                        @endif
-                    </dd>
-
-                    <dt class="col-sm-4">Total Copies</dt>
-                    <dd class="col-sm-8">{{ $book->total_copies }}</dd>
-
-                    <dt class="col-sm-4">Issued Copies</dt>
-                    <dd class="col-sm-8">{{ $book->issued_copies }}</dd>
-
-                    <dt class="col-sm-4">Available Copies</dt>
-                    <dd class="col-sm-8">{{ $book->total_copies - $book->issued_copies }}</dd>
-
-                    <dt class="col-sm-4">Location</dt>
-                    <dd class="col-sm-8">{{ $book->location ?: '—' }}</dd>
-
-                    <dt class="col-sm-4">Created At</dt>
-                    <dd class="col-sm-8">{{ Qs::formatDate($book->created_at) }}</dd>
-                </dl>
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <td class="font-weight-bold">Name</td>
+                            <td class="break-all">{{ $book->name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Class</td>
+                            <td class="break-all">{{ $book->my_class->name }} {{ $book->section->name ?? '' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Author</td>
+                            <td class="break-all">{{ $book->author }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Book Type</td>
+                            <td class="break-all">{{ $book->book_type ?: '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Status</td>
+                            <td class="break-all">{{ $book->status }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Description</td>
+                            <td class="break-all">{{ $book->description ?: '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">URL</td>
+                            <td class="break-all">
+                                @if($book->url)
+                                <a href="{{ $book->url }}" target="_blank">{{ $book->url }}</a>
+                                @else
+                                —
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Total Copies</td>
+                            <td class="break-all">{{ $book->total_copies }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Issued Copies</td>
+                            <td class="break-all">{{ $book->issued_copies }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Available Copies</td>
+                            <td class="break-all">{{ $book->total_copies - $book->issued_copies }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Location</td>
+                            <td class="break-all">{{ $book->location ?: '—' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Created At</td>
+                            <td class="break-all">{{ Qs::formatDate($book->created_at) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
