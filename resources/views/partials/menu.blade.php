@@ -419,7 +419,7 @@
                             <ul class="nav nav-group-sub">
                                 @can($tenant_permissions['books']['index']['permission'])
                                 <li class="nav-item">
-                                    <a href="{{ route('books.index') }}" class="nav-link {{ request()->routeIs('books.index','books.edit') ? 'active' : '' }}">
+                                    <a href="{{ route('books.index') }}" class="nav-link {{ request()->routeIs('books.index','books.edit','books.show') ? 'active' : '' }}">
                                         Manage
                                     </a>
                                 </li>
