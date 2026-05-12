@@ -38,7 +38,7 @@
                     </ul>
                     <div class="row display-none message-row pb-5 pb-xl-0">
                         <div class="col-lg-8 offset-lg-2 col-xl-6 offset-xl-3">
-                            @include('messenger.partials.form-message')
+                            @includeWhen(auth()->user()->can($tenant_permissions['message_threads']['update']['permission']), 'messenger.partials.form-message')
                         </div>
                     </div>
                     <div class="row alert-row mb-3 clear">
