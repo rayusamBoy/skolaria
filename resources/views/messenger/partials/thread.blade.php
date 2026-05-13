@@ -35,12 +35,12 @@
             <div class="col-md-5">
                 <small><strong>Participants:</strong></small>
                 <p>
+                    @include('pages/modals/participants')
                     <td><a href="javascript:;" data-toggle="modal" data-target="#thread-participants-{{ $thread->id }}">View Participants</a></td>
                 </p>
             </div>
         </div>
     </div>
-    @include('pages/modals/participants')
 </div>
 
 @elseif($thread->isDirtyParticipant(auth()->id()))
