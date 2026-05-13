@@ -279,34 +279,52 @@ class AssessmentRepo
     }
 
     /**
-     * Calculate a student's position (global, by class or section) based on a given value column.
+     * Calculate a student's CA position (1‑based) directly via the database,
+     * using the sort order supplied by the controller.
      *
      * @param int      $st_id
      * @param int      $exam_id
      * @param int      $class_id
      * @param string   $year
-     * @param string   $value        Column to compare (e.g., 'total', 'ave')
-     * @param int|null $section_id   If provided, limits to that section
-     * @return int|null
+     * @param string   $value        column to compare (e.g., 'total', 'ave')
+     * @param string   $sort_order    'asc' (lower is better) or 'desc' (higher is better)
+     * @param int|null $section_id   optional section filter
+     * @return int|null              position (1‑based) or null if not applicable
      */
-    public function getStudentPositionByColumn(int $st_id, int $exam_id, int $class_id, string $year, string $value, ?int $section_id = null): ?int
-    {
-        $where = ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'student_id' => $st_id, 'year' => $year];
-        $std_value = $this->getStudentColumnValue($where, $value);
+    public function getStudentPositionByColumn(
+        int $st_id,
+        int $exam_id,
+        int $class_id,
+        string $year,
+        string $value,
+        string $sort_order = 'desc',
+        ?int $section_id = null
+    ): ?int {
+        $base_query = AssessmentRecord::query()
+            ->select('student_id', $value)
+            ->where('exam_id', $exam_id)
+            ->where('my_class_id', $class_id)
+            ->where('year', $year)
+            ->whereNotNull($value);
 
-        $data = $section_id !== null
-            ? ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'section_id' => $section_id, 'year' => $year]
-            : ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'year' => $year];
+        if ($section_id !== null) {
+            $base_query->where('section_id', $section_id);
+        }
 
-        $std_values = AssessmentRecord::where($data)
-            ->whereNotNull($value)
-            ->orderByDesc($value)
-            ->select($value)
-            ->get()
-            ->pluck($value);
+        $student_record = (clone $base_query)->where('student_id', $st_id)->first();
+        if (!$student_record || $student_record->$value === null) {
+            return null;
+        }
+        $student_value = $student_record->$value;
 
-        $position = $std_values->isNotEmpty() ? $std_values->search($std_value) : false;
-        return ($position !== false) ? $position + 1 : null;
+        $operator = ($sort_order === 'asc') ? '<' : '>';
+        $better_count = (clone $base_query)
+            ->where('student_id', '!=', $st_id)
+            ->where($value, $operator, $student_value)
+            ->distinct($value)
+            ->count($value);
+
+        return $better_count + 1;
     }
 
     /**

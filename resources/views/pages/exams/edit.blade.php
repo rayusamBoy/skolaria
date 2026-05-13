@@ -96,9 +96,23 @@
                             @foreach(Mk::getStudentExamPositionByValues() as $key => $value)
                             <div class="d-flex mb-2">
                                 <span><input @checked($key==$ex->exam_student_position_by_value) type="radio" id="exam_mark-pos-by-{{ $key }}" name="exam_student_position_by_value" value="{{ $key }}" class="form-input-styled text-center"></span>
-                                <label for="exam_mark-pos-by-{{ $key }}" class="ml-2 w-50 m-auto-0">{{ $value }}</label>
+                                <label for="exam_mark-pos-by-{{ $key }}" class="ml-2 w-50 m-auto-0 cursor-pointer">{{ $value }}</label>
                             </div>
                             @endforeach
+                        </div>
+                    </div>
+                    {{-- Sort order for exam position --}}
+                    <div class="form-group row" id="exam-position-sort-order">
+                        <label class="col-lg-5 col-form-label font-weight-semibold">Position Sort Order <span class="text-danger">*</span></label>
+                        <div class="col-lg-7">
+                            <div class="d-flex mb-2">
+                                <span><input type="radio" @checked($ex->exam_student_position_sort_order == 'desc') id="exam-sort-desc" name="exam_student_position_sort_order" value="desc" class="form-input-styled text-center"></span>
+                                <label for="exam-sort-desc" class="ml-2 cursor-pointer">Highest is best</label>
+                            </div>
+                            <div class="d-flex mb-2">
+                                <span><input type="radio" @checked($ex->exam_student_position_sort_order == 'asc') id="exam-sort-asc" name="exam_student_position_sort_order" value="asc" class="form-input-styled text-center"></span>
+                                <label for="exam-sort-asc" class="ml-2 cursor-pointer">Lowest is best</label>
+                            </div>
                         </div>
                     </div>
                     {{-- Has Continous Assessment (CA)? --}}
@@ -148,9 +162,23 @@
                                 @foreach(Mk::getStudentCAPositionByValues() as $key => $value)
                                 <div class="d-flex mb-2">
                                     <span><input @checked($key==$ex->ca_student_position_by_value) type="radio" id="ca-position-by-{{ $key }}" name="ca_student_position_by_value" value="{{ $key }}" class="form-input-styled text-center"></span>
-                                    <label for="ca-position-by-{{ $key }}" class="ml-2 w-50 m-auto-0">{{ $value }}</label>
+                                    <label for="ca-position-by-{{ $key }}" class="ml-2 w-50 m-auto-0 cursor-pointer">{{ $value }}</label>
                                 </div>
                                 @endforeach
+                            </div>
+                        </div>
+                        {{-- Sort order for CA position --}}
+                        <div class="form-group row" id="ca-position-sort-order">
+                            <label class="col-lg-7 col-form-label font-weight-semibold">Position Sort Order <span class="text-danger">*</span></label>
+                            <div class="col-lg-5">
+                                <div class="d-flex mb-2">
+                                    <span><input type="radio" @checked($ex->ca_student_position_sort_order == 'desc') id="ca-sort-desc" name="ca_student_position_sort_order" value="desc" class="form-input-styled text-center"></span>
+                                    <label for="ca-sort-desc" class="ml-2 cursor-pointer">Highest is best</label>
+                                </div>
+                                <div class="d-flex mb-2">
+                                    <span><input type="radio" @checked($ex->ca_student_position_sort_order == 'asc') id="ca-sort-asc" name="ca_student_position_sort_order" value="asc" class="form-input-styled text-center"></span>
+                                    <label for="ca-sort-asc" class="ml-2 cursor-pointer">Lowest is best</label>
+                                </div>
                             </div>
                         </div>
                     </div>

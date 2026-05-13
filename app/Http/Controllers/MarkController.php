@@ -1049,7 +1049,7 @@ class MarkController extends Controller
                 'average' => $average,
                 'grade_id' => $grade->id ?? null,
                 'class_average' => $this->mark->getClassAverage($exam, $class_id, $this->year) ?? null,
-                'section_position' => $this->exam->getStudentPositionByColumn($st_id, $exam->id, $class_id, $this->year, $exam->exam_student_position_by_value, $section_id),
+                'section_position' => $this->exam->getStudentPositionByColumn($st_id, $exam->id, $class_id, $this->year, $exam->exam_student_position_by_value, $exam->exam_student_position_sort_order, $section_id),
                 'points' => $points_sum,
                 'gpa' => ($total_credits > 0) ? round($total_credits_point / $total_credits, 2) : 0,
                 'division_id' => Mk::getDivisionByPoints($points_sum, $class_type_id)->id ?? null,
@@ -1154,7 +1154,7 @@ class MarkController extends Controller
                 'student_id' => $st_id,
                 'exam_id' => $exam->id,
                 'my_class_id' => $class_id,
-                'class_position' => $this->exam->getStudentPositionByColumn($st_id, $exam->id, $class_id, $this->year, $exam->exam_student_position_by_value),
+                'class_position' => $this->exam->getStudentPositionByColumn($st_id, $exam->id, $class_id, $this->year, $exam->exam_student_position_by_value, $exam->exam_student_position_sort_order),
             ];
         }
         return $updates;

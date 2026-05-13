@@ -411,44 +411,52 @@ class ExamRepo
     }
 
     /**
-     * Calculate a student's position based on a specific value column.
+     * Calculate a student's position (1‑based) directly via the database,
+     * using the sort order supplied.
      *
      * @param int      $st_id
      * @param int      $exam_id
      * @param int      $class_id
      * @param string   $year
-     * @param string   $value        column to compare (e.g., 'total', 'ave')
+     * @param string   $value        column to compare (e.g., 'total', 'ave', 'gpa', 'points')
+     * @param string   $sort_order    'asc' (lower is better) or 'desc' (higher is better)
      * @param int|null $section_id   optional section filter
-     * @return int|null              position (1‑based) or null
+     * @return int|null              position (1‑based) or null if not applicable
      */
-    public function getStudentPositionByColumn(int $st_id, int $exam_id, int $class_id, string $year, string $value, ?int $section_id = null): ?int
-    {
-        $where = [
-            'exam_id' => $exam_id,
-            'my_class_id' => $class_id,
-            'student_id' => $st_id,
-            'year' => $year,
-        ];
-        $std_value = $this->getExamRecordColumn($where, $value);
+    public function getStudentPositionByColumn(
+        int $st_id,
+        int $exam_id,
+        int $class_id,
+        string $year,
+        string $value,
+        string $sort_order = 'desc',
+        ?int $section_id = null
+    ): ?int {
+        $base_query = ExamRecord::query()
+            ->select('student_id', $value)
+            ->where('exam_id', $exam_id)
+            ->where('my_class_id', $class_id)
+            ->where('year', $year)
+            ->whereNotNull($value);
 
-        $conditions = ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'year' => $year];
         if ($section_id !== null) {
-            $conditions['section_id'] = $section_id;
+            $base_query->where('section_id', $section_id);
         }
 
-        $values = ExamRecord::where($conditions)
-            ->whereNotNull($value)
-            ->orderByDesc($value)
-            ->select($value)
-            ->get()
-            ->pluck($value);
-
-        if ($values->isEmpty()) {
+        $student_record = (clone $base_query)->where('student_id', $st_id)->first();
+        if (!$student_record || $student_record->$value === null) {
             return null;
         }
+        $student_value = $student_record->$value;
 
-        $key = $values->search($std_value);
-        return $key === false ? null : $key + 1;
+        $operator = ($sort_order === 'asc') ? '<' : '>';
+        $better_count = (clone $base_query)
+            ->where('student_id', '!=', $st_id)
+            ->where($value, $operator, $student_value)
+            ->distinct($value)
+            ->count($value);
+
+        return $better_count + 1;
     }
 
     /*********** Grades ***************/

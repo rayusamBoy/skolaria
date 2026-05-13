@@ -25,8 +25,9 @@ return new class extends Migration
             $table->unsignedInteger('hw_denominator')->nullable();
             $table->unsignedInteger('tt_denominator')->nullable();
             $table->unsignedInteger('tdt_denominator')->nullable();
-            $table->string('exam_student_position_by_value', 40);
+            $table->enum('exam_student_position_sort_order', ['asc', 'desc'])->default('desc');
             $table->string('ca_student_position_by_value', 40)->nullable();
+            $table->enum('ca_student_position_sort_order', ['asc', 'desc'])->default('desc');
             $table->timestamps();
             $table->softDeletes();
         });

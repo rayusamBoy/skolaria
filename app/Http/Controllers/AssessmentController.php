@@ -396,7 +396,7 @@ class AssessmentController extends Controller
                 'average' => $this->assessment->getAverageTermMark($assessment->exam, $st_id, $class_id, $section_id, $this->year),
                 'class_average' => $this->assessment->getClassAverageTermMark($assessment->exam, $class_id, $this->year),
                 'total' => $this->assessment->getTotalTermMark($assessment->exam, $st_id, $class_id, $this->year),
-                'section_position' => $this->assessment->getStudentPositionByColumn($st_id, $assessment->exam->id, $class_id, $this->year, $assessment->exam->ca_student_position_by_value, $section_id),
+                'section_position' => $this->assessment->getStudentPositionByColumn($st_id, $assessment->exam->id, $class_id, $this->year, $assessment->exam->ca_student_position_by_value, $assessment->exam->ca_student_position_sort_order, $section_id),
             ];
         }
         $this->assessment->massUpdateRecords($summary_updates, ['student_id']);

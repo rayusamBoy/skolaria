@@ -68,7 +68,7 @@ $hasActions = $canEdit || $canPublish || $canDelete;
                             <td><label class="form-switch disabled m-0"><input type="checkbox" @checked($ex->is_locked)><i></i></label></td>
                             @endif
 
-                            @if($hasActions)
+                            @if($hasActions && !$ex->is_published)
                             <td class="text-center">
                                 <div class="list-icons">
                                     <div class="dropdown">
@@ -77,11 +77,11 @@ $hasActions = $canEdit || $canPublish || $canDelete;
                                             @if($canEdit && !$ex->is_locked)
                                             <a href="{{ route('exams.edit', $ex->id) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
                                             @endif
-                                            @if(!$ex->is_published && $canPublish)
+                                            @if($canPublish)
                                             <a id="{{ $ex->id }}" onclick="confirmPublish(this.id)" href="javascript:;" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> Publish</a>
                                             <form method="post" id="item-publish-{{ $ex->id }}" action="{{ route('exams.publish', $ex->id) }}" class="hidden">@csrf</form>
                                             @endif
-                                            @if($canDelete && !$ex->is_published)
+                                            @if($canDelete)
                                             <a id="{{ $ex->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
                                             <form method="post" id="item-delete-{{ $ex->id }}" action="{{ route('exams.destroy', $ex->id) }}" class="hidden">
                                                 @csrf
@@ -168,16 +168,30 @@ $hasActions = $canEdit || $canPublish || $canDelete;
                                     <input name="exam_denominator" min="0" max="100" value="100" required type="number" class="form-control">
                                 </div>
                             </div>
-                            {{-- Exam Denominator By Value --}}
+                            {{-- Exam Student Position By Value --}}
                             <div class="form-group row">
                                 <label class="col-lg-5 col-form-label font-weight-semibold">Calculate Exam Student Position By <span class="text-danger">*</span></label>
                                 <div class="col-lg-7">
                                     @foreach (Mk::getStudentExamPositionByValues() as $key => $value)
                                     <div class="d-flex mb-2">
-                                        <span><input type="radio" id="exam_mark-pos-by-{{ $key }}" name="exam_student_position_by_value" value="{{ $key }}" class="form-input-styled text-center"></span>
-                                        <label for="exam_mark-pos-by-{{ $key }}" class="ml-2 w-50 m-auto-0">{{ $value }}</label>
+                                        <span><input type="radio" id="exm-pos-by-{{ $key }}" name="exam_student_position_by_value" value="{{ $key }}" class="form-input-styled text-center"></span>
+                                        <label for="exm-pos-by-{{ $key }}" class="ml-2 w-50 m-auto-0 cursor-pointer">{{ $value }}</label>
                                     </div>
                                     @endforeach
+                                </div>
+                            </div>
+                            {{-- Sort order for exam position --}}
+                            <div class="form-group row" id="exam-position-sort-order">
+                                <label class="col-lg-5 col-form-label font-weight-semibold">Position Sort Order <span class="text-danger">*</span></label>
+                                <div class="col-lg-7">
+                                    <div class="d-flex mb-2">
+                                        <span><input type="radio" checked id="exam-sort-desc" name="exam_student_position_sort_order" value="desc" class="form-input-styled text-center"></span>
+                                        <label for="exam-sort-desc" class="ml-2 cursor-pointer">Highest is best</label>
+                                    </div>
+                                    <div class="d-flex mb-2">
+                                        <span><input type="radio" id="exam-sort-asc" name="exam_student_position_sort_order" value="asc" class="form-input-styled text-center"></span>
+                                        <label for="exam-sort-asc" class="ml-2 cursor-pointer">Lowest is best</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -239,9 +253,23 @@ $hasActions = $canEdit || $canPublish || $canDelete;
                                         @foreach(Mk::getStudentCAPositionByValues() as $key => $value)
                                         <div class="d-flex mb-2">
                                             <span><input type="radio" id="ca-position-by-{{ $key }}" name="ca_student_position_by_value" value="{{ $key }}" class="form-input-styled text-center"></span>
-                                            <label for="ca-position-by-{{ $key }}" class="ml-2 w-50 m-auto-0">{{ $value }}</label>
+                                            <label for="ca-position-by-{{ $key }}" class="ml-2 w-50 m-auto-0 cursor-pointer">{{ $value }}</label>
                                         </div>
                                         @endforeach
+                                    </div>
+                                </div>
+                                {{-- Sort order for CA position --}}
+                                <div class="form-group row" id="ca-position-sort-order">
+                                    <label class="col-lg-7 col-form-label font-weight-semibold">Position Sort Order <span class="text-danger">*</span></label>
+                                    <div class="col-lg-5">
+                                        <div class="d-flex mb-2">
+                                            <span><input type="radio" checked id="ca-sort-desc" name="ca_student_position_sort_order" value="desc" class="form-input-styled text-center"></span>
+                                            <label for="ca-sort-desc" class="ml-2 cursor-pointer">Highest is best</label>
+                                        </div>
+                                        <div class="d-flex mb-2">
+                                            <span><input type="radio" id="ca-sort-asc" name="ca_student_position_sort_order" value="asc" class="form-input-styled text-center"></span>
+                                            <label for="ca-sort-asc" class="ml-2 cursor-pointer">Lowest is best</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

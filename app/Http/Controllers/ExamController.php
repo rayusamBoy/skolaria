@@ -85,7 +85,7 @@ class ExamController extends Controller
      */
     public function update(ExamUpdate $req, $id): JsonResponse
     {
-        $exam = $this->exam->getExamsByConditions(['id' => $id], true, ['assessment'])->first();
+        $exam = $this->exam->getExamsByConditions(['id' => $id], false, ['assessment'])->first();
 
         if ($exam->is_locked) {
             return Mk::jsonUpdateDenied();
@@ -120,7 +120,7 @@ class ExamController extends Controller
      */
     public function update_lock_state(ExamUpdateLockState $req): JsonResponse
     {
-        $exam = $this->exam->findExam($req->id);
+        $exam = $this->exam->findExam($req->id, false);
         if ($exam->is_published) {
             return Mk::jsonUpdateDenied();
         }
@@ -168,7 +168,7 @@ class ExamController extends Controller
         $has_assessment = $req->boolean('has_assessment');
         return $has_assessment
             ? Mk::getExamFieldNames()
-            : Mk::getExamFieldNames(['ca_student_position_by_value', 'cw_denominator', 'hw_denominator', 'tt_denominator', 'tdt_denominator']);
+            : Mk::getExamFieldNames(['ca_student_position_by_value', 'ca_student_position_sort_order', 'cw_denominator', 'hw_denominator', 'tt_denominator', 'tdt_denominator']);
     }
 
     /**
