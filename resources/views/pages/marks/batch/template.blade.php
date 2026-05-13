@@ -51,7 +51,7 @@
 
                 <div class="col-md-3 mt-4">
                     <div class="text-right mt-1">
-                        <button type="submit" class="btn btn-sm btn-primary">Download Spreadsheet Template <i class="material-symbols-rounded ml-2">download</i></button>
+                        <button type="submit" class="btn btn-sm btn-primary">Download Template <i class="material-symbols-rounded ml-2">download</i></button>
                     </div>
                 </div>
             </div>
