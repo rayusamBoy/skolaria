@@ -264,21 +264,6 @@ class AssessmentRepo
     }
 
     /**
-     * Get a specific value from the first assessment record matching conditions.
-     *
-     * @param array  $where
-     * @param string $value  Column name
-     * @return mixed
-     */
-    public function getStudentColumnValue(array $where, string $value): mixed
-    {
-        return AssessmentRecord::where($where)
-            ->select('average')
-            ->first()
-        ->$value;
-    }
-
-    /**
      * Calculate a student's CA position (1‑based) directly via the database,
      * using the sort order supplied by the controller.
      *

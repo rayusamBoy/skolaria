@@ -398,19 +398,6 @@ class ExamRepo
     }
 
     /**
-     * Get a single column value from the first exam record matching conditions.
-     *
-     * @param array  $where
-     * @param string $value
-     * @return mixed|null
-     */
-    public function getExamRecordColumn(array $where, string $value): mixed
-    {
-        $record = ExamRecord::where($where)->select($value)->first();
-        return $record ? $record->$value : null;
-    }
-
-    /**
      * Calculate a student's position (1‑based) directly via the database,
      * using the sort order supplied.
      *
