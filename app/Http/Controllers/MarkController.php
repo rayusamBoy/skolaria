@@ -20,6 +20,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -377,7 +378,8 @@ class MarkController extends Controller
         ];
 
         $delimiter = Mk::getDelimiter();
-        $filename = str_replace(' ', '_', "{$class->name}{$delimiter}{$exam->name}{$delimiter}{$exam->year}.xlsx");
+        $time = time();
+        $filename = str_replace(' ', '_', "{$class->name}{$delimiter}{$exam->name}{$delimiter}{$exam->year}{$delimiter}{$time}.xlsx");
 
         return Excel::download(
             new MarksExport($data),
@@ -397,8 +399,9 @@ class MarkController extends Controller
     public function batch_upload(Request $req)
     {
         $template = $req->file('template');
-        $file_meta = Mk::getFileMetaData($template);
-        $name = str_replace('.' . $file_meta['ext'], '', $file_meta['name']);
+        $delimiter = Mk::getDelimiter();
+        // Remove file extension and unix timestamp
+        $name = Str::beforeLast(pathinfo($template->getClientOriginalPath(), PATHINFO_FILENAME), $delimiter);
         $req['template_file_name'] = $name;
 
         Validator::make($req->toArray(), [
@@ -410,7 +413,6 @@ class MarkController extends Controller
             return Mk::json(__('msg.file_required'), false);
         }
 
-        $delimiter = Mk::getDelimiter();
         $exploded_name = explode($delimiter, $name);
         $year = "$exploded_name[2]-$exploded_name[3]";
 

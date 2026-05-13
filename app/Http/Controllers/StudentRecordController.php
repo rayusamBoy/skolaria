@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\Attributes\SkipPermission;
 use App\Exports\StudentsBatchAddExport;
 use App\Helpers\Usr;
 use App\Http\Controllers\Controller;
@@ -22,7 +23,6 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use App\Auth\Attributes\SkipPermission;
 
 class StudentRecordController extends Controller
 {
@@ -134,7 +134,8 @@ class StudentRecordController extends Controller
         $data['year'] = $year = Usr::getCurrentSession();
 
         $delimiter = Usr::getDelimiter();
-        $filename = ucfirst(strtolower(str_replace(' ', '_', "{$class->name}{$delimiter}{$this->students_batch_file_name_description}{$delimiter}{$year}.xlsx")));
+        $time = time();
+        $filename = ucfirst(strtolower(str_replace(' ', '_', "{$class->name}{$delimiter}{$this->students_batch_file_name_description}{$delimiter}{$year}{}{$delimiter}{$time}.xlsx")));
 
         return Excel::download(
             new StudentsBatchAddExport($data),
@@ -170,8 +171,9 @@ class StudentRecordController extends Controller
     public function batch_store(HttpReq $req): JsonResponse
     {
         $template = $req->file('template');
-        $file_meta = Usr::getFileMetaData($template);
-        $name = str_replace('.' . $file_meta['ext'], '', $file_meta['name']);
+        $delimiter = Usr::getDelimiter();
+        // Remove file extension and unix timestamp
+        $name = Str::beforeLast(pathinfo($template->getClientOriginalPath(), PATHINFO_FILENAME), $delimiter);
         $req['template_file_name'] = $name;
 
         Validator::make($req->toArray(), [
