@@ -580,6 +580,7 @@ class Mk extends Qs
 
     /**
      * Options for student exam position calculation.
+     * These must match the column names in the exam_records table.
      *
      * @return array
      */
@@ -589,7 +590,7 @@ class Mk extends Qs
             'total' => 'Total Marks',
             'average' => 'Average Mark',
             'points' => 'Division Points',
-            'GPA' => 'GPA',
+            'gpa' => 'GPA',
         ];
     }
 
