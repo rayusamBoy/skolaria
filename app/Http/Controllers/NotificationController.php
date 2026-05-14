@@ -123,7 +123,8 @@ class NotificationController extends Controller
     /**
      * Delete specific device tokens from the authenticated user.
      */
-    protected function deleteDeviceToken(array $tokens_to_remove, $user): int
+    #[SkipPermission] // Skip permission generation for this method
+    public function deleteDeviceToken(array $tokens_to_remove, $user): int
     {
         $current_tokens = $user->firebase_device_tokens ?? [];
         $new_tokens = array_values(array_diff($current_tokens, $tokens_to_remove));
