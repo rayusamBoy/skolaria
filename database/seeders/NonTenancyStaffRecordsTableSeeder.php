@@ -24,7 +24,7 @@ class NonTenancyStaffRecordsTableSeeder extends Seeder
                 'user_id' => \DB::table('users')->where('username', 'rootuser')->value('id'),
                 'allow_staff_data_edit' => true,
                 'place_of_living' => 'Zanzibar Town',
-                'role' => 'An IT person',
+                'designation' => 'An IT person',
                 'code' => 'ITGUY',
                 'employment_date' => NULL,
                 'employment_number' => NULL,
