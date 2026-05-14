@@ -3,9 +3,11 @@
 namespace App\Providers;
 
 use App\Helpers\Usr;
+use App\Listeners\HandleFailedFcmNotifications;
 use App\Listeners\TenantEventSubscriber;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -15,6 +17,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /**
+     * The event listener mappings for the application.
+     */
+    protected array $listen = [
+        NotificationFailed::class => [
+            HandleFailedFcmNotifications::class,
+        ],
+    ];
+
     /**
      * Register any application services.
      */
@@ -28,13 +39,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        require base_path('routes/tenant/channels.php');
+        require_once base_path('routes/tenant/channels.php');
 
-        RateLimiter::for('api', static fn(Request $request) => Limit::perMinute(60)->by($request->user()?->id ?? $request->ip()));
+        RateLimiter::for('api', static fn(Request $request) => Limit::perMinute(60)->by($request->user()?->id ?: $request->ip()));
         Event::subscribe(TenantEventSubscriber::class);
         Paginator::useBootstrapFour();
-        Gate::before(fn($user, string $ability) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()) ? true : null);
-
+        Gate::before(static fn($user, string $ability) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()) ? true : null);
         Model::preventLazyLoading(!app()->isProduction());
     }
 }
