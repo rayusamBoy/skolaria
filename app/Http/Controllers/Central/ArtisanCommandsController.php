@@ -18,9 +18,9 @@ class ArtisanCommandsController extends Controller
      * Command ID mapping for run_command action.
      */
     protected const array TENANT_COMMANDS = [
-        '0' => 'tenants:migrate --force',
-        '1' => 'tenants:migrate-fresh --force',
-        '2' => 'tenants:seed --force',
+        '0' => 'tenants:migrate',
+        '1' => 'tenants:migrate-fresh',
+        '2' => 'tenants:seed',
     ];
 
     public function __construct()
@@ -157,7 +157,10 @@ class ArtisanCommandsController extends Controller
         try {
             tenancy()->initialize($tenant);
 
-            $status = Artisan::call($command_name);
+            $status = Artisan::call($command_name, [
+                '--force' => true, // This needs to be true to run migrations in production.
+                '--tenants' => [$tenant],
+            ]);
             $output = Artisan::output();
 
             if ($status !== 0) {
