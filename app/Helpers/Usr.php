@@ -742,11 +742,7 @@ class Usr extends Qs
      */
     public static function getTenancyAwareImgOrDefaultBgUrl($img): string
     {
-        if ($img === null) {
-            return asset(path: self::getLoginAndRelatedPagesBgValue());
-        }
-
-        $img_desc = $img->value;
+        $img_desc = $img?->value;
         $img_url = $img_desc === null
             ? asset(path: self::getLoginAndRelatedPagesBgValue())
             : (self::tenancyInitialized() ? tenant_asset($img_desc) : asset($img_desc));
