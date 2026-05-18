@@ -132,7 +132,7 @@ class MarkRepo
             ->get()
             ->where('subject.is_core')
             ->sortByDesc($tex)
-            ->take($limit)
+            ->when($limit > 0, fn($q) => $q->take($limit))
             ->avg($tex);
         return round((float) $avg, 1);
     }
@@ -280,7 +280,7 @@ class MarkRepo
      */
     public function sumSmallestValues(array $weights, int $length): int|float|null
     {
-        if ($length <= 0) {
+        if ($length < 0) {
             return null;
         }
         if (\count($weights) < $length) {
@@ -288,7 +288,7 @@ class MarkRepo
         }
         $sorted = $weights;
         sort($sorted);
-        return array_sum(\array_slice($sorted, 0, $length));
+        return $length === 0 ? array_sum($sorted) : array_sum(\array_slice($sorted, 0, $length));
     }
 
     /**
