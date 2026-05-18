@@ -742,7 +742,7 @@ class MarkController extends Controller
             ->where('subject.my_class_id', $class_id);
 
         if ($section_id === null && $sub_recs->whereNull('section_id')->whereNotNull('students_ids')->isNotEmpty()) {
-            return $this->student->getActiveStudentsByUserIds($sub_recs->value('students_ids'))->get();
+            return $this->student->getActiveStudentsByUserIdsQuery($sub_recs->value('students_ids'))->get();
         }
 
         if (
@@ -1094,7 +1094,7 @@ class MarkController extends Controller
             fn($item) => "{$item->student_id}_{$item->subject_id}"
         );
 
-        $students = $this->student->getStudentsByUserIds($st_ids->toArray())
+        $students = $this->student->getStudentsByUserIdsQuery($st_ids->toArray())
             ->get()
             ->whereNotNull('user')
             ->sortBy('user.name');

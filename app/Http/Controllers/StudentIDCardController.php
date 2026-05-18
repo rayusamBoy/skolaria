@@ -118,7 +118,7 @@ class StudentIDCardController extends Controller
         }
 
         $data = $req->except('_token');
-        $data['students'] = $this->student->getActiveStudentsByUserIds($req->students_ids)
+        $data['students'] = $this->student->getActiveStudentsByUserIdsQuery($req->students_ids)
             ->with('my_class')
             ->get()
             ->sortBy('user.name');

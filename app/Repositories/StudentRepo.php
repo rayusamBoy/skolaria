@@ -147,24 +147,23 @@ class StudentRepo
     }
 
     /**
-     * Get active student records for a set of user IDs, with user relation (for eager loading).
+     * Query builder for active student records for a set of user IDs, with user relation (for eager loading).
      *
      * @param array $ids
      * @return Builder
      */
-    public function getActiveStudentsByUserIds(array $ids): Builder
+    public function getActiveStudentsByUserIdsQuery(array $ids): Builder
     {
         return $this->getActiveStudentsQuery()->whereIn('user_id', $ids)->with('user');
     }
 
     /**
-     * Get student records (active or graduated) for a set of user IDs, with user relation.
-     * (Retained for backward compatibility – similar to getRecordByUserIDs but without active filter.)
+     * Query builder student records (active or graduated) for a set of user IDs, with user relation.
      *
      * @param array $ids
      * @return Builder
      */
-    public function getStudentsByUserIds(array $ids): Builder
+    public function getStudentsByUserIdsQuery(array $ids): Builder
     {
         return StudentRecord::whereIn('user_id', $ids)->with('user');
     }

@@ -88,7 +88,7 @@ class AssessmentController extends Controller
         }
 
         $students = ($req->section_id === null && $sub_record->students_ids !== null)
-            ? $this->student->getActiveStudentsByUserIds($sub_record->students_ids)->get()
+            ? $this->student->getActiveStudentsByUserIdsQuery($sub_record->students_ids)->get()
             : $this->student->getActiveStudentsQueryWithRelations($classSection)->get();
 
         if ($students->isEmpty()) {
@@ -706,7 +706,7 @@ class AssessmentController extends Controller
 
         return [
             'students_summary' => $this->buildProgressiveStudentData($asr, $subjects, "tex{$exam->term}", $class_type_id),
-            'students' => $this->student->getStudentsByUserIds($st_ids->toArray())
+            'students' => $this->student->getStudentsByUserIdsQuery($st_ids->toArray())
                 ->get()
                 ->whereNotNull('user')
                 ->sortBy('user.name')
