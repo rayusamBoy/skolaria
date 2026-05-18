@@ -126,16 +126,9 @@ class AjaxController extends Controller
      */
     public function get_class_subjects($class_id): array
     {
-        $session_key = 'route_is.subject_records.index';
-        $has_session_flag = session()->has($session_key);
-
-        $subjects = auth()->user()->hasRole(config('roles.default_roles.tenant.teacher')) && $has_session_flag
+        $subjects = auth()->user()->hasRole(config('roles.default_roles.tenant.teacher'))
             ? $this->my_class->findSubjectsByTeacherAndClass(auth()->id(), $class_id)
             : $this->my_class->findSubjectByClass($class_id);
-
-        if ($has_session_flag) {
-            session()->forget($session_key);
-        }
 
         return $subjects->map(fn($q) => [
             'id' => $q->id ?? $q->subject->id ?? null,
