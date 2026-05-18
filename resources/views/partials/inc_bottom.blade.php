@@ -30,13 +30,13 @@
 <script src="{{ asset('global_assets/js/plugins/forms/selects/form_select2.js') }}"></script>
 <script src="{{ asset('global_assets/js/plugins/uploaders/uploader_bootstrap.js') }}"></script>
 <script src="{{ asset('global_assets/js/plugins/ui/autosize.min.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ asset('global_assets/js/plugins/charts/chart.js') }}"></script>
 {{-- Scrollers --}}
 <script src="{{ asset('global_assets/js/plugins/scrollers/jquery.floatingscroll.min.js') }}"></script>
 {{-- Prints --}}
 <script src="{{ asset('global_assets/js/plugins/prints/printThis-min.js') }}"></script>
 {{-- Editors --}}
-<script src="https://cdn.jsdelivr.net/npm/overtype@latest/dist/overtype.min.js"></script>
+<script src="{{ asset('global_assets/js/plugins/editors/overtype.min.js') }}"></script>
 {{-- Theme JS files --}}
 <script src="{{ asset('assets/js/custom-min.js') }}"></script>
 
