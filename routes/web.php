@@ -94,7 +94,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             Route::post('lock/{ticket}', [TicketController::class, 'lock_ticket'])->name('tickets.lock');
             Route::post('unlock/{ticket}', [TicketController::class, 'unlock_ticket'])->name('tickets.unlock');
 
-            Route::get('answer/{ticket}', [TicketController::class, 'answer'])->name('tickets.answer');
+            Route::get('answer/{ticket}', [TicketController::class, 'answer'])->name('tickets.answer')->middleware('decodeRouteParams');
             Route::put('store/operator-message', [TicketController::class, 'store_operator_message'])->name('tickets.store_operator_message');
             Route::put('update/assignee/{ticket}', [TicketController::class, 'update_assignee'])->name('tickets.update_assignee');
 
