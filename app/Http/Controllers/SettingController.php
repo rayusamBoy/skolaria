@@ -30,7 +30,6 @@ class SettingController extends Controller
     public function index(): View
     {
         $data['class_types'] = $this->my_class->getAllClassTypes();
-        $data['settings'] = Qs::getSettings();
 
         return view('pages.settings', $data);
     }

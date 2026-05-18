@@ -76,8 +76,6 @@ class TicketController extends Controller
      */
     public function reply(string $ticket_id): View|RedirectResponse
     {
-        $ticket_id = Usr::decodeHash($ticket_id);
-
         $tickets = $this->ticket->getTicketsByConditions([
             'tenant_id' => tenant()?->getTenantKey(),
             'user_id' => auth()->id(),
@@ -109,8 +107,6 @@ class TicketController extends Controller
      */
     public function answer(string $ticket_id): View|RedirectResponse
     {
-        $ticket_id = Usr::decodeHash($ticket_id);
-
         $where_ticket = Usr::userIsHead()
             ? ['id' => $ticket_id]
             : ['id' => $ticket_id, 'assigned_to' => auth()->id()];
@@ -277,7 +273,6 @@ class TicketController extends Controller
             ->where('is_archived', false)
             ->pluck('id')
             ->toArray();
-        $ticket_id = Usr::decodeHash($ticket_id);
 
         if (!\in_array($ticket_id, $user_ticket_ids)) {
             return back()->with('flash_danger', __('msg.denied'));
