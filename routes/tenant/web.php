@@ -59,6 +59,9 @@ use Illuminate\Support\Facades\Route;
 Route::group(["middleware" => ['universal']], function () {
     Auth::routes();
 
+    // The helper rotue page only sets theme and skin preferences for the PWA GeneratePwaScreenshots command
+    Route::get('pwa-set-preferences', fn() => view('pwa.set_preferences'));
+
     /****************** My Account ***************/
     Route::group(['prefix' => 'my-account', 'middleware' => ['auth', 'checkForPassUpdate']], function () {
         Route::get('profile/edit', [MyAccountController::class, 'edit_profile'])->name('my_account.edit');
