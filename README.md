@@ -83,7 +83,7 @@ php artisan serve
 
 #### Screenshots
 
-<img alt="delete-tenant-with-success-msg-dark" src="/public/images/screenshots/non_tenancy/delete-tenant-with-success-msg-dark.png">
+<img alt="manage-tenants-dark" src="/public/images/screenshots/non_tenancy/manage-tenants-dark.png">
 <img alt="system-settings-light" src="/public/images/screenshots/non_tenancy/system-settings-light.PNG">
 
 `Non-tenancy` [more screenshots](/public/images/screenshots/non_tenancy/).
@@ -91,7 +91,7 @@ php artisan serve
 ---
 
 <img alt="superadmin-dashboard-dark" src="/public/images/screenshots/tenancy/superadmin-dashboard-dark.png">
-<img alt="login-dark" src="/public/images/screenshots/tenancy/login-dark.png">
+<img alt="teacher-batch-marks-dark" src="/public/images/screenshots/tenancy/teacher-batch-marks-dark.png">
 
 `Tenancy` [more screenshots](/public/images/screenshots/tenancy/).
 
