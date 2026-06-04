@@ -9,7 +9,7 @@
 ## About
 
 The multi‑tenant, progressive web app (PWA) school management system powered by
-[Laravel 12](https://laravel.com), [Bootstrap 4](https://getbootstrap.com),
+[Laravel 13](https://laravel.com), [Bootstrap 4](https://getbootstrap.com),
 [jQuery 3](https://jquery.com), and the
 [tenancyforlaravel package v4](https://v4.tenancyforlaravel.com), among others.
 
@@ -248,7 +248,7 @@ php artisan serve
 
 ### Deployment
 
-Please review the official [Laravel deployment guide](https://laravel.com/docs/12.x/deployment), and consider searching online for tutorials on deploying a Laravel application tailored to your specific hosting environment.
+Please review the official [Laravel deployment guide](https://laravel.com/docs/13.x/deployment), and consider searching online for tutorials on deploying a Laravel application tailored to your specific hosting environment.
 
 ### Usage
 
