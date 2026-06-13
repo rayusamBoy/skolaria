@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use Stancl\Tenancy\Database\Concerns\CentralConnection;
 
 class Ticket extends Model
@@ -99,6 +98,6 @@ class Ticket extends Model
 
         config()->set('database.connections.dynamic_tenant', $template_connection);
 
-        return DB::connection('dynamic_tenant')->table('users')->where('id', $user_id)->first();
+        return User::on('dynamic_tenant')->with('roles')->find($user_id);
     }
 }
