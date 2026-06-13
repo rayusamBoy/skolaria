@@ -182,13 +182,15 @@ $hasActions = $canAnswer || $canLock || $canUnlock || $canDelete;
                                             <a href="javascript:;" data-toggle="modal" data-target="#ticket-info-modal-{{ $ticket->id }}" class="dropdown-item"><i class="material-symbols-rounded">info</i> Information</a>
                                             {{-- Lock / Unlock --}}
                                             @if($ticket->is_locked() && $canUnlock)
-                                            <a href="{{ route('tickets.unlock', $ticket->id) }}" class="dropdown-item text-success"><i class="material-symbols-rounded">lock_open</i> UnLock</a>
+                                            <a href="javascript:;" onclick="document.getElementById('unlock-ticket-form-{{ $ticket->id }}').submit();" class="dropdown-item text-success"><i class="material-symbols-rounded">lock_open</i> UnLock</a>
+                                            <form class="d-none" method="POST" id="unlock-ticket-form-{{ $ticket->id }}" action="{{ route('tickets.unlock', $ticket->id) }}">@csrf</form>
                                             @elseif(!$ticket->is_locked() && $canLock)
-                                            <a href="{{ route('tickets.lock', $ticket->id) }}" class="dropdown-item text-warning"><i class="material-symbols-rounded">lock</i> Lock</a>
+                                            <a href="javascript:;" onclick="document.getElementById('lock-ticket-form-{{ $ticket->id }}').submit();" class="dropdown-item text-warning"><i class="material-symbols-rounded">lock</i> Lock</a>
+                                            <form class="d-none" method="POST" id="lock-ticket-form-{{ $ticket->id }}" action="{{ route('tickets.lock', $ticket->id) }}">@csrf</form>
                                             @endif
                                             @if($canDelete)
                                             <a id="{{ $ticket->id }}" onclick="confirmPermanentDelete(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
-                                            <form class="d-none" method="post" id="item-delete-{{ $ticket->id }}" action="{{ route('tickets.delete', $ticket->id) }}">@csrf</form>
+                                            <form class="d-none" method="post" id="item-delete-{{ $ticket->id }}" action="{{ route('tickets.delete', $ticket->id) }}">@csrf @method('DELETE')</form>
                                             @endif
                                         </div>
                                     </div>
