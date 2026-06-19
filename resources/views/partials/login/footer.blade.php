@@ -8,6 +8,13 @@
     </span>
 
     <ul class="navbar-nav ml-lg-auto">
+        @if (request()->hasCookie('tenant'))
+        <li class="nav-item"><a href="javascript:;" onclick="document.getElementById('tenant-logout-form').submit();" class="navbar-nav-link text-color-custom"><i class="material-symbols-rounded mr-2">exit_to_app</i><span class="d-none d-md-block">{{ 'Back to Central' }} </span></a></li>
+        <form method="POST" id="tenant-logout-form" action="{{ route('tenant.logout') }}" class="hidden">@csrf</form>
+        @endif
+        @if (config('tenancy.active_identification_mode') === 'request_data')
+        <li class="nav-item"><a href="{{ route('entry.home') }}" class="navbar-nav-link text-color-custom"><i class="material-symbols-rounded mr-2">school</i><span class="d-none d-md-block">{{ 'Schools' }} </span></a></li>
+        @endif
         <li class="nav-item"><a href="{{ route('pages.privacy_policy') }}" class="navbar-nav-link text-color-custom" target="_blank"><i class="material-symbols-rounded mr-2">policy</i><span class="d-none d-md-block">{{ 'Privacy Policy' }} </span></a></li>
         <li class="nav-item"><a href="{{ route('pages.terms_of_use') }}" class="navbar-nav-link text-color-custom" target="_blank"><i class="material-symbols-rounded mr-2">gavel</i><span class="d-none d-md-block">{{ 'Terms of Use' }} </span></a></li>
         <li class="nav-item"><a href="javascript:;" class="navbar-nav-link text-color-custom" id="contact-link" data-toggle="modal" data-target="#admin-contact-modal"><i class="material-symbols-rounded mr-2">call</i> <span class="d-none d-md-block"> {{ 'Contact Admin' }} </span></a></li>
@@ -15,9 +22,10 @@
 </div>
 
 <script type="text/javascript">
-        $("#exam-announce").marquee({
-            direction: 'left', 
-            pauseOnHover: true, 
-            speed: 100
-        });
+    $("#exam-announce").marquee({
+        direction: 'left', 
+        pauseOnHover: true, 
+        speed: 100
+    });
+
 </script>

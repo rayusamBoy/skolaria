@@ -5,9 +5,9 @@ declare(strict_types=1);
 use App\Http\Controllers\AjaxController;
 use App\Http\Controllers\AnalyticController;
 use App\Http\Controllers\AssessmentController;
-use App\Http\Controllers\Auth\AccountSecurityController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BookRequestController;
+use App\Http\Controllers\ChildrenController;
 use App\Http\Controllers\ClassTypeController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\DormController;
@@ -17,16 +17,12 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\MarkController;
 use App\Http\Controllers\MessageThreadController;
-use App\Http\Controllers\MyAccountController;
 use App\Http\Controllers\MyClassController;
-use App\Http\Controllers\ChildrenController;
 use App\Http\Controllers\NoticeController;
-use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PinController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\QueryBuilderController;
-use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\SettingController;
@@ -35,14 +31,12 @@ use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\StudentIDCardController;
 use App\Http\Controllers\StudentRecordController;
 use App\Http\Controllers\SubjectController;
-use App\Http\Controllers\TestController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\TimeTableController;
 use App\Http\Controllers\UserController;
 use App\Http\Requests\CustomEmailVerificationRequest;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EntryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,62 +44,20 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 |
 | Here you can register the tenant routes for your application.
-| These routes are loaded by the TenantRouteServiceProvider.
 |
 | Feel free to customize them however you want. Good luck!
 |
 */
 
-Route::group(["middleware" => ['universal']], function () {
-    Auth::routes();
-
-    // The helper rotue page only sets theme and skin preferences for the PWA GeneratePwaScreenshots command
-    Route::get('pwa-set-preferences', fn() => view('pwa.set_preferences'));
-
-    /****************** My Account ***************/
-    Route::group(['prefix' => 'my-account', 'middleware' => ['auth', 'checkForPassUpdate']], function () {
-        Route::get('profile/edit', [MyAccountController::class, 'edit_profile'])->name('my_account.edit');
-        Route::put('profile', [MyAccountController::class, 'update_profile'])->name('my_account.update');
-        Route::put('password/change', [MyAccountController::class, 'change_pass'])->name('my_account.change_pass');
-        Route::put('preferences/update', [MyAccountController::class, 'update_preferences'])->name('my_account.update_preferences');
-        Route::post('hidden-alerts/update', [MyAccountController::class, 'update_hidden_alerts'])->name('my_account.update_hidden_alerts');
-        Route::post('hidden-alerts/clear', [MyAccountController::class, 'clear_hidden_alerts'])->name('my_account.clear_hidden_alerts');
-    });
-
-    /*************** Test *****************/
-    Route::get('test', [TestController::class, 'index'])->name('test')->middleware('auth');
-
-    /*************** Others (public pages) *****************/
-    Route::get('privacy-policy', [HomeController::class, 'privacy_policy'])->name('pages.privacy_policy');
-    Route::get('terms-of-use', [HomeController::class, 'terms_of_use'])->name('pages.terms_of_use');
-});
+Route::post('tenant/logout', [EntryController::class, 'tenant_logout'])->name('tenant.logout');
 
 Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
-    /*************** Two-factor authentication (account-scoped) *****************/
-    Route::group(['prefix' => 'two-factor-authentication', 'middleware' => 'universal'], function () {
-        Route::get('account/security', [AccountSecurityController::class, 'index'])->name('account_security.index')->middleware('2fa');
-        Route::match(['POST', 'GET'], 'account/recovery', [AccountSecurityController::class, 'account_recovery'])->name('account_security.account_recovery');
-        Route::get('show', [AccountSecurityController::class, 'show_google_2fa_verification'])->name('two_factor.show');
-        // middleware captures OTP and runs authenticate
-        Route::post('authenticate', [AccountSecurityController::class, 'authenticate'])->name('two_factor.authenticate')->middleware(['2fa', 'throttle:5,1']);
-        Route::post('update/code', [AccountSecurityController::class, 'update_secret_codes'])->name('two_factor.update_secret_codes')->middleware(['2fa', 'password.confirm']);
-        Route::patch('code/null/{user?}', [AccountSecurityController::class, 'null_secret_code'])->name('two_factor.null_secret_code')->middleware(['2fa', 'password.confirm']);
-        Route::delete('logout/other-browser-sessions', [AccountSecurityController::class, 'logout_other_browser_sessions'])->name('account_security.logout_other_browser_sessions');
-    });
-
     // Require 2FA for the routes below
     Route::group(['middleware' => '2fa'], function () {
-        /*************** Permissions and Roles (admin-protected) *****************/
-        Route::group(['middleware' => ['auth', 'password.confirm', 'universal']], function () {
-            Route::resource('roles', RoleController::class);
-        });
-
         /*************** Dashboard **************/
-        Route::group(['middleware' => 'universal'], function () {
-            Route::get('/', [HomeController::class, 'dashboard'])->name('index');
-            Route::get('home', [HomeController::class, 'dashboard'])->name('home');
-            Route::get('dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
-        });
+        Route::get('/', [HomeController::class, 'dashboard'])->name('index');
+        Route::get('home', [HomeController::class, 'dashboard'])->name('home');
+        Route::get('dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
 
         /*************** Calendar Events **************/
         Route::get('schedule', [ScheduleController::class, 'index'])->name('schedule.index');
@@ -123,11 +75,6 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             $request->fulfill();
             return redirect('/home')->with('pop_success', __('msg.email_verified'));
         })->middleware(['signed'])->name('verification.verify');
-
-        Route::get('email/verification/notification', function (Request $request) {
-            $request->user()->sendEmailVerificationNotification();
-            return back()->with('flash_success', __('msg.verification_sent'));
-        })->middleware(['throttle:6,1', 'universal'])->name('verification.send');
 
         /*************** Statistics **************/
         Route::get('statistics', [StatisticsController::class, 'index'])->name('statistics.index');
@@ -345,16 +292,10 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         Route::resource('payments', PaymentController::class);
         Route::resource('divisions', DivisionController::class);
         Route::resource('message_threads', MessageThreadController::class);
-        Route::resource('notifications', NotificationController::class)->middleware('universal');
         Route::resource('class_types', ClassTypeController::class);
 
         /************************ AJAX helper endpoints ****************************/
         Route::prefix('ajax')->group(function () {
-            Route::group(['middleware' => 'universal'], function () {
-                Route::get('state/{state}', [AjaxController::class, 'get_state'])->name('ajax.get_state');
-                Route::get('lga/{state}', [AjaxController::class, 'get_lga'])->name('ajax.get_lga');
-            });
-
             Route::get('class-sections/{class}', [AjaxController::class, 'get_class_sections'])->name('ajax.get_class_sections');
             Route::get('class-students/{class}', [AjaxController::class, 'get_class_students'])->name('ajax.get_class_students');
             Route::get('pre-defined-subjects', [AjaxController::class, 'get_pre_defined_subjects'])->name('ajax.get_pre_defined_subjects');
@@ -419,14 +360,6 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             Route::get('/', [AnalyticController::class, 'index'])->name('analytics.index');
             Route::post('google/setup', [AnalyticController::class, 'google_setup'])->name('analytics.google_setup');
             Route::get('data/google/fetch', [AnalyticController::class, 'fetch_data'])->name('analytics.fetch_data');
-        });
-
-        /*************** Notifications (user-specific settings) **************/
-        Route::group(['prefix' => 'notifications', 'middleware' => ['universal']], function () {
-            Route::post('mark/as-read/{notification}', [NotificationController::class, 'mark_as_read'])->name('notifications.mark_as_read');
-            Route::put('mark/all-read', [NotificationController::class, 'mark_all_read'])->name('notifications.mark_all_read');
-            Route::put('update/notifiable', [NotificationController::class, 'update_notification_preferences'])->name('notifications.update.notification_preferences');
-            Route::match(['post', 'put', 'delete'], 'update/firebase/device-token', [NotificationController::class, 'update_firebase_device_token'])->name('notifications.firebase.update_device_token');
         });
 
         /*************** Tickets (support workflow) **************/

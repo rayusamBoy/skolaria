@@ -8,7 +8,6 @@ use App\Http\Requests\TenantRequest;
 use App\Repositories\TenantRepo;
 use App\Repositories\UserRepo;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Log;
 use Stancl\Tenancy\Resolvers\DomainTenantResolver;
 
 class TenantController extends Controller
@@ -31,6 +30,8 @@ class TenantController extends Controller
     {
         $data["tenants"] = $this->tenant->getAllTenants();
         $data["user_roles"] = $this->user->getRolesByName();
+        $data["active_identification_mode"] = config('tenancy.active_identification_mode');
+        $data["active_identification_mode_is_domain"] = (config('tenancy.active_identification_mode') === "domain");
 
         return view("pages.central.tenants.index", $data);
     }
@@ -47,40 +48,30 @@ class TenantController extends Controller
      */
     public function store(TenantRequest $request)
     {
-        set_time_limit(600); // Set time limit for this method to 10 minutes.
-        $data = $request->except(['_token', '_method', 'domain']);
-        $creation_error = $domain_error = $tenant = null;
+        set_time_limit(600);
+
+        $data = $request->except(['_token', '_method', 'domain', 'tenant_slug']);
+        $data['identification_mode'] = $request->identification_mode;
 
         try {
             $tenant = $this->tenant->createTenant($data);
         } catch (\Throwable $t) {
-            logger()->error('err', ['fs'=> $t]);
-            $creation_error = $t->getMessage();
+            logger()->error('Tenant creation failed', ['error' => $t->getMessage()]);
+            return Qs::json(msg: "", arr: ['msg' => $t->getMessage(), 'ok' => false, 'pop' => true, 'pop_timer' => 0]);
         }
 
-        if ($tenant) {
+        // Handle domain or request‑data fields
+        if ($request->identification_mode === 'domain') {
             try {
                 $tenant->createDomain(['domain' => $request->domain]);
             } catch (\Throwable $t) {
-                $domain_error = $t->getMessage();
+                logger()->error('Domain creation failed', ['error' => $t->getMessage()]);
+                return Qs::json(msg: "", arr: ['msg' => $t->getMessage(), 'ok' => false, 'pop' => true, 'pop_timer' => 0]);
             }
         } else {
-            $domain_error = "Tenant creation did not complete successfully, so domain creation skipped.";
-        }
-
-        $errors = [];
-
-        if ($creation_error) {
-            $errors['tenant_creation_error'] = $creation_error;
-        }
-
-        if ($domain_error) {
-            $errors['domain_creation_error'] = $domain_error;
-        }
-
-        if ($creation_error || $domain_error) {
-            Log::error("Errors during tenant creation process: ", $errors);
-            return Qs::json(msg: "", arr: ['msg' => implode(", ", $errors), 'ok' => false, 'pop' => true, 'pop_timer' => 0]);
+            $tenant->update([
+                'tenant_slug' => $request->tenant_slug,
+            ]);
         }
 
         return Qs::json(msg: "", arr: ['msg' => __('msg.store_ok'), 'ok' => true, 'pop' => true, 'pop_timer' => 0]);
@@ -106,12 +97,17 @@ class TenantController extends Controller
         $data = $request->only(['account_status', 'payment_status', 'remarks', 'name']);
         $data['updated_at'] = Carbon::now();
 
-        // Handle domain update if provided
-        if ($request->has('domain') && $request->domain) {
-            // Invalidate the cached domain for this tenant
-            app(DomainTenantResolver::class)->invalidateCache($tenant);
-            $this->tenant->updateOrCreateDomain(['tenant_id' => $tenant->id], ['domain' => $request->domain]);
-            $data['domain'] = $request->domain;
+        if ($tenant->identification_mode === 'domain') {
+            // Domain‑based tenant – update domain record
+            if ($request->has('domain') && $request->domain) {
+                app(DomainTenantResolver::class)->invalidateCache($tenant);
+                $this->tenant->updateOrCreateDomain(
+                    ['tenant_id' => $tenant->id],
+                    ['domain' => $request->domain]
+                );
+            }
+        } else {
+            $data['tenant_slug'] = $request->tenant_slug;
         }
 
         $tenant->update($data);

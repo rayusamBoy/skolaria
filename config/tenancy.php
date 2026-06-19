@@ -169,16 +169,16 @@ return [
      * To configure their behavior, see the config keys below.
      */
     'bootstrappers' => [
-        // Basic Laravel features
+            // Basic Laravel features
         Bootstrappers\DatabaseTenancyBootstrapper::class,
         Bootstrappers\CacheTenancyBootstrapper::class,
-        // Bootstrappers\CacheTagsBootstrapper::class, // Alternative to CacheTenancyBootstrapper
-        // Bootstrappers\DatabaseCacheBootstrapper::class, // Separates cache by DB rather than by prefix, must run after DatabaseTenancyBootstrapper
+            // Bootstrappers\CacheTagsBootstrapper::class, // Alternative to CacheTenancyBootstrapper
+            // Bootstrappers\DatabaseCacheBootstrapper::class, // Separates cache by DB rather than by prefix, must run after DatabaseTenancyBootstrapper
         Bootstrappers\FilesystemTenancyBootstrapper::class,
         Bootstrappers\QueueTenancyBootstrapper::class,
-        // Bootstrappers\RedisTenancyBootstrapper::class, // Note: phpredis is needed
+            // Bootstrappers\RedisTenancyBootstrapper::class, // Note: phpredis is needed
 
-        // Adds support for the database session driver
+            // Adds support for the database session driver
         Bootstrappers\DatabaseSessionBootstrapper::class,
 
         // Configurable bootstrappers
@@ -480,4 +480,11 @@ return [
         '--class' => 'Database\Seeders\DatabaseSeeder', // root seeder class
         // '--force' => true,
     ],
+
+    'identification_modes' => [
+        'domain',
+        'request_data',
+    ],
+
+    'active_identification_mode' => 'request_data',
 ];

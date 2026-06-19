@@ -10,6 +10,7 @@ use App\Http\Controllers\Central\TenantController as CentralTenantController;
 use App\Http\Controllers\Central\UserController as CentralUserController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EntryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,7 +23,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
+Route::get('entry', [EntryController::class, 'index'])->name('entry.home');
+Route::get('/select/{tenant_id}', [EntryController::class, 'select'])->name('entry.select');
+Route::get('slug/{tenant_slug}', [EntryController::class, 'slug'])->name('entry.slug');
+
+Route::group(['middleware' => ['auth', 'checkForPassUpdate'], 'prefix' => 'central'], function () {
     // Require 2FA for the routes below
     Route::group(['middleware' => '2fa'], function () {
         /*************** Central namespace (central admin) ***************/
@@ -71,7 +76,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         });
 
         /*************** Users (central admin) *****************/
-        Route::prefix('central-users')->group(function () {
+        Route::prefix('users')->group(function () {
             Route::get('password/reset/{user}', [CentralUserController::class, 'reset_password'])->name('central_users.password.reset')->middleware('decodeRouteParams');
             Route::post('update/blocked-state', [CentralUserController::class, 'toggle_user_block'])->name('central_users.toggle_user_block');
             Route::get('my-profile/{user}', [CentralUserController::class, 'show_profile'])->name('central_users_profile.show')->middleware('decodeRouteParams');

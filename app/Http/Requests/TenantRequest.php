@@ -4,8 +4,6 @@ namespace App\Http\Requests;
 
 use App\Rules\Domain;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use Stancl\Tenancy\Database\Models\Domain as DomainModel;
 
 class TenantRequest extends FormRequest
 {
@@ -30,14 +28,22 @@ class TenantRequest extends FormRequest
     public function rules()
     {
         $store = [
-            'domain' => ['required', 'bail', 'unique:domains', new Domain],
+            'domain' => ['bail', 'unique:domains', 'required_if:identification_mode,domain', 'nullable', new Domain],
             'name' => 'required|string|unique:tenants,data->name',
             'remarks' => 'sometimes|nullable|max:300',
+            'account_status' => 'required|string',
+            'payment_status' => 'required|string',
+            'identification_mode' => 'required|in:domain,request_data',
+            'tenant_slug' => 'required_if:identification_mode,request_data|nullable|string|alpha_dash',
         ];
 
         $update = [
-            'remarks' => 'sometimes|nullable|max:300',
-            'domain' => ['required', Rule::unique(DomainModel::class)->ignore($this->getRouteTenantIdParameter(), 'tenant_id'), new Domain],
+            'domain' => ['bail', 'unique:domains', 'required_if:identification_mode,domain', 'nullable', new Domain],
+            'name' => 'required|string|max:255',
+            'account_status' => 'required|string',
+            'payment_status' => 'required|string',
+            'remarks' => 'nullable|string|max:300',
+            'tenant_slug' => 'required_if:identification_mode,request_data|nullable|string|alpha_dash',
         ];
 
         return $this->method() === 'POST' ? $store : $update;

@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
+use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 use Stancl\Tenancy\Middleware\PreventAccessFromUnwantedDomains;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -12,23 +13,37 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         using: function () {
             $centralDomains = config('tenancy.identification.central_domains');
+            $activeIdentificationMode = config('tenancy.active_identification_mode');
 
-            foreach ($centralDomains as $domain) {
+            if ($activeIdentificationMode === 'domain') {
+                foreach ($centralDomains as $domain) {
+                    Route::middleware('web')
+                        ->domain($domain)
+                        ->namespace('App\Http\Controllers')
+                        ->group(base_path('routes/web.php'));
+                }
+
+                Route::middleware([
+                    InitializeTenancyByDomain::class,
+                    PreventAccessFromUnwantedDomains::class
+                ])->group(function () {
+                    Route::middleware('web')
+                        ->namespace('App\Http\Controllers')
+                        ->group(base_path('routes/tenant/web.php'))
+                        ->group(base_path('routes/tenant/universal.php'));
+                    Route::middleware('api')->group(base_path('routes/tenant/api.php'));
+                    Route::middleware('web')->group(base_path('routes/tenant/channels.php'));
+                });
+            } else {
+                Route::middleware(['web', InitializeTenancyByRequestData::class])
+                    ->namespace('App\Http\Controllers')
+                    ->group(base_path('routes/tenant/universal.php'))
+                    ->group(base_path('routes/tenant/web.php'));
+
                 Route::middleware('web')
-                    ->domain($domain)
                     ->namespace('App\Http\Controllers')
                     ->group(base_path('routes/web.php'));
             }
-
-            Route::middleware([
-                'tenant',
-                InitializeTenancyByDomain::class,
-                PreventAccessFromUnwantedDomains::class
-            ])->group(function () {
-                Route::middleware('web')->namespace('App\Http\Controllers')->group(base_path('routes/tenant/web.php'));
-                Route::middleware('api')->group(base_path('routes/tenant/api.php'));
-                Route::middleware('web')->group(base_path('routes/tenant/channels.php'));
-            });
         },
     )
     ->withMiddleware(function (Middleware $middleware) {

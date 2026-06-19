@@ -34,14 +34,21 @@ $hasActions = $canEdit || $canShow || $canDelete || $canRunCommand;
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
+                                <label for="identification_mode">Identification Mode <span class="text-danger">*</span></label>
+                                <select required class="form-control select" name="identification_mode" id="identification_mode">
+                                    <option value="{{ $active_identification_mode }}" @selected(true)>{{ ucfirst(str_replace("_", " ", $active_identification_mode)) }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
                                 <label for="name">Tenant Name: <span class="text-danger">*</span></label>
                                 <input id="name" required name="name" value="{{ old('name') }}" type="text" class="form-control" placeholder="tenant name">
                             </div>
                         </div>
-
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label for="account_status"> Account Status: <span class="text-danger">*</span></label>
+                                <label for="account_status">Account Status: <span class="text-danger">*</span></label>
                                 <select required data-placeholder="Select Status" class="form-control select" name="account_status" id="account_status">
                                     @foreach (Usr::getAccountStatuses() as $status)
                                     <option @selected(old('account_status')==$status) value="{{ $status }}">{{ $status }}</option>
@@ -49,22 +56,9 @@ $hasActions = $canEdit || $canShow || $canDelete || $canRunCommand;
                                 </select>
                             </div>
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="domain" class="font-weight-semibold">Domain <span class="text-danger">*</span></label>
-                                <div class="text-right input-group">
-                                    <label class="input-group-text">https://</label>
-                                    <input id="domain" required name="domain" value="{{ old('domain') }}" type="text" class="form-control" placeholder="Eg., foo.localhost">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label for="payment_status"> Payment Status: <span class="text-danger">*</span></label>
+                                <label for="payment_status">Payment Status: <span class="text-danger">*</span></label>
                                 <select required data-placeholder="Select Status" class="form-control select" name="payment_status" id="payment_status">
                                     @foreach (Pay::getPaymentStatusOptions() as $key => $value)
                                     <option @selected(old('payment_status')==$key) value="{{ $key }}">{{ $value }}</option>
@@ -72,11 +66,39 @@ $hasActions = $canEdit || $canShow || $canDelete || $canRunCommand;
                                 </select>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-md-9">
+                    <div class="row">
+                        <div class="col-md-6">
                             <div class="form-group">
-                                <label for="remarks" class="font-weight-semibold">Remarks</label>
+                                <label for="remarks">Remarks</label>
                                 <textarea id="remarks" name="remarks" class="form-control">{{ old('remarks') }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div @class($active_identification_mode_is_domain ? [] : ["d-none"])>
+                                <div class="form-group">
+                                    <label for="domain">Domain <span class="text-danger">*</span></label>
+                                    <div class="text-right input-group">
+                                        <label class="input-group-text">https://</label>
+                                        <input id="domain" @required($active_identification_mode_is_domain) name="domain" value="{{ old('domain') }}" type="text" class="form-control" placeholder="Eg., foo.localhost">
+                                    </div>
+                                </div>
+                            </div>
+                            <div @class($active_identification_mode_is_domain ? ["d-none"] : [])>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="tenant_slug">School Slug <span class="text-danger">*</span></label>
+                                            <input id="tenant_slug" @required(!$active_identification_mode_is_domain) name="tenant_slug" value="{{ old('tenant_slug') }}" type="text" class="form-control" placeholder="Eg., campus-a">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-info">
+                                    This school will be accessed via <strong>the domain {{ url('/') }}</strong> using a cookie/header.
+                                    A domain record is not created for this tenant.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -94,11 +116,12 @@ $hasActions = $canEdit || $canShow || $canDelete || $canRunCommand;
                         <tr>
                             <th>S/N</th>
                             <th>Name</th>
-                            <th>Domain</th>
                             <th>Account Status</th>
                             <th>Payment Status</th>
-                            <th>Created At</th>
-                            <th>Updated At</th>
+                            <th>Identification</th>
+                            <th>Domain/Entry Domain</th>
+                            <th>Created</th>
+                            <th>Updated</th>
                             @if($hasActions)
                             <th class="text-center">Action</th>
                             @endif
@@ -109,9 +132,16 @@ $hasActions = $canEdit || $canShow || $canDelete || $canRunCommand;
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $tenant->name }}</td>
-                            <td><a href="https://{{ $tenant->domain->domain ?? $tenant->domain }}" target="_blank">{{ $tenant->domain->domain ?? $tenant->domain }}</a></td>
                             <td>{{ ucfirst($tenant->account_status) }}</td>
                             <td>{{ ucfirst($tenant->payment_status) }}</td>
+                            <td>
+                                @if($tenant->identification_mode === 'request_data')
+                                <span class="badge">Request Data</span>
+                                @else
+                                <span class="badge">Domain</span>
+                                @endif
+                            </td>
+                            <td><a href="https://{{ $tenant->domain->domain ?? $tenant->domain ?? url('/') . "/{$tenant->tenant_slug}" }}" target="_blank">{{ $tenant->domain->domain ?? $tenant->domain ?? url('/') . "/{$tenant->tenant_slug}" }}</a></td>
                             <td>{{ $tenant->created_at->diffForHumans() }}</td>
                             <td>{{ $tenant->updated_at->diffForHumans() }}</td>
 
@@ -122,12 +152,12 @@ $hasActions = $canEdit || $canShow || $canDelete || $canRunCommand;
                                         <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
 
                                         <div class="dropdown-menu dropdown-menu-left">
-                                            @if($canEdit)
-                                            <a href="{{ route('tenants.edit', Qs::hash($tenant->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
-                                            @endif
-
                                             @if($canShow)
                                             <a href="{{ route('tenants.show', Qs::hash($tenant->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> View Profile</a>
+                                            @endif
+
+                                            @if($canEdit)
+                                            <a href="{{ route('tenants.edit', Qs::hash($tenant->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">edit</i> Edit</a>
                                             @endif
 
                                             @if($canDelete)
