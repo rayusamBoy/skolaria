@@ -97,7 +97,7 @@ class LoginController extends Controller implements HasMiddleware
     /**
      * The user has logged out of the application.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return mixed
      */
     protected function loggedOut(Request $request)
@@ -111,7 +111,7 @@ class LoginController extends Controller implements HasMiddleware
     /**
      * The user has been authenticated.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @param  mixed  $user
      * @return mixed
      */
