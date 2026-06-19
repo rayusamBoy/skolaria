@@ -6,14 +6,13 @@ namespace App\Providers;
 
 use App\Jobs\DeleteIDCardsThemeDir;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Route as RouteFacade;
 use Illuminate\Support\ServiceProvider;
 use Stancl\JobPipeline\JobPipeline;
-use Stancl\Tenancy\Actions\CloneRoutesAsTenant;
 use Stancl\Tenancy\Events;
 use Stancl\Tenancy\Jobs;
 use Stancl\Tenancy\Listeners;
 use Stancl\Tenancy\Middleware;
+use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 use Stancl\Tenancy\ResourceSyncing;
 
 /**
@@ -39,7 +38,7 @@ class TenancyServiceProvider extends ServiceProvider
     public function events()
     {
         return [
-            // Tenant events
+                // Tenant events
             Events\CreatingTenant::class => [],
             Events\TenantCreated::class => [
                 JobPipeline::make([
@@ -82,13 +81,13 @@ class TenancyServiceProvider extends ServiceProvider
             Events\TenantMaintenanceModeEnabled::class => [],
             Events\TenantMaintenanceModeDisabled::class => [],
 
-            // Pending tenant events
+                // Pending tenant events
             Events\CreatingPendingTenant::class => [],
             Events\PendingTenantCreated::class => [],
             Events\PullingPendingTenant::class => [],
             Events\PendingTenantPulled::class => [],
 
-            // Domain events
+                // Domain events
             Events\CreatingDomain::class => [],
             Events\DomainCreated::class => [],
             Events\SavingDomain::class => [],
@@ -98,14 +97,14 @@ class TenancyServiceProvider extends ServiceProvider
             Events\DeletingDomain::class => [],
             Events\DomainDeleted::class => [],
 
-            // Database events
+                // Database events
             Events\DatabaseCreated::class => [],
             Events\DatabaseMigrated::class => [],
             Events\DatabaseSeeded::class => [],
             Events\DatabaseRolledBack::class => [],
             Events\DatabaseDeleted::class => [],
 
-            // Tenancy events
+                // Tenancy events
             Events\InitializingTenancy::class => [],
             Events\TenancyInitialized::class => [
                 Listeners\BootstrapTenancy::class,
@@ -121,7 +120,7 @@ class TenancyServiceProvider extends ServiceProvider
             Events\RevertingToCentralContext::class => [],
             Events\RevertedToCentralContext::class => [],
 
-            // Resource syncing
+                // Resource syncing
             ResourceSyncing\Events\SyncedResourceSaved::class => [
                 ResourceSyncing\Listeners\UpdateOrCreateSyncedResource::class,
             ],
@@ -137,10 +136,10 @@ class TenancyServiceProvider extends ServiceProvider
             ResourceSyncing\Events\CentralResourceDetachedFromTenant::class => [
                 ResourceSyncing\Listeners\DeleteResourceInTenant::class,
             ],
-            // Fired only when a synced resource is changed in a different DB than the origin DB (to avoid infinite loops)
+                // Fired only when a synced resource is changed in a different DB than the origin DB (to avoid infinite loops)
             ResourceSyncing\Events\SyncedResourceSavedInForeignDatabase::class => [],
 
-            // Storage symlinks
+                // Storage symlinks
             Events\CreatingStorageSymlink::class => [],
             Events\StorageSymlinkCreated::class => [],
             Events\RemovingStorageSymlink::class => [],
@@ -187,6 +186,8 @@ class TenancyServiceProvider extends ServiceProvider
         $this->makeTenancyMiddlewareHighestPriority();
         $this->overrideUrlInTenantContext();
 
+        InitializeTenancyByRequestData::$onFail = fn($exception, $request, $next) => $next($request);
+
         // // Include soft deleted resources in synced resource queries.
         // ResourceSyncing\Listeners\UpdateOrCreateSyncedResource::$scopeGetModelQuery = function (Builder $query) {
         //     if ($query->hasMacro('withTrashed')) {
@@ -211,35 +212,6 @@ class TenancyServiceProvider extends ServiceProvider
                 Event::listen($event, $listener);
             }
         }
-    }
-
-    protected function mapRoutes()
-    {
-        $this->app->booted(function () {
-            if (file_exists(base_path('routes/tenant.php'))) {
-                RouteFacade::namespace(static::$controllerNamespace)
-                    ->middleware('tenant')
-                    ->group(base_path('routes/tenant.php'));
-            }
-
-            // $this->cloneRoutes();
-        });
-    }
-
-    /**
-     * Clone routes as tenant.
-     *
-     * This is used primarily for integrating packages.
-     *
-     * @see CloneRoutesAsTenant
-     */
-    protected function cloneRoutes(): void
-    {
-        /** @var CloneRoutesAsTenant $cloneRoutes */
-        $cloneRoutes = $this->app->make(CloneRoutesAsTenant::class);
-
-        /** See CloneRoutesAsTenant for usage details. */
-        $cloneRoutes->handle();
     }
 
     protected function makeTenancyMiddlewareHighestPriority()
