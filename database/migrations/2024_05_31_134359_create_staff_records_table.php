@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('user_id')->index();
             $table->boolean('allow_staff_data_edit')->default(true);
             $table->string('place_of_living', 100)->nullable();
-            $table->string('role')->nullable();
+            $table->string('designation')->nullable();
             $table->string('code', 100)->nullable()->unique();
             $table->date('employment_date')->nullable();
             $table->integer('employment_number')->nullable()->unique('employment_number');
