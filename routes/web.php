@@ -24,7 +24,7 @@ use App\Http\Controllers\EntryController;
 */
 
 Route::get('entry', [EntryController::class, 'index'])->name('entry.home');
-Route::get('/select/{tenant_id}', [EntryController::class, 'select'])->name('entry.select');
+Route::get('select/{tenant_id}', [EntryController::class, 'select'])->name('entry.select');
 Route::get('slug/{tenant_slug}', [EntryController::class, 'slug'])->name('entry.slug');
 
 Route::group(['middleware' => ['auth', 'checkForPassUpdate'], 'prefix' => 'central'], function () {
@@ -69,8 +69,6 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate'], 'prefix' => 'centr
             Route::group(['prefix' => 'settings'], function () {
                 Route::get('app', [CentralSettingController::class, 'index'])->name('settings_non_tenancy.index')->middleware('password.confirm');
                 Route::put('update', [CentralSettingController::class, 'update'])->name('settings_non_tenancy.update');
-                Route::post('analytics/google/disable', [CentralSettingController::class, 'disable_analytics'])->name('settings_non_tenancy.disable_analytics');
-                Route::post('analytics/google/enable', [CentralSettingController::class, 'enable_analytics'])->name('settings_non_tenancy.enable_analytics');
                 Route::get('login-form/preview', [CentralSettingController::class, 'preview_login_form'])->name('settings_non_tenancy.preview_login_form');
             });
         });

@@ -223,9 +223,6 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
 
         /*************** Continuous Assessments *****************/
         Route::prefix('assessments')->group(function () {
-            Route::get('batch/fix', [AssessmentController::class, 'batch_fix'])->name('assessments.batch_fix');
-            Route::put('batch', [AssessmentController::class, 'batch_update'])->name('assessments.batch_update');
-
             Route::get('/', [AssessmentController::class, 'index'])->name('assessments.index');
             Route::get('list', [AssessmentController::class, 'list'])->name('assessments.list');
             Route::get('progressive/{assessment?}/{class?}/{section?}', [AssessmentController::class, 'progressive'])->name('assessments.progressive'); // filters via query params
