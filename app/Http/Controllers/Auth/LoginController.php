@@ -27,13 +27,6 @@ class LoginController extends Controller implements HasMiddleware
 
     use AuthenticatesUsers;
 
-    /**
-     * Where to redirect users after login.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/';
-
     protected $cookieService;
 
     /**
@@ -128,5 +121,7 @@ class LoginController extends Controller implements HasMiddleware
 
         $this->cookieService->delete('has_logged_out');
         $this->cookieService->setForever('was_logged_in', true);
+
+        return redirect()->route(Usr::tenancyInitialized() ? 'dashboard' : 'central_dashboard');
     }
 }
