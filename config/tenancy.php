@@ -486,5 +486,5 @@ return [
         'request_data',
     ],
 
-    'active_identification_mode' => 'request_data',
+    'active_identification_mode' => env('TENANCY_IDENTIFICATION_MODE', 'domain'),
 ];
