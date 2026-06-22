@@ -141,7 +141,7 @@ $hasActions = $canEdit || $canShow || $canDelete || $canRunCommand;
                                 <span class="badge">Domain</span>
                                 @endif
                             </td>
-                            <td><a href="https://{{ $tenant->domain->domain ?? $tenant->domain ?? url('/') . "/{$tenant->tenant_slug}" }}" target="_blank">{{ $tenant->domain->domain ?? $tenant->domain ?? url('/') . "/{$tenant->tenant_slug}" }}</a></td>
+                            <td><a href="https://{{ $tenant->domain->domain ?? $tenant->domain ?? url('/') . "/slug/{$tenant->tenant_slug}" }}" target="_blank">{{ $tenant->domain->domain ?? $tenant->domain ?? url('/') . "/slug/{$tenant->tenant_slug}" }}</a></td>
                             <td>{{ $tenant->created_at->diffForHumans() }}</td>
                             <td>{{ $tenant->updated_at->diffForHumans() }}</td>
 
