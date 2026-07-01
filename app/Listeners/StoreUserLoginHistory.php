@@ -11,7 +11,7 @@ class StoreUserLoginHistory
     /**
      * Handle the event.
      *
-     * @param  \App\Events\UserLoggedIn  $event
+     * @param  UserLoggedIn  $event
      * @return void
      */
     public function handle(UserLoggedIn $event)
