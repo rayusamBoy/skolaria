@@ -341,7 +341,6 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             /************* Logs ************/
             Route::prefix('logs')->group(function () {
                 Route::get('/', [LogController::class, 'index'])->name('logs.index');
-                Route::post('login-history/reset/{user_id}', [LogController::class, 'reset_login_histories'])->name('login_histories.reset')->middleware('decodeRouteParams');
                 Route::post('delete-activity/{log}', [LogController::class, 'delete_activity'])->name('activity_log.delete');
                 Route::post('activity-log/clean', [LogController::class, 'clean_activity_log'])->name('activity_log.clean');
             });

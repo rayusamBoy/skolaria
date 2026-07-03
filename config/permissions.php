@@ -1350,16 +1350,6 @@ return [
                     'label' => 'View Logs',
                     'description' => 'List all logs.',
                 ],
-                'reset_login_hist' => [
-                    'permission' => 'logs.reset_login_hist',
-                    'label' => 'Reset Login History',
-                    'description' => 'Clear login history records.',
-                ],
-                'reset_login_histories' => [
-                    'permission' => 'logs.reset_login_histories',
-                    'label' => 'Reset All Login Histories',
-                    'description' => 'Clear all login history records.',
-                ],
             ],
             'dashboard_statistics' => [
                 'active_students' => [
@@ -1716,16 +1706,6 @@ return [
                     'permission' => 'central_logs.view',
                     'label' => 'View Central Logs',
                     'description' => 'List all central logs.',
-                ],
-                'reset_login_hist' => [
-                    'permission' => 'central_logs.reset_login_hist',
-                    'label' => 'Reset Central Login History',
-                    'description' => 'Clear central login history records.',
-                ],
-                'reset_login_histories' => [
-                    'permission' => 'central_logs.reset_login_histories',
-                    'label' => 'Reset All Central Login Histories',
-                    'description' => 'Clear all central login history records.',
                 ],
             ],
 

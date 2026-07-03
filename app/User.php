@@ -149,9 +149,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->primary_mobile ?? $this->secondary_mobile;
     }
 
-    public function loginHistory()
+    public function getByLatestLoginHistories()
     {
-        $hist = LoginHistory::where('user_id', auth()->id())->get();
-        return $hist;
+        return LoginHistory::where('user_id', auth()->id())->latest('logged_in_at')->get();
     }
 }

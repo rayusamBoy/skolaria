@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Events\UserLoggedIn;
 use App\Helpers\Usr;
 use App\Http\Controllers\Controller;
 use App\Services\CookieService;
@@ -115,9 +114,6 @@ class LoginController extends Controller implements HasMiddleware
             Auth::logout();
             return redirect()->route('login')->with('access_denied', __('msg.restricted') . ' ACCOUNT BLOCKED.');
         }
-
-        // Store User's login in DB.
-        event(new UserLoggedIn($user));
 
         $this->cookieService->delete('has_logged_out');
         $this->cookieService->setForever('was_logged_in', true);

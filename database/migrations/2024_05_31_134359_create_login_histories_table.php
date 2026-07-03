@@ -4,20 +4,19 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
         Schema::create('login_histories', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id')->index();
-            $table->integer('login_count')->default(0);
-            $table->timestamp('last_login')->nullable();
-            $table->timestamp('last_reset')->nullable();
-            $table->timestamp('created_at')->nullable()->useCurrent();
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->timestamp('logged_in_at')->useCurrent();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

@@ -236,8 +236,7 @@
 
                                 <div class="form-group row">
                                     <div class="col-6">
-                                        <input @disabled($browser_sessions->count()
-                                        <= 1) class="form-control form-control-sm" name="password" placeholder="Enter password" type="password" />
+                                        <input @disabled($browser_sessions->count() <= 1) class="form-control form-control-sm" name="password" placeholder="Enter password" type="password" />
                                     </div>
                                 </div>
                                 <button @disabled($browser_sessions->count() <= 1) type="submit" class="btn btn-sm btn-primary mt-1">Logout Other Sessions</button>
@@ -247,24 +246,18 @@
 
                     <div class="col-md-5">
                         @php
-                        $login_history = auth()->user()->loginHistory()->first();
+                        $login_histories = auth()->user()->getByLatestLoginHistories();
                         @endphp
                         <h6>Login History</h6>
                         <table class="table table-bordered table-respxonsive">
                             <tr>
                                 <td class="font-weight-bold">Login Count</td>
-                                <td>{{ $login_history->login_count}}</td>
+                                <td>{{ $login_histories->count()}}</td>
                             </tr>
                             <tr>
                                 <td class="font-weight-bold">Last Login</td>
-                                <td>{{ Qs::formatDateTime($login_history->last_login) }}</td>
+                                <td>{{ Qs::formatDateTime($login_histories->skip(1)->first()?->logged_in_at) ?? 'N/A' }}</td>
                             </tr>
-                            @if ($login_history->last_reset)
-                            <tr>
-                                <td class="font-weight-bold">Last Reset</td>
-                                <td>{{ Qs::formatDateTime($login_history->last_reset) }}</td>
-                            </tr>
-                            @endif
                         </table>
                     </div>
                 </div>

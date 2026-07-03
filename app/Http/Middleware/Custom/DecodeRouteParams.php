@@ -7,7 +7,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class DecodeRouteParamsMiddleware
+class DecodeRouteParams
 {
     /**
      * List of route parameter names to decode.

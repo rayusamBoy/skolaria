@@ -7,8 +7,7 @@
 @php
 // Pre‑compute permissions for Login Histories
 $canViewProfile = auth()->user()->can($central_permissions['central_users']['show']['permission']);
-$canResetLogin = auth()->user()->can($central_permissions['central_logs']['reset_login_hist']['permission']);
-$hasLoginActions = $canViewProfile || $canResetLogin;
+$hasLoginActions = $canViewProfile;
 
 // Pre‑compute permissions for Activity Logs
 $canDeleteActivity = auth()->user()->can($central_permissions['central_logs']['delete_activity']['permission']);
@@ -37,6 +36,7 @@ $canDeleteActivity = auth()->user()->can($central_permissions['central_logs']['d
             @foreach ($user_roles as $ur)
             @php
             $role_scoped_users_ids = Usr::getUsersByRoleNames([$ur->name])->pluck('id')->toArray();
+            $roles_scoped_login_histories = $login_histories->whereIn('user.id', $role_scoped_users_ids)->groupBy('user.id');
             @endphp
             <div class="tab-pane fade" id="ur-{{ Qs::hash($ur->id) }}">
                 <span class="status-styled">{{ $ur->name }}</span>
@@ -50,22 +50,31 @@ $canDeleteActivity = auth()->user()->can($central_permissions['central_logs']['d
                             <th>Login Count</th>
                             <th>First Login</th>
                             <th>Last Login</th>
-                            <th>Last Reset</th>
                             @if($hasLoginActions)
                             <th class="text-center">Action</th>
                             @endif
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($login_histories->whereIn('user.id', $role_scoped_users_ids) as $lh)
+                        @foreach ($roles_scoped_login_histories as $lh)
+                        @php
+                        $user = $lh->first()->user;
+                        $firstLogin = $lh->first();
+                        $lastLogin = $lh->last();
+                        $previousLogin = $lh->count() > 1
+                        ? $lh->slice(-2, 1)->first()
+                        : null;
+                        @endphp
+
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td><img class="rounded-circle" style="height: 40px; width: 40px;" src="{{ Usr::getTenancyAwarePhotoUrl($lh->user->photo_path) }}" alt="photo"></td>
-                            <td>{{ $lh->user->name }}</td>
-                            <td>{{ $lh->login_count }}</td>
-                            <td>{{ Qs::formatDateTime($lh->created_at) }}</td>
-                            <td>{{ $lh->last_login ? Qs::formatDateTime($lh->last_login) : 'Never' }}</td>
-                            <td>{{ $lh->last_reset ? Qs::formatDateTime($lh->last_reset) : 'Never' }}</td>
+                            <td>
+                                <img class="rounded-circle" style="height:40px; width:40px;" src="{{ Usr::getTenancyAwarePhotoUrl($user->photo_path) }}" alt="photo">
+                            </td>
+                            <td>{{ $user->name }}</td>
+                            <td>{{ $lh->count() }}</td>
+                            <td>{{ $firstLogin ? Qs::formatDateTime($firstLogin->logged_in_at) : 'N/A' }}</td>
+                            <td>{{ $previousLogin ? Qs::formatDateTime($previousLogin->logged_in_at) : 'N/A' }}</td>
                             @if($hasLoginActions)
                             <td class="text-center">
                                 <div class="list-icons">
@@ -73,10 +82,7 @@ $canDeleteActivity = auth()->user()->can($central_permissions['central_logs']['d
                                         <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
                                             @if($canViewProfile)
-                                            <a href="{{ route('central_users.show', Qs::hash($lh->user->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> View Profile</a>
-                                            @endif
-                                            @if($canResetLogin)
-                                            <a href="javascript:;" onclick="confirmReset(null, '{{ route('logs.login_history_reset', Qs::hash($lh->user->id)) }}')" class="dropdown-item"><i class="material-symbols-rounded">history</i> Reset Login History</a>
+                                            <a href="{{ route('central_users.show', Qs::hash($user->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i>View Profile</a>
                                             @endif
                                         </div>
                                     </div>

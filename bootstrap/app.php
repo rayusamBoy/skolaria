@@ -57,7 +57,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'roleOrPermission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-            'decodeRouteParams' => \App\Http\Middleware\Custom\DecodeRouteParamsMiddleware::class,
+            'decodeRouteParams' => \App\Http\Middleware\Custom\DecodeRouteParams::class,
         ]);
         $middleware->encryptCookies(except: [
             'do_not_show_els_with_these_ids_again',
@@ -65,7 +65,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->prependToPriorityList(
             before: \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            prepend: \App\Http\Middleware\Custom\DecodeRouteParamsMiddleware::class,
+            prepend: \App\Http\Middleware\Custom\DecodeRouteParams::class,
         );
     })
     ->withExceptions(function (Exceptions $exceptions) {

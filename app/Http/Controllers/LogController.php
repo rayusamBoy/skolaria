@@ -34,25 +34,10 @@ class LogController extends Controller
     public function index(): View
     {
         $data['activities'] = $this->log->getActivities(['causer'])->sortByDesc('id');
-        $data['login_histories'] = $this->log->getLoginHistories()->sortByDesc('last_login');
+        $data['login_histories'] = $this->log->getLoginHistories(['user'], 'logged_in_at', 'asc');
         $data['user_roles'] = $this->user->getRolesByName();
 
         return view('pages.logs', $data);
-    }
-
-    /**
-     * Reset login history for a specific user.
-     */
-    public function reset_login_histories($user_id): RedirectResponse
-    {
-        $data = [
-            'login_count' => 0,
-            'last_reset' => Carbon::now(),
-            'last_login' => null,
-        ];
-        $this->log->updateLoginHistory(['user_id' => $user_id], $data);
-
-        return redirect()->back()->with('flash_success', __('msg.login_history_reset_success'));
     }
 
     /**

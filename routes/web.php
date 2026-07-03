@@ -61,7 +61,6 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate'], 'prefix' => 'centr
             /************* Logs ************/
             Route::prefix('logs')->group(function () {
                 Route::get('/', [CentralLogController::class, 'index'])->name('central_logs.index');
-                Route::get('login-history/reset/{user}', [CentralLogController::class, 'reset_login_hist'])->name('logs.login_history_reset')->middleware('decodeRouteParams');
                 Route::post('delete-activity/{log}', [CentralLogController::class, 'delete_activity'])->name('logs.activity_log_delete');
             });
 

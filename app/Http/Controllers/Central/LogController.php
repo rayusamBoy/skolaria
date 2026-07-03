@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Repositories\LogRepo;
 use App\Repositories\MyClassRepo;
 use App\Repositories\UserRepo;
-use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -31,25 +30,10 @@ class LogController extends Controller
     public function index(): View
     {
         $data['activities'] = $this->log->getActivities(['causer']);
-        $data['login_histories'] = $this->log->getLoginHistories(['user'], 'last_login');
+        $data['login_histories'] = $this->log->getLoginHistories(['user'], 'logged_in_at', 'asc');
         $data['user_roles'] = $this->user->getRolesByName();
 
         return view('pages.central.logs', $data);
-    }
-
-    /**
-     * Reset login history for a specific user.
-     */
-    public function reset_login_hist($user): RedirectResponse
-    {
-        $data = [
-            'login_count' => 0,
-            'last_reset' => Carbon::now(),
-        ];
-
-        $this->log->updateLoginHistory(['user_id' => $user], $data);
-
-        return back()->with('flash_success', __('msg.login_history_reset_success'));
     }
 
     /**
