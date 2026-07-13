@@ -73,7 +73,7 @@ return [
          *
          * If you use multiple forms of identification, you can set this to the "main" approach you use.
          */
-        'default_middleware' => Middleware\InitializeTenancyByDomain::class,
+        'default_middleware' => env('TENANCY_IDENTIFICATION_MODE', 'domain') === 'request_data' ? Middleware\InitializeTenancyByPath::class : Middleware\InitializeTenancyByDomain::class,
 
         /**
          * All of the identification middleware used by the package.
