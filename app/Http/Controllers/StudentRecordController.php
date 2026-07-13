@@ -392,7 +392,7 @@ class StudentRecordController extends Controller
         $file_meta['path'] = Usr::getUploadPath($role) . $user_code . '/' . $file_meta['name'];
 
         $file->storeAs($file_meta['path']);
-        $data[$field] = $file_meta['path'];
+        $data['photo_path'] = $file_meta['path'];
     }
 
     /**

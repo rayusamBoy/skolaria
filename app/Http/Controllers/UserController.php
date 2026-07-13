@@ -351,9 +351,9 @@ class UserController extends Controller
             $file_meta['name'] = 'photo.' . $file_meta['ext'];
             $file_meta['path'] = Usr::getUploadPath($last_role_name) . $user_code . '/' . $file_meta['name'];
             $photo->storeAs($file_meta['path']);
-            $data['photo'] = $file_meta['path'];
+            $data['photo_path'] = $file_meta['path'];
         } elseif ($req->route()->getActionMethod() === 'store') {
-            $data['photo'] = Usr::createAvatar($data['name'], $user_code, $last_role_name);
+            $data['photo_path'] = Usr::createAvatar($data['name'], $user_code, $last_role_name);
         }
     }
 
