@@ -115,13 +115,14 @@ class MyClassRepo
     }
 
     /**
-     * Check if any class has student records.
+     * Check if a class has student records.
      *
+     * @param int $id
      * @return bool
      */
-    public function hasAnyClassStudents(): bool
+    public function hasAnyClassStudents(int $id): bool
     {
-        return MyClass::whereHas('student_record')->exists();
+        return MyClass::where('id', $id)->whereHas('student_record')->exists();
     }
 
     /*********** Class type ***************/

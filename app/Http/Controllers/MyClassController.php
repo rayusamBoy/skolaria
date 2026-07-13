@@ -81,7 +81,7 @@ class MyClassController extends Controller
      */
     public function destroy(int $id): RedirectResponse
     {
-        if ($this->my_class->hasAnyClassStudents()) {
+        if ($this->my_class->hasAnyClassStudents($id)) {
             return back()->with('pop_warning', 'This class has student(s) with it, you cannot delete it.');
         }
 
