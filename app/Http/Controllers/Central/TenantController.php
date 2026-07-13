@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Central;
 use App\Helpers\Qs;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TenantRequest;
+use App\Repositories\SettingRepo;
 use App\Repositories\TenantRepo;
 use App\Repositories\UserRepo;
 use Illuminate\Support\Carbon;
@@ -14,13 +15,15 @@ class TenantController extends Controller
 {
     protected TenantRepo $tenant;
     protected UserRepo $user;
+    protected SettingRepo $setting;
 
-    public function __construct(TenantRepo $tenant, UserRepo $user)
+    public function __construct(TenantRepo $tenant, UserRepo $user, SettingRepo $setting)
     {
         $this->permissionMap = config('permissions.names.central.tenants');
         parent::__construct();
         $this->tenant = $tenant;
         $this->user = $user;
+        $this->setting = $setting;
     }
 
     /**
@@ -73,6 +76,11 @@ class TenantController extends Controller
                 'tenant_slug' => $request->tenant_slug,
             ]);
         }
+
+        tenancy()->run($tenant, function () use ($request) {
+            $this->setting->update('system_name', $request->name);
+            $this->setting->update('system_title', Qs::getStringAbbreviation($request->name));
+        });
 
         return Qs::json(msg: "", arr: ['msg' => __('msg.store_ok'), 'ok' => true, 'pop' => true, 'pop_timer' => 0]);
     }
