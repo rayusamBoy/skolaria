@@ -59,4 +59,5 @@ return
         'credits_info' => 'This weight calculates GPA.',
         'role_in_use' => 'This role is currently assigned to one or more users and cannot be deleted.',
         'subject_in_use' => 'This subject is currently assigned to one or more records and cannot be deleted.',
+        'file_required' => 'File is required.',
     ];
