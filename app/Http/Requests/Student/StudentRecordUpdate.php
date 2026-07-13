@@ -29,7 +29,7 @@ class StudentRecordUpdate extends FormRequest
      */
     protected function getUserIdInput()
     {
-        return $this->input('user_id');
+        return $this->student ?? $this->user;
     }
 
     /**
