@@ -37,7 +37,8 @@
                         @endif
 
                         <div class="text-center mt-3">
-                            <a href="{{ route('login') }}" class="text-muted">Back to Central login</a>
+                            {{-- The form is defined in resources\views\partials\login\footer.blade.php --}}
+                            <a href="javascript:;" onclick="document.getElementById('tenant-logout-form').submit();" class="text-muted">Back to Central login</a>
                         </div>
                     </div>
                 </div>
