@@ -605,6 +605,11 @@ Breadcrumbs::for('tenants.show', function (BreadcrumbTrail $trail, $tenant_id): 
     $trail->push('View Tenant', route('tenants.show', $tenant_id));
 });
 
+Breadcrumbs::for('master_data_sync.index', function (BreadcrumbTrail $trail): void {
+    $trail->parent('tenants.index');
+    $trail->push('Sync Master Data', route('master_data_sync.index'));
+});
+
 // ----------------------------------------------------------------------
 // Notifications
 // ----------------------------------------------------------------------
