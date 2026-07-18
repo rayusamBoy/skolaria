@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Helpers\Usr;
 use App\Listeners\HandleFailedFcmNotifications;
 use App\Listeners\RecordLoginHistory;
 use App\Listeners\TenantEventSubscriber;
@@ -13,7 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -49,7 +47,6 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('api', static fn(Request $request) => Limit::perMinute(60)->by($request->user()?->id ?: $request->ip()));
         Event::subscribe(TenantEventSubscriber::class);
         Paginator::useBootstrapFour();
-        Gate::before(static fn($user, string $ability) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()) ? true : null);
         Model::preventLazyLoading(!app()->isProduction());
     }
 }
