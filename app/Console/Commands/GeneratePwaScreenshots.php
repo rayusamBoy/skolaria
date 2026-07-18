@@ -150,7 +150,7 @@ class GeneratePwaScreenshots extends Command
      */
     protected function resolveTenantBaseUrl(int $tenantId, TenantRepo $tenantRepo): string
     {
-        $tenant = $tenantRepo->findTenant($tenantId);
+        $tenant = $tenantRepo->findOrFailTenant($tenantId);
         if (!$tenant) {
             throw new \RuntimeException("Tenant {$tenantId} not found.");
         }

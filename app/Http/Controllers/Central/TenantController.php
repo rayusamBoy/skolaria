@@ -41,7 +41,7 @@ class TenantController extends Controller
 
     public function show($tenant)
     {
-        $data["tenant"] = $this->tenant->findTenant($tenant);
+        $data["tenant"] = $this->tenant->findOrFailTenant($tenant);
 
         return view("pages.central.tenants.show", $data);
     }
@@ -90,7 +90,7 @@ class TenantController extends Controller
      */
     public function edit($tenant)
     {
-        $data["tenant"] = $this->tenant->findTenant($tenant);
+        $data["tenant"] = $this->tenant->findOrFailTenant($tenant);
 
         return view("pages.central.tenants.edit", $data);
     }
@@ -100,7 +100,7 @@ class TenantController extends Controller
      */
     public function update(TenantRequest $request, $tenant)
     {
-        $tenant = $this->tenant->findTenant($tenant);
+        $tenant = $this->tenant->findOrFailTenant($tenant);
 
         $data = $request->only(['account_status', 'payment_status', 'remarks', 'name']);
         $data['updated_at'] = Carbon::now();
@@ -128,7 +128,7 @@ class TenantController extends Controller
      */
     public function destroy($tenant)
     {
-        $tenant = $this->tenant->findTenant($tenant);
+        $tenant = $this->tenant->findOrFailTenant($tenant);
         try {
             $tenant->delete();
         } catch (\Exception $e) {
