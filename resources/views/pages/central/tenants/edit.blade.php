@@ -65,10 +65,34 @@
 
             <div class="row">
                 @if($tenant->identification_mode === 'request_data')
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-group">
                         <label for="tenant_slug">School Slug <span class="text-danger">*</span></label>
                         <input id="tenant_slug" required name="tenant_slug" value="{{ $tenant->tenant_slug }}" type="text" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="is_template" class="w-100">Template tenant
+                            <i class="material-symbols-rounded float-right text-info" data-toggle="tooltip" title="Whether other schools will sync from this school">info</i>
+                        </label>
+                        <select required data-placeholder="Select Status" class="form-control select" name="is_template" id="is_template">
+                            @foreach ([1 => 'Yes', 0 => 'No'] as $key => $value)
+                            <option @selected($tenant->is_template == $key) value="{{ $key }}">{{ $value }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="is_template" class="w-100">Lock master data
+                            <i class="material-symbols-rounded float-right text-info" data-toggle="tooltip" title="Whether only template tenant can modify master data">info</i>
+                        </label>
+                        <select required data-placeholder="Select Status" class="form-control select" name="lock_master_data" id="lock_master_data">
+                            @foreach ([1 => 'Yes', 0 => 'No'] as $key => $value)
+                            <option @selected($tenant->lock_master_data == $key) value="{{ $key }}">{{ $value }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
                 @endif

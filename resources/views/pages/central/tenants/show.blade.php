@@ -19,12 +19,15 @@
                             <td class="break-all">{{ $tenant->name }}</td>
                         </tr>
                         <tr>
-                            <td class="font-weight-bold">Domain</td>
-                            <td><a href="https://{{ $tenant->domain->domain ?? $tenant->domain }}" target="_blank">{{ $tenant->domain->domain ?? $tenant->domain }}</a></td>
+                            <td class="font-weight-bold">Identification Mode</td>
+                            <td>
+                                <span class="badge">{{ Str::headline($tenant->identification_mode) }}</span>
+                                <a href="https://{{ $tenant->domain->domain ?? $tenant->domain ?? url('/') . "/slug/{$tenant->tenant_slug}" }}" target="_blank">{{ $tenant->domain->domain ?? $tenant->domain ?? url('/') . "/slug/{$tenant->tenant_slug}" }}</a>
+                            </td>
                         </tr>
                         <tr>
                             <td class="font-weight-bold">Remarks</td>
-                            <td>{{ $tenant->remarks }}</td>
+                            <td>{{ $tenant->remarks ?? '-' }}</td>
                         </tr>
                         <tr>
                             <td class="font-weight-bold">Database Name</td>
@@ -37,6 +40,14 @@
                         <tr>
                             <td class="font-weight-bold">Payment Status</td>
                             <td>{{ ucfirst($tenant->payment_status) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Is Template</td>
+                            <td>{{ $tenant->is_template == 1 ? 'Yes' : 'No' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Lock Master Data</td>
+                            <td>{{ $tenant->lock_master_data == 1 ? 'Yes' : 'No' }}</td>
                         </tr>
                         <tr>
                             <td class="font-weight-bold">Created At</td>

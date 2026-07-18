@@ -1746,6 +1746,13 @@ return [
                     'description' => 'Execute commands for a specific tenant.',
                 ],
             ],
+            'master_data_syncs' => [
+                'sync' => [
+                    'permission' => 'master_data_syncs.sync',
+                    'label' => 'Sync Master Data',
+                    'description' => 'Sync master data between template tenant and selected tenant(s).',
+                ]
+            ]
         ],
     ],
 ];

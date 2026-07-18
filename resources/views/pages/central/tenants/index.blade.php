@@ -15,7 +15,15 @@ $hasActions = $canEdit || $canShow || $canDelete || $canRunCommand;
 <div class="card">
     <div class="card-header header-elements-inline">
         <h6 class="card-title">Manage Tenants</h6>
-        {!! Qs::getPanelOptionsHtml() !!}
+        <div class="header-elements pt-0">
+            <div class="list-icons">
+                @if(auth()->user()->can($central_permissions['master_data_syncs']['sync']['permission']))
+                <a class="list-icons-item" href="{{ route('master_data_sync.index') }}" data-action="data-sync"></a>
+                @endcan
+                <a class="list-icons-item" data-action="collapse"></a>
+                <a class="list-icons-item" data-action="remove"></a>
+            </div>
+        </div>
     </div>
 
     <div class="card-body">
@@ -88,10 +96,34 @@ $hasActions = $canEdit || $canShow || $canDelete || $canRunCommand;
                             </div>
                             <div @class($active_identification_mode_is_domain ? ["d-none"] : [])>
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="tenant_slug">School Slug <span class="text-danger">*</span></label>
                                             <input id="tenant_slug" @required(!$active_identification_mode_is_domain) name="tenant_slug" value="{{ old('tenant_slug') }}" type="text" class="form-control" placeholder="Eg., campus-a">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="is_template" class="w-100">Template Tenant
+                                                <i class="material-symbols-rounded float-right text-info" data-toggle="tooltip" title="Whether other schools will sync from this school">info</i>
+                                            </label>
+                                            <select required data-placeholder="Select Status" class="form-control select" name="is_template" id="is_template">
+                                                @foreach ([1 => 'Yes', 0 => 'No'] as $key => $value)
+                                                <option @selected(old('is_template')==$key ?? $key===0) value="{{ $key }}">{{ $value }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="is_template" class="w-100">Lock Master Data
+                                                <i class="material-symbols-rounded float-right text-info" data-toggle="tooltip" title="Whether only template tenant can modify master data">info</i>
+                                            </label>
+                                            <select required data-placeholder="Select Status" class="form-control select" name="lock_master_data" id="lock_master_data">
+                                                @foreach ([1 => 'Yes', 0 => 'No'] as $key => $value)
+                                                <option @selected(old('lock_master_data')==$key ?? $key===0) value="{{ $key }}">{{ $value }}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
