@@ -156,7 +156,7 @@ class SyncPermissions extends Command
                     $updateExisting
                 );
 
-            } elseif (is_array($item)) {
+            } elseif (\is_array($item)) {
                 $this->processGroup(
                     $item,
                     $guard,
