@@ -3754,6 +3754,10 @@ hr {
     content: "\e8ad";
 }
 
+[data-action="data-sync"]:after {
+    content: "\e9f4";
+}
+
 .card-group-control .card-title > a {
     display: inline-block;
 }
