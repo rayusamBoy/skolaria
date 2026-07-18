@@ -623,7 +623,7 @@ class AssessmentController extends Controller
     public function print_cover($student): View
     {
         $data['student'] = $this->student->getActiveStudentsQueryWithRelations(["user_id" => $student], ['user'])->first();
-        return view('pages/assessments/print/cover', $data);
+        return view('pages.assessments.print.cover', $data);
     }
 
     /**
