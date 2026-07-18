@@ -5,12 +5,13 @@ declare(strict_types=1);
 use App\Http\Controllers\Central\ArtisanCommandsController as CentralArtisanCommandsController;
 use App\Http\Controllers\Central\HomeController as CentralHomeController;
 use App\Http\Controllers\Central\LogController as CentralLogController;
+use App\Http\Controllers\Central\MasterDataSyncController;
 use App\Http\Controllers\Central\SettingController as CentralSettingController;
 use App\Http\Controllers\Central\TenantController as CentralTenantController;
 use App\Http\Controllers\Central\UserController as CentralUserController;
+use App\Http\Controllers\EntryController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\EntryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -102,5 +103,8 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate'], 'prefix' => 'centr
 
             Route::delete('delete/{ticket}', [TicketController::class, 'delete'])->name('tickets.delete');
         });
+
+        Route::get('master-data-sync', [MasterDataSyncController::class, 'index'])->name('master_data_sync.index');
+        Route::post('master-data-sync', [MasterDataSyncController::class, 'sync'])->name('master_data_sync.sync');
     });
 });
