@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Collection;
 use Stancl\Tenancy\Database\Models\Domain;
+use Illuminate\Database\Eloquent\Builder;
 
 class TenantRepo
 {
@@ -15,9 +16,9 @@ class TenantRepo
      *
      * @return Collection
      */
-    public function getAllTenants(): Collection
+    public function getAllTenants($with_domain = true): Collection
     {
-        return Tenant::with('domain')->get();
+        return $with_domain ? Tenant::with('domain')->get() : Tenant::all();
     }
 
     /**
@@ -37,9 +38,19 @@ class TenantRepo
      * @param int $id
      * @return Tenant|null
      */
-    public function findTenant(int $id): ?Tenant
+    public function findOrFailTenant(int $id): ?Tenant
     {
-        return Tenant::with('domain')->find($id);
+        return Tenant::with('domain')->findOrFail($id);
+    }
+
+    /**
+     * Build a query to find a tenant.
+     * @param array $where
+     * @return Tenant
+     */
+    public function whereTenantQuery(array $where): Builder
+    {
+        return Tenant::where($where);
     }
 
     /*********** Domain ***************/
