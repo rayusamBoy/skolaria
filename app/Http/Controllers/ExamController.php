@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Mk;
+use App\Helpers\Usr;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Exam\ExamAnnounce;
 use App\Http\Requests\Exam\ExamCreate;
@@ -17,21 +18,25 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use Illuminate\Http\Request;
+use App\Repositories\StudentRepo;
 
 class ExamController extends Controller
 {
     protected ExamRepo $exam;
     protected AssessmentRepo $assessment;
     protected MyClassRepo $my_class;
+    protected StudentRepo $student;
     protected string $year;
 
-    public function __construct(ExamRepo $exam, AssessmentRepo $assessment, MyClassRepo $my_class)
+    public function __construct(ExamRepo $exam, AssessmentRepo $assessment, MyClassRepo $my_class, StudentRepo $student)
     {
         $this->permissionMap = config('permissions.names.tenant.exams');
         parent::__construct();
         $this->exam = $exam;
         $this->assessment = $assessment;
         $this->my_class = $my_class;
+        $this->student = $student;
         $this->year = Mk::getSetting('current_session');
     }
 
@@ -95,10 +100,15 @@ class ExamController extends Controller
         $this->exam->update($id, $data);
 
         $classes = $this->my_class->getClassesByConditions(['class_type_id' => $exam->class_type_id]);
-        $this->validateAndUpdateNumberFormats($req, $classes, $exam->id);
+        $append_message = "";
+        if ($classes->isEmpty()) {
+            $append_message = " But no classes were found for the class type {$exam->class_type->name}, so the number formats were not updated.";
+        } else {
+            $this->validateAndUpdateNumberFormats($req, $classes, $exam->id);
+        }
         $this->handleAssessmentForExam($req, $exam);
 
-        return Mk::jsonUpdateOk();
+        return Mk::json(__('msg.update_ok') . $append_message);
     }
 
     /**
@@ -154,6 +164,71 @@ class ExamController extends Controller
         $this->exam->announce($data);
 
         return Mk::jsonStoreOk();
+    }
+
+    /**
+     * Generate exam numbers for students of a class/section based on the exam's number format.
+     */
+    public function generate_exam_numbers(Request $request)
+    {
+        $validated = $request->validate([
+            'exam_id' => 'required|exists:exams,id',
+            'my_class_id' => 'required|exists:my_classes,id',
+            'section_id' => 'nullable|exists:sections,id',
+        ]);
+
+        $exam = $this->exam->findExam($validated['exam_id'], false, ['number_format']);
+        $class = $this->my_class->findClass($validated['my_class_id']);
+        $section_id = $validated['section_id'] ?? null;
+
+        // Get the number format for this exam + class
+        $format = $exam->number_format?->where('my_class_id', $class->id)->first();
+        if (!$format) {
+            return response()->json(['msg' => "Number format not found for the exam $exam->name and class $class->name", 'ok' => false]);
+        }
+
+        // Fetch students
+        $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class->id], ['user'])
+            ->when($section_id, fn($q) => $q->where('section_id', $section_id))
+            ->get()
+            ->whereNotNull('user')
+            ->sortBy('user.gender')
+            ->sortBy('user.name');
+
+        if ($students->isEmpty()) {
+            return response()->json(['msg' => __('msg.srnf'), 'ok' => false]);
+        }
+
+        $placeholder = Usr::getStudentExamNumberPlaceholder();
+        $format_str = $format->format;
+        $counter = 0;
+        $generated = 0;
+
+        foreach ($students as $student) {
+            // Count placeholders
+            $placeholder_count = substr_count($format_str, $placeholder);
+            if ($placeholder_count === 0) {
+                continue; // no placeholder – can't generate dynamic number
+            }
+            $counter++;
+            $padded_number = str_pad($counter, $placeholder_count, '0', STR_PAD_LEFT);
+            $exam_number = str_replace(str_repeat($placeholder, $placeholder_count), $padded_number, $format_str);
+
+            // Update or create the exam record with the generated number
+            $this->exam->updateOrCreateExamRecord(
+                [
+                    'exam_id' => $exam->id,
+                    'student_id' => $student->user_id,
+                    'my_class_id' => $class->id,
+                    'section_id' => $student->section_id,
+                    'year' => $exam->year,
+                ],
+                ['exam_number' => $exam_number]
+            );
+            $generated++;
+        }
+
+        return Usr::json(__('msg.update_ok') . " Generated: ({$generated} / {$counter})", true);
     }
 
     // ----------------------------------------------------------------------

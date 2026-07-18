@@ -252,6 +252,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             Route::post('update/lock-state', [ExamController::class, 'update_lock_state'])->name('exams.update_lock_state');
             Route::post('{exam}/publish', [ExamController::class, 'publish'])->name('exams.publish');
             Route::post('announce', [ExamController::class, 'announce'])->name('exams.announce');
+            Route::post('generate-numbers', [ExamController::class, 'generate_exam_numbers'])->name('exams.generate_numbers');
         });
 
         /*************** Messages (threads & participants) **************/

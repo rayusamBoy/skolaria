@@ -315,6 +315,18 @@ class ExamRepo
     }
 
     /**
+     * Update or create an exam record.
+     *
+     * @param array $attributes
+     * @param array $values
+     * @return ExamRecord
+     */
+    public function updateOrCreateExamRecord(array $attributes, array $values): ExamRecord
+    {
+        return ExamRecord::updateOrCreate($attributes, $values);
+    }
+
+    /**
      * Delete exam records matching conditions.
      *
      * @param array $where

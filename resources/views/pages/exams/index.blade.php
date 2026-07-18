@@ -27,14 +27,20 @@ $hasActions = $canEdit || $canPublish || $canDelete;
             @can($tenant_permissions['exams']['store']['permission'])
             <li class="nav-item"><a href="#new-exam" class="{{ $errors->any() ? 'nav-link active' : 'nav-link' }}" data-toggle="tab">Add Exam</a></li>
             @endcan
+            {{-- Generate Exam Numbers tab --}}
+            @can($tenant_permissions['exams']['store']['permission'])
+            <li class="nav-item">
+                <a href="#generate-numbers" class="nav-link" data-toggle="tab">Generate Numbers</a>
+            </li>
+            @endcan
             {{-- Announce exam item --}}
             @if (session('announce_exam') && $canAnnounce)
             <li class="nav-item"><a href="#announce-exam" class="nav-link active" data-toggle="tab"><i></i> Announce the Exam</a></li>
             @endif
         </ul>
 
-        {{-- Manage exam tab --}}
         <div class="tab-content">
+            {{-- Manage exam tab --}}
             <div class="{{ session('announce_exam') || $errors->any() ? 'tab-pane fade show' : 'tab-pane fade show active' }}" id="all-exams">
                 <table class="table datatable-button-html5-columns" id="manage-exams-table">
                     <thead>
@@ -56,7 +62,7 @@ $hasActions = $canEdit || $canPublish || $canDelete;
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $ex->name }}@if($ex->is_published) <span class="badge bg-success">published</span> @else <span class="badge bg-danger">not published</span> @endif @if($ex->hasAssessment()) <span class="badge bg-info">has assessment</span> @endif</td>
-                            <td>{{ Number::spellOrdinal($ex->term) . "Term" }}</td>
+                            <td>{{ Number::spellOrdinal($ex->term) . " term" }}</td>
                             <td>{{ $ex->year }}</td>
                             <td>{{ $ex->category->name }}</td>
                             <td>{{ $class_types->where('id', $ex->class_type_id)->first()->name }}</td>
@@ -297,6 +303,50 @@ $hasActions = $canEdit || $canPublish || $canDelete;
                     </div>
                     <div class="text-right">
                         <button type="submit" class="btn btn-primary">Submit form <i class="material-symbols-rounded ml-2">send</i></button>
+                    </div>
+                </form>
+            </div>
+            @endcan
+
+            {{-- Generate Exam Numbers tab --}}
+            @can($tenant_permissions['exams']['store']['permission'])
+            <div class="tab-pane fade" id="generate-numbers">
+                <form id="generate-numbers-form" class="mb-3 ajax-update" action="{{ route('exams.generate_numbers') }}">
+                    @csrf
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="gen_exam_id">Exam <span class="text-danger">*</span></label>
+                                <select required class="form-control select" id="gen_exam_id" name="exam_id">
+                                    <option value="">Select</option>
+                                    @foreach($exams as $ex)
+                                    <option value="{{ $ex->id }}">{{ $ex->name }} ({{ $ex->year }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="gen_class_id">Class <span class="text-danger">*</span></label>
+                                <select required class="form-control select" id="gen_class_id" name="my_class_id" onchange="getClassSections(this.value, '#gen_section_id_add_not_applicable')">
+                                    <option value="">Select</option>
+                                    @foreach($my_classes as $class)
+                                    <option value="{{ $class->id }}">{{ $class->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="gen_section_id_add_not_applicable">Section (optional)</label>
+                                <select class="form-control select" id="gen_section_id_add_not_applicable" name="section_id" data-placeholder="All Sections"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="material-symbols-rounded mr-2">autorenew</i> Generate Numbers
+                        </button>
                     </div>
                 </form>
             </div>
