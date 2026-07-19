@@ -135,7 +135,8 @@ class StudentRecordController extends Controller
 
         $delimiter = Usr::getDelimiter();
         $time = time();
-        $filename = ucfirst(strtolower(str_replace(' ', '_', "{$class->name}{$delimiter}{$this->students_batch_file_name_description}{$delimiter}{$year}{$delimiter}{$time}.xlsx")));
+        $tenant_title = Usr::getSetting('system_title');
+        $filename = ucfirst(strtolower(str_replace(' ', '_', "{$class->name}{$delimiter}{$this->students_batch_file_name_description}{$delimiter}{$year}{$delimiter}{$tenant_title}{$delimiter}{$time}.xlsx")));
 
         return Excel::download(
             new StudentsBatchAddExport($data),

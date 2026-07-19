@@ -379,7 +379,8 @@ class MarkController extends Controller
 
         $delimiter = Mk::getDelimiter();
         $time = time();
-        $filename = str_replace(' ', '_', "{$class->name}{$delimiter}{$exam->name}{$delimiter}{$exam->year}{$delimiter}{$time}.xlsx");
+        $tenant_title = Usr::getSetting('system_title');
+        $filename = str_replace(' ', '_', "{$class->name}{$delimiter}{$exam->name}{$delimiter}{$exam->year}{$delimiter}{$tenant_title}{$delimiter}{$time}.xlsx");
 
         return Excel::download(
             new MarksExport($data),
