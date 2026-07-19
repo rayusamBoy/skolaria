@@ -16,7 +16,7 @@
                 <td class="text-center">{{ $loop->iteration }}</td>
                 <td>{{ $mk->user->name }}</td>
                 <td class="text-center">{{ substr($mk->user->gender, 0, 1) }}</td>
-                <td class="text-center">{{ $mk->user->exam_record->exam_number }}</td>
+                <td class="text-center">{{ $mk->user->exam_record->first()->exam_number }}</td>
                 <td class="text-center"><input @readonly($is_restricted) title="EXAM" min="0" max="{{ $mk->exam->exam_denominator }}" class="{{ $is_restricted ? 'text-center form-control form-control-sm cursor-not-allowed' : 'text-center form-control form-control-sm' }}" name="exm_{{ $mk->id }}" value="{{ $mk->exam_mark }}" type="number"></td>
             </tr>
             @endforeach
