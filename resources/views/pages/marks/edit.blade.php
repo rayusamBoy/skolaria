@@ -11,7 +11,7 @@
             </tr>
         </thead>
         <tbody class="exam-tbody">
-            @foreach($marks->sortBy('user.gender')->sortBy('user.name') as $mk)
+            @foreach($marks->sortBy('user.name')->sortBy('user.gender') as $mk)
             <tr>
                 <td class="text-center">{{ $loop->iteration }}</td>
                 <td>{{ $mk->user->name }}</td>

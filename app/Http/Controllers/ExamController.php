@@ -192,8 +192,8 @@ class ExamController extends Controller
             ->when($section_id, fn($q) => $q->where('section_id', $section_id))
             ->get()
             ->whereNotNull('user')
-            ->sortBy('user.gender')
-            ->sortBy('user.name');
+            ->sortBy('user.name')
+            ->sortBy('user.gender');
 
         if ($students->isEmpty()) {
             return response()->json(['msg' => __('msg.srnf'), 'ok' => false]);
