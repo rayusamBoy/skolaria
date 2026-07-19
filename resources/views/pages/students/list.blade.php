@@ -84,6 +84,7 @@ $showBlockUnblockButtons = $canBlockAll || $canUnblockAll;
                             <th>S/N</th>
                             <th>Photo</th>
                             <th>Name</th>
+                            <th>Exam No</th>
                             <th>ADM No</th>
                             <th>Section</th>
                             <th>Parent</th>
@@ -101,6 +102,7 @@ $showBlockUnblockButtons = $canBlockAll || $canUnblockAll;
                                 <img class="rounded-circle" style="height:40px;width:40px;" src="{{ Usr::getTenancyAwarePhotoUrl($s->user->photo_path) }}" alt="photo">
                             </td>
                             <td>{{ $s->user->name }}</td>
+                            <td>{{ $s->user->exam_record->first()->exam_number ?? "not set" }}</td>
                             <td>{{ $s->admission_number }}</td>
                             <td>{{ $s->section->name }}</td>
                             <td>
