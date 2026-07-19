@@ -17,6 +17,7 @@ class SyncMasterDataService
         'grades' => 'grades',
         'divisions' => 'divisions',
         'subjects' => 'subjects',
+        'subject_records' => 'subject_records',
         'exams' => 'exams',
         'time_table_records' => 'time_table_records',
         'time_slots' => 'time_slots',
