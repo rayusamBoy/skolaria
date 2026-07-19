@@ -7,6 +7,7 @@ use Dompdf\Css\Color;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithProperties;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -15,7 +16,7 @@ use PhpOffice\PhpSpreadsheet\Style\Protection;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Events\AfterSheet;
 
-class MarksExport implements FromView, ShouldAutoSize, WithStyles, WithProperties
+class MarksExport implements FromView, ShouldAutoSize, WithStyles, WithProperties, WithEvents
 {
     protected array $data;
     // S/N, ADMISSION NUMBER, FULL NAME, GENDER, SECTION
@@ -154,10 +155,12 @@ class MarksExport implements FromView, ShouldAutoSize, WithStyles, WithPropertie
         return [
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
-                // Hide column 
-                $sheet->getColumnDimension('B')->setVisible(false);
-                // Freeze pane
-                $sheet->freezePane('A5');
+
+                // Hide column C
+                $sheet->getColumnDimension('C')->setVisible(false);
+
+                // Freeze rows 1-4 and columns A-B
+                $sheet->freezePane('C5');
             },
         ];
     }
