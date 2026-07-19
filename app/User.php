@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Models\BloodGroup;
+use App\Models\ExamRecord;
 use App\Models\Lga;
 use App\Models\LoginHistory;
 use App\Models\Nationality;
@@ -90,6 +91,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function student_record()
     {
         return $this->hasOne(StudentRecord::class);
+    }
+
+    public function exam_record(){
+        return $this->hasMany(ExamRecord::class);
     }
 
     public function lga()
