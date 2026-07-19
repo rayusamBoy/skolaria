@@ -13,6 +13,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use PhpOffice\PhpSpreadsheet\Style\Protection;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Events\AfterSheet;
 
 class MarksExport implements FromView, ShouldAutoSize, WithStyles, WithProperties
 {
@@ -143,6 +144,22 @@ class MarksExport implements FromView, ShouldAutoSize, WithStyles, WithPropertie
         $bg_color = substr(str_replace('#', '', Color::parse($exploded[1])['hex'] ?? ''), 0, 6) ?? '171717';
 
         return [$text_color, $bg_color];
+    }
+
+    /**
+     * Register events (after sheet creation).
+     */
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+                // Hide column 
+                $sheet->getColumnDimension('B')->setVisible(false);
+                // Freeze pane
+                $sheet->freezePane('A5');
+            },
+        ];
     }
 
     public function view(): View

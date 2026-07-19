@@ -17,10 +17,11 @@ $sub_count = $subjects->count() + $initial_cols;
         </tr>
         <tr>
             <th style="text-align: center"><strong>S/N</strong></th>
+            <th><strong>EXAM NUMBER</strong></th>
             <th><strong>ADMISSION NUMBER</strong></th>
-            <th><strong>FULL NAME</strong></th>
+            {{-- <th><strong>FULL NAME</strong></th> --}}
             <th><strong>GENDER</strong></th>
-            <th style="text-align: center"><strong>SECTION</strong></th>
+            {{-- <th style="text-align: center"><strong>SECTION</strong></th> --}}
 
             @foreach($subjects as $sub)
             <th style="text-align: center"><strong>{{ $sub->name }}</strong></th>
@@ -32,10 +33,11 @@ $sub_count = $subjects->count() + $initial_cols;
         @foreach($marks->unique('user.id')->whereNotNull('user')->sortBy('user.name')->sortBy('user.gender') as $mk)
         <tr>
             <td style="text-align: center">{{ sprintf("%03d", $loop->iteration) }}</td>
+            <td>{{ $mk->user->exam_record->first()->exam_number }}</td>
             <td>{{ $mk->user->username }}</td>
-            <td>{{ $mk->user->name }}</td>
+            {{-- <td>{{ $mk->user->name }}</td> --}}
             <td>{{ $mk->user->gender }}</td>
-            <td style="text-align: center">{{ $mk->section->name }}</td>
+            {{-- <td style="text-align: center">{{ $mk->section->name }}</td> --}}
 
             @foreach($subjects as $sub)
             <td style="text-align: center">{{ $marks->where('subject_id', $sub->id)->where('student_id', $mk->user->id)->value('exam_mark') }}</td>
