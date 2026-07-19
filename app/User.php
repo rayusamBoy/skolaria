@@ -93,8 +93,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(StudentRecord::class);
     }
 
-    public function exam_record(){
-        return $this->hasMany(ExamRecord::class);
+    public function exam_record()
+    {
+        return $this->hasMany(ExamRecord::class, 'student_id');
     }
 
     public function lga()
