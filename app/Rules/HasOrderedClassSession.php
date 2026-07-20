@@ -12,69 +12,77 @@ abstract class HasOrderedClassSession implements ValidationRule
     /**
      * Run the validation rule.
      *
-     * Expected file‑name structure:
-     *   {Class_Name}{delimiter}{Second_Segment}{delimiter}{Year}
-     * where Year is always "YYYY-YYYY" (the hyphen inside the year is constant).
+     * Required file‑name structure:
+     *   {Class}{delimiter}{SecondSegment}{delimiter}{TenantTitle…}{delimiter}{Year}{delimiter}{Timestamp}
      *
-     * @param  string  $attribute
-     * @param  mixed   $value
-     * @param  Closure $fail
+     * Year is always "YYYY-YYYY" (the hyphen inside the year is constant).
+     * Timestamp is a numeric Unix timestamp at the very end.
+     * Tenant title may contain the delimiter and is ignored.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $delimiter = Mk::getDelimiter();
         $parts = explode($delimiter, $value);
 
-        // Determine year and second segment
-        if (\count($parts) >= 4 && is_numeric($parts[\count($parts) - 2]) && is_numeric($parts[\count($parts) - 1])) {
-            $class_raw = $parts[0];
-            $second_raw = $parts[1];
-            $year_start = $parts[\count($parts) - 2];
-            $year_end = $parts[\count($parts) - 1];
-        } elseif (\count($parts) >= 3 && str_contains(end($parts), '-')) {
-            $class_raw = $parts[0];
-            $second_raw = $parts[1];
-            $year_part = array_pop($parts);
-            $year_segments = explode('-', $year_part);
-            if (\count($year_segments) !== 2) {
-                $fail('The :attribute contains an invalid year format.');
-                return;
-            }
-            [$year_start, $year_end] = $year_segments;
-        } else {
-            $fail('The :attribute is invalid.');
+        if (\count($parts) < 5) {
+            $fail('The :attribute does not match the required format.');
             return;
         }
 
-        $class_in_file = strtolower(str_replace('_', ' ', $class_raw));
-        $year_in_file = "{$year_start}-{$year_end}";
+        // Remove trailing numeric timestamp
+        if (!is_numeric(end($parts))) {
+            $fail('The :attribute must end with a numeric timestamp.');
+            return;
+        }
+        array_pop($parts);
+
+        // Extract year (now the last part, must contain a hyphen)
+        $yearPart = array_pop($parts);
+        if (!str_contains($yearPart, '-')) {
+            $fail('The :attribute is missing a valid session year segment.');
+            return;
+        }
+        $yearSegments = explode('-', $yearPart);
+        if (\count($yearSegments) !== 2) {
+            $fail('The session year in :attribute is invalid.');
+            return;
+        }
+        [$yearStart, $yearEnd] = $yearSegments;
+
+        // After removing timestamp and year, we have at least [class, secondSegment, …tenantTitle…]
+        if (\count($parts) < 2) {
+            $fail('The :attribute is missing required segments.');
+            return;
+        }
+
+        $classRaw = array_shift($parts);      // first part
+        $secondRaw = array_shift($parts);      // second part
+        // Remaining $parts = tenant title (ignored)
 
         // Validate class
-        $valid_class_names = MyClass::pluck('name')
-            ->map(strtolower(...))
+        $classInFile = strtolower(str_replace('_', ' ', $classRaw));
+        $validClassNames = MyClass::pluck('name')
+            ->map(fn($name) => strtolower($name))
             ->toArray();
 
-        if (!\in_array($class_in_file, $valid_class_names)) {
+        if (!\in_array($classInFile, $validClassNames)) {
             $fail('The class specified in :attribute does not exist.');
             return;
         }
 
-        // Validate year
-        if ($year_in_file !== Mk::getCurrentSession()) {
+        // Validate session year
+        $yearInFile = "{$yearStart}-{$yearEnd}";
+        if ($yearInFile !== Mk::getCurrentSession()) {
             $fail('The session year in the :attribute does not match the current session.');
             return;
         }
 
-        // Delegate second‑segment validation to the concrete rule
-        $this->validateSecondSegment($second_raw, $fail);
+        // Delegate second‑segment validation
+        $this->validateSecondSegment($secondRaw, $fail);
     }
 
     /**
      * Validate the second segment of the file name (after the class name).
-     *
-     * @param  string  $second_raw  The raw second segment (may contain underscores)
-     * @param  Closure $fail
-     * @return void
      */
-    abstract protected function validateSecondSegment(string $second_raw, Closure $fail): void;
+    abstract protected function validateSecondSegment(string $secondRaw, Closure $fail): void;
 }
