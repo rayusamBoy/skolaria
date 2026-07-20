@@ -15,7 +15,7 @@
         </div>
         @endif
 
-        <form method="POST" action="{{ route('master_data_sync.sync') }}">
+        <form method="POST" class="page-block" action="{{ route('master_data_sync.sync') }}">
             @csrf
             <div class="row">
                 <div class="col-md-6">
