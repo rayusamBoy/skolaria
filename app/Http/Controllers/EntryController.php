@@ -2,19 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tenant;
+use App\Repositories\TenantRepo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 
 class EntryController extends Controller
 {
+    protected TenantRepo $tenant;
+
+    public function __construct(
+        TenantRepo $tenant
+    ) {
+        $this->tenant = $tenant;
+    }
+
     /**
      * Show the list of schools for this entry domain.
      */
     public function index()
     {
-        $schools = Tenant::where('data->identification_mode', 'request_data')
-            ->get(['id', 'data']);
+        $schools = $this->tenant->whereTenantQuery(['data->identification_mode' => 'request_data'])->get(['id', 'data']);
 
         return view('entry.schools', compact('schools'));
     }
@@ -25,7 +32,7 @@ class EntryController extends Controller
      */
     public function select($tenant_id)
     {
-        $tenant = Tenant::findOrFail($tenant_id);
+        $tenant = $this->tenant->findOrFailTenant($tenant_id);
 
         return redirect('/login')->withCookie(
             Cookie::make('tenant', $tenant->id, 120)
@@ -37,7 +44,7 @@ class EntryController extends Controller
      */
     public function slug($tenant_slug)
     {
-        $tenant = Tenant::where([
+        $tenant = $this->tenant->whereTenantQuery([
             'data->identification_mode' => 'request_data',
             'data->tenant_slug' => $tenant_slug,
         ])->firstOrFail();
