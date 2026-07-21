@@ -68,6 +68,6 @@
     const get_class_subjects_url = "{{ route('ajax.get_class_subjects', [':id']) }}";
     const update_exam_lock_state_url = "{{ route('exams.update_lock_state') }}";
     const toggle_staff_data_editing_url = "{{ route('users.toggle_staff_data_editing') }}";
-    const toggle_user_block_url = "{{ Usr::tenancyInitialized() ? route('users.toggle_user_block') : route('central_users.toggle_user_block') }}";
+    const toggle_user_block_url = "{{ $is_tenant_context ? route('users.toggle_user_block') : route('central_users.toggle_user_block') }}";
 
 </script>

@@ -6,5 +6,5 @@
         </a>
     </div>
 
-    <a href="{{ Usr::tenancyInitialized() ? route('home') : route('central_home') }}" class="navbar-nav-link d-flex text-color-custom"><span class="mr-1">{{ "Home" }}</span><i class="material-symbols-rounded">home</i></a>
+    <a href="{{ $is_tenant_context ? route('home') : route('central_home') }}" class="navbar-nav-link d-flex text-color-custom"><span class="mr-1">{{ "Home" }}</span><i class="material-symbols-rounded">home</i></a>
 </div>

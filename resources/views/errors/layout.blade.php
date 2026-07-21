@@ -33,7 +33,7 @@
         <h6 class="mt-auto mb-auto text-color-custom">@yield('title')</h6>
         @endif
 
-        <a href="{{ Usr::tenancyInitialized() ? route('home') : route('central_home') }}" class="navbar-nav-link d-flex text-color-custom float-right">
+        <a href="{{ $is_tenant_context ? route('home') : route('central_home') }}" class="navbar-nav-link d-flex text-color-custom float-right">
             <span class="mr-1">{{ "Home" }}</span>
             <i class="material-symbols-rounded">home</i>
         </a>

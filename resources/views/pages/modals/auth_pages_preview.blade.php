@@ -11,7 +11,7 @@
             <div class="modal-body">
                 <div class="card-body p-0 h-100">
                     @php
-                    $preview_route = Usr::tenancyInitialized() ? route('settings.preview_login_form') : route('settings_non_tenancy.preview_login_form');
+                    $preview_route = $is_tenant_context ? route('settings.preview_login_form') : route('settings_non_tenancy.preview_login_form');
                     @endphp
                     <iframe class="user-select-none pointer-events-none" src="{{ $preview_route }}" allowfullscreen width="100%" height="100%"></iframe>
                 </div>

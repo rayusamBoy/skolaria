@@ -1,5 +1,5 @@
 <!-- Exam announce -->
-@if(Usr::tenancyInitialized() && request()->routeIs('login'))
+@if($is_tenant_context && request()->routeIs('login'))
 @php $exam_announces = Qs::getValidExamAnnounces() @endphp
 
 @if($exam_announces->isNotEmpty())
