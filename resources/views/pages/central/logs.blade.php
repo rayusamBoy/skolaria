@@ -136,7 +136,7 @@ $canDeleteActivity = auth()->user()->can($central_permissions['central_logs']['d
                             <td>{{ $chk->causer_type ? end($causer) : 'N/A' }}</td>
                             <td>{{ $chk->causer?->name ?? 'N/A' }}</td>
                             <td>
-                                @include('pages/modals/activity_log_properties')
+                                @include('pages.modals.activity_log_properties')
                                 <a href="javascript:;" data-toggle="modal" data-target="#activity-log-properties-{{ $chk->id }}">show</a>
                             </td>
                             <td>{{ Qs::formatDate($chk->created_at) }}</td>
