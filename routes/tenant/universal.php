@@ -8,6 +8,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MyAccountController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\TenantAuthController;
+use App\Http\Controllers\TenantSwitchController;
 use App\Http\Controllers\TestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,6 +25,8 @@ use Illuminate\Support\Facades\Route;
 | Feel free to customize them however you want. Good luck!
 |
 */
+
+Route::get('auth/impersonate', [TenantAuthController::class, 'impersonate'])->name('tenant.impersonate');
 
 Route::group(["middleware" => ['universal']], function () {
     Auth::routes();
@@ -87,6 +91,10 @@ Route::group(["middleware" => ['universal']], function () {
                 Route::put('update/notifiable', [NotificationController::class, 'update_notification_preferences'])->name('notifications.update.notification_preferences');
                 Route::match(['post', 'put', 'delete'], 'update/firebase/device-token', [NotificationController::class, 'update_firebase_device_token'])->name('notifications.firebase.update_device_token');
             });
+
+            Route::get('switch-tenant/schools', [TenantSwitchController::class, 'index'])->name('tenant.switch.schools');
         });
+        Route::get('switch-tenant/{tenant}', [TenantSwitchController::class, 'switch'])->name('tenant.switch');
+
     });
 });

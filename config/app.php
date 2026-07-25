@@ -155,4 +155,16 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Impersonate Secret
+    |-------------------------------------------------------------------------- 
+    |
+    | This key is used to encrypt the impersonate token in the URL
+    |
+    */
+
+    'impersonate_secret' => env('APP_IMPERSONATE_SECRET'),
 ];

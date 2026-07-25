@@ -77,9 +77,17 @@ class TenantController extends Controller
             ]);
         }
 
-        tenancy()->run($tenant, function () use ($request) {
+        tenancy()->run($tenant, function () use ($request, $tenant) {
             $this->setting->update('system_name', $request->name);
             $this->setting->update('system_title', Qs::getStringAbbreviation($request->name));
+            $local_super_dmin = $this->user->findUser(1);
+            if ($local_super_dmin) {
+                $this->tenant->insertManagerData([
+                    'central_user_id' => Qs::getHeadIds()[0], // Root user ID
+                    'tenant_id' => $tenant->id,
+                    'tenant_user_id' => $local_super_dmin->id,
+                ]);
+            }
         });
 
         return Qs::json(msg: "", arr: ['msg' => __('msg.store_ok'), 'ok' => true, 'pop' => true, 'pop_timer' => 0]);

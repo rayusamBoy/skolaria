@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Tenant;
+use App\Models\TenantManager;
 use Illuminate\Database\Eloquent\Collection;
 use Stancl\Tenancy\Database\Models\Domain;
 use Illuminate\Database\Eloquent\Builder;
@@ -46,11 +47,21 @@ class TenantRepo
     /**
      * Build a query to find a tenant.
      * @param array $where
-     * @return Tenant
+     * @return Tenant|Builder
      */
-    public function whereTenantQuery(array $where): Builder
+    public function whereTenantQuery(array $where): Tenant|Builder
     {
         return Tenant::where($where);
+    }
+
+    /**
+     * Build a query to find a tenant.
+     * @param array $where
+     * @return mixed|Tenant
+     */
+    public function whereInQuery(string $column, array $where): Tenant|Builder
+    {
+        return Tenant::whereIn($column, $where);
     }
 
     /*********** Domain ***************/
@@ -65,5 +76,26 @@ class TenantRepo
     public function updateOrCreateDomain(array $attributes, array $values): Domain
     {
         return Domain::updateOrCreate($attributes, $values);
+    }
+
+    /*********** Manager ***************/
+
+    /**
+     * Insert manager data 
+     * @param array $data
+     */
+    public function insertManagerData(array $data)
+    {
+        return TenantManager::insert($data);
+    }
+
+    /**
+     * Build a query to find a tenant manager.
+     * @param array $where
+     * @return TenantManager|Builder
+     */
+    public function whereTenantManagerQuery(array $where): TenantManager|Builder
+    {
+        return TenantManager::where($where);
     }
 }

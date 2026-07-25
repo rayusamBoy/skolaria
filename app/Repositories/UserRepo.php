@@ -173,6 +173,8 @@ class UserRepo
         return User::where($where);
     }
 
+    
+
     /********** STAFF RECORD **********/
 
     /**

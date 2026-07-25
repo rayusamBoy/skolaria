@@ -43,7 +43,7 @@
         <div class="card card-sidebar-mobile border-0">
             <ul class="nav nav-sidebar" data-nav-type="accordion">
 
-                @if (Usr::tenancyInitialized())
+                @if ($is_tenant_context)
 
                 {{-- Dashboard --}}
                 <li class="nav-item">
@@ -546,6 +546,26 @@
 
                 @else
                 @include('pages.central.menu')
+                @endif
+
+                @if($managed_tenants->isNotEmpty())
+                <li class="nav-item">
+                    <a href="{{ route('tenant.switch.schools') }}" class="nav-link {{ request()->routeIs('tenant.switch.schools') ? 'active' : '' }}">
+                        <i class="material-symbols-rounded">swap_horiz</i>
+                        <span>Schools</span>
+                    </a>
+                </li>
+                @endif
+
+                @if($is_tenant_context && session('impersonated_by_central'))
+                <li class="nav-item">
+                    <a href="javascript:;" class="nav-link text-info" onclick="event.preventDefault(); document.getElementById('back-to-central-form').submit();">
+                        <i class="material-symbols-rounded">exit_to_app</i> Back to Central
+                    </a>
+                    <form id="back-to-central-form" method="POST" action="{{ route('tenant.back_to_central') }}" class="d-none">
+                        @csrf
+                    </form>
+                </li>
                 @endif
             </ul>
         </div>
