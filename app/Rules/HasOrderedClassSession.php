@@ -29,13 +29,6 @@ abstract class HasOrderedClassSession implements ValidationRule
             return;
         }
 
-        // Remove trailing numeric timestamp
-        if (!is_numeric(end($parts))) {
-            $fail('The :attribute must end with a numeric timestamp.');
-            return;
-        }
-        array_pop($parts);
-
         // Extract year (now the last part, must contain a hyphen)
         $yearPart = array_pop($parts);
         if (!str_contains($yearPart, '-')) {
