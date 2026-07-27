@@ -1053,7 +1053,7 @@ class MarkController extends Controller
                 'section_position' => $this->exam->getStudentPositionByColumn($st_id, $exam->id, $class_id, $this->year, $exam->exam_student_position_by_value, $exam->exam_student_position_sort_order, $section_id),
                 'points' => $points_sum,
                 'gpa' => ($total_credits > 0) ? round($total_credits_point / $total_credits, 2) : 0,
-                'division_id' => Mk::getDivisionByPoints($points_sum, $class_type_id)->id ?? null,
+                'division_id' => $points_sum !== null ? Mk::getDivisionByPoints($points_sum, $class_type_id)?->id : null,
             ];
         }
 
