@@ -556,17 +556,6 @@
                     </a>
                 </li>
                 @endif
-
-                @if($is_tenant_context && session('impersonated_by_central'))
-                <li class="nav-item">
-                    <a href="javascript:;" class="nav-link text-info" onclick="event.preventDefault(); document.getElementById('back-to-central-form').submit();">
-                        <i class="material-symbols-rounded">exit_to_app</i> Back to Central
-                    </a>
-                    <form id="back-to-central-form" method="POST" action="{{ route('tenant.back_to_central') }}" class="d-none">
-                        @csrf
-                    </form>
-                </li>
-                @endif
             </ul>
         </div>
     </div>
