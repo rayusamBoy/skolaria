@@ -5,10 +5,10 @@
             <div style="font-size: 28px; font-weight: bold; color: #0c801b;">
                 SMZ
             </div>
-            <div style="font-size: 26px; font-weight: bold; color: #0c801b;">
-                CENTRAL DISTRICT EXAMINATION BOARD
+            <div style="font-size: 26px; font-weight: bold; color: #0c801b; margin-bottom: 5px;">
+                CENTRAL DISTRICT EXAMINATIONS BOARD
             </div>
-            <div style="font-size: 22px; font-weight: bold; color: #1b0c80;">
+            <div style="font-size: 22px; font-weight: bold; color: #1b0c80; margin-bottom: 5px;">
                 {{ strtoupper($settings->firstWhere('key', 'system_name')->value) }}
             </div>
             <div class="mt-2" style="font-size: 16px;">
