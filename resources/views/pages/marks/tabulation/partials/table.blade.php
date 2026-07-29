@@ -6,7 +6,7 @@
             <th class="text-center">Gender</th>
             @foreach($subjects as $sub)
             <th class="text-center" title="{{ $sub->name }}">{{ strtoupper($sub->slug ?? $sub->name) }}</th>
-            <th class="text-center">Grd</th>
+            {{-- <th class="text-center">Grd</th> --}}
             @endforeach
             <th id="header-total" class="text-center col-total toggleable" data-toggle-target=".col-total">Total</th>
             <th id="header-avg" class="text-center col-avg toggleable" title="Average" data-toggle-target=".col-avg">Avg</th>
@@ -30,8 +30,8 @@
 
             @foreach($subjects as $sub)
             @php $sub_mark = $row['sub_marks'][$sub->id]; @endphp
-            <td class="text-center">{{ $sub_mark['mark'] ?? '—' }}</td>
-            <td class="text-center text-green">{{ $sub_mark['grade'] ?? '—' }}</td>
+            {{-- <td class="text-center">{{ $sub_mark['mark'] ?? '—' }}</td> --}}
+            <td class="text-center">{{ $sub_mark['grade'] ?? '—' }}</td>
             @endforeach
             <td class="text-center text-danger col-total">{{ $row['total'] ?? '—' }}</td>
             <td class="text-center text-secondary col-average">{{ $row['average'] ?? '—' }}</td>

@@ -1,8 +1,8 @@
 <div class="row" style="display: flex; gap: 1rem;">
     {{--Metric Summary--}}
     <div id="division-summary" data-toggle-target="#division-summary" class="toggleable col-3 mw-fit w-60">
-        <strong style="font-size: 15px;">Metric Summary</strong>
-        {!! Mk::renderGenderWiseSummary($exam_id, $my_class->id, $my_class->class_type_id, $section_id) !!}
+        <strong style="font-size: 15px;">Average Grade Summary</strong>
+        {!! Mk::renderGenderWiseSummary($exam_id, $my_class->id, $my_class->class_type_id, $section_id, 'grades') !!}
     </div>
     @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[2])
     {{--Grades Criteria--}}
