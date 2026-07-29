@@ -964,13 +964,12 @@ class MarkController extends Controller
         $updates = [];
         foreach ($marks as $mk) {
             $exam_mark = $form_data["exm_{$mk->id}"];
-            $total = $exam_mark;
-            $grade = $this->mark->getGradeByTotal($total, $class_type_id);
+            $grade = is_numeric($exam_mark) ? $this->mark->getGradeByTotal($exam_mark, $class_type_id) : null;
 
             $updates[] = [
                 'id' => $mk->id,
-                'exam_mark' => $total == null || $total > 100 ? null : $exam_mark,
-                "tex{$exam->term}" => $total > 100 ? null : $total,
+                'exam_mark' => is_numeric($exam_mark) && $exam_mark <= 100 ? $exam_mark : null,
+                "tex{$exam->term}" => is_numeric($exam_mark) && $exam_mark <= 100 ? $exam_mark : null,
                 'grade_id' => $grade?->id,
                 'subject_position' => $this->mark->getSubjectPosition($mk->student_id, $exam, $class_id, $subject_id, $this->year),
             ];
@@ -983,10 +982,10 @@ class MarkController extends Controller
         $updates = [];
         foreach ($marks as $mk) {
             $exam_mark = $form_data["exm_{$mk->id}"];
-            $evaluated_val = $exam_mark == null ? null : $this->assessment->calculateProportionalValue(
+            $evaluated_val = is_numeric($exam_mark) ? $this->assessment->calculateProportionalValue(
                 $exam_mark,
                 $exam->tdt_denominator
-            );
+            ) : null;
             $updates[] = [
                 'mark_id' => $mk->id,
                 "tex{$exam->term}" => null,
