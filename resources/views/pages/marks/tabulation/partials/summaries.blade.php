@@ -1,10 +1,10 @@
 <div class="row" style="display: flex; gap: 1rem;">
-    @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[2])
-    {{--Division Summary--}}
+    {{--Metric Summary--}}
     <div id="division-summary" data-toggle-target="#division-summary" class="toggleable col-3 mw-fit w-60">
-        <strong style="font-size: 15px;">Division Summary</strong>
+        <strong style="font-size: 15px;">Metric Summary</strong>
         {!! Mk::renderGenderWiseSummary($exam_id, $my_class->id, $my_class->class_type_id, $section_id) !!}
     </div>
+    @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[2])
     {{--Grades Criteria--}}
     <div id="grades-criteria" data-toggle-target="#grades-criteria" class="toggleable col-3 mw-fit w-60">
         <strong style="font-size: 15px;">Grade Criteria</strong>
