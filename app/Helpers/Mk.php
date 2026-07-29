@@ -98,7 +98,7 @@ class Mk extends Qs
      * @param Collection|Model $my_class
      * @return string
      */
-    public static function renderSubjectPerformanceSummary(int|string $section_id, int $exam_id, Collection|Model $my_class): string
+    public static function renderSubjectPerformanceSummary(int|string $section_id, int $exam_id, Collection|Model $my_class, string $exam_student_position_by_value): string
     {
         $collection = '';
         $grades = self::getGrades($my_class->class_type_id);
@@ -177,7 +177,7 @@ class Mk extends Qs
             }
 
             $gpa = $total_count > 0 ? round($total_grade_points / $total_count, 2) : 0;
-            $collection .= "</tr></table></td><td class='text-center'>$gpa</td></tr>";
+            $collection .= $exam_student_position_by_value === array_keys(self::getStudentExamPositionByValues())[3] ? "</tr></table></td><td class='text-center'>$gpa</td></tr>" : "";
         }
 
         return $collection;
@@ -287,57 +287,56 @@ class Mk extends Qs
     }
 
     /**
- * Render a summary table of numeric metrics (total, average, gpa) for an exam/class/section.
- *
- * @param int    $exam_id
- * @param int    $class_id
- * @param mixed  $section_id  Section ID or 'all'
- * @param array  $metrics     Keys from getStudentExamPositionByValues() to include
- * @return string
- */
-public static function renderExamMetricsSummary(int $exam_id, int $class_id, $section_id, array $metrics = []): string
-{
-    if (empty($metrics)) {
-        $metrics = array_keys(self::getStudentExamPositionByValues());
+     * Render a summary table of numeric metrics (total, average, gpa) for an exam/class/section.
+     *
+     * @param int    $exam_id
+     * @param int    $class_id
+     * @param mixed  $section_id  Section ID or 'all'
+     * @param array  $metrics     Keys from getStudentExamPositionByValues() to include
+     * @return string
+     */
+    public static function renderExamMetricsSummary(int $exam_id, int $class_id, $section_id, array $metrics = []): string
+    {
+        if (empty($metrics)) {
+            $metrics = array_keys(self::getStudentExamPositionByValues());
+        }
+
+        $exam_records = self::getExamRecords($section_id, $exam_id, $class_id)->whereNotNull('student');
+
+        $rows = '';
+
+        foreach ($metrics as $metric) {
+            $values = $exam_records->pluck($metric)->filter(function ($val) {
+                return $val !== null && $val !== 0;
+            });
+
+            $count = $values->count();
+            $min = $count ? round($values->min(), 2) : '—';
+            $max = $count ? round($values->max(), 2) : '—';
+            $avg = $count ? round($values->avg(), 2) : '—';
+
+            $label = self::getStudentExamPositionByValues()[$metric] ?? ucfirst($metric);
+
+            $rows .= "<tr>
+                        <td class='text-center font-weight-bold'>{$label}</td>
+                        <td class='text-center'>{$count}</td>
+                        <td class='text-center'>{$min}</td>
+                        <td class='text-center'>{$max}</td>
+                        <td class='text-center'>{$avg}</td>
+                    </tr>";
+        }
+
+        return "<table class='table-styled styled float-head'>
+                    <thead><tr>
+                        <th class='text-center'>Metric</th>
+                        <th class='text-center'>Students</th>
+                        <th class='text-center'>Min</th>
+                        <th class='text-center'>Max</th>
+                        <th class='text-center'>Average</th>
+                    </tr></thead>
+                    <tbody>{$rows}</tbody>
+                </table>";
     }
-
-    $exam_records = self::getExamRecords($section_id, $exam_id, $class_id)
-        ->whereNotNull('student');
-
-    $rows = '';
-
-    foreach ($metrics as $metric) {
-        $values = $exam_records->pluck($metric)->filter(function ($val) {
-            return $val !== null && $val !== 0;
-        });
-
-        $count = $values->count();
-        $min   = $count ? round($values->min(), 2) : '—';
-        $max   = $count ? round($values->max(), 2) : '—';
-        $avg   = $count ? round($values->avg(), 2) : '—';
-
-        $label = self::getStudentExamPositionByValues()[$metric] ?? ucfirst($metric);
-
-        $rows .= "<tr>
-            <td class='text-center font-weight-bold'>{$label}</td>
-            <td class='text-center'>{$count}</td>
-            <td class='text-center'>{$min}</td>
-            <td class='text-center'>{$max}</td>
-            <td class='text-center'>{$avg}</td>
-        </tr>";
-    }
-
-    return "<table class='table-styled styled float-head'>
-        <thead><tr>
-            <th class='text-center'>Metric</th>
-            <th class='text-center'>Students</th>
-            <th class='text-center'>Min</th>
-            <th class='text-center'>Max</th>
-            <th class='text-center'>Average</th>
-        </tr></thead>
-        <tbody>{$rows}</tbody>
-    </table>";
-}
 
     /**
      * Return a number with an ordinal suffix (English).

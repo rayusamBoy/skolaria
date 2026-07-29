@@ -12,11 +12,13 @@
                 <th class="font-weight-bold text-center">AVG RANK</th>
                 <th class="font-weight-bold text-center">GRADE</th>
                 <th class="font-weight-bold text-center">GRADES COUNT</th>
+                @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[3])
                 <th class="font-weight-bold text-center">GPA</th>
+                @endif
             </tr>
         </thead>
         <tbody>
-            {!! Mk::renderSubjectPerformanceSummary($section_id, $ex->id, $my_class) !!}
+            {!! Mk::renderSubjectPerformanceSummary($section_id, $ex->id, $my_class, $ex->exam_student_position_by_value) !!}
         </tbody>
     </table>
     <p style="margin-top: 10px;">

@@ -1,4 +1,5 @@
 <div class="row" style="display: flex; gap: 1rem;">
+    @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[2])
     {{--Division Summary--}}
     <div id="division-summary" data-toggle-target="#division-summary" class="toggleable col-3 mw-fit w-60">
         <strong style="font-size: 15px;">Division Summary</strong>
@@ -14,6 +15,8 @@
         <strong style="font-size: 15px;">Division Criteria</strong>
         {!! Mk::renderDivisionTable($class_type_id) !!}
     </div>
+    @endif
+    @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[3])
     {{--Overall GPA--}}
     <div id="overall-gpa" data-toggle-target="#overall-gpa" class="toggleable w-60 col-3 text-center">
         <strong style="font-size: 15px;">Overall GPA</strong>
@@ -25,4 +28,11 @@
             </thead>
         </table>
     </div>
+    @endif
+    @if($ex->exam_student_position_by_value)
+    <div id="metrics-summary" class="mw-fit w-60">
+        <strong>Exam Metrics Summary</strong>
+        {!! Mk::renderExamMetricsSummary($exam_id, $my_class->id, $section_id, [$ex->exam_student_position_by_value]) !!}
+    </div>
+    @endif
 </div>
