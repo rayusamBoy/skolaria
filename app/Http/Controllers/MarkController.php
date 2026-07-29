@@ -969,7 +969,7 @@ class MarkController extends Controller
 
             $updates[] = [
                 'id' => $mk->id,
-                'exam_mark' => $total > 100 ? null : $exam_mark,
+                'exam_mark' => $total == null || $total > 100 ? null : $exam_mark,
                 "tex{$exam->term}" => $total > 100 ? null : $total,
                 'grade_id' => $grade?->id,
                 'subject_position' => $this->mark->getSubjectPosition($mk->student_id, $exam, $class_id, $subject_id, $this->year),
