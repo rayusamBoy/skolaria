@@ -165,7 +165,7 @@ class MarksImport implements ToCollection, WithHeadingRow, WithValidation
      */
     public function headingRow(): int
     {
-        return 1;
+        return 4;
     }
 
     // ----------------------------------------------------------------------
