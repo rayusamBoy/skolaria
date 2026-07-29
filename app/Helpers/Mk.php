@@ -294,7 +294,7 @@ class Mk extends Qs
             }
 
             $html .= "<table class='table-styled styled float-head'>
-                <thead><tr><th class='text-center'>Grade</th>{$gradeNames}</tr></thead>
+                <thead><tr><th class='text-center'>Average Grade</th>{$gradeNames}</tr></thead>
                 <tbody>
                     <tr><td class='text-center'>Male</td>{$maleCounts}</tr>
                     <tr><td class='text-center'>Female</td>{$femaleCounts}</tr>

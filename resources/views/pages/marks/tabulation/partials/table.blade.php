@@ -9,7 +9,7 @@
             {{-- <th class="text-center">Grd</th> --}}
             @endforeach
             <th id="header-total" class="text-center col-total toggleable" data-toggle-target=".col-total">Total</th>
-            <th id="header-avg" class="text-center col-avg toggleable" title="Average" data-toggle-target=".col-avg">Avg</th>
+            <th id="header-avg" class="text-center col-avg toggleable" title="Average" data-toggle-target=".col-avg">Avg Grade</th>
             {{-- <th id="header-grade" class="text-center col-grade toggleable" title="Grade" data-toggle-target=".col-grade">Grd</th> --}}
             @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[2])
             <th id="header-points" class="text-center col-points toggleable" title="Points" data-toggle-target=".col-points">Pts</th>
