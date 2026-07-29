@@ -1097,8 +1097,7 @@ class MarkController extends Controller
 
         $students = $this->student->getStudentsByUserIdsQuery($st_ids->toArray())
             ->get()
-            ->whereNotNull('user')
-            ->sortBy('user.name');
+            ->whereNotNull('user');
 
         $tex = "tex{$exam->term}";
         $students_data = [];
@@ -1110,6 +1109,7 @@ class MarkController extends Controller
 
             $row = [
                 'user' => $s->user,
+                'exam_number' => $record->exam_number,
                 'gender' => $s->user->gender,
                 'total' => $total,
                 'average' => $record->average ?? null,
@@ -1132,6 +1132,10 @@ class MarkController extends Controller
 
             $students_data[] = $row;
         }
+
+        usort($students_data, function ($a, $b) {
+            return strcmp($a['exam_number'] ?? '', $b['exam_number'] ?? '');
+        });
 
         return [
             'my_class' => $my_class,

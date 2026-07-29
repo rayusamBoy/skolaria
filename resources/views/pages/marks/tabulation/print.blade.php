@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Tabulation Sheet - {{ $my_class->name }} @if(isset($section)) {{ $section->name }} @endif {{ $ex->name }} ({{ $year }})</title>
+    <title>Tabulation Sheet - {{ strtoupper($settings->firstWhere('key', 'system_title')->value) }} - {{ $my_class->name }} @if(isset($section)) {{ $section->name }} @endif {{ $ex->name }} ({{ $year }})</title>
     <link rel="stylesheet" href="{{ asset('assets/css/print_tabulation.css') }}">
 
     @laravelPWA

@@ -287,6 +287,59 @@ class Mk extends Qs
     }
 
     /**
+ * Render a summary table of numeric metrics (total, average, gpa) for an exam/class/section.
+ *
+ * @param int    $exam_id
+ * @param int    $class_id
+ * @param mixed  $section_id  Section ID or 'all'
+ * @param array  $metrics     Keys from getStudentExamPositionByValues() to include
+ * @return string
+ */
+public static function renderExamMetricsSummary(int $exam_id, int $class_id, $section_id, array $metrics = []): string
+{
+    if (empty($metrics)) {
+        $metrics = array_keys(self::getStudentExamPositionByValues());
+    }
+
+    $exam_records = self::getExamRecords($section_id, $exam_id, $class_id)
+        ->whereNotNull('student');
+
+    $rows = '';
+
+    foreach ($metrics as $metric) {
+        $values = $exam_records->pluck($metric)->filter(function ($val) {
+            return $val !== null && $val !== 0;
+        });
+
+        $count = $values->count();
+        $min   = $count ? round($values->min(), 2) : '—';
+        $max   = $count ? round($values->max(), 2) : '—';
+        $avg   = $count ? round($values->avg(), 2) : '—';
+
+        $label = self::getStudentExamPositionByValues()[$metric] ?? ucfirst($metric);
+
+        $rows .= "<tr>
+            <td class='text-center font-weight-bold'>{$label}</td>
+            <td class='text-center'>{$count}</td>
+            <td class='text-center'>{$min}</td>
+            <td class='text-center'>{$max}</td>
+            <td class='text-center'>{$avg}</td>
+        </tr>";
+    }
+
+    return "<table class='table-styled styled float-head'>
+        <thead><tr>
+            <th class='text-center'>Metric</th>
+            <th class='text-center'>Students</th>
+            <th class='text-center'>Min</th>
+            <th class='text-center'>Max</th>
+            <th class='text-center'>Average</th>
+        </tr></thead>
+        <tbody>{$rows}</tbody>
+    </table>";
+}
+
+    /**
      * Return a number with an ordinal suffix (English).
      *
      * @param int $number
