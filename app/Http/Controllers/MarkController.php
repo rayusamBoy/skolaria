@@ -982,14 +982,15 @@ class MarkController extends Controller
     {
         $updates = [];
         foreach ($marks as $mk) {
-            $evaluated_val = $this->assessment->calculateProportionalValue(
-                $form_data["exm_{$mk->id}"],
+            $exam_mark = $form_data["exm_{$mk->id}"];
+            $evaluated_val = $exam_mark == null ? null : $this->assessment->calculateProportionalValue(
+                $exam_mark,
                 $exam->tdt_denominator
             );
             $updates[] = [
                 'mark_id' => $mk->id,
                 "tex{$exam->term}" => null,
-                'evaluated_exam_mark' => ($evaluated_val == 0) ? null : $evaluated_val,
+                'evaluated_exam_mark' => ($evaluated_val == 0 || $exam_mark == null) ? null : $evaluated_val,
             ];
         }
         return $updates;
