@@ -177,8 +177,9 @@ class Mk extends Qs
             }
 
             $gpa = $total_count > 0 ? round($total_grade_points / $total_count, 2) : 0;
-            $gpa_string = $exam_student_position_by_value === array_keys(self::getStudentExamPositionByValues())[3] ? "</tr></table></td><td class='text-center'>$gpa</td></tr>" : "";
-            $collection .= "</tr></table></td><td class='text-center'>$gpa</td></tr>";
+            if ($exam_student_position_by_value == array_keys(self::getStudentExamPositionByValues())[3]) {
+                $collection .= "</tr></table></td><td class='text-center'>$gpa</td></tr>";
+            }
         }
 
         return $collection;

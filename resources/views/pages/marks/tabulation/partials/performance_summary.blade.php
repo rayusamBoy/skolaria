@@ -12,9 +12,9 @@
                 <th class="font-weight-bold text-center">AVG RANK</th>
                 <th class="font-weight-bold text-center">GRADE</th>
                 <th class="font-weight-bold text-center">GRADES COUNT</th>
-                {{-- @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[3]) --}}
+                @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[3])
                 <th class="font-weight-bold text-center">GPA</th>
-                {{-- @endif --}}
+                @endif
             </tr>
         </thead>
         <tbody>
