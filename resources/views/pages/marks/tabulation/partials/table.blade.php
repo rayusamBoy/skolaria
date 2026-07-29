@@ -10,7 +10,7 @@
             @endforeach
             <th id="header-total" class="text-center col-total toggleable" data-toggle-target=".col-total">Total</th>
             <th id="header-avg" class="text-center col-avg toggleable" title="Average" data-toggle-target=".col-avg">Avg</th>
-            <th id="header-grade" class="text-center col-grade toggleable" title="Grade" data-toggle-target=".col-grade">Grd</th>
+            {{-- <th id="header-grade" class="text-center col-grade toggleable" title="Grade" data-toggle-target=".col-grade">Grd</th> --}}
             @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[2])
             <th id="header-points" class="text-center col-points toggleable" title="Points" data-toggle-target=".col-points">Pts</th>
             <th id="header-division" class="text-center col-division toggleable" title="Division" data-toggle-target=".col-division">Div</th>
@@ -30,12 +30,12 @@
 
             @foreach($subjects as $sub)
             @php $sub_mark = $row['sub_marks'][$sub->id]; @endphp
-            {{-- <td class="text-center">{{ $sub_mark['mark'] ?? '—' }}</td> --}}
             <td class="text-center">{{ $sub_mark['grade'] ?? '—' }}</td>
+            {{-- <td class="text-center text-green">{{ $sub_mark['grade'] ?? '—' }}</td> --}}
             @endforeach
             <td class="text-center text-danger col-total">{{ $row['total'] ?? '—' }}</td>
-            <td class="text-center text-secondary col-average">{{ $row['average'] ?? '—' }}</td>
-            <td class="text-center text-info col-grade">{{ $row['grade'] ?? '—' }}</td>
+            <td class="text-center text-secondary col-average">{{ $row['grade'] ?? '—' }}</td>
+            {{-- <td class="text-center text-info col-grade">{{ $row['grade'] ?? '—' }}</td> --}}
             @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[2])
             <td class="text-center text-pink col-points">{{ $row['points'] ?? '—' }}</td>
             <td class="text-center text-orange col-division">{{ $row['division'] ?? '—' }}</td>
