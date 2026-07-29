@@ -34,9 +34,9 @@
             <td class="text-center text-green">{{ $sub_mark['grade'] ?? '—' }}</td>
             @endforeach
             <td class="text-center text-danger col-total">{{ $row['total'] ?? '—' }}</td>
-            @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[2])
             <td class="text-center text-secondary col-average">{{ $row['average'] ?? '—' }}</td>
             <td class="text-center text-info col-grade">{{ $row['grade'] ?? '—' }}</td>
+            @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[2])
             <td class="text-center text-pink col-points">{{ $row['points'] ?? '—' }}</td>
             <td class="text-center text-orange col-division">{{ $row['division'] ?? '—' }}</td>
             @endif
