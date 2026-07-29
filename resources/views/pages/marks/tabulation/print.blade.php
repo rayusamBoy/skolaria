@@ -25,6 +25,7 @@
         @include('pages.marks.tabulation.partials.header')
         @include('pages.marks.tabulation.partials.summaries')
         @include('pages.marks.tabulation.partials.table')
+        <div style="page-break-after: always"></div>
         @include('pages.marks.tabulation.partials.performance_summary')
         <p class="copyright text-center mt-4">
             {{ date('Y') }}. {{ ucwords(strtolower($settings->firstWhere('key', 'system_name')->value)) }}. All rights reserved.

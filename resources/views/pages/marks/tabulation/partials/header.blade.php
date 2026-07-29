@@ -6,7 +6,7 @@
                 SMZ
             </div>
             <div style="font-size: 26px; font-weight: bold; color: #0c801b; margin-bottom: 5px;">
-                CENTRAL DISTRICT EXAMINATIONS BOARD
+                CENTRAL DISTRICT EXAMINATIONS
             </div>
             <div style="font-size: 22px; font-weight: bold; color: #1b0c80; margin-bottom: 5px;">
                 {{ strtoupper($settings->firstWhere('key', 'system_name')->value) }}
