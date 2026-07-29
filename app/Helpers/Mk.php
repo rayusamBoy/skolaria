@@ -246,99 +246,92 @@ class Mk extends Qs
     }
 
     /**
-     * Render a division summary table (gender counts per division, attended/absent).
-     *
-     * @param int        $exam_id
-     * @param int        $class_id
-     * @param int        $class_type_id
-     * @param mixed      $section_id
-     * @return string
-     */
-    public static function renderDivisionsSummary(int $exam_id, int $class_id, int $class_type_id, $section_id): string
-    {
-        $exam_records = self::getExamRecords($section_id, $exam_id, $class_id)
-            ->whereNotNull('student'); // exclude deleted users
-
-        $attended = $exam_records->where('total', '<>', 0);
-        $absent = $exam_records->where('total', 0);
-
-        $divisions = Division::where('class_type_id', $class_type_id)->get();
-        if ($divisions->isEmpty()) {
-            $divisions = Division::whereNull('class_type_id')->get();
-        }
-
-        $div_name = $male_count = $female_count = $count_per_div = '';
-        foreach ($divisions as $div) {
-            $div_name .= "<th class='text-center'>{$div->name}</th>";
-            $mc = $attended->where('student.gender', User::GENDER_MALE)
-                ->where('division_id', $div->id)->count();
-            $fc = $attended->where('student.gender', User::GENDER_FEMALE)
-                ->where('division_id', $div->id)->count();
-            $male_count .= "<td class='text-center'>$mc</td>";
-            $female_count .= "<td class='text-center'>$fc</td>";
-            $count_per_div .= '<td class="text-center">' . $mc + $fc . '</td>';
-        }
-
-        $count = $divisions->count() + 1;
-        $colspan = $count / 2;
-        $attended_str = '</tr><tr><td class="text-center" colspan="' . round($count - $colspan)
-            . '">SAT: ' . $attended->whereNotNull('division_id')->count() . '</td>';
-        $absent_str = '<td class="text-center" colspan="' . round($colspan)
-            . '">ABS: ' . $absent->count() . '</td>';
-
-        return "<table class='table-styled styled float-head'><thead><tr><th class='text-center'>Division</th>$div_name</tr></thead><tbody><tr><td class='text-center'>Male</td>$male_count</tr><tr><td class='text-center'>Female</td>$female_count</tr><tr><td class='text-center'>Total</td>$count_per_div</tr>$attended_str$absent_str</tbody></table>";
-    }
-
-    /**
-     * Render a summary table of numeric metrics (total, average, gpa) for an exam/class/section.
+     * Render a gender‑wise summary table for grades and divisions.
      *
      * @param int    $exam_id
      * @param int    $class_id
+     * @param int    $class_type_id
      * @param mixed  $section_id  Section ID or 'all'
-     * @param array  $metrics     Keys from getStudentExamPositionByValues() to include
+     * @param string $type        'grades', 'divisions', or 'both' (default)
      * @return string
      */
-    public static function renderExamMetricsSummary(int $exam_id, int $class_id, $section_id, array $metrics = []): string
+    public static function renderGenderWiseSummary(int $exam_id, int $class_id, int $class_type_id, $section_id, string $type = 'both'): string
     {
-        if (empty($metrics)) {
-            $metrics = array_keys(self::getStudentExamPositionByValues());
+        $exam_records = self::getExamRecords($section_id, $exam_id, $class_id)
+            ->whereNotNull('student')
+            ->where('total', '<>', 0); // attended only
+
+        // Grades list (with class‑type fallback)
+        $grades = Grade::where('class_type_id', $class_type_id)->orderBy('name')->get();
+        if ($grades->isEmpty()) {
+            $grades = Grade::whereNull('class_type_id')->orderBy('name')->get();
         }
 
-        $exam_records = self::getExamRecords($section_id, $exam_id, $class_id)->whereNotNull('student');
-
-        $rows = '';
-
-        foreach ($metrics as $metric) {
-            $values = $exam_records->pluck($metric)->filter(function ($val) {
-                return $val !== null && $val !== 0;
-            });
-
-            $count = $values->count();
-            $min = $count ? round($values->min(), 2) : '—';
-            $max = $count ? round($values->max(), 2) : '—';
-            $avg = $count ? round($values->avg(), 2) : '—';
-
-            $label = self::getStudentExamPositionByValues()[$metric] ?? ucfirst($metric);
-
-            $rows .= "<tr>
-                        <td class='text-center font-weight-bold'>{$label}</td>
-                        <td class='text-center'>{$count}</td>
-                        <td class='text-center'>{$min}</td>
-                        <td class='text-center'>{$max}</td>
-                        <td class='text-center'>{$avg}</td>
-                    </tr>";
+        // Divisions list (with class‑type fallback)
+        $divisions = Division::where('class_type_id', $class_type_id)->orderBy('name')->get();
+        if ($divisions->isEmpty()) {
+            $divisions = Division::whereNull('class_type_id')->orderBy('name')->get();
         }
 
-        return "<table class='table-styled styled float-head'>
-                    <thead><tr>
-                        <th class='text-center'>Metric</th>
-                        <th class='text-center'>Students</th>
-                        <th class='text-center'>Min</th>
-                        <th class='text-center'>Max</th>
-                        <th class='text-center'>Average</th>
-                    </tr></thead>
-                    <tbody>{$rows}</tbody>
-                </table>";
+        $html = '';
+
+        // ------- Grades section -------
+        if ($type === 'grades' || $type === 'both') {
+            $gradeNames = '';
+            $maleCounts = '';
+            $femaleCounts = '';
+            $totalCounts = '';
+
+            foreach ($grades as $grade) {
+                $gradeNames .= "<th class='text-center'>{$grade->name}</th>";
+                $mc = $exam_records->where('student.gender', User::GENDER_MALE)
+                    ->where('grade_id', $grade->id)->count();
+                $fc = $exam_records->where('student.gender', User::GENDER_FEMALE)
+                    ->where('grade_id', $grade->id)->count();
+                $maleCounts .= "<td class='text-center'>$mc</td>";
+                $femaleCounts .= "<td class='text-center'>$fc</td>";
+                $totalCounts .= '<td class="text-center">' . ($mc + $fc) . '</td>';
+            }
+
+            $html .= "<table class='table-styled styled float-head'>
+                <thead><tr><th class='text-center'>Grade</th>{$gradeNames}</tr></thead>
+                <tbody>
+                    <tr><td class='text-center'>Male</td>{$maleCounts}</tr>
+                    <tr><td class='text-center'>Female</td>{$femaleCounts}</tr>
+                    <tr><td class='text-center'>Total</td>{$totalCounts}</tr>
+                </tbody>
+            </table>";
+        }
+
+        // ------- Divisions section -------
+        if ($type === 'divisions' || $type === 'both') {
+            $divNames = '';
+            $maleCounts = '';
+            $femaleCounts = '';
+            $totalCounts = '';
+
+            foreach ($divisions as $div) {
+                $divNames .= "<th class='text-center'>{$div->name}</th>";
+                $mc = $exam_records->where('student.gender', User::GENDER_MALE)
+                    ->where('division_id', $div->id)->count();
+                $fc = $exam_records->where('student.gender', User::GENDER_FEMALE)
+                    ->where('division_id', $div->id)->count();
+                $maleCounts .= "<td class='text-center'>$mc</td>";
+                $femaleCounts .= "<td class='text-center'>$fc</td>";
+                $totalCounts .= '<td class="text-center">' . ($mc + $fc) . '</td>';
+            }
+
+            $html .= "<table class='table-styled styled float-head' style='margin-top:1em;'>
+                <thead><tr><th class='text-center'>Division</th>{$divNames}</tr></thead>
+                <tbody>
+                    <tr><td class='text-center'>Male</td>{$maleCounts}</tr>
+                    <tr><td class='text-center'>Female</td>{$femaleCounts}</tr>
+                    <tr><td class='text-center'>Total</td>{$totalCounts}</tr>
+                </tbody>
+            </table>";
+        }
+
+        return $html;
     }
 
     /**

@@ -3,7 +3,7 @@
     {{--Division Summary--}}
     <div id="division-summary" data-toggle-target="#division-summary" class="toggleable col-3 mw-fit w-60">
         <strong style="font-size: 15px;">Division Summary</strong>
-        {!! Mk::renderDivisionsSummary($exam_id, $my_class->id, $my_class->class_type_id, $section_id) !!}
+        {!! Mk::renderGenderWiseSummary($exam_id, $my_class->id, $my_class->class_type_id, $section_id) !!}
     </div>
     {{--Grades Criteria--}}
     <div id="grades-criteria" data-toggle-target="#grades-criteria" class="toggleable col-3 mw-fit w-60">
@@ -27,12 +27,6 @@
                 </tr>
             </thead>
         </table>
-    </div>
-    @endif
-    @if($ex->exam_student_position_by_value)
-    <div id="metrics-summary" class="mw-fit w-60">
-        <strong>Exam Metrics Summary</strong>
-        {!! Mk::renderExamMetricsSummary($exam_id, $my_class->id, $section_id, [$ex->exam_student_position_by_value]) !!}
     </div>
     @endif
 </div>
