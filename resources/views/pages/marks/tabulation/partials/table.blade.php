@@ -18,7 +18,7 @@
             @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[3])
             <th id="header-gpa" class="text-center col-gpa toggleable" title="Grade Point Average" data-toggle-target=".col-gpa">GPA</th>
             @endif
-            <th id="header-position" class="text-center col-position toggleable" title="Position" data-toggle-target=".col-position">Pos</th>
+            {{-- <th id="header-position" class="text-center col-position toggleable" title="Position" data-toggle-target=".col-position">Pos</th> --}}
         </tr>
     </thead>
     <tbody>
@@ -43,7 +43,7 @@
             @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[3])
             <td class="text-center text-violet col-gpa">{{ $row['gpa'] ?? '—' }}</td>
             @endif
-            <td class="text-center text-primary col-position">{{ $row['pos'] ?? '—' }}</td>
+            {{-- <td class="text-center text-primary col-position">{{ $row['pos'] ?? '—' }}</td> --}}
         </tr>
         @endforeach
     </tbody>
