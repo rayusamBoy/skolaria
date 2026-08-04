@@ -31,7 +31,7 @@
             @foreach($subjects as $sub)
             @php $sub_mark = $row['sub_marks'][$sub->id]; @endphp
             <td class="text-center">{{ $sub_mark['grade'] ?? '—' }}</td>
-            <td class="text-center text-green">{{ $sub_mark['grade'] ?? '—' }}</td>
+            <td class="text-center text-green">{{ $sub_mark['mark'] ?? '—' }}</td>
             @endforeach
             <td class="text-center text-danger col-total">{{ $row['total'] ?? '—' }}</td>
             <td class="text-center text-secondary col-average">{{ $row['grade'] ?? '—' }}</td>
