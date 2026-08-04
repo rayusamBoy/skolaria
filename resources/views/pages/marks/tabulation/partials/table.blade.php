@@ -6,11 +6,11 @@
             <th class="text-center">Gender</th>
             @foreach($subjects as $sub)
             <th class="text-center" title="{{ $sub->name }}">{{ strtoupper($sub->slug ?? $sub->name) }}</th>
-            <th class="text-center">Grd</th>
+            {{-- <th class="text-center">Grd</th> --}}
             @endforeach
             <th id="header-total" class="text-center col-total toggleable" data-toggle-target=".col-total">Total</th>
             <th id="header-avg" class="text-center col-avg toggleable" title="Average" data-toggle-target=".col-avg">Avg Grade</th>
-            <th id="header-grade" class="text-center col-grade toggleable" title="Grade" data-toggle-target=".col-grade">Grd</th>
+            {{-- <th id="header-grade" class="text-center col-grade toggleable" title="Grade" data-toggle-target=".col-grade">Grd</th> --}}
             @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[2])
             <th id="header-points" class="text-center col-points toggleable" title="Points" data-toggle-target=".col-points">Pts</th>
             <th id="header-division" class="text-center col-division toggleable" title="Division" data-toggle-target=".col-division">Div</th>
@@ -18,7 +18,7 @@
             @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[3])
             <th id="header-gpa" class="text-center col-gpa toggleable" title="Grade Point Average" data-toggle-target=".col-gpa">GPA</th>
             @endif
-            <th id="header-position" class="text-center col-position toggleable" title="Position" data-toggle-target=".col-position">Pos</th>
+            {{-- <th id="header-position" class="text-center col-position toggleable" title="Position" data-toggle-target=".col-position">Pos</th> --}}
         </tr>
     </thead>
     <tbody>
@@ -30,12 +30,12 @@
 
             @foreach($subjects as $sub)
             @php $sub_mark = $row['sub_marks'][$sub->id]; @endphp
-            <td class="text-center">{{ $sub_mark['mark'] ?? '—' }}</td>
-            <td class="text-center text-green">{{ $sub_mark['grade'] ?? '—' }}</td>
+            <td class="text-center">{{ $sub_mark['grade'] ?? '—' }}</td>
+            {{-- <td class="text-center text-green">{{ $sub_mark['grade'] ?? '—' }}</td> --}}
             @endforeach
             <td class="text-center text-danger col-total">{{ $row['total'] ?? '—' }}</td>
-            <td class="text-center text-secondary col-average">{{ $row['average'] ?? '—' }}</td>
-            <td class="text-center text-info col-grade">{{ $row['grade'] ?? '—' }}</td>
+            <td class="text-center text-secondary col-average">{{ $row['grade'] ?? '—' }}</td>
+            {{-- <td class="text-center text-info col-grade">{{ $row['grade'] ?? '—' }}</td> --}}
             @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[2])
             <td class="text-center text-pink col-points">{{ $row['points'] ?? '—' }}</td>
             <td class="text-center text-orange col-division">{{ $row['division'] ?? '—' }}</td>
@@ -43,7 +43,7 @@
             @if($ex->exam_student_position_by_value === array_keys(Mk::getStudentExamPositionByValues())[3])
             <td class="text-center text-violet col-gpa">{{ $row['gpa'] ?? '—' }}</td>
             @endif
-            <td class="text-center text-primary col-position">{{ $row['pos'] ?? '—' }}</td>
+            {{-- <td class="text-center text-primary col-position">{{ $row['pos'] ?? '—' }}</td> --}}
         </tr>
         @endforeach
     </tbody>
