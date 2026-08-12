@@ -30,7 +30,6 @@ Route::get('auth/impersonate', [TenantAuthController::class, 'impersonate'])->na
 
 Route::group(["middleware" => ['universal']], function () {
     Auth::routes();
-    Route::get('/', [HomeController::class, 'index'])->name('home');
 
     // The helper route page only sets theme and skin preferences for the PWA GeneratePwaScreenshots command
     Route::get('pwa-set-preferences', fn() => view('pwa.set_preferences'));
