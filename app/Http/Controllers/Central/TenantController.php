@@ -64,31 +64,31 @@ class TenantController extends Controller
         }
 
         // Handle domain or request‑data fields
-        if ($request->identification_mode === 'domain') {
+        if ($request->identification_mode === 'request_data') {
+            $tenant->update([
+                'tenant_slug' => $request->tenant_slug,
+            ]);
+
+            tenancy()->run($tenant, function () use ($request, $tenant) {
+                $this->setting->update('system_name', $request->name);
+                $this->setting->update('system_title', Qs::getStringAbbreviation($request->name));
+                $local_super_dmin = $this->user->findUser(1);
+                if ($local_super_dmin) {
+                    $this->tenant->insertManagerData([
+                        'central_user_id' => Qs::getHeadIds()[0], // Root user ID
+                        'tenant_id' => $tenant->id,
+                        'tenant_user_id' => $local_super_dmin->id,
+                    ]);
+                }
+            });
+        } else {
             try {
                 $tenant->createDomain(['domain' => $request->domain]);
             } catch (\Throwable $t) {
                 logger()->error('Domain creation failed', ['error' => $t->getMessage()]);
                 return Qs::json(msg: "", arr: ['msg' => $t->getMessage(), 'ok' => false, 'pop' => true, 'pop_timer' => 0]);
             }
-        } else {
-            $tenant->update([
-                'tenant_slug' => $request->tenant_slug,
-            ]);
         }
-
-        tenancy()->run($tenant, function () use ($request, $tenant) {
-            $this->setting->update('system_name', $request->name);
-            $this->setting->update('system_title', Qs::getStringAbbreviation($request->name));
-            $local_super_dmin = $this->user->findUser(1);
-            if ($local_super_dmin) {
-                $this->tenant->insertManagerData([
-                    'central_user_id' => Qs::getHeadIds()[0], // Root user ID
-                    'tenant_id' => $tenant->id,
-                    'tenant_user_id' => $local_super_dmin->id,
-                ]);
-            }
-        });
 
         return Qs::json(msg: "", arr: ['msg' => __('msg.store_ok'), 'ok' => true, 'pop' => true, 'pop_timer' => 0]);
     }
