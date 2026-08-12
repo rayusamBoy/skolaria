@@ -25,6 +25,8 @@ class MasterDataSyncController extends Controller
     #[SkipPermission]
     public function index()
     {
+        $this->validateRequestDataMode('domain');
+
         $tenants = $this->tenant->getAllTenants(false);
         $tables = new SyncMasterDataService()->getSyncableTables();
         $templateTenant = $this->tenant->whereTenantQuery(['data->is_template' => 1])->first();
@@ -37,6 +39,8 @@ class MasterDataSyncController extends Controller
      */
     public function sync(Request $request, SyncMasterDataService $service)
     {
+        $this->validateRequestDataMode('domain');
+
         $validated = $request->validate([
             'source_tenant_id' => 'required|exists:tenants,id',
             'target_tenants' => 'required|array',
@@ -57,5 +61,15 @@ class MasterDataSyncController extends Controller
         $service->sync($sourceTenant, $targetIds, $tables, $lock, $exclude);
 
         return redirect()->route('tenants.index')->with('pop_success', 'Master data synced successfully.');
+    }
+
+    /**
+     * Validate request data mode.
+     */
+    private function validateRequestDataMode(string $mode): void
+    {
+        if ($mode !== 'request_data') {
+            throw new \InvalidArgumentException("Tenant identification mode must be 'request_data' to access this endpoint.");
+        }
     }
 }
