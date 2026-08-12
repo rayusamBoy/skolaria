@@ -462,6 +462,11 @@ Breadcrumbs::for('bin', function (BreadcrumbTrail $trail): void {
     $trail->push('Recycle Bin', route('bin'));
 });
 
+Breadcrumbs::for('central_bin', function (BreadcrumbTrail $trail): void {
+    $trail->parent(Usr::tenancyInitialized() ? 'home' : 'central_home');
+    $trail->push('Recycle Bin', route('central_bin'));
+});
+
 Breadcrumbs::for('statistics.index', function (BreadcrumbTrail $trail): void {
     $trail->parent(Usr::tenancyInitialized() ? 'home' : 'central_home');
     $trail->push('Statistics', route('statistics.index'));

@@ -30,7 +30,7 @@ return [
      */
     'models' => [
         'tenant' => Tenant::class,
-        'domain' => Stancl\Tenancy\Database\Models\Domain::class,
+        'domain' => App\Models\TenantDomain::class,
         'impersonation_token' => Stancl\Tenancy\Database\Models\ImpersonationToken::class,
 
         /**

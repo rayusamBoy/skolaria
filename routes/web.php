@@ -7,6 +7,7 @@ use App\Http\Controllers\Central\HomeController as CentralHomeController;
 use App\Http\Controllers\Central\LogController as CentralLogController;
 use App\Http\Controllers\Central\MasterDataSyncController;
 use App\Http\Controllers\Central\SettingController as CentralSettingController;
+use App\Http\Controllers\Central\SoftDeleteController as CentralSoftDeleteController;
 use App\Http\Controllers\Central\TenantController as CentralTenantController;
 use App\Http\Controllers\Central\UserController as CentralUserController;
 use App\Http\Controllers\EntryController;
@@ -33,6 +34,13 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate'], 'prefix' => 'centr
     Route::group(['middleware' => '2fa'], function () {
         /*************** Central namespace (central admin) ***************/
         Route::group(['namespace' => 'Central'], function () {
+            Route::get('bin', [CentralSoftDeleteController::class, 'bin'])->name('central_bin')->middleware('password.confirm');
+            // Tenants soft-delete actions
+            Route::post('tenant/{id}/restore', [CentralSoftDeleteController::class, 'tenant_restore'])->name('central.tenant.restore');
+            Route::post('tenant/{id}/force-delete', [CentralSoftDeleteController::class, 'tenant_force_delete'])->name('central.tenant.force_delete');
+            // Central users soft-delete actions
+            Route::post('user/{user}/restore', [CentralSoftDeleteController::class, 'user_restore'])->name('central.user.restore');
+            Route::post('user/{user}/force-delete', [CentralSoftDeleteController::class, 'user_force_delete'])->name('central.user.force_delete');
 
             /*************** Artisan commands UI (shared-hosting helper) ***************/
             Route::prefix('artisan-commands')->group(function () {

@@ -72,13 +72,24 @@
                 </div>
                 @endif
 
-                @if($is_tenant_context && auth()->user()->can($tenant_permissions['soft_deletes']['bin']['permission']))
+                @if($is_tenant_context)
+                @can($tenant_permissions['soft_deletes']['bin']['permission'])
                 <div class="breadcrumb-elements-item">
                     <a href="{{ route('bin') }}" @if(request()->routeIs('bin')) class="breadcrumb-elements-item is-disabled d-block" @else class="breadcrumb-elements-item" @endif>
                         <i class="material-symbols-rounded mr-1 align-middle">delete_forever</i>
                         <span class="align-middle">Bin</span>
                     </a>
                 </div>
+                @endcan
+                @else
+                @can($central_permissions['central_soft_deletes']['bin']['permission'])
+                <div class="breadcrumb-elements-item">
+                    <a href="{{ route('central_bin') }}" @if(request()->routeIs('central_bin')) class="breadcrumb-elements-item is-disabled d-block" @else class="breadcrumb-elements-item" @endif>
+                        <i class="material-symbols-rounded mr-1 align-middle">delete_forever</i>
+                        <span class="align-middle">Bin</span>
+                    </a>
+                </div>
+                @endcan
                 @endif
             </div>
         </div>

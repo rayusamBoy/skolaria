@@ -35,19 +35,18 @@ class TenantController extends Controller
         $data["tenants"] = $tenants = $this->tenant->getAllTenants();
         $data["user_roles"] = $this->user->getRolesByName();
         $data["active_identification_mode"] = config('tenancy.active_identification_mode');
-        $data["active_identification_mode_is_domain"] = (config('tenancy.active_identification_mode') === "domain");
+        $data["active_identification_mode_is_domain"] = config('tenancy.active_identification_mode') === "domain";
 
         // Check if each tenant is active ie., has data other than the initial ones
         foreach ($tenants as $tenant) {
             try {
-                tenancy()->initialize($tenant);
-                // Check a few core tables that only get populated after real usage
-                $has_data = DB::table('my_classes')->count() > 1
-                    || DB::table('student_records')->count() > 1
-                    || DB::table('marks')->exists()
-                    || DB::table('exam_records')->exists();
-                $tenant->active = $has_data;
-                tenancy()->end();
+                tenancy()->run($tenant, function () use ($tenant) {
+                    $has_data = DB::table('my_classes')->count() > 1
+                        || DB::table('student_records')->count() > 1
+                        || DB::table('marks')->exists()
+                        || DB::table('exam_records')->exists();
+                    $tenant->active = $has_data;
+                });
             } catch (\Throwable $e) {
                 $tenant->active = false; // assume inactive if database not accessible
             }
@@ -155,7 +154,8 @@ class TenantController extends Controller
     {
         $tenant = $this->tenant->findOrFailTenant($tenant);
         try {
-            $tenant->delete();
+            $tenant->deleted_at = Carbon::now();
+            $tenant->save();
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['delete_error' => $e->getMessage()]);
         }

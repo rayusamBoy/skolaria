@@ -200,7 +200,7 @@ $hasActions = $canEdit || $canShow || $canDelete || $canRunCommand;
                                             @endif
 
                                             @if($canDelete)
-                                            <a id="tenant-delete-{{ Qs::hash($tenant->id) }}" onclick="confirmPermanentDeleteTwice(this.id)" href="javascript:;" class="dropdown-item text-danger" @if($tenant->active) data-toggle="tooltip" title="This tenant is active. Please proceed with caution." @endif>
+                                            <a id="tenant-delete-{{ Qs::hash($tenant->id) }}" onclick="confirmPermanentDelete(this.id)" href="javascript:;" class="dropdown-item text-danger" @if($tenant->active) data-toggle="tooltip" title="This tenant is active. Please proceed with caution." @endif>
                                                 <i class="material-symbols-rounded">delete</i> Delete
                                             </a>
                                             <form method="post" id="item-delete-tenant-delete-{{ Qs::hash($tenant->id) }}" action="{{ route('tenants.destroy', Qs::hash($tenant->id)) }}" class="hidden page-block">@csrf @method('delete')</form>

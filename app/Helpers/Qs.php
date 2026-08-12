@@ -1059,9 +1059,9 @@ class Qs
      * @param array $remove
      * @return array
      */
-    public static function getCanSoftDeleteModelNames(array $remove = []): array
+    public static function getCanSoftDeleteModelNames(array $remove = [], $is_tenant_context = true): array
     {
-        $names = ['users', 'payments', 'my_classes', 'exams', 'threads'];
+        $names = $is_tenant_context ? ['users', 'payments', 'my_classes', 'exams', 'threads'] : ['users', 'tenants'];
         return $remove ? array_values(array_diff($names, $remove)) : $names;
     }
 }

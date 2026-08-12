@@ -63,6 +63,14 @@ class UserRepo
     }
 
     /**
+     * Permanently delete all soft-deleted users.
+     */
+    public function forceDeleteOnlyTrashed()
+    {
+        return User::onlyTrashed()->forceDelete();
+    }
+
+    /**
      * Create a new user.
      *
      * @param array $data
@@ -172,8 +180,6 @@ class UserRepo
     {
         return User::where($where);
     }
-
-    
 
     /********** STAFF RECORD **********/
 
