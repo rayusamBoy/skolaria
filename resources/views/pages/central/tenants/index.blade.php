@@ -17,7 +17,7 @@ $hasActions = $canEdit || $canShow || $canDelete || $canRunCommand;
         <h6 class="card-title">Manage Tenants</h6>
         <div class="header-elements pt-0">
             <div class="list-icons">
-                @if(auth()->user()->can($central_permissions['master_data_syncs']['sync']['permission']))
+                @if(auth()->user()->can($central_permissions['master_data_syncs']['sync']['permission']) && config('tenancy.active_identification_mode') === "request_data")
                 <a class="list-icons-item" href="{{ route('master_data_sync.index') }}" data-action="data-sync"></a>
                 @endcan
                 <a class="list-icons-item" data-action="collapse"></a>
