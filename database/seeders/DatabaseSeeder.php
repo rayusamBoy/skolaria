@@ -2,18 +2,18 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
+    use WithoutModelEvents;
+
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        activity()->disableLogging();
-
         // Tenancy specific seeders
         $this->call(TenancyExamCategoriesTableSeeder::class);
         $this->call(TenancySkillsTableSeeder::class);
@@ -27,7 +27,5 @@ class DatabaseSeeder extends Seeder
         $this->call(TenancySectionsTableSeeder::class);
         $this->call(TenancyStudentRecordsTableSeeder::class);
         $this->call(ParentRelativesTableSeeder::class);
-
-        activity()->enableLogging();
     }
 }
