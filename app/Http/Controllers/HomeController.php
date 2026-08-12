@@ -100,7 +100,7 @@ class HomeController extends Controller
                 str_contains($request->fullUrl(), 'unviewed') ? $un_paginated : $vn_paginated;
             $data['current_url'] = $request->url();
 
-            return view('pages/notices/show', $data);
+            return view('pages.notices.show', $data);
         }
 
         $student_recs = $this->student->getStudentRecords([], ['section', 'user'])->whereNotNull('user');
