@@ -98,6 +98,8 @@ class LoginController extends Controller implements HasMiddleware
         $this->cookieService->setForever('has_logged_out', true);
         // Delete was logged in
         $this->cookieService->delete('was_logged_in');
+
+        return redirect()->route('login');
     }
 
     /**
