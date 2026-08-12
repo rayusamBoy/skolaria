@@ -163,7 +163,14 @@ $hasActions = $canEdit || $canShow || $canDelete || $canRunCommand;
                         @foreach ($tenants as $tenant)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $tenant->name }}</td>
+                            <td>
+                                {{ $tenant->name }}
+                                @if(isset($tenant->active) && $tenant->active)
+                                <span class="badge badge-success badge-default">Active</span>
+                                @else
+                                <span class="badge badge-secondary badge-default">New</span>
+                                @endif
+                            </td>
                             <td>{{ ucfirst($tenant->account_status) }}</td>
                             <td>{{ ucfirst($tenant->payment_status) }}</td>
                             <td>
@@ -193,20 +200,25 @@ $hasActions = $canEdit || $canShow || $canDelete || $canRunCommand;
                                             @endif
 
                                             @if($canDelete)
-                                            <a id="tenant-delete-{{ Qs::hash($tenant->id) }}" onclick="confirmPermanentDeleteTwice(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">delete</i> Delete</a>
+                                            <a id="tenant-delete-{{ Qs::hash($tenant->id) }}" onclick="confirmPermanentDeleteTwice(this.id)" href="javascript:;" class="dropdown-item text-danger" @if($tenant->active) data-toggle="tooltip" title="This tenant is active. Please proceed with caution." @endif>
+                                                <i class="material-symbols-rounded">delete</i> Delete
+                                            </a>
                                             <form method="post" id="item-delete-tenant-delete-{{ Qs::hash($tenant->id) }}" action="{{ route('tenants.destroy', Qs::hash($tenant->id)) }}" class="hidden page-block">@csrf @method('delete')</form>
                                             @endif
 
                                             @if($canRunCommand)
-                                            {{-- Tenant Migrate --}}
+                                            {{-- Safe migration – always available --}}
                                             <a id="tenant-migrate-{{ Qs::hash($tenant->id) }}" onclick="confirmOperationTwice(this.id)" href="javascript:;" class="dropdown-item text-warning"><i class="material-symbols-rounded">swap_vert</i> Migrate</a>
                                             <form method="post" id="item-confirm-operation-tenant-migrate-{{ Qs::hash($tenant->id) }}" action="{{ route('tenants.run_command', [0, Qs::hash($tenant->id)]) }}" class="hidden page-block">@csrf @method('post')</form>
-                                            {{-- Tenant Migrate Fresh --}}
+                                            {{-- Destructive commands – only when inactive --}}
+                                            @if(!$tenant->active)
+                                            {{-- Migrate Fresh --}}
                                             <a id="tenant-migrate-fresh-{{ Qs::hash($tenant->id) }}" onclick="confirmOperationTwice(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">swap_horiz</i> Migrate Fresh</a>
                                             <form method="post" id="item-confirm-operation-tenant-migrate-fresh-{{ Qs::hash($tenant->id) }}" action="{{ route('tenants.run_command', [1, Qs::hash($tenant->id)]) }}" class="hidden page-block">@csrf @method('post')</form>
-                                            {{-- Tenant Seed --}}
+                                            {{-- Seed --}}
                                             <a id="tenant-seed-{{ Qs::hash($tenant->id) }}" onclick="confirmOperationTwice(this.id)" href="javascript:;" class="dropdown-item text-danger"><i class="material-symbols-rounded">filter_vintage</i> Seed</a>
                                             <form method="post" id="item-confirm-operation-tenant-seed-{{ Qs::hash($tenant->id) }}" action="{{ route('tenants.run_command', [2, Qs::hash($tenant->id)]) }}" class="hidden page-block">@csrf @method('post')</form>
+                                            @endif
                                             @endif
                                         </div>
                                     </div>

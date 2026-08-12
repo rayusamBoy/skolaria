@@ -9,6 +9,7 @@ use App\Repositories\SettingRepo;
 use App\Repositories\TenantRepo;
 use App\Repositories\UserRepo;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Stancl\Tenancy\Resolvers\DomainTenantResolver;
 
 class TenantController extends Controller
@@ -31,10 +32,26 @@ class TenantController extends Controller
      */
     public function index()
     {
-        $data["tenants"] = $this->tenant->getAllTenants();
+        $data["tenants"] = $tenants = $this->tenant->getAllTenants();
         $data["user_roles"] = $this->user->getRolesByName();
         $data["active_identification_mode"] = config('tenancy.active_identification_mode');
         $data["active_identification_mode_is_domain"] = (config('tenancy.active_identification_mode') === "domain");
+
+        // Check if each tenant is active ie., has data other than the initial ones
+        foreach ($tenants as $tenant) {
+            try {
+                tenancy()->initialize($tenant);
+                // Check a few core tables that only get populated after real usage
+                $has_data = DB::table('my_classes')->count() > 1
+                    || DB::table('student_records')->count() > 1
+                    || DB::table('marks')->exists()
+                    || DB::table('exam_records')->exists();
+                $tenant->active = $has_data;
+                tenancy()->end();
+            } catch (\Throwable $e) {
+                $tenant->active = false; // assume inactive if database not accessible
+            }
+        }
 
         return view("pages.central.tenants.index", $data);
     }
