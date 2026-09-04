@@ -27,7 +27,7 @@ class TicketMessage extends Model
     /**
      * Get the central user from the central connection
      */
-    public function central_user($user_id)
+    public function central_user(int $user_id)
     {
         return $this->join('users', $this->getTable() . '.user_id', '=', 'users.id')->where($this->getTable() . '.user_id', $user_id)->first();
     }

@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Traits\CentralDatabase;
-use Eloquent;
+use Illuminate\Database\Eloquent\Model as Eloquent;
 
 class BloodGroup extends Eloquent
 {

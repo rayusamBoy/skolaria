@@ -49,7 +49,7 @@ class Ticket extends Model
      */
     public function messages()
     {
-        return $this->hasMany(Message::class, 'ticket_id')->connection;
+        return $this->hasMany(Message::class, 'ticket_id');
     }
 
     /**
@@ -90,7 +90,7 @@ class Ticket extends Model
         return $this->is_locked;
     }
 
-    public static function get_tenant_user($tenant_db, $user_id)
+    public static function get_tenant_user(string $tenant_db, int $user_id)
     {
         $template = config('database.default');
         $template_connection = config("database.connections.{$template}");

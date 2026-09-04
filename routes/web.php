@@ -10,7 +10,6 @@ use App\Http\Controllers\Central\SettingController as CentralSettingController;
 use App\Http\Controllers\Central\SoftDeleteController as CentralSoftDeleteController;
 use App\Http\Controllers\Central\TenantController as CentralTenantController;
 use App\Http\Controllers\Central\UserController as CentralUserController;
-use App\Http\Controllers\EntryController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,10 +23,6 @@ use Illuminate\Support\Facades\Route;
 | Feel free to customize them however you want. Good luck!
 |
 */
-
-Route::get('entry', [EntryController::class, 'index'])->name('entry.home');
-Route::get('select/{tenant_id}', [EntryController::class, 'select'])->name('entry.select');
-Route::get('slug/{tenant_slug}', [EntryController::class, 'slug'])->name('entry.slug');
 
 Route::group(['middleware' => ['auth', 'checkForPassUpdate'], 'prefix' => 'central'], function () {
     // Require 2FA for the routes below
@@ -95,7 +90,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate'], 'prefix' => 'centr
 
         /*************** Controller's resources **************/
         Route::resource('central_users', CentralUserController::class)->middleware('decodeRouteParams');
-        Route::resource('tenants', CentralTenantController::class)->middleware('decodeRouteParams');
+        Route::resource('tenants', CentralTenantController::class);
 
         /*************** Tickets (central support actions) **************/
         Route::prefix('tickets')->group(function () {

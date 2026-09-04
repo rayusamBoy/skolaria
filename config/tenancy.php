@@ -55,7 +55,7 @@ return [
          * @see \Stancl\Tenancy\UniqueIdentifierGenerators\RandomIntGenerator
          * @see \Stancl\Tenancy\UniqueIdentifierGenerators\RandomStringGenerator
          */
-        'id_generator' => null //UniqueIdentifierGenerators\UUIDGenerator::class,
+        'id_generator' => UniqueIdentifierGenerators\UUIDv7Generator::class,
     ],
 
     'identification' => [
@@ -422,7 +422,7 @@ return [
      * understand which ones you want to enable.
      */
     'features' => [
-        // Stancl\Tenancy\Features\UserImpersonation::class,
+        Stancl\Tenancy\Features\UserImpersonation::class,
         // Stancl\Tenancy\Features\TelescopeTags::class,
         // Stancl\Tenancy\Features\CrossDomainRedirect::class,
         // Stancl\Tenancy\Features\ViteBundler::class,
@@ -487,4 +487,10 @@ return [
     ],
 
     'active_identification_mode' => env('TENANCY_IDENTIFICATION_MODE', 'domain'),
+
+    /**
+     * Whether users can impersonate other users.
+     * Initial impersonation must start from the central context.
+     */
+    'allow_user_impersonation' => env('TENANCY_ALLOW_USER_IMPERSONATION', false),
 ];

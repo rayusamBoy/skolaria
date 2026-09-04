@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\User;
-use Eloquent;
 use Iksaku\Laravel\MassUpdate\MassUpdatable;
+use Illuminate\Database\Eloquent\Model as Eloquent;
 
 class AssessmentRecord extends Eloquent
 {

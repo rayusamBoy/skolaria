@@ -11,7 +11,7 @@
     </div>
 
     <div class="card-body">
-        <form method="post" enctype="multipart/form-data" class="ajax-update" data-reload="#page-title" action="{{ route('tenants.update', Qs::hash($tenant->id)) }}">
+        <form method="post" enctype="multipart/form-data" class="ajax-update" data-reload="#page-title" action="{{ route('tenants.update', $tenant->id) }}">
             @csrf @method('PUT')
 
             <div class="row">

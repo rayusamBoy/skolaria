@@ -41,7 +41,7 @@ class Thread extends OriginalThread
     /**
      * Restore a thread by id.
      */
-    public static function restoreThread($id)
+    public static function restoreThread(int $id)
     {
         return Thread::where('id', $id)->restore();
     }
@@ -49,7 +49,7 @@ class Thread extends OriginalThread
     /**
      * Delete a soft deleted thread by id.
      */
-    public static function force_delete($id)
+    public static function force_delete(int $id)
     {
         return Thread::where('id', $id)->forceDelete();
     }
@@ -61,7 +61,7 @@ class Thread extends OriginalThread
      *
      * @return void
      */
-    public function removeParticipantByUserId($userId, $threadId)
+    public function removeParticipantByUserId(mixed $userId, int $threadId)
     {
         Models::participant()->where('thread_id', $threadId)->where('user_id', $userId)->delete();
     }
@@ -74,7 +74,7 @@ class Thread extends OriginalThread
      *
      * @return string
      */
-    public function participantsArray($userId = null, $columns = ['name', 'id'])
+    public function participantsArray($userId = null, array $columns = ['name', 'id'])
     {
         $participantsTable = Models::table('participants');
         $usersTable = Models::table('users');

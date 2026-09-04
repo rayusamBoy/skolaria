@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\User;
-use Eloquent;
+use Illuminate\Database\Eloquent\Model as Eloquent;
 
 class LoginHistory extends Eloquent
 {

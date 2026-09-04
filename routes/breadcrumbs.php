@@ -615,9 +615,9 @@ Breadcrumbs::for('master_data_sync.index', function (BreadcrumbTrail $trail): vo
     $trail->push('Sync Master Data', route('master_data_sync.index'));
 });
 
-Breadcrumbs::for('tenant.switch.schools', function (BreadcrumbTrail $trail): void {
+Breadcrumbs::for('tenant.impersonation', function (BreadcrumbTrail $trail): void {
     $trail->parent(Usr::tenancyInitialized() ? 'home' : 'central_home');
-    $trail->push('Switch Schools', route('tenant.switch.schools'));
+    $trail->push('Impersonate Tenant', route('tenant.impersonation'));
 });
 
 // ----------------------------------------------------------------------

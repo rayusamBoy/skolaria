@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Models\Tenant;
 use App\Models\TenantDomain as Domain;
-use App\Models\TenantManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -36,10 +35,10 @@ class TenantRepo
     /**
      * Find a tenant by ID, including its domain.
      *
-     * @param int $id
+     * @param string $id
      * @return Tenant|null
      */
-    public function findOrFailTenant(int $id): ?Tenant
+    public function findOrFailTenant(string $id): ?Tenant
     {
         return Tenant::with('domain')->findOrFail($id);
     }
@@ -66,20 +65,20 @@ class TenantRepo
 
     /**
      * Restore a soft deleted tenant.
-     * @param int $id
+     * @param string $id
      * @return void
      */
-    public function restoreTenant(int $id): void
+    public function restoreTenant(string $id): void
     {
         Tenant::withTrashed()->where('id', $id)->restore();
     }
 
     /**
      * Permanently delete a tenant.
-     * @param int $id
+     * @param string $id
      * @return void
      */
-    public function forceDeleteTenant(int $id): void
+    public function forceDeleteTenant(string $id): void
     {
         // Delete tenant record + trigger Stancl job pipeline
         $tenant = Tenant::withTrashed()->findOrFail($id);
@@ -115,26 +114,5 @@ class TenantRepo
     public function updateOrCreateDomain(array $attributes, array $values): Domain
     {
         return Domain::updateOrCreate($attributes, $values);
-    }
-
-    /*********** Manager ***************/
-
-    /**
-     * Insert manager data 
-     * @param array $data
-     */
-    public function insertManagerData(array $data)
-    {
-        return TenantManager::insert($data);
-    }
-
-    /**
-     * Build a query to find a tenant manager.
-     * @param array $where
-     * @return TenantManager|Builder
-     */
-    public function whereTenantManagerQuery(array $where): TenantManager|Builder
-    {
-        return TenantManager::where($where);
     }
 }

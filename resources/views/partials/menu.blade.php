@@ -548,11 +548,11 @@
                 @include('pages.central.menu')
                 @endif
 
-                @if($managed_tenants->isNotEmpty())
+                @if((session('impersonated_from_central') && $is_tenant_context) || !$is_tenant_context && config('tenancy.allow_user_impersonation') === true)
                 <li class="nav-item">
-                    <a href="{{ route('tenant.switch.schools') }}" class="nav-link {{ request()->routeIs('tenant.switch.schools') ? 'active' : '' }}">
+                    <a href="{{ route('tenant.impersonation') }}" class="nav-link {{ request()->routeIs('tenant.impersonation') ? 'active' : '' }}">
                         <i class="material-symbols-rounded">swap_horiz</i>
-                        <span>Schools</span>
+                        <span>Impersonation</span>
                     </a>
                 </li>
                 @endif

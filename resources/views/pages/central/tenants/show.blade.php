@@ -22,7 +22,7 @@
                             <td class="font-weight-bold">Identification Mode</td>
                             <td>
                                 <span class="badge">{{ Str::headline($tenant->identification_mode) }}</span>
-                                <a href="https://{{ $tenant->domain->domain ?? $tenant->domain ?? url('/') . "/slug/{$tenant->tenant_slug}" }}" target="_blank">{{ $tenant->domain->domain ?? $tenant->domain ?? url('/') . "/slug/{$tenant->tenant_slug}" }}</a>
+                                <a href="{{ Qs::formatDomain($tenant->domain->domain ?? $tenant->domain) ?? url('/') . "/slug/{$tenant->tenant_slug}" }}" target="_blank">{{ Qs::formatDomain($tenant->domain->domain) ?? $tenant->domain ?? url('/') . "/slug/{$tenant->tenant_slug}" }}</a>
                             </td>
                         </tr>
                         <tr>

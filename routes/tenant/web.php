@@ -11,7 +11,6 @@ use App\Http\Controllers\ChildrenController;
 use App\Http\Controllers\ClassTypeController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\DormController;
-use App\Http\Controllers\EntryController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\HomeController;
@@ -32,10 +31,10 @@ use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\StudentIDCardController;
 use App\Http\Controllers\StudentRecordController;
 use App\Http\Controllers\SubjectController;
-use App\Http\Controllers\TenantAuthController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\TimeTableController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserImpersonationController;
 use App\Http\Requests\CustomEmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 
@@ -50,13 +49,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('tenant/logout', [EntryController::class, 'tenant_logout'])->name('tenant.logout');
+Route::get('/impersonate/{token}', [UserImpersonationController::class, 'impersonate'])->name('tenant.impersonate');
 
 Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
     // Require 2FA for the routes below
     Route::group(['middleware' => '2fa'], function () {
         /*************** Impersonation **************/
-        Route::post('auth/back-to-central', [TenantAuthController::class, 'back_to_central'])->name('tenant.back_to_central');
+        // Route::post('auth/back-to-central', [TenantAuthController::class, 'back_to_central'])->name('tenant.back_to_central');
 
         /*************** Dashboard **************/
         Route::get('/', [HomeController::class, 'dashboard'])->name('index');

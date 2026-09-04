@@ -8,8 +8,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MyAccountController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\TenantAuthController;
-use App\Http\Controllers\TenantSwitchController;
+use App\Http\Controllers\UserImpersonationController;
 use App\Http\Controllers\TestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,13 +25,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('auth/impersonate', [TenantAuthController::class, 'impersonate'])->name('tenant.impersonate');
-
 Route::group(["middleware" => ['universal']], function () {
     Auth::routes();
 
     // The helper route page only sets theme and skin preferences for the PWA GeneratePwaScreenshots command
     Route::get('pwa-set-preferences', fn() => view('pwa.set_preferences'));
+
+    Route::group(['prefix' => 'impersonation', 'middleware' => ['auth', 'checkForPassUpdate', '2fa']], function () {
+        Route::get('/', [UserImpersonationController::class, 'index'])->name('tenant.impersonation');
+        Route::get('redirect/{tenant_id}/{user_id}', [UserImpersonationController::class, 'redirect_to_impersonation_route'])->name('tenant.impersonation.redirect');
+    });
 
     /****************** My Account ***************/
     Route::group(['prefix' => 'my-account', 'middleware' => ['auth', 'checkForPassUpdate']], function () {
@@ -91,10 +93,6 @@ Route::group(["middleware" => ['universal']], function () {
                 Route::put('update/notifiable', [NotificationController::class, 'update_notification_preferences'])->name('notifications.update.notification_preferences');
                 Route::match(['post', 'put', 'delete'], 'update/firebase/device-token', [NotificationController::class, 'update_firebase_device_token'])->name('notifications.firebase.update_device_token');
             });
-
-            Route::get('switch-tenant/schools', [TenantSwitchController::class, 'index'])->name('tenant.switch.schools');
         });
-        Route::get('switch-tenant/{tenant}', [TenantSwitchController::class, 'switch'])->name('tenant.switch');
-
     });
 });

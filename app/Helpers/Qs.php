@@ -13,6 +13,7 @@ use Hashids\Hashids;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use NotificationChannels\Fcm\FcmChannel;
 use Parsedown;
 
@@ -1063,5 +1064,15 @@ class Qs
     {
         $names = $is_tenant_context ? ['users', 'payments', 'my_classes', 'exams', 'threads'] : ['users', 'tenants'];
         return $remove ? array_values(array_diff($names, $remove)) : $names;
+    }
+
+    public static function formatDomain(string $domain): string
+    {
+        if (str_contains($domain, 'localhost') || str_contains($domain, '127.0.0.1')) {
+            $port = Str::afterLast(config('app.url'), ':');
+            $port = $port === '' ? '8000' : $port;
+            return "http://$domain:$port";
+        }
+        return "https://$domain";
     }
 }

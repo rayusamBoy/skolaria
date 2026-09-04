@@ -135,7 +135,7 @@ $isSuperAdmin = auth()->user()->hasRole(config('roles.root_roles.central.root'))
                     <td>{{ $tenant->identification_mode === 'request_data' ? 'Request Data' : 'Domain' }}</td>
                     <td>
                         @if($tenant->identification_mode === 'domain')
-                        {{ $tenant->domain->domain ?? '—' }}
+                        {{ Qs::formatDomain($tenant->domain->domain) ?? '—' }}
                         @else
                         {{ $tenant->tenant_slug ?? '—' }}
                         @endif

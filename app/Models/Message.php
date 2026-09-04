@@ -20,17 +20,17 @@ class Message extends OriginalMessage
         return OriginalMessage::where('id', $messageId)->delete();
     }
 
-    public function deleteMessageForever($messageId)
+    public function deleteMessageForever(int $messageId)
     {
         return DB::table($this->table)->where("id", $messageId)->delete();
     }
 
-    public function restoreDeletedMessage($messageId)
+    public function restoreDeletedMessage(int $messageId)
     {
         return OriginalMessage::where('id', $messageId)->restore();
     }
 
-    public function updateMessage($messageId, $data)
+    public function updateMessage(int $messageId, array $data)
     {
         return OriginalMessage::where('id', $messageId)->update($data);
     }

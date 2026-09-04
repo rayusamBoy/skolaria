@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\User;
-use Eloquent;
+use Illuminate\Database\Eloquent\Model as Eloquent;
 use Iksaku\Laravel\MassUpdate\MassUpdatable;
 
 class Mark extends Eloquent

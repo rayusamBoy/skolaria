@@ -133,7 +133,7 @@ $hasActions = $canAnswer || $canLock || $canUnlock || $canDelete;
                             <td>
                                 @if(!in_array($tenant->id, $displayed_tenants))
                                 @php $displayed_tenants[] = $tenant->id @endphp
-                                <a target="_blank" href="{{ route('tenants.show', Qs::hash($tenant->id)) }}">{{ $tenant->name }}</a>
+                                <a target="_blank" href="{{ route('tenants.show', $tenant->id) }}">{{ $tenant->name }}</a>
                                 @else
                                 <span>{{ $tenant->name }}</span>
                                 @endif

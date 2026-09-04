@@ -1611,27 +1611,33 @@ return [
             'central_soft_deletes' => [
                 'bin' => [
                     'permission' => 'central_soft_deletes.bin',
-                    'label' => 'View Central Recycle Bin'
+                    'label' => 'View Central Recycle Bin',
+                    'description' => 'View Central Recycle Bin',
                 ],
                 'user_restore' => [
                     'permission' => 'central_soft_deletes.user_restore',
-                    'label' => 'Restore Central User'
+                    'label' => 'Restore Central User',
+                    'description' => 'Restore Soft-deleted Central User',
                 ],
                 'user_force_delete' => [
                     'permission' => 'central_soft_deletes.user_force_delete',
-                    'label' => 'Permanently Delete Central User'
+                    'label' => 'Permanently Delete Central User',
+                    'description' => 'Permanently Removing Soft-deleted Central User',
                 ],
                 'tenant_restore' => [
                     'permission' => 'central_soft_deletes.tenant_restore',
-                    'label' => 'Restore Tenant'
+                    'label' => 'Restore Tenant',
+                    'description' => 'Restore Soft-deleted Tenant',
                 ],
                 'tenant_force_delete' => [
                     'permission' => 'central_soft_deletes.tenant_force_delete',
-                    'label' => 'Permanently Delete Tenant'
+                    'label' => 'Permanently Delete Tenant',
+                    'description' => 'Permanently Remove Soft-deleted Tenant',
                 ],
                 'empty_soft_deleted_model' => [
                     'permission' => 'central_soft_deletes.empty',
-                    'label' => 'Empty Recycle Bin'
+                    'label' => 'Empty Recycle Bin',
+                    'description' => 'Empty Recycle Bin',
                 ],
             ],
 

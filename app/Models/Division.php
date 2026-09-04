@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Eloquent;
+use Illuminate\Database\Eloquent\Model as Eloquent;
 
 class Division extends Eloquent
 {

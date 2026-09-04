@@ -55,7 +55,7 @@ class TenantController extends Controller
         return view("pages.central.tenants.index", $data);
     }
 
-    public function show($tenant)
+    public function show(string $tenant)
     {
         $data["tenant"] = $this->tenant->findOrFailTenant($tenant);
 
@@ -87,15 +87,7 @@ class TenantController extends Controller
 
             tenancy()->run($tenant, function () use ($request, $tenant) {
                 $this->setting->update('system_name', $request->name);
-                $this->setting->update('system_title', Qs::getStringAbbreviation($request->name));
-                $local_super_dmin = $this->user->findUser(1);
-                if ($local_super_dmin) {
-                    $this->tenant->insertManagerData([
-                        'central_user_id' => Qs::getHeadIds()[0], // Root user ID
-                        'tenant_id' => $tenant->id,
-                        'tenant_user_id' => $local_super_dmin->id,
-                    ]);
-                }
+                $this->setting->update('system_title', Qs::getStringAbbreviation($request->name));               
             });
         } else {
             try {
@@ -112,7 +104,7 @@ class TenantController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($tenant)
+    public function edit(string $tenant)
     {
         $data["tenant"] = $this->tenant->findOrFailTenant($tenant);
 
@@ -122,7 +114,7 @@ class TenantController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(TenantRequest $request, $tenant)
+    public function update(TenantRequest $request, string $tenant)
     {
         $tenant = $this->tenant->findOrFailTenant($tenant);
 
@@ -150,7 +142,7 @@ class TenantController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($tenant)
+    public function destroy(string $tenant)
     {
         $tenant = $this->tenant->findOrFailTenant($tenant);
         try {
