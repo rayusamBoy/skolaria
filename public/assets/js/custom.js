@@ -2433,3 +2433,15 @@ $("select#select").on("change", function () {
         .removeClass("border-danger");
     btn.prop("disabled", false);
 });
+
+
+/**
+ *-------------------------------------------------------------
+ * Prevent Page BF Cache
+ *-------------------------------------------------------------
+ */
+window.addEventListener("pageshow", function (event) {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
