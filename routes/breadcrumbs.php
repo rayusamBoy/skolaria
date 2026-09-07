@@ -410,7 +410,7 @@ Breadcrumbs::for('payments.edit', function (BreadcrumbTrail $trail, $payment): v
     $trail->push('Edit Payment', route('payments.edit', $payment));
 });
 
-Breadcrumbs::for('payments.manage', function (BreadcrumbTrail $trail, $class_id): void {
+Breadcrumbs::for('payments.manage', function (BreadcrumbTrail $trail, $class_id = null): void {
     $trail->parent(Usr::tenancyInitialized() ? 'dashboard' : 'central_dashboard');
     $trail->push('Student Payments', route('payments.manage', $class_id));
 });
