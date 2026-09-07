@@ -154,7 +154,7 @@
                         @can($tenant_permissions['student_records']['create']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('students.create') }}" class="nav-link {{ request()->routeIs('students.create') ? 'active' : '' }}">
-                                Admit Student
+                                Admit
                             </a>
                         </li>
                         @endcan
@@ -162,7 +162,7 @@
                         @can($tenant_permissions['student_records']['list_by_class']['permission'])
                         <li class="nav-item nav-item-submenu {{ request()->routeIs('students.list','students.edit','students.show','students.list_by_class') ? 'nav-item-expanded' : '' }}">
                             <a href="#" class="nav-link {{ request()->routeIs('students.list','students.edit','students.show','students.list_by_class') ? 'active' : '' }}">
-                                Student Information
+                                Information
                             </a>
                             <ul class="nav nav-group-sub">
                                 @foreach($my_classes as $c)
@@ -179,13 +179,13 @@
                         @canany(array_column($tenant_permissions['promotions'], 'permission'))
                         <li class="nav-item nav-item-submenu {{ request()->routeIs('students.promotion*') ? 'nav-item-expanded' : '' }}">
                             <a href="#" class="nav-link {{ request()->routeIs('students.promotion*') ? 'active' : '' }}">
-                                Student Promotion
+                                Promotion
                             </a>
                             <ul class="nav nav-group-sub">
                                 @can($tenant_permissions['promotions']['promotion']['permission'])
                                 <li class="nav-item">
                                     <a href="{{ route('students.promotion') }}" class="nav-link {{ request()->routeIs('students.promotion') ? 'active' : '' }}">
-                                        Promote Students
+                                        Promote
                                     </a>
                                 </li>
                                 @endcan
@@ -203,7 +203,7 @@
                         @can($tenant_permissions['student_records']['graduated']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('students.graduated') }}" class="nav-link {{ request()->routeIs('students.graduated') ? 'active' : '' }}">
-                                Students Graduated
+                                Graduated
                             </a>
                         </li>
                         @endcan
@@ -211,7 +211,7 @@
                         @canany([$tenant_permissions['student_id_cards']['index']['permission'], $tenant_permissions['student_id_cards']['manage']['permission']])
                         <li class="nav-item">
                             <a href="{{ route('students.id_cards') }}" class="nav-link {{ request()->routeIs('students.id_cards', 'students.id_cards.manage') ? 'active' : '' }}">
-                                Students ID Cards
+                                ID Cards
                             </a>
                         </li>
                         @endcanany
@@ -238,7 +238,7 @@
                         @can($tenant_permissions['exams']['index']['permission'])
                         <li class="nav-item">
                             <a href="{{ route('exams.index') }}" class="nav-link {{ request()->routeIs('exams.index') ? 'active' : '' }}">
-                                Exams List
+                                List
                             </a>
                         </li>
                         @endcan
