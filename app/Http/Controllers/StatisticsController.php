@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Mk;
-use App\Http\Controllers\Controller;
 use App\Repositories\ExamRepo;
 use App\Repositories\MarkRepo;
 use App\Repositories\MyClassRepo;
@@ -16,10 +15,15 @@ use Illuminate\View\View;
 class StatisticsController extends Controller
 {
     protected UserRepo $user;
+
     protected MyClassRepo $class;
+
     protected ExamRepo $exam;
+
     protected StudentRepo $student;
+
     protected MarkRepo $mark;
+
     protected string $year;
 
     public function __construct(
@@ -56,12 +60,11 @@ class StatisticsController extends Controller
             ? $this->exam->findExam($exam_id)
             : $exams->first();
 
-
         $user = auth()->user();
         $user_is_parent = $user->hasRole(config('roles.default_roles.tenant.parent'));
         $user_is_student = $user->hasRole(config('roles.default_roles.tenant.student'));
         $user_roles_count = $user->roles->count();
-        $user_is_staff = ($user_is_parent && $user_roles_count > 1) || (!$user_is_student && !$user_is_parent && $user_roles_count === 1);
+        $user_is_staff = ($user_is_parent && $user_roles_count > 1) || (! $user_is_student && ! $user_is_parent && $user_roles_count === 1);
 
         $data = [
             'last_exam' => $last_exam,

@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Helpers\Qs;
 use App\Http\Controllers\Controller;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\View\View;
 
 class ResetPasswordController extends Controller implements HasMiddleware
 {
@@ -46,8 +48,7 @@ class ResetPasswordController extends Controller implements HasMiddleware
      *
      * If no token is present, display the link request form.
      *
-     * @param  Request  $request
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Factory|View
      */
     public function showResetForm(Request $request)
     {

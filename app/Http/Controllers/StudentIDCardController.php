@@ -16,6 +16,7 @@ use Illuminate\View\View;
 class StudentIDCardController extends Controller
 {
     protected MyClassRepo $my_class;
+
     protected StudentRepo $student;
 
     public function __construct(MyClassRepo $my_class, StudentRepo $student)
@@ -80,8 +81,8 @@ class StudentIDCardController extends Controller
         $expire,
         $theme,
         $phone,
-        $class_from = null,
-        $class_to = null,
+        $class_from,
+        $class_to,
         $motto,
         $brightness = 1,
         $website_link = null
@@ -103,7 +104,7 @@ class StudentIDCardController extends Controller
         $data['settings'] = Qs::getSettings();
 
         return view(
-            'pages.students.id_cards.themes.' . config('tenancy.database.prefix') . tenant()?->getTenantKey() . '/' . $theme,
+            'pages.students.id_cards.themes.'.config('tenancy.database.prefix').tenant()?->getTenantKey().'/'.$theme,
             $data
         );
     }
@@ -128,7 +129,7 @@ class StudentIDCardController extends Controller
         $data['settings'] = Qs::getSettings();
 
         return view(
-            'pages.students.id_cards.themes.' . config('tenancy.database.prefix') . tenant()?->getTenantKey() . '/' . $data['theme'],
+            'pages.students.id_cards.themes.'.config('tenancy.database.prefix').tenant()?->getTenantKey().'/'.$data['theme'],
             $data
         );
     }
@@ -136,19 +137,17 @@ class StudentIDCardController extends Controller
     /**
      * Get the list of available ID card theme file names.
      * Copies sample files to the tenant directory if missing.
-     *
-     * @return array
      */
     private function getThemeFilesNames(): array
     {
         $id_card_theme_dir = Qs::getTenancyAwareIDCardsThemeDir();
-        $tenant_storage_dir = tenancy()->run(tenant(), fn() => storage_path('app/public/'));
+        $tenant_storage_dir = tenancy()->run(tenant(), fn () => storage_path('app/public/'));
 
         $file_names_to_copy = ['0001.blade.php'];
         $dir_names_to_copy = ['backgrounds', 'others'];
         $default_dir = resource_path('views/pages/students/id_cards/themes/samples/');
 
-        if (!File::isDirectory($id_card_theme_dir)) {
+        if (! File::isDirectory($id_card_theme_dir)) {
             File::makeDirectory($id_card_theme_dir, 0755, true);
             foreach ($file_names_to_copy as $fname) {
                 File::copy("$default_dir$fname", "$id_card_theme_dir$fname");
@@ -157,7 +156,7 @@ class StudentIDCardController extends Controller
 
         foreach ($dir_names_to_copy as $dname) {
             $dest = "$tenant_storage_dir$dname";
-            if (!File::isDirectory($dest)) {
+            if (! File::isDirectory($dest)) {
                 File::copyDirectory("$default_dir$dname", $dest);
             }
         }

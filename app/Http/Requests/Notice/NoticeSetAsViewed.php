@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class NoticeSetAsViewed extends FormRequest
 {
-
     public function authorize()
     {
         return true;
@@ -23,5 +22,4 @@ class NoticeSetAsViewed extends FormRequest
             'id' => 'required|distinct|integer',
         ];
     }
-
 }

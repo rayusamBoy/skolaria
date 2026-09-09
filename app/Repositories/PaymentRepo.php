@@ -15,8 +15,6 @@ class PaymentRepo
 
     /**
      * Get all soft‑deleted payments.
-     *
-     * @return Collection
      */
     public function getTrashedPayments(): Collection
     {
@@ -25,9 +23,6 @@ class PaymentRepo
 
     /**
      * Restore a soft‑deleted payment by ID.
-     *
-     * @param int $id
-     * @return int
      */
     public function restorePayment(int $id): int
     {
@@ -36,9 +31,6 @@ class PaymentRepo
 
     /**
      * Permanently delete a soft‑deleted payment.
-     *
-     * @param int $id
-     * @return int
      */
     public function forceDeletePayment(int $id): int
     {
@@ -47,9 +39,6 @@ class PaymentRepo
 
     /**
      * Get a query builder for payments filtered by conditions, with class loaded.
-     *
-     * @param array $where
-     * @return Builder
      */
     public function getPaymentsByConditions(array $where): Builder
     {
@@ -58,9 +47,6 @@ class PaymentRepo
 
     /**
      * Get a query builder for payments that are **not** class‑specific (i.e., global fees).
-     *
-     * @param array $where
-     * @return Builder
      */
     public function getGlobalPayments(array $where): Builder
     {
@@ -69,8 +55,6 @@ class PaymentRepo
 
     /**
      * Get the query builder for currently active payments (current session).
-     *
-     * @return Builder
      */
     public function getActivePayments(): Builder
     {
@@ -79,8 +63,6 @@ class PaymentRepo
 
     /**
      * Get all distinct payment years.
-     *
-     * @return Collection
      */
     public function getDistinctPaymentYears(): Collection
     {
@@ -89,9 +71,6 @@ class PaymentRepo
 
     /**
      * Find a payment by its primary key.
-     *
-     * @param int $id
-     * @return Payment|null
      */
     public function findPayment(int $id): ?Payment
     {
@@ -100,9 +79,6 @@ class PaymentRepo
 
     /**
      * Create a new payment.
-     *
-     * @param array $data
-     * @return Payment
      */
     public function createPayment(array $data): Payment
     {
@@ -111,10 +87,6 @@ class PaymentRepo
 
     /**
      * Update a payment by ID.
-     *
-     * @param int   $id
-     * @param array $data
-     * @return int
      */
     public function updatePayment(int $id, array $data): int
     {
@@ -123,9 +95,6 @@ class PaymentRepo
 
     /**
      * Delete a payment by ID (soft delete).
-     *
-     * @param int $id
-     * @return int
      */
     public function deletePayment(int $id): int
     {
@@ -136,10 +105,6 @@ class PaymentRepo
 
     /**
      * Get the query builder for all payment records of a student, optionally filtered by year.
-     *
-     * @param int        $st_id
-     * @param string|null $year
-     * @return Builder
      */
     public function getStudentPaymentRecords(int $st_id, ?string $year = null): Builder
     {
@@ -147,16 +112,16 @@ class PaymentRepo
         if ($year) {
             $data['year'] = $year;
         }
+
         return $this->getPaymentRecords($data);
     }
 
     /**
      * Get a query builder for payment records, ordered by a column.
      *
-     * @param array  $data   conditions
-     * @param string $order  column to order by
-     * @param string $dir    direction
-     * @return Builder
+     * @param  array  $data  conditions
+     * @param  string  $order  column to order by
+     * @param  string  $dir  direction
      */
     public function getPaymentRecords(array $data, string $order = 'year', string $dir = 'desc'): Builder
     {
@@ -165,9 +130,6 @@ class PaymentRepo
 
     /**
      * Create a new payment record if one doesn’t already exist.
-     *
-     * @param array $data
-     * @return PaymentRecord
      */
     public function firstOrCreatePaymentRecord(array $data): PaymentRecord
     {
@@ -176,9 +138,6 @@ class PaymentRepo
 
     /**
      * Find a payment record by ID, throw 404 if missing.
-     *
-     * @param int $id
-     * @return PaymentRecord
      */
     public function findPaymentRecord(int $id): PaymentRecord
     {
@@ -188,9 +147,8 @@ class PaymentRepo
     /**
      * Get a single column value from the **payments** table, not payment records.
      *
-     * @param int    $id       payment ID
-     * @param string $col_name column name
-     * @return mixed
+     * @param  int  $id  payment ID
+     * @param  string  $col_name  column name
      */
     public static function getPaymentColumnValue(int $id, string $col_name): mixed
     {
@@ -199,10 +157,6 @@ class PaymentRepo
 
     /**
      * Update a payment record by ID.
-     *
-     * @param int   $id
-     * @param array $data
-     * @return int
      */
     public function updatePaymentRecord(int $id, array $data): int
     {
@@ -211,8 +165,6 @@ class PaymentRepo
 
     /**
      * Get all paid payment records whose parent payment still exists.
-     *
-     * @return Collection
      */
     public function getPaidRecordsWithValidPayment(): Collection
     {
@@ -227,9 +179,6 @@ class PaymentRepo
 
     /**
      * Create a new receipt.
-     *
-     * @param array $data
-     * @return Receipt
      */
     public function createReceipt(array $data): Receipt
     {
@@ -238,9 +187,6 @@ class PaymentRepo
 
     /**
      * Delete receipts matching conditions.
-     *
-     * @param array $data
-     * @return int
      */
     public function deleteReceipts(array $data): int
     {

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Mk;
 use App\Helpers\Usr;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Exam\ExamAnnounce;
 use App\Http\Requests\Exam\ExamCreate;
 use App\Http\Requests\Exam\ExamUpdate;
@@ -12,21 +11,25 @@ use App\Http\Requests\Exam\ExamUpdateLockState;
 use App\Repositories\AssessmentRepo;
 use App\Repositories\ExamRepo;
 use App\Repositories\MyClassRepo;
+use App\Repositories\StudentRepo;
 use App\Rules\HasStudentExamNumberPlaceholder;
 use App\Rules\Uppercase;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
-use Illuminate\Http\Request;
-use App\Repositories\StudentRepo;
 
 class ExamController extends Controller
 {
     protected ExamRepo $exam;
+
     protected AssessmentRepo $assessment;
+
     protected MyClassRepo $my_class;
+
     protected StudentRepo $student;
+
     protected string $year;
 
     public function __construct(ExamRepo $exam, AssessmentRepo $assessment, MyClassRepo $my_class, StudentRepo $student)
@@ -100,7 +103,7 @@ class ExamController extends Controller
         $this->exam->update($id, $data);
 
         $classes = $this->my_class->getClassesByConditions(['class_type_id' => $exam->class_type_id]);
-        $append_message = "";
+        $append_message = '';
         if ($classes->isEmpty()) {
             $append_message = " But no classes were found for the class type {$exam->class_type->name}, so the number formats were not updated.";
         } else {
@@ -108,7 +111,7 @@ class ExamController extends Controller
         }
         $this->handleAssessmentForExam($req, $exam);
 
-        return Mk::json(__('msg.update_ok') . $append_message);
+        return Mk::json(__('msg.update_ok').$append_message);
     }
 
     /**
@@ -122,6 +125,7 @@ class ExamController extends Controller
         }
 
         $this->exam->delete($id);
+
         return back()->with('flash_success', __('msg.del_ok'));
     }
 
@@ -136,6 +140,7 @@ class ExamController extends Controller
         }
 
         $this->exam->update($req->id, $req->only('is_locked'));
+
         return Mk::json('ok');
     }
 
@@ -183,13 +188,13 @@ class ExamController extends Controller
 
         // Get the number format for this exam + class
         $format = $exam->number_format?->where('my_class_id', $class->id)->first();
-        if (!$format) {
+        if (! $format) {
             return response()->json(['msg' => "Number format not found for the exam $exam->name and class $class->name", 'ok' => false]);
         }
 
         // Fetch students
         $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class->id], ['user'])
-            ->when($section_id, fn($q) => $q->where('section_id', $section_id))
+            ->when($section_id, fn ($q) => $q->where('section_id', $section_id))
             ->get()
             ->whereNotNull('user')
             ->sortBy('user.name')
@@ -228,7 +233,7 @@ class ExamController extends Controller
             $generated++;
         }
 
-        return Usr::json(__('msg.update_ok') . " Generated: ({$generated} / {$counter})", true);
+        return Usr::json(__('msg.update_ok')." Generated: ({$generated} / {$counter})", true);
     }
 
     // ----------------------------------------------------------------------
@@ -241,6 +246,7 @@ class ExamController extends Controller
     protected function getExamDataKeys($req): array
     {
         $has_assessment = $req->boolean('has_assessment');
+
         return $has_assessment
             ? Mk::getExamFieldNames()
             : Mk::getExamFieldNames(['ca_student_position_by_value', 'ca_student_position_sort_order', 'cw_denominator', 'hw_denominator', 'tt_denominator', 'tdt_denominator']);

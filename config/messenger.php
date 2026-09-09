@@ -1,14 +1,19 @@
 <?php
 
+use App\User;
+use Cmgmyr\Messenger\Models\Message;
+use Cmgmyr\Messenger\Models\Participant;
+use Cmgmyr\Messenger\Models\Thread;
+
 return [
 
-    'user_model' => App\User::class,
+    'user_model' => User::class,
 
-    'message_model' => Cmgmyr\Messenger\Models\Message::class,
+    'message_model' => Message::class,
 
-    'participant_model' => Cmgmyr\Messenger\Models\Participant::class,
+    'participant_model' => Participant::class,
 
-    'thread_model' => Cmgmyr\Messenger\Models\Thread::class,
+    'thread_model' => Thread::class,
 
     /**
      * Define custom database table names - without prefixes.

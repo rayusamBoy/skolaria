@@ -12,8 +12,11 @@ use App\Repositories\StudentRepo;
 class AjaxController extends Controller
 {
     protected LocationRepo $loc;
+
     protected MyClassRepo $my_class;
+
     protected StudentRepo $student;
+
     protected ExamRepo $exam;
 
     public function __construct(
@@ -43,7 +46,7 @@ class AjaxController extends Controller
     {
         $lgas = $this->loc->getStatesByCountryId($nationality_id);
 
-        return $lgas->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
+        return $lgas->map(fn ($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
     }
 
     /**
@@ -53,7 +56,7 @@ class AjaxController extends Controller
     {
         $lgas = $this->loc->getStateById($state_id);
 
-        return $lgas->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
+        return $lgas->map(fn ($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
     }
 
     /**
@@ -63,7 +66,7 @@ class AjaxController extends Controller
     {
         $sections = $this->my_class->getClassSections($class_id);
 
-        return $sections->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
+        return $sections->map(fn ($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
     }
 
     /**
@@ -73,7 +76,7 @@ class AjaxController extends Controller
     {
         $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class_id])->get()->whereNotNull('user');
 
-        return $students->map(fn($q) => ['id' => $q->user->id, 'name' => $q->user->name])->values()->all();
+        return $students->map(fn ($q) => ['id' => $q->user->id, 'name' => $q->user->name])->values()->all();
     }
 
     /**
@@ -91,7 +94,7 @@ class AjaxController extends Controller
     {
         $sections = $this->my_class->getTeacherClassSections($class_id, auth()->id());
 
-        return $sections->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
+        return $sections->map(fn ($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
     }
 
     /**
@@ -101,7 +104,7 @@ class AjaxController extends Controller
     {
         $exams = $this->exam->getExamsByConditions(['year' => $year], false);
 
-        return $exams->map(fn($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
+        return $exams->map(fn ($q) => ['id' => $q->id, 'name' => $q->name])->values()->all();
     }
 
     /**
@@ -111,7 +114,7 @@ class AjaxController extends Controller
     {
         $record = $this->my_class->whereSubjectRecord(['subject_id' => $subject_id, 'section_id' => $section_id])->with('teacher')->first();
 
-        if (!$record || !$record->teacher) {
+        if (! $record || ! $record->teacher) {
             return ['id' => null, 'name' => null];
         }
 
@@ -130,7 +133,7 @@ class AjaxController extends Controller
             ? $this->my_class->findSubjectsByTeacherAndClass(auth()->id(), $class_id)
             : $this->my_class->findSubjectByClass($class_id);
 
-        return $subjects->map(fn($q) => [
+        return $subjects->map(fn ($q) => [
             'id' => $q->id ?? $q->subject->id ?? null,
             'name' => $q->name ?? $q->subject->name ?? null,
         ])->values()->all();

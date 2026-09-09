@@ -19,10 +19,10 @@ class UserRepo
     /**
      * Update users matching a column value.
      *
-     * @param int    $value   The value to match
-     * @param array  $data    Columns to update
-     * @param string $column  Column to filter by (default 'id')
-     * @return int            Number of updated rows
+     * @param  int  $value  The value to match
+     * @param  array  $data  Columns to update
+     * @param  string  $column  Column to filter by (default 'id')
+     * @return int Number of updated rows
      */
     public function updateUsersByColumn(int $value, array $data, string $column = 'id'): int
     {
@@ -32,9 +32,8 @@ class UserRepo
     /**
      * Update multiple users by their IDs.
      *
-     * @param mixed $ids   Array or collection of user IDs
-     * @param array $data  Columns to update
-     * @return int
+     * @param  mixed  $ids  Array or collection of user IDs
+     * @param  array  $data  Columns to update
      */
     public function updateByIds(mixed $ids, array $data): int
     {
@@ -43,9 +42,6 @@ class UserRepo
 
     /**
      * Restore a soft‑deleted user by ID.
-     *
-     * @param int $id
-     * @return int
      */
     public function restoreUser(int $id): int
     {
@@ -54,9 +50,6 @@ class UserRepo
 
     /**
      * Permanently delete a user.
-     *
-     * @param int $id
-     * @return int
      */
     public function forceDeleteUser(int $id): int
     {
@@ -73,9 +66,6 @@ class UserRepo
 
     /**
      * Create a new user.
-     *
-     * @param array $data
-     * @return User
      */
     public function createUser(array $data): User
     {
@@ -84,9 +74,6 @@ class UserRepo
 
     /**
      * Find a user by attributes or create one.
-     *
-     * @param array $data
-     * @return User
      */
     public function firstOrCreate(array $data): User
     {
@@ -95,10 +82,6 @@ class UserRepo
 
     /**
      * Update an existing user or create a new one.
-     *
-     * @param array $where
-     * @param array $data
-     * @return User
      */
     public function updateOrCreate(array $where, array $data): User
     {
@@ -107,9 +90,6 @@ class UserRepo
 
     /**
      * Get the first user matching attributes, or return a new instance.
-     *
-     * @param array $data
-     * @return User
      */
     public function firstOrNew(array $data): User
     {
@@ -118,9 +98,6 @@ class UserRepo
 
     /**
      * Find a user by primary key.
-     *
-     * @param int $id
-     * @return User|null
      */
     public function findUser(int $id): ?User
     {
@@ -129,9 +106,6 @@ class UserRepo
 
     /**
      * Find a soft‑deleted user by ID.
-     *
-     * @param int $id
-     * @return User|null
      */
     public function findOnlyTrashed(int $id): ?User
     {
@@ -140,9 +114,6 @@ class UserRepo
 
     /**
      * Get all users, optionally with eager‑loaded relations.
-     *
-     * @param array $with
-     * @return Collection
      */
     public function getAllUsers(array $with = []): Collection
     {
@@ -151,10 +122,6 @@ class UserRepo
 
     /**
      * Get users having any of the given role names, ordered by name.
-     *
-     * @param array $role_names
-     * @param array $with
-     * @return Collection
      */
     public function getUsersByRoleNames(array $role_names, array $with = []): Collection
     {
@@ -163,8 +130,6 @@ class UserRepo
 
     /**
      * Get all soft‑deleted users with their roles.
-     *
-     * @return Collection
      */
     public function getTrashedUsers(): Collection
     {
@@ -173,9 +138,6 @@ class UserRepo
 
     /**
      * Query builder for users matching conditions.
-     *
-     * @param array $where
-     * @return Builder|User
      */
     public function getUsersQuery(array $where): Builder|User
     {
@@ -187,7 +149,6 @@ class UserRepo
     /**
      * Query builder for staff records matching conditions.
      *
-     * @param array $where
      * @return Builder
      */
     public function whereStaffRecord(array $where): Builder|StaffRecord
@@ -197,9 +158,6 @@ class UserRepo
 
     /**
      * Create a new staff record.
-     *
-     * @param array $data
-     * @return StaffRecord
      */
     public function createStaffRecordsQuery(array $data): StaffRecord
     {
@@ -208,10 +166,6 @@ class UserRepo
 
     /**
      * Update staff records matching conditions.
-     *
-     * @param array $where
-     * @param array $data
-     * @return int
      */
     public function updateStaffRecord(array $where, array $data): int
     {
@@ -220,9 +174,6 @@ class UserRepo
 
     /**
      * Get staff records matching conditions, with user and LGA.
-     *
-     * @param array $where
-     * @return Collection
      */
     public function getStaffRecordsByConditions(array $where): Collection
     {
@@ -231,9 +182,6 @@ class UserRepo
 
     /**
      * Delete staff records matching conditions.
-     *
-     * @param array $where
-     * @return int
      */
     public function deleteStaffRecords(array $where): int
     {
@@ -244,8 +192,6 @@ class UserRepo
 
     /**
      * Get all blood groups ordered by name.
-     *
-     * @return Collection
      */
     public function getBloodGroups(): Collection
     {
@@ -256,9 +202,6 @@ class UserRepo
 
     /**
      * Create a new parent/relative record.
-     *
-     * @param array $data
-     * @return ParentRelative
      */
     public function createParentRelativeRecord(array $data): ParentRelative
     {
@@ -267,10 +210,6 @@ class UserRepo
 
     /**
      * Update or create a parent/relative record.
-     *
-     * @param array $attributes
-     * @param array $values
-     * @return ParentRelative
      */
     public function updateOrCreateParentRelative(array $attributes, array $values): ParentRelative
     {
@@ -281,9 +220,6 @@ class UserRepo
 
     /**
      * Delete a notification by primary key.
-     *
-     * @param mixed $id
-     * @return bool|null
      */
     public function deleteNotification(mixed $id): ?bool
     {
@@ -294,9 +230,6 @@ class UserRepo
 
     /**
      * Get roles optionally excluding some by name.
-     *
-     * @param array $except
-     * @return Collection
      */
     public function getRolesByName(array $except = []): Collection
     {
@@ -307,8 +240,6 @@ class UserRepo
 
     /**
      * Get all user registration invitations with their creators.
-     *
-     * @return Collection
      */
     public function getInvitations(): Collection
     {
@@ -319,9 +250,6 @@ class UserRepo
 
     /**
      * Create a new user registration invitation.
-     *
-     * @param array $data
-     * @return UserRegistrationInvite
      */
     public function createInvitation(array $data): UserRegistrationInvite
     {
@@ -330,9 +258,6 @@ class UserRepo
 
     /**
      * Find an invitation by ID or fail.
-     *
-     * @param int $id
-     * @return UserRegistrationInvite
      */
     public function findInvitationOrFail(int $id): UserRegistrationInvite
     {
@@ -341,8 +266,6 @@ class UserRepo
 
     /**
      * Query builder for invitations matching conditions.
-     * @param array $where
-     * @return Builder|UserRegistrationInvite
      */
     public function whereInvitationBuilder(array $where): Builder|UserRegistrationInvite
     {

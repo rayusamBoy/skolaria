@@ -20,21 +20,18 @@ class Mk extends Qs
 
     /**
      * Check if the exam subsystem is locked globally.
-     *
-     * @return bool
      */
     public static function examIsLocked(): bool
     {
         if (self::$lockExamCache === null) {
             self::$lockExamCache = (int) self::getSetting('lock_exam');
         }
+
         return self::$lockExamCache === 1;
     }
 
     /**
      * Return a list of predefined remarks for grades/divisions.
-     *
-     * @return array
      */
     public static function getRemarks(): array
     {
@@ -51,17 +48,12 @@ class Mk extends Qs
             'Pass',
             'Poor',
             'Very Good',
-            'Very Poor'
+            'Very Poor',
         ];
     }
 
     /**
      * Calculate the average of a sum divided by a count.
-     *
-     * @param float|int $sum
-     * @param int       $number
-     * @param int       $precision
-     * @return float
      */
     public static function getAverage(float|int $sum, int $number, int $precision = 1): float
     {
@@ -70,9 +62,6 @@ class Mk extends Qs
 
     /**
      * Get distinct subjects that have marks for the given conditions.
-     *
-     * @param array $where
-     * @return \Illuminate\Support\Collection
      */
     public static function getDistinctMarkSubjects(array $where): \Illuminate\Support\Collection
     {
@@ -81,9 +70,6 @@ class Mk extends Qs
 
     /**
      * Get grades for a specific class type.
-     *
-     * @param int $class_type_id
-     * @return Collection
      */
     public static function getGrades(int $class_type_id): Collection
     {
@@ -92,11 +78,6 @@ class Mk extends Qs
 
     /**
      * Render a performance summary table for subjects, showing grade distribution, averages, ranks, and GPA.
-     *
-     * @param int|string     $section_id
-     * @param int            $exam_id
-     * @param Collection|Model $my_class
-     * @return string
      */
     public static function renderSubjectPerformanceSummary(int|string $section_id, int $exam_id, Collection|Model $my_class, string $exam_student_position_by_value): string
     {
@@ -157,21 +138,21 @@ class Mk extends Qs
             // Grade distribution
             $grade_counts = $filtered
                 ->groupBy('grade_id')
-                ->map(fn($students) => $students->count())
+                ->map(fn ($students) => $students->count())
                 ->toArray();
 
-            $collection .= "<tr><td class='text-center'>{$subject->slug}</td><td class='text-center'>{$subject->name}</td><td class='text-center'>$reg</td><td class='text-center'>$sat</td><td class='text-center'>" . $reg - $sat . '</td>'
-                . '<td class="text-center">' . $avg . '</td>'
-                . '<td class="text-center">' . self::getOrdinalSuffix(($all_avg_sum_flipped[$avg_sum] ?? 0) + 1) . '</td>'
-                . '<td class="text-green text-center">' . self::getGradeNameByScore($avg, true) . '</td>'
-                . '<td><table style="border-collapse: collapse;"><tr>';
+            $collection .= "<tr><td class='text-center'>{$subject->slug}</td><td class='text-center'>{$subject->name}</td><td class='text-center'>$reg</td><td class='text-center'>$sat</td><td class='text-center'>".$reg - $sat.'</td>'
+                .'<td class="text-center">'.$avg.'</td>'
+                .'<td class="text-center">'.self::getOrdinalSuffix(($all_avg_sum_flipped[$avg_sum] ?? 0) + 1).'</td>'
+                .'<td class="text-green text-center">'.self::getGradeNameByScore($avg, true).'</td>'
+                .'<td><table style="border-collapse: collapse;"><tr>';
 
             $total_grade_points = 0;
             $total_count = 0;
             foreach ($grades as $grd) {
                 $count = $grade_counts[$grd->id] ?? 0;
                 $collection .= "<td class='w-1pcnt unstyled text-center'><strong>{$grd->name}</strong>: "
-                    . \sprintf("%02d", $count) . '</td>';
+                    .\sprintf('%02d', $count).'</td>';
                 $total_grade_points += $grd->point * $count;
                 $total_count += $count;
             }
@@ -179,7 +160,7 @@ class Mk extends Qs
             $gpa = $total_count > 0 ? round($total_grade_points / $total_count, 2) : 0;
             $collection .= match ($exam_student_position_by_value) {
                 array_keys(self::getStudentExamPositionByValues())[3] => "</tr></table></td><td class='text-center'>$gpa</td></tr>",
-                default => "</tr></table></td></tr>",
+                default => '</tr></table></td></tr>',
             };
         }
 
@@ -188,17 +169,10 @@ class Mk extends Qs
 
     /**
      * Calculate overall GPA for an exam, optional class and section, using credit-weighted grade points.
-     *
-     * @param int      $exam_id
-     * @param int|null $my_class_id
-     * @param int      $class_type_id
-     * @param mixed    $section_id
-     * @param int      $precision
-     * @return float
      */
     public static function getGPA(
         int $exam_id,
-        int|null $my_class_id,
+        ?int $my_class_id,
         int $class_type_id,
         mixed $section_id,
         int $precision = 2
@@ -224,10 +198,7 @@ class Mk extends Qs
     /**
      * Get distinct exam records for a section (or all) with student data.
      *
-     * @param mixed    $section_id
-     * @param int      $exam_id
-     * @param int      $class_id
-     * @return Collection
+     * @param  mixed  $section_id
      */
     public static function getExamRecords($section_id, int $exam_id, int $class_id): Collection
     {
@@ -248,12 +219,8 @@ class Mk extends Qs
     /**
      * Render a gender‑wise summary table for grades and divisions.
      *
-     * @param int    $exam_id
-     * @param int    $class_id
-     * @param int    $class_type_id
-     * @param mixed  $section_id  Section ID or 'all'
-     * @param string $type        'grades', 'divisions', or 'both' (default)
-     * @return string
+     * @param  mixed  $section_id  Section ID or 'all'
+     * @param  string  $type  'grades', 'divisions', or 'both' (default)
      */
     public static function renderGenderWiseSummary(int $exam_id, int $class_id, int $class_type_id, $section_id, string $type = 'both'): string
     {
@@ -290,7 +257,7 @@ class Mk extends Qs
                     ->where('grade_id', $grade->id)->count();
                 $maleCounts .= "<td class='text-center'>$mc</td>";
                 $femaleCounts .= "<td class='text-center'>$fc</td>";
-                $totalCounts .= '<td class="text-center">' . ($mc + $fc) . '</td>';
+                $totalCounts .= '<td class="text-center">'.($mc + $fc).'</td>';
             }
 
             $html .= "<table class='table-styled styled float-head'>
@@ -318,7 +285,7 @@ class Mk extends Qs
                     ->where('division_id', $div->id)->count();
                 $maleCounts .= "<td class='text-center'>$mc</td>";
                 $femaleCounts .= "<td class='text-center'>$fc</td>";
-                $totalCounts .= '<td class="text-center">' . ($mc + $fc) . '</td>';
+                $totalCounts .= '<td class="text-center">'.($mc + $fc).'</td>';
             }
 
             $html .= "<table class='table-styled styled float-head' style='margin-top:1em;'>
@@ -336,9 +303,6 @@ class Mk extends Qs
 
     /**
      * Return a number with an ordinal suffix (English).
-     *
-     * @param int $number
-     * @return string|null
      */
     public static function getOrdinalSuffix(int $number): ?string
     {
@@ -349,111 +313,88 @@ class Mk extends Qs
         if ($number % 100 >= 11 && $number % 100 <= 13) {
             return "$number<sup>th</sup>";
         }
-        return "$number<sup>" . $ends[$number % 10] . '</sup>';
+
+        return "$number<sup>".$ends[$number % 10].'</sup>';
     }
 
     /**
      * Count marks with grade names starting with A or B (distinctions).
-     *
-     * @param Collection $marks
-     * @return int
      */
     public static function countDistinctions(Collection $marks): int
     {
         $ids = Grade::where('name', 'LIKE', 'A%')->orWhere('name', 'LIKE', 'B%')->pluck('id')->toArray();
+
         return self::markGradeFilter($marks, $ids);
     }
 
     /**
      * Count marks with grade names starting with D or E (passes).
-     *
-     * @param Collection $marks
-     * @return int
      */
     public static function countPasses(Collection $marks): int
     {
         $ids = Grade::where('name', 'LIKE', 'D%')->orWhere('name', 'LIKE', 'E%')->pluck('id')->toArray();
+
         return self::markGradeFilter($marks, $ids);
     }
 
     /**
      * Count marks with grade names starting with C (credits).
-     *
-     * @param Collection $marks
-     * @return int
      */
     public static function countCredits(Collection $marks): int
     {
         $ids = Grade::where('name', 'LIKE', 'C%')->pluck('id')->toArray();
+
         return self::markGradeFilter($marks, $ids);
     }
 
     /**
      * Count marks with grade names starting with F (failures).
-     *
-     * @param Collection $marks
-     * @return int
      */
     public static function countFailures(Collection $marks): int
     {
         $ids = Grade::where('name', 'LIKE', 'F%')->pluck('id')->toArray();
+
         return self::markGradeFilter($marks, $ids);
     }
 
     /**
      * Filter marks by a set of grade IDs and return count.
-     *
-     * @param Collection $marks
-     * @param array      $gradeIds
-     * @return int
      */
     protected static function markGradeFilter(Collection $marks, array $gradeIds): int
     {
-        return $marks->filter(fn($mk) => \in_array($mk->grade_id, $gradeIds))->count();
+        return $marks->filter(fn ($mk) => \in_array($mk->grade_id, $gradeIds))->count();
     }
 
     /**
      * Count subjects a student actually took (total tca+exam_mark > 0).
-     *
-     * @param Collection $marks
-     * @return int
      */
     public static function countSubjectsOffered(Collection $marks): int
     {
-        return $marks->filter(fn($mk) => $mk->tca + $mk->exam_mark > 0)->count();
+        return $marks->filter(fn ($mk) => $mk->tca + $mk->exam_mark > 0)->count();
     }
 
     /**
      * Get grade list for a class type, falling back to global grades if empty.
-     *
-     * @param int $class_type_id
-     * @return Collection
      */
     public static function getGradeList(int $class_type_id): Collection
     {
         $grades = Grade::where('class_type_id', $class_type_id)->orderBy('name')->get();
+
         return $grades->isNotEmpty() ? $grades : Grade::whereNull('class_type_id')->orderBy('name')->get();
     }
 
     /**
      * Get division list for a class type, falling back to global divisions if empty.
-     *
-     * @param int $class_type_id
-     * @return Collection
      */
     public static function getDivisionList(int $class_type_id): Collection
     {
         $divisions = Division::where('class_type_id', $class_type_id)->orderBy('name')->get();
+
         return $divisions->isNotEmpty() ? $divisions : Division::whereNull('class_type_id')->orderBy('name')->get();
     }
 
     /**
      * Count exam records for a section in an exam/class.
-     *
-     * @param int $exam_id
-     * @param int $class_id
-     * @param int $section_id
-     * @return int
      */
     public static function getSectionCount(int $exam_id, int $class_id, int $section_id): int
     {
@@ -466,10 +407,6 @@ class Mk extends Qs
 
     /**
      * Count exam records for a whole class.
-     *
-     * @param int $exam_id
-     * @param int $class_id
-     * @return int
      */
     public static function getClassCount(int $exam_id, int $class_id): int
     {
@@ -481,10 +418,6 @@ class Mk extends Qs
 
     /**
      * Delete marks and exam records from a previous class/section when a student changes.
-     *
-     * @param int $st_id
-     * @param int $class_id
-     * @return bool
      */
     public static function deleteOldClassRecords(int $st_id, int $class_id): bool
     {
@@ -495,14 +428,12 @@ class Mk extends Qs
             $marks->delete();
             ExamRecord::where('my_class_id', '<>', $class_id)->where($conditions)->delete();
         }
+
         return true;
     }
 
     /**
      * Get divisions for a specific class type.
-     *
-     * @param int $class_type_id
-     * @return Collection
      */
     public static function getDivisionsByClassType(int $class_type_id): Collection
     {
@@ -511,10 +442,6 @@ class Mk extends Qs
 
     /**
      * Determine division based on points and class type, fallback to global divisions.
-     *
-     * @param float|int $points
-     * @param int       $class_type_id
-     * @return Division|null
      */
     public static function getDivisionByPoints(float|int $points, int $class_type_id): ?Division
     {
@@ -522,16 +449,15 @@ class Mk extends Qs
         if ($divisions->isNotEmpty()) {
             $div = $divisions->where('points_from', '<=', $points)
                 ->where('points_to', '>=', $points)->first();
+
             return $div ?: self::getGlobalDivisionByPoints($points);
         }
+
         return self::getGlobalDivisionByPoints($points);
     }
 
     /**
      * Fallback: division lookup from global (class-type-independent) divisions.
-     *
-     * @param float|int $points
-     * @return Division|null
      */
     public static function getGlobalDivisionByPoints(float|int $points): ?Division
     {
@@ -543,10 +469,6 @@ class Mk extends Qs
 
     /**
      * Get grade name for an average, optionally with remarks.
-     *
-     * @param int|float $marks_avg
-     * @param bool      $with_remark
-     * @return string|null
      */
     public static function getGradeNameByScore(float|int $marks_avg, bool $with_remark = false): ?string
     {
@@ -554,16 +476,14 @@ class Mk extends Qs
         $grade = Grade::where('mark_from', '<=', $marks_avg)->where('mark_to', '>=', $marks_avg);
 
         if ($with_remark) {
-            return $grade->value('name') . ' - ' . $grade->value('remarks');
+            return $grade->value('name').' - '.$grade->value('remarks');
         }
+
         return $grade->value('name');
     }
 
     /**
      * Generate HTML table showing grade thresholds for a class type.
-     *
-     * @param int $class_type_id
-     * @return string
      */
     public static function renderGradeTable(int $class_type_id): string
     {
@@ -585,9 +505,6 @@ class Mk extends Qs
 
     /**
      * Generate HTML table showing division thresholds for a class type.
-     *
-     * @param int $class_type_id
-     * @return string
      */
     public static function renderDivisionTable(int $class_type_id): string
     {
@@ -608,29 +525,25 @@ class Mk extends Qs
 
     /**
      * Get subjects for a class, respecting teacher role if applicable.
-     *
-     * @param int $class_id
-     * @return Collection
      */
     public static function getSubjects(int $class_id): Collection
     {
         if (auth()->user()->hasRole(config('roles.default_roles.tenant.teacher'))) {
             return SubjectRecord::where('teacher_id', auth()->id())
                 ->rightJoin(Subject::getTable(), function ($join) {
-                    $join->on(SubjectRecord::getTable() . '.subject_id', '=', Subject::getTable() . '.id');
+                    $join->on(SubjectRecord::getTable().'.subject_id', '=', Subject::getTable().'.id');
                 })
-                ->where(Subject::getTable() . '.my_class_id', $class_id)
+                ->where(Subject::getTable().'.my_class_id', $class_id)
                 ->distinct()
                 ->get();
         }
+
         return Subject::where('my_class_id', $class_id)->distinct()->get();
     }
 
     /**
      * Options for student exam position calculation.
      * These must match the column names in the exam_records table.
-     *
-     * @return array
      */
     public static function getStudentExamPositionByValues(): array
     {
@@ -644,8 +557,6 @@ class Mk extends Qs
 
     /**
      * Options for continuous assessment position calculation.
-     *
-     * @return array
      */
     public static function getStudentCAPositionByValues(): array
     {

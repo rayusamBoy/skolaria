@@ -13,8 +13,6 @@ class TenantRepo
 
     /**
      * Get all tenants with their domain.
-     *
-     * @return Collection
      */
     public function getAllTenants($with_domain = true): Collection
     {
@@ -23,9 +21,6 @@ class TenantRepo
 
     /**
      * Create a new tenant.
-     *
-     * @param array $data
-     * @return Tenant
      */
     public function createTenant(array $data): Tenant
     {
@@ -34,9 +29,6 @@ class TenantRepo
 
     /**
      * Find a tenant by ID, including its domain.
-     *
-     * @param string $id
-     * @return Tenant|null
      */
     public function findOrFailTenant(string $id): ?Tenant
     {
@@ -45,8 +37,6 @@ class TenantRepo
 
     /**
      * Build a query to find a tenant.
-     * @param array $where
-     * @return Tenant|Builder
      */
     public function whereTenantQuery(array $where): Tenant|Builder
     {
@@ -55,7 +45,7 @@ class TenantRepo
 
     /**
      * Build a query to find a tenant.
-     * @param array $where
+     *
      * @return mixed|Tenant
      */
     public function whereInQuery(string $column, array $where): Tenant|Builder
@@ -65,8 +55,6 @@ class TenantRepo
 
     /**
      * Restore a soft deleted tenant.
-     * @param string $id
-     * @return void
      */
     public function restoreTenant(string $id): void
     {
@@ -75,8 +63,6 @@ class TenantRepo
 
     /**
      * Permanently delete a tenant.
-     * @param string $id
-     * @return void
      */
     public function forceDeleteTenant(string $id): void
     {
@@ -95,7 +81,6 @@ class TenantRepo
 
     /**
      * Get all soft deleted tenants.
-     * @return Collection
      */
     public function getTrashedTenants(): Collection
     {
@@ -107,9 +92,8 @@ class TenantRepo
     /**
      * Update an existing domain or create a new one for a tenant.
      *
-     * @param array $attributes  Conditions to find the domain
-     * @param array $values      Values to set/update
-     * @return Domain
+     * @param  array  $attributes  Conditions to find the domain
+     * @param  array  $values  Values to set/update
      */
     public function updateOrCreateDomain(array $attributes, array $values): Domain
     {

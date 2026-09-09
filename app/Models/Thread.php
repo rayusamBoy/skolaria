@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Message;
 use Cmgmyr\Messenger\Models\Models;
 use Cmgmyr\Messenger\Models\Participant;
 use Cmgmyr\Messenger\Models\Thread as OriginalThread;
@@ -57,7 +56,6 @@ class Thread extends OriginalThread
     /**
      * Remove participants from thread by user id.
      *
-     * @param mixed $userId
      *
      * @return void
      */
@@ -69,9 +67,7 @@ class Thread extends OriginalThread
     /**
      * Generates array of participant information.
      *
-     * @param mixed $userId
-     * @param array $columns
-     *
+     * @param  mixed  $userId
      * @return string
      */
     public function participantsArray($userId = null, array $columns = ['name', 'id'])
@@ -87,7 +83,7 @@ class Thread extends OriginalThread
         $participantNames = $this->getConnection()->table($usersTable)
             ->join($participantsTable, "$usersTable.$userPrimaryKey", '=', "$participantsTable.user_id")
             ->where("$participantsTable.thread_id", $this->id)
-            ->where("$participantsTable.deleted_at", '=', NULL)
+            ->where("$participantsTable.deleted_at", '=', null)
             ->select($this->getConnection()->raw($selectString));
 
         if ($userId !== null) {
@@ -100,8 +96,7 @@ class Thread extends OriginalThread
     /**
      * See is the thread has any soft deleted participant.
      *
-     * @param int $threadId
-     *
+     * @param  int  $threadId
      * @return bool
      */
     public function hasDirtyParticipant($threadId)
@@ -114,8 +109,7 @@ class Thread extends OriginalThread
     /**
      * Checks to see if a user is a current participant of the thread.
      *
-     * @param mixed $userId
-     *
+     * @param  mixed  $userId
      * @return bool
      */
     public function isDirtyParticipant($userId)

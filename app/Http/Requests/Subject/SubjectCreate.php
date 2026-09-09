@@ -8,7 +8,6 @@ use Illuminate\Validation\Rule;
 
 class SubjectCreate extends FormRequest
 {
-
     public function authorize()
     {
         return true;
@@ -26,7 +25,7 @@ class SubjectCreate extends FormRequest
                 'required',
                 'string',
                 'min:3',
-                Rule::unique(Subject::class)->where(fn($query) => $query->where('my_class_id', $this->my_class_id)->where('name', $this->name))
+                Rule::unique(Subject::class)->where(fn ($query) => $query->where('my_class_id', $this->my_class_id)->where('name', $this->name)),
             ],
             'my_class_id' => 'required',
             'slug' => 'nullable|string|min:2|max:7',

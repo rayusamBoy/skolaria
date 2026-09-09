@@ -3,13 +3,14 @@
 namespace App\Helpers;
 
 use App\Models\Event;
+use Illuminate\Database\Eloquent\Collection;
 
 class Evt
 {
     /**
      * Get all events (unordered).
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public static function getAll()
     {
@@ -18,8 +19,6 @@ class Evt
 
     /**
      * Return the list of possible event statuses.
-     *
-     * @return array
      */
     public static function getStatusOptions(): array
     {

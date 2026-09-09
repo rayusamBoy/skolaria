@@ -3,17 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\SettingUpdate;
 use App\Repositories\MyClassRepo;
 use App\Repositories\SettingRepo;
 use ColorThief\ColorThief;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\View\View;
 
 class SettingController extends Controller
 {
     protected SettingRepo $setting;
+
     protected MyClassRepo $my_class;
 
     public function __construct(SettingRepo $setting, MyClassRepo $my_class)
@@ -104,17 +105,12 @@ class SettingController extends Controller
 
     /**
      * Upload a file and update the corresponding setting with its storage path.
-     *
-     * @param \Illuminate\Http\UploadedFile $file
-     * @param string $setting_key
-     * @param string $base_filename
-     * @return void
      */
-    protected function uploadAndUpdateSetting(\Illuminate\Http\UploadedFile $file, string $setting_key, string $base_filename): void
+    protected function uploadAndUpdateSetting(UploadedFile $file, string $setting_key, string $base_filename): void
     {
         $file_meta = Qs::getFileMetaData($file);
-        $file_meta['name'] = "$base_filename." . $file_meta['ext'];
-        $file_meta['path'] = Qs::getPublicUploadPath() . '/' . $file_meta['name'];
+        $file_meta['name'] = "$base_filename.".$file_meta['ext'];
+        $file_meta['path'] = Qs::getPublicUploadPath().'/'.$file_meta['name'];
 
         $file->storeAs($file_meta['path']);
         $this->setting->update($setting_key, $file_meta['path']);
@@ -122,25 +118,21 @@ class SettingController extends Controller
 
     /**
      * Extract dominant color from the uploaded background image and update colors.
-     *
-     * @param SettingUpdate $req
-     * @param \Illuminate\Http\UploadedFile $file
-     * @return void
      */
-    protected function updateColorsFromBackground(SettingUpdate $req, \Illuminate\Http\UploadedFile $file): void
+    protected function updateColorsFromBackground(SettingUpdate $req, UploadedFile $file): void
     {
         try {
             if ($req->input('texts_and_bg_colors') === 'from_img') {
                 $dominant_color = (array) ColorThief::getColor($file->getPathname());
                 $bg_color = \sprintf('rgb(%d,%d,%d)', ...$dominant_color);
                 $texts_color = Qs::getContrastColor($bg_color);
-                $colors = $texts_color . Qs::getDelimiter() . $bg_color;
+                $colors = $texts_color.Qs::getDelimiter().$bg_color;
                 $this->setting->update('login_and_related_pgs_txts_and_bg_colors', $colors);
             } else {
                 $this->setting->update('login_and_related_pgs_txts_and_bg_colors', null);
             }
         } catch (\Throwable $e) {
-            logger()->error('Failed to extract dominant color: ' . $e->getMessage());
+            logger()->error('Failed to extract dominant color: '.$e->getMessage());
             $this->setting->update('login_and_related_pgs_txts_and_bg_colors', null);
         }
     }

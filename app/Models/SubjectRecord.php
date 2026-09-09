@@ -14,7 +14,7 @@ class SubjectRecord extends Eloquent
     protected $fillable = ['subject_id', 'section_id', 'teacher_id', 'students_ids'];
 
     protected $casts = [
-        'students_ids' => 'array'
+        'students_ids' => 'array',
     ];
 
     public function subject()

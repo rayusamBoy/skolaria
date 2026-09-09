@@ -18,7 +18,7 @@ class HasOrderedClassExamSession extends HasOrderedClassSession
             ->map(strtolower(...))
             ->toArray();
 
-        if (!\in_array($exam_in_file, $valid_exam_names)) {
+        if (! \in_array($exam_in_file, $valid_exam_names)) {
             $fail('The exam specified in the :attribute does not exist.');
         }
     }

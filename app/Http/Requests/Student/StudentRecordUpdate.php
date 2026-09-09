@@ -11,7 +11,6 @@ use Illuminate\Validation\Rule;
 
 class StudentRecordUpdate extends FormRequest
 {
-
     public function authorize()
     {
         return true;
@@ -42,7 +41,7 @@ class StudentRecordUpdate extends FormRequest
         return [
             'name' => 'required|string|min:6|max:150',
             'gender' => 'required|string',
-            'date_admitted' => 'required|date_format:' . Usr::getDateFormat(),
+            'date_admitted' => 'required|date_format:'.Usr::getDateFormat(),
             'primary_mobile' => ['sometimes', 'nullable', 'string', 'max:16', Rule::unique(User::class)->ignore($this->getUserIdInput()), new StartsWithProperPhoneCode],
             'secondary_mobile' => ['sometimes', 'nullable', 'string', 'max:16', Rule::unique(User::class)->ignore($this->getUserIdInput()), new StartsWithProperPhoneCode],
             'email' => ['sometimes', 'nullable', 'email', 'max:100', Rule::unique(User::class)->ignore($this->getUserIdInput())],
@@ -64,7 +63,7 @@ class StudentRecordUpdate extends FormRequest
             'food_taboos' => 'sometimes|nullable|string',
             'parent_status' => 'required|string',
             'admission_number' => ['sometimes', 'nullable', 'regex:/^[a-zA-Z0-9\s\-\/]+$/', 'min:4', 'max:20', Rule::unique(StudentRecord::class)->ignore($this->getStudentIdIParam())],
-            'date_of_birth' => 'required|date_format:' . Usr::getDateFormat(),
+            'date_of_birth' => 'required|date_format:'.Usr::getDateFormat(),
         ];
     }
 

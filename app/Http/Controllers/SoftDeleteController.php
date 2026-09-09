@@ -3,24 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Usr;
-use App\Http\Controllers\Controller;
 use App\Models\Thread;
-use App\User;
 use App\Repositories\ExamRepo;
 use App\Repositories\MyClassRepo;
 use App\Repositories\PaymentRepo;
 use App\Repositories\StudentRepo;
 use App\Repositories\UserRepo;
+use App\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class SoftDeleteController extends Controller
 {
     protected MyClassRepo $my_class;
+
     protected PaymentRepo $pay;
+
     protected UserRepo $user;
+
     protected ExamRepo $exam;
+
     protected StudentRepo $student;
+
     protected string $year;   // not actively used in this controller
 
     public function __construct(
@@ -62,7 +66,7 @@ class SoftDeleteController extends Controller
         $allowed_models = Usr::getCanSoftDeleteModelNames();
         $model_name = strtolower($model_name);
 
-        if (!\in_array($model_name, $allowed_models, true) || !auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin'))) {
+        if (! \in_array($model_name, $allowed_models, true) || ! auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin'))) {
             return back()->with('pop_error', __('msg.denied'));
         }
 
@@ -78,7 +82,8 @@ class SoftDeleteController extends Controller
         }
 
         $model_name = str_replace('_', ' ', $model_name);
-        return redirect()->back()->with('flash_success', ucfirst($model_name) . ' ' . __('msg.force_del_ok'));
+
+        return redirect()->back()->with('flash_success', ucfirst($model_name).' '.__('msg.force_del_ok'));
     }
 
     /********** Payments **********/
@@ -89,7 +94,8 @@ class SoftDeleteController extends Controller
     public function payment_restore(int $id): RedirectResponse
     {
         $this->pay->restorePayment($id);
-        return redirect()->route('bin')->with('flash_success', 'Payment ' . __('msg.restore_ok'));
+
+        return redirect()->route('bin')->with('flash_success', 'Payment '.__('msg.restore_ok'));
     }
 
     /**
@@ -98,7 +104,8 @@ class SoftDeleteController extends Controller
     public function payment_force_delete(int $id): RedirectResponse
     {
         $this->pay->forceDeletePayment($id);
-        return redirect()->route('bin')->with('flash_success', 'Payment ' . __('msg.force_del_ok'));
+
+        return redirect()->route('bin')->with('flash_success', 'Payment '.__('msg.force_del_ok'));
     }
 
     /********** Users **********/
@@ -109,7 +116,8 @@ class SoftDeleteController extends Controller
     public function user_restore(int $id): RedirectResponse
     {
         $this->user->restoreUser($id);
-        return redirect()->route('bin')->with('flash_success', 'User ' . __('msg.restore_ok'));
+
+        return redirect()->route('bin')->with('flash_success', 'User '.__('msg.restore_ok'));
     }
 
     /**
@@ -121,7 +129,7 @@ class SoftDeleteController extends Controller
         $this->user->forceDeleteUser($id);
         Usr::deleteUserPhotoDirs($user->roles->pluck('name'), $user->code);
 
-        return redirect()->route('bin')->with('flash_success', 'User ' . __('msg.force_del_ok'));
+        return redirect()->route('bin')->with('flash_success', 'User '.__('msg.force_del_ok'));
     }
 
     /********** Classes **********/
@@ -132,7 +140,8 @@ class SoftDeleteController extends Controller
     public function my_class_restore(int $id): RedirectResponse
     {
         $this->my_class->restoreClass($id);
-        return redirect()->route('bin')->with('flash_success', 'Class ' . __('msg.restore_ok'));
+
+        return redirect()->route('bin')->with('flash_success', 'Class '.__('msg.restore_ok'));
     }
 
     /**
@@ -141,7 +150,8 @@ class SoftDeleteController extends Controller
     public function my_class_force_delete(int $id): RedirectResponse
     {
         $this->my_class->forceDeleteClass($id);
-        return redirect()->route('bin')->with('flash_success', 'Class ' . __('msg.force_del_ok'));
+
+        return redirect()->route('bin')->with('flash_success', 'Class '.__('msg.force_del_ok'));
     }
 
     /********** Exams **********/
@@ -152,7 +162,8 @@ class SoftDeleteController extends Controller
     public function exam_restore(int $id): RedirectResponse
     {
         $this->exam->restore($id);
-        return redirect()->route('bin')->with('flash_success', 'Exam ' . __('msg.restore_ok'));
+
+        return redirect()->route('bin')->with('flash_success', 'Exam '.__('msg.restore_ok'));
     }
 
     /**
@@ -161,7 +172,8 @@ class SoftDeleteController extends Controller
     public function exam_force_delete(int $id): RedirectResponse
     {
         $this->exam->forceDelete($id);
-        return redirect()->route('bin')->with('flash_success', 'Exam ' . __('msg.force_del_ok'));
+
+        return redirect()->route('bin')->with('flash_success', 'Exam '.__('msg.force_del_ok'));
     }
 
     /********** Message Threads **********/
@@ -172,7 +184,8 @@ class SoftDeleteController extends Controller
     public function thread_restore(int $id): RedirectResponse
     {
         Thread::restoreThread($id);
-        return redirect()->route('bin')->with('flash_success', 'Message Thread ' . __('msg.restore_ok'));
+
+        return redirect()->route('bin')->with('flash_success', 'Message Thread '.__('msg.restore_ok'));
     }
 
     /**
@@ -181,6 +194,7 @@ class SoftDeleteController extends Controller
     public function thread_force_delete(int $id): RedirectResponse
     {
         Thread::force_delete($id);
-        return redirect()->route('bin')->with('flash_success', 'Message Thread ' . __('msg.force_del_ok'));
+
+        return redirect()->route('bin')->with('flash_success', 'Message Thread '.__('msg.force_del_ok'));
     }
 }

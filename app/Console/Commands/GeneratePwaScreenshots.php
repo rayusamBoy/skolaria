@@ -10,12 +10,13 @@ use Spatie\Browsershot\Browsershot;
  * This command generates screenshots for the PWA dashboard across various roles and pages.
  * It uses the Browsershot package to automate a headless Chrome instance, performing logins and navigating to specified routes before capturing screenshots.
  * The configuration for which pages to capture, the credentials to use, and the output paths are all defined in the config/pwa-screenshots.php file.
- * 
+ *
  * This is intended as a developer tool to keep the PWA screenshots up to date, ensuring they reflect the current state of the application.
  */
 class GeneratePwaScreenshots extends Command
 {
     protected $signature = 'pwa:generate-screenshots';
+
     protected $description = 'Automatically capture PWA screenshots for all configured roles and pages';
 
     public function handle(): int
@@ -28,6 +29,7 @@ class GeneratePwaScreenshots extends Command
         }
 
         $this->info('All screenshots generated successfully.');
+
         return 0;
     }
 
@@ -49,16 +51,18 @@ class GeneratePwaScreenshots extends Command
         $loginUrl = "$baseUrl$loginPath";
 
         // --- Public pages (no login) ---
-        if (!empty($job['skip_auth'])) {
+        if (! empty($job['skip_auth'])) {
             $this->capturePages($job, $config, $baseUrl, null);
+
             return;
         }
 
         // --- Fetch credentials ---
         $credsKey = $job['credentials'] ?? '';
         $creds = $config['credentials'][$credsKey] ?? null;
-        if (!$creds) {
+        if (! $creds) {
             $this->error("Credentials key '{$credsKey}' not found.");
+
             return;
         }
 
@@ -93,11 +97,11 @@ class GeneratePwaScreenshots extends Command
             $size = $config['viewports'][$viewport];
             $route = route($page['route'], [], false);
             $url = "$baseUrl$route";
-            $output = $config['output_directory'] . '/' . $page['output'];
+            $output = $config['output_directory'].'/'.$page['output'];
 
             $this->info("  → Capturing {$page['output']} ({$viewport})"
-                . (isset($page['theme']) ? " theme={$page['theme']}" : '')
-                . (isset($page['skin']) ? " skin={$page['skin']}" : ''));
+                .(isset($page['theme']) ? " theme={$page['theme']}" : '')
+                .(isset($page['skin']) ? " skin={$page['skin']}" : ''));
 
             if ($browser === null) {
                 // Public page – no session
@@ -105,6 +109,7 @@ class GeneratePwaScreenshots extends Command
                     ->windowSize($size['width'], $size['height'])
                     ->setScreenshotType('png')
                     ->save($output);
+
                 continue;
             }
 
@@ -114,9 +119,9 @@ class GeneratePwaScreenshots extends Command
             if ($theme || $skin) {
                 // Build the URL of our theme‑preferences helper
                 $setThemeUrl = "$baseUrl/pwa-set-preferences?"
-                    . ($theme ? 'theme=' . urlencode($theme) . '&' : '')
-                    . ($skin ? 'skin=' . urlencode($skin) . '&' : '')
-                    . 'url=' . urlencode($url);
+                    .($theme ? 'theme='.urlencode($theme).'&' : '')
+                    .($skin ? 'skin='.urlencode($skin).'&' : '')
+                    .'url='.urlencode($url);
 
                 $browser->setUrl($setThemeUrl);
                 // The helper will redirect – wait for the real page’s navbar
@@ -151,11 +156,12 @@ class GeneratePwaScreenshots extends Command
     protected function resolveTenantBaseUrl(int $tenantId, TenantRepo $tenantRepo): string
     {
         $tenant = $tenantRepo->findOrFailTenant($tenantId);
-        if (!$tenant) {
+        if (! $tenant) {
             throw new \RuntimeException("Tenant {$tenantId} not found.");
         }
 
         $domain = \is_string($tenant->domain) ? $tenant->domain : $tenant->domain->domain;
+
         return rtrim(tenant_route($domain, 'index'), '/');
     }
 }

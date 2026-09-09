@@ -25,7 +25,7 @@ class CustomEmailVerificationRequest extends EmailVerificationRequest
         }
         */
 
-        if (!hash_equals(sha1($this->user()->getEmailForVerification()), (string) $this->route('hash'))) {
+        if (! hash_equals(sha1($this->user()->getEmailForVerification()), (string) $this->route('hash'))) {
             return false;
         }
 

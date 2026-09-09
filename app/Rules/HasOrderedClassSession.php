@@ -14,8 +14,9 @@ abstract class HasOrderedClassSession implements ValidationRule
         $delimiter = Mk::getDelimiter();
 
         // Find the session year (always YYYY-YYYY)
-        if (!preg_match('/\b(\d{4})-(\d{4})\b/', $value, $matches, PREG_OFFSET_CAPTURE)) {
+        if (! preg_match('/\b(\d{4})-(\d{4})\b/', $value, $matches, PREG_OFFSET_CAPTURE)) {
             $fail('The :attribute does not contain a valid session year.');
+
             return;
         }
 
@@ -31,22 +32,24 @@ abstract class HasOrderedClassSession implements ValidationRule
         // Left side must contain at least class + exam name
         if (empty($left)) {
             $fail('The :attribute is missing class and examination name.');
+
             return;
         }
 
         $leftParts = explode($delimiter, $left);
-        $leftParts = array_values(array_filter($leftParts, fn($p) => $p !== ''));
+        $leftParts = array_values(array_filter($leftParts, fn ($p) => $p !== ''));
 
         if (\count($leftParts) < 2) {
             $fail('The :attribute must contain a class and an examination name before the year.');
+
             return;
         }
 
         $classRaw = array_shift($leftParts);
         $secondRaw = array_shift($leftParts);
         // Any remaining $leftParts were part of the exam name (if delimiter appeared inside it)
-        if (!empty($leftParts)) {
-            $secondRaw .= $delimiter . implode($delimiter, $leftParts);
+        if (! empty($leftParts)) {
+            $secondRaw .= $delimiter.implode($delimiter, $leftParts);
         }
 
         // Right side is the tenant title (may be empty)
@@ -55,11 +58,12 @@ abstract class HasOrderedClassSession implements ValidationRule
         // Validate class name
         $classInFile = strtolower(str_replace('_', ' ', $classRaw));
         $validClassNames = MyClass::pluck('name')
-            ->map(fn($name) => strtolower($name))
+            ->map(fn ($name) => strtolower($name))
             ->toArray();
 
-        if (!\in_array($classInFile, $validClassNames)) {
+        if (! \in_array($classInFile, $validClassNames)) {
             $fail('The class specified in :attribute is invalid.');
+
             return;
         }
 
@@ -67,6 +71,7 @@ abstract class HasOrderedClassSession implements ValidationRule
         $yearInFile = "{$yearStart}-{$yearEnd}";
         if ($yearInFile !== Mk::getCurrentSession()) {
             $fail('The session year in :attribute does not match the current session.');
+
             return;
         }
 

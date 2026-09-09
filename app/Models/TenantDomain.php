@@ -14,7 +14,7 @@ class TenantDomain extends BaseDomain
 {
     use LogsActivity;
 
-    protected $table = "domains";
+    protected $table = 'domains';
 
     /**
      * @return BelongsTo<Tenant&Model, $this>

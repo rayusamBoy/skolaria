@@ -15,9 +15,13 @@ use Illuminate\Support\Str;
 class UserService
 {
     protected UserRepo $user;
+
     protected StudentRepo $student;
+
     protected LocationRepo $loc;
+
     protected MyClassRepo $my_class;
+
     protected PermissionRepo $permission;
 
     public function __construct(
@@ -37,10 +41,9 @@ class UserService
     /**
      * Create a new user with roles, staff record, and parent record if applicable.
      *
-     * @param array $data          Validated user attributes
-     * @param array $roles         Role names
-     * @param array|null $permissions Additional permissions
-     * @return User
+     * @param  array  $data  Validated user attributes
+     * @param  array  $roles  Role names
+     * @param  array|null  $permissions  Additional permissions
      */
     public function storeUser(array $data, array $roles, ?array $permissions = null): User
     {
@@ -57,7 +60,7 @@ class UserService
         $user = $this->user->createUser($user_data);
         $user->syncRoles($roles);
 
-        if (!empty($permissions)) {
+        if (! empty($permissions)) {
             $user->syncPermissions($permissions);
         }
 
@@ -129,11 +132,11 @@ class UserService
      */
     protected function handlePhotoUpload(array $data, array &$user_data, string $user_code, string $last_role_name, bool $is_new): void
     {
-        if (!empty($data['photo']) && is_uploaded_file($data['photo']->getRealPath())) {
+        if (! empty($data['photo']) && is_uploaded_file($data['photo']->getRealPath())) {
             $photo = $data['photo'];
             $file_meta = Usr::getFileMetaData($photo);
-            $file_meta['name'] = 'photo.' . $file_meta['ext'];
-            $file_meta['path'] = Usr::getUploadPath($last_role_name) . $user_code . '/' . $file_meta['name'];
+            $file_meta['name'] = 'photo.'.$file_meta['ext'];
+            $file_meta['path'] = Usr::getUploadPath($last_role_name).$user_code.'/'.$file_meta['name'];
             $photo->storeAs($file_meta['path']);
             $user_data['photo_path'] = $file_meta['path'];
         } elseif ($is_new) {
@@ -147,7 +150,8 @@ class UserService
     protected function generateStaffId($employment_date = null): string
     {
         $date = $employment_date ?: now();
-        return Usr::getSystemShortCode() . '/STAFF/' . date('Y/m', strtotime($date)) . '/' . mt_rand(1000, 9999);
+
+        return Usr::getSystemShortCode().'/STAFF/'.date('Y/m', strtotime($date)).'/'.mt_rand(1000, 9999);
     }
 
     /**
@@ -198,8 +202,9 @@ class UserService
      */
     protected function handleParentRecordUpdate(int $user_id, bool $is_parent, array $data): void
     {
-        if (!$is_parent)
+        if (! $is_parent) {
             return;
+        }
 
         $parent_data = $this->extractParentFields($data);
         $parent_data['name'] = ucwords(strtolower($data['relative_name'] ?? ''));
@@ -213,6 +218,7 @@ class UserService
     protected function extractStaffFields(array $data): array
     {
         $staff_fields = Usr::getStaffRecordFields();
+
         return array_intersect_key($data, array_flip($staff_fields));
     }
 
@@ -223,6 +229,7 @@ class UserService
     {
         $parent_fields = Usr::getParentRelativeRecordFields();
         $parent_fields = array_diff($parent_fields, ['user_id', 'name']); // those set separately
+
         return array_intersect_key($data, array_flip($parent_fields));
     }
 

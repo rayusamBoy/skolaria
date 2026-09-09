@@ -17,7 +17,14 @@ class StudentPaymentPaid extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    protected $receipt, $subject, $student, $url;
+    protected $receipt;
+
+    protected $subject;
+
+    protected $student;
+
+    protected $url;
+
     public function __construct($receipt, $student)
     {
         $this->receipt = $receipt;
@@ -34,6 +41,7 @@ class StudentPaymentPaid extends Notification implements ShouldQueue
     public function via(object $notifiable): array
     {
         $channels = Pay::getActiveNotificationChannels($notifiable, true, true, true, true);
+
         return $channels;
     }
 
@@ -43,6 +51,7 @@ class StudentPaymentPaid extends Notification implements ShouldQueue
     public function toMail(): MailMessage
     {
         $url = route('payments.receipts', Pay::hash($this->receipt->payment_record_id));
+
         return (new MailMessage)
             ->subject($this->subject)
             ->greeting('Salaam, Hello')
@@ -83,11 +92,11 @@ class StudentPaymentPaid extends Notification implements ShouldQueue
             'icon' => Pay::getAppIcon(),
             'type' => 'notifications',
             'url' => $this->url,
-            'url_title' => "view receipt",
+            'url_title' => 'view receipt',
             'created_at' => $this->receipt->created_at->toISOString(),
         ];
 
-        return (new FcmMessage())
+        return (new FcmMessage)
             ->data($data)
             ->custom([
                 'android' => [
@@ -102,7 +111,7 @@ class StudentPaymentPaid extends Notification implements ShouldQueue
                 'apns' => [
                     'payload' => [
                         'aps' => [
-                            'sound' => 'default'
+                            'sound' => 'default',
                         ],
                     ],
                     'fcm_options' => [

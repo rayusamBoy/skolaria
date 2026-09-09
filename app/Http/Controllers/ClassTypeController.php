@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\ClassType\ClassTypeCreate;
 use App\Http\Requests\ClassType\ClassTypeUpdate;
 use App\Models\ClassType;
@@ -17,7 +16,9 @@ use Illuminate\View\View;
 class ClassTypeController extends Controller
 {
     protected MyClassRepo $my_class;
+
     protected UserRepo $user;
+
     protected SettingRepo $setting;
 
     public function __construct(MyClassRepo $my_class, UserRepo $user, SettingRepo $setting)
@@ -45,7 +46,7 @@ class ClassTypeController extends Controller
     public function store(ClassTypeCreate $req): JsonResponse
     {
         $this->my_class->createClassType($req->validated());
-        $this->setting->create("next_term_fees_" . strtolower($req->validated('code')), '0000');
+        $this->setting->create('next_term_fees_'.strtolower($req->validated('code')), '0000');
 
         return Qs::jsonStoreOk();
     }
@@ -70,7 +71,7 @@ class ClassTypeController extends Controller
 
         $class_type->update($req->validated());
         if (strtolower($current_code) != strtolower($request_code)) {
-            $this->setting->updateKey("next_term_fees_" . strtolower($current_code), "next_term_fees_" . strtolower($request_code));
+            $this->setting->updateKey('next_term_fees_'.strtolower($current_code), 'next_term_fees_'.strtolower($request_code));
         }
 
         return Qs::jsonUpdateOk();

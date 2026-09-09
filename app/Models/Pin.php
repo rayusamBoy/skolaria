@@ -17,7 +17,7 @@ class Pin extends Eloquent
         'is_used' => 'boolean',
     ];
 
-    public function user($foreign = NULL)
+    public function user($foreign = null)
     {
         return $this->belongsTo(User::class, $foreign);
     }

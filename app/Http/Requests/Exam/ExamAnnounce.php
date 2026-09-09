@@ -6,7 +6,10 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class ExamAnnounce extends FormRequest
 {
-    protected $max_duration_in_secs, $min_duration_in_secs;
+    protected $max_duration_in_secs;
+
+    protected $min_duration_in_secs;
+
     public function __construct()
     {
         $seconds_to_add = 604800; // 7 days

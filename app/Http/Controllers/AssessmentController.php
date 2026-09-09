@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Mk;
 use App\Helpers\Usr;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Assessment\AssessmentSelector;
 use App\Repositories\AssessmentRepo;
 use App\Repositories\ExamRepo;
@@ -21,14 +20,21 @@ use Illuminate\View\View;
 class AssessmentController extends Controller
 {
     protected ExamRepo $exam;
+
     protected AssessmentRepo $assessment;
+
     protected MyClassRepo $my_class;
+
     protected StudentRepo $student;
+
     protected MarkRepo $mark;
+
     protected string $year;
 
     protected const int CW_COUNT = 10;
+
     protected const int HW_COUNT = 5;
+
     protected const int TT_COUNT = 3;
 
     public function __construct(
@@ -99,7 +105,7 @@ class AssessmentController extends Controller
             $req->assessment_id,
             $req->my_class_id,
             $req->subject_id,
-            $req->section_id
+            $req->section_id,
         ]);
     }
 
@@ -144,7 +150,7 @@ class AssessmentController extends Controller
      */
     public function sheets($class_id = null, $section_id = null): View|RedirectResponse
     {
-        if (!$this->assessment->hasAnyAssessmentWithExam()) {
+        if (! $this->assessment->hasAnyAssessmentWithExam()) {
             return $this->noAssessmentRecord();
         }
 
@@ -179,7 +185,7 @@ class AssessmentController extends Controller
         $assessments = $this->assessment->getAssessmentsWithValidExam([])->where('exam.year', $this->year);
         $data = [
             'assessments' => $assessments,
-            'teacher_class_ids' => $this->my_class->getSectionsByConditions(["teacher_id" => auth()->id()])->pluck("my_class_id"),
+            'teacher_class_ids' => $this->my_class->getSectionsByConditions(['teacher_id' => auth()->id()])->pluck('my_class_id'),
             'selected' => false,
             'user_is_class_section_teacher' => Mk::userIsClassSectionTeacher(),
         ];
@@ -264,7 +270,7 @@ class AssessmentController extends Controller
     {
         $year = $req->year;
 
-        if (!$this->verifyStudentExamYear($student_id, $year)) {
+        if (! $this->verifyStudentExamYear($student_id, $year)) {
             return $this->noStudentRecord();
         }
 
@@ -286,19 +292,19 @@ class AssessmentController extends Controller
         $user = auth()->user();
         $is_staff = $user->hasAnyRole(Usr::getTenancyAwareStaffRoles());
 
-        if (!$is_staff && $user->id != $student && !Mk::isStudentChildOfParent($student, $user->id)) {
+        if (! $is_staff && $user->id != $student && ! Mk::isStudentChildOfParent($student, $user->id)) {
             return redirect()->route('dashboard')->with('pop_error', __('msg.denied'));
         }
 
-        if (Mk::examIsLocked() && !$user->hasAnyRole($this->getAdminRoles())) {
+        if (Mk::examIsLocked() && ! $user->hasAnyRole($this->getAdminRoles())) {
             session()->put('assessments_url', route('assessments.show', [Mk::hash($student), $year]));
 
-            if (!$this->checkPinVerified($student)) {
+            if (! $this->checkPinVerified($student)) {
                 return redirect()->route('pins.enter', Mk::hash($student));
             }
         }
 
-        if (!$this->verifyStudentExamYear($student, $year)) {
+        if (! $this->verifyStudentExamYear($student, $year)) {
             return $this->noStudentRecord();
         }
 
@@ -311,8 +317,9 @@ class AssessmentController extends Controller
     public function show($student_id, $year): View|RedirectResponse
     {
         $redirect = $this->authorizeAssessmentAccess($student_id, $year);
-        if ($redirect)
+        if ($redirect) {
             return $redirect;
+        }
 
         $where = ['student_id' => $student_id, 'year' => $year];
         $asrs = $this->assessment->getAssessmentRecordsWithRelations($where, ['my_class', 'grade']);
@@ -358,13 +365,13 @@ class AssessmentController extends Controller
     public function update(Request $req, $assessment_id, $class_id, $subject_id, $section_id = null): JsonResponse
     {
         $assessment = $this->assessment->getAssessmentsWithValidExam(['id' => $assessment_id])->first();
-        if ($assessment->exam->is_locked && !Mk::userIsHead(auth()->id())) {
+        if ($assessment->exam->is_locked && ! Mk::userIsHead(auth()->id())) {
             return Mk::jsonUpdateDenied();
         }
 
         $exam = $this->exam->find($assessment->exam->id);
 
-        if ($exam->is_locked && !auth()->user()->hasAnyRole($this->getAdminRoles())) {
+        if ($exam->is_locked && ! auth()->user()->hasAnyRole($this->getAdminRoles())) {
             return Mk::jsonUpdateDenied();
         }
 
@@ -444,6 +451,7 @@ class AssessmentController extends Controller
         $term = $exam->term;
         $d["tex$term"] = ($total > 100) ? (function () use (&$d) {
             $d['t1'] = $d['t2'] = $d['t3'] = $d['t4'] = $d['tca'] = $d['evaluated_exam_mark'] = null;
+
             return null;
         })() : $total;
 
@@ -463,6 +471,7 @@ class AssessmentController extends Controller
         for ($i = 1; $i <= $count; $i++) {
             $values[$i] = $input[$i] ?? null;
         }
+
         return ['values' => $values];
     }
 
@@ -479,6 +488,7 @@ class AssessmentController extends Controller
                 $notNull = true;
             }
         }
+
         return $notNull ? $sum / $count : null;
     }
 
@@ -530,8 +540,9 @@ class AssessmentController extends Controller
     public function print_detailed($student_id, $assessment_id, $year): View|RedirectResponse
     {
         $redirect = $this->authorizeAssessmentAccess($student_id, $year);
-        if ($redirect)
+        if ($redirect) {
             return $redirect;
+        }
 
         $wh = ['student_id' => $student_id, 'assessment_id' => $assessment_id, 'year' => $year];
         $asrs = $this->assessment->getAssessmentRecordsWithRelations($wh);
@@ -567,8 +578,9 @@ class AssessmentController extends Controller
     public function print_minimal($student_id, $assessment_id, $year): View|RedirectResponse
     {
         $redirect = $this->authorizeAssessmentAccess($student_id, $year);
-        if ($redirect)
+        if ($redirect) {
             return $redirect;
+        }
 
         $wh = ['student_id' => $student_id, 'assessment_id' => $assessment_id, 'year' => $year];
         $asrs = $this->assessment->getAssessmentRecordsWithRelations($wh);
@@ -622,7 +634,8 @@ class AssessmentController extends Controller
      */
     public function print_cover($student): View
     {
-        $data['student'] = $this->student->getActiveStudentsQueryWithRelations(["user_id" => $student], ['user'])->first();
+        $data['student'] = $this->student->getActiveStudentsQueryWithRelations(['user_id' => $student], ['user'])->first();
+
         return view('pages.assessments.print.cover', $data);
     }
 
@@ -636,6 +649,7 @@ class AssessmentController extends Controller
             : $req->only(['t_comment']);
 
         $this->assessment->updateRecord(['id' => $as_id], $d);
+
         return Mk::jsonUpdateOk();
     }
 
@@ -650,6 +664,7 @@ class AssessmentController extends Controller
         }
 
         $this->assessment->updateRecord(['id' => $as_id], $d);
+
         return Mk::jsonUpdateOk();
     }
 
@@ -677,7 +692,7 @@ class AssessmentController extends Controller
                 ->where('exam_id', $exam->id)
                 ->isNotEmpty();
 
-            if (!$examBelongsToClass) {
+            if (! $examBelongsToClass) {
                 return null;
             }
         }

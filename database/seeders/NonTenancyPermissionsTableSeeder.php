@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\PermissionRegistrar;
 
 class NonTenancyPermissionsTableSeeder extends Seeder
 {
@@ -16,11 +17,13 @@ class NonTenancyPermissionsTableSeeder extends Seeder
 
         if (empty($centralPerms)) {
             $this->command->error("Permissions not found in config('permissions.names.central')");
+
             return;
         }
 
-        if (!\is_array($centralPerms)) {
-            $this->command->error("Permissions file must return an array. Found: " . \gettype($centralPerms));
+        if (! \is_array($centralPerms)) {
+            $this->command->error('Permissions file must return an array. Found: '.\gettype($centralPerms));
+
             return;
         }
 
@@ -31,17 +34,18 @@ class NonTenancyPermissionsTableSeeder extends Seeder
             foreach ($groupNodes as $groupNode) {
                 $perms[] = $this->collectPermissionValues($groupNode);
             }
-            if (!empty($perms)) {
+            if (! empty($perms)) {
                 $groups[$groupName] = $perms;
             }
         }
 
         if (empty($groups)) {
             $this->command->info('No central permissions found to seed.');
+
             return;
         }
 
-        $this->command->info('Seeding central permission groups: ' . implode(', ', array_keys($groups)));
+        $this->command->info('Seeding central permission groups: '.implode(', ', array_keys($groups)));
 
         $guard = config('auth.defaults.guard', 'web');
         $table = config('permission.table_names.permissions', 'permissions');
@@ -51,7 +55,7 @@ class NonTenancyPermissionsTableSeeder extends Seeder
             sort($perms);
             $this->command->info(\sprintf(" - group '%s' (%d permissions)", $groupName, \count($perms)));
             foreach ($perms as $perm) {
-                if (!\is_array($perm)) {
+                if (! \is_array($perm)) {
                     continue;
                 }
                 DB::table($table)->updateOrInsert(
@@ -61,7 +65,7 @@ class NonTenancyPermissionsTableSeeder extends Seeder
             }
         }
 
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
         $this->command->info('Central permissions seeded.');
     }
 
@@ -71,7 +75,7 @@ class NonTenancyPermissionsTableSeeder extends Seeder
      * Supports both the old structure (string permission names or boolean flags)
      * and the new structure where each permission is an array with a 'permission' key.
      *
-     * @param mixed $node
+     * @param  mixed  $node
      * @return string[]
      */
     protected function collectPermissionValues($node): array
@@ -84,6 +88,7 @@ class NonTenancyPermissionsTableSeeder extends Seeder
                 $out['name'] = trim($node['permission']);
                 $out['label'] = trim($node['label']);
                 $out['description'] = trim($node['description']);
+
                 return $out;
             }
 

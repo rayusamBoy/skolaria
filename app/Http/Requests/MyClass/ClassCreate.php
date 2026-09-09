@@ -8,7 +8,6 @@ use Illuminate\Validation\Rule;
 
 class ClassCreate extends FormRequest
 {
-
     public function authorize()
     {
         return true;
@@ -26,7 +25,7 @@ class ClassCreate extends FormRequest
                 'required',
                 'string',
                 'min:2',
-                Rule::unique(MyClass::class)->where(fn($query) => $query->where('name', $this->name)->where('class_type_id', $this->class_type_id))
+                Rule::unique(MyClass::class)->where(fn ($query) => $query->where('name', $this->name)->where('class_type_id', $this->class_type_id)),
             ],
             'class_type_id' => 'required|exists:class_types,id',
         ];

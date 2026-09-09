@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Section\SectionCreate;
 use App\Http\Requests\Section\SectionUpdate;
 use App\Models\Section;
@@ -16,6 +15,7 @@ use Illuminate\View\View;
 class SectionController extends Controller
 {
     protected MyClassRepo $my_class;
+
     protected UserRepo $user;
 
     public function __construct(MyClassRepo $my_class, UserRepo $user)

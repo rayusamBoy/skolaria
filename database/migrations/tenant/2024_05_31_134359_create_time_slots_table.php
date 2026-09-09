@@ -16,10 +16,10 @@ return new class extends Migration
             $table->unsignedInteger('ttr_id')->index();
             $table->tinyInteger('hour_from');
             $table->tinyInteger('min_from');
-            $table->enum('meridian_from', ['AM','PM']);
+            $table->enum('meridian_from', ['AM', 'PM']);
             $table->tinyInteger('hour_to');
             $table->string('min_to', 2);
-            $table->enum('meridian_to', ['AM','PM']);
+            $table->enum('meridian_to', ['AM', 'PM']);
             $table->string('time_from', 100);
             $table->string('time_to', 100);
             $table->time('timestamp_from');

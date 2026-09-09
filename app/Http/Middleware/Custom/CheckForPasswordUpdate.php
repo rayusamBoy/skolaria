@@ -16,8 +16,6 @@ class CheckForPasswordUpdate
      * redirects them to the change password page with a warning message.
      * This ensures that users update their passwords before accessing other parts of the application.
      *
-     * @param  Request  $request
-     * @param  Closure  $next
      * @return mixed
      */
     public function handle(Request $request, Closure $next)
@@ -25,7 +23,7 @@ class CheckForPasswordUpdate
         $user = Auth::user();
 
         // User not authenticated or password already updated
-        if (!$user || $user->password_updated_at !== null) {
+        if (! $user || $user->password_updated_at !== null) {
             return $next($request);
         }
 

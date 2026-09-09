@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class NoticeCreate extends FormRequest
 {
-
     public function authorize()
     {
         return true;
@@ -24,5 +23,4 @@ class NoticeCreate extends FormRequest
             'body' => 'required|string|min:7|max:500',
         ];
     }
-
 }

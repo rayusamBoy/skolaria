@@ -34,7 +34,7 @@ class TenancyRolesTableSeeder extends Seeder
         }
 
         // Remove root roles from the created list to avoid assigning permissions to them
-        $createdRoles = array_filter($createdRoles, fn($r) => !\in_array($r->name, $rootRoles));
+        $createdRoles = array_filter($createdRoles, fn ($r) => ! \in_array($r->name, $rootRoles));
 
         // Fetch all permission names present in this tenant DB
         $allPermissions = Permission::all()->pluck('name')->toArray();
@@ -182,7 +182,7 @@ class TenancyRolesTableSeeder extends Seeder
                         continue;
                     }
                 }
-                if (!$matched) {
+                if (! $matched) {
                     continue;
                 }
 
@@ -198,10 +198,11 @@ class TenancyRolesTableSeeder extends Seeder
                         continue;
                     }
                 }
-                if (!$excluded) {
+                if (! $excluded) {
                     $matches[] = $perm;
                 }
             }
+
             return array_values(array_unique($matches));
         };
 
@@ -216,7 +217,7 @@ class TenancyRolesTableSeeder extends Seeder
             $key = mb_strtolower($roleName);
             $role = $rolesMap[$key] ?? null;
 
-            if (!$role) {
+            if (! $role) {
                 // fuzzy match for slight spelling differences
                 foreach ($rolesMap as $lowerName => $r) {
                     if (Str::contains($lowerName, $key) || Str::contains($key, $lowerName)) {
@@ -226,7 +227,7 @@ class TenancyRolesTableSeeder extends Seeder
                 }
             }
 
-            if (!$role) {
+            if (! $role) {
                 continue; // role not seeded (e.g., it was a root role)
             }
 
@@ -240,13 +241,13 @@ class TenancyRolesTableSeeder extends Seeder
             $permsForRole = $collectMatching($patterns, $exclude);
 
             if (property_exists($this, 'command') && $this->command) {
-                $this->command->info("Role: {$role->name} will get " . \count($permsForRole) . " permissions:");
+                $this->command->info("Role: {$role->name} will get ".\count($permsForRole).' permissions:');
                 foreach ($permsForRole as $p) {
                     $this->command->line(" - {$p}");
                 }
             }
 
-            if (!empty($permsForRole)) {
+            if (! empty($permsForRole)) {
                 $role->givePermissionTo($permsForRole);
             }
         }

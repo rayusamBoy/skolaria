@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Tenant;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\PermissionRegistrar;
 
 class SyncPermissions extends Command
 {
@@ -32,7 +34,7 @@ class SyncPermissions extends Command
 
     public function handle(): int
     {
-        $runCentral = $this->option('central') || !$this->option('all-tenants') && empty($this->option('tenant'));
+        $runCentral = $this->option('central') || ! $this->option('all-tenants') && empty($this->option('tenant'));
         $runAllTenants = $this->option('all-tenants');
         $specificTenants = $this->option('tenant');
         $deleteExisting = $this->option('delete-existing');
@@ -46,11 +48,12 @@ class SyncPermissions extends Command
         }
 
         // ---------- Tenants ----------
-        if ($runAllTenants || !empty($specificTenants)) {
-            $tenants = $runAllTenants ? \App\Models\Tenant::all() : \App\Models\Tenant::whereIn('id', $specificTenants)->get();
+        if ($runAllTenants || ! empty($specificTenants)) {
+            $tenants = $runAllTenants ? Tenant::all() : Tenant::whereIn('id', $specificTenants)->get();
 
             if ($tenants->isEmpty()) {
                 $this->warn('No matching tenants found.');
+
                 return 1;
             }
 
@@ -61,14 +64,14 @@ class SyncPermissions extends Command
                     tenancy()->initialize($tenant);
                     $this->syncContext('permissions.names.tenant', 'tenant', $guard, $deleteExisting, $updateExisting);
                 } catch (\Throwable $e) {
-                    $this->error("Failed to sync tenant {$tenant->id}: " . $e->getMessage());
+                    $this->error("Failed to sync tenant {$tenant->id}: ".$e->getMessage());
                 } finally {
                     tenancy()->end();
                 }
             }
         }
 
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
         $this->info('All done.');
 
         return 0;
@@ -83,6 +86,7 @@ class SyncPermissions extends Command
 
         if (empty($permissionsConfig)) {
             $this->warn("No permissions found in config('{$configKey}').");
+
             return;
         }
 
@@ -132,6 +136,7 @@ class SyncPermissions extends Command
                         $this->warn(
                             "    Ignoring duplicate permission {$permission} from action {$action}"
                         );
+
                         continue;
                     }
 
@@ -185,8 +190,9 @@ class SyncPermissions extends Command
         bool $updateExisting
     ): void {
         $name = $perm['permission'] ?? null;
-        if (!$name)
+        if (! $name) {
             return;
+        }
 
         $label = $perm['label'] ?? $name;
         $description = $perm['description'] ?? '';
@@ -196,7 +202,7 @@ class SyncPermissions extends Command
             ->where('guard_name', $guard)
             ->first();
 
-        if (!$existing) {
+        if (! $existing) {
             // Insert new
             DB::table($table)->insert([
                 'name' => $name,
@@ -208,6 +214,7 @@ class SyncPermissions extends Command
             ]);
             $inserted++;
             $this->line("    + {$name}");
+
             return;
         }
 
@@ -222,10 +229,11 @@ class SyncPermissions extends Command
                 $newData['description'] = $description;
             }
 
-            if (!empty($newData)) {
+            if (! empty($newData)) {
                 DB::table($table)->where('id', $existing->id)->update($newData);
                 $updated++;
                 $this->line("    ~ {$name} (label/description updated)");
+
                 return;
             }
         }

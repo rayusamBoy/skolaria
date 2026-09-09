@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class TTRecordRequest extends FormRequest
 {
-
     public function authorize()
     {
         return true;
@@ -14,6 +13,7 @@ class TTRecordRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     *
      * @return array
      */
     public function rules()
@@ -40,5 +40,4 @@ class TTRecordRequest extends FormRequest
             'section_id' => 'section',
         ];
     }
-
 }

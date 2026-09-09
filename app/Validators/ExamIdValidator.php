@@ -10,8 +10,8 @@ class ExamIdValidator
     /**
      * Validate the given exam ID.
      *
-     * @param mixed $exam_id
-     * @return void
+     * @param  mixed  $exam_id
+     *
      * @throws ValidationException
      */
     public static function validate($exam_id): void

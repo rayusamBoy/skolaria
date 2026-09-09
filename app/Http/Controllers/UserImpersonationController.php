@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Repositories\TenantRepo;
 use App\Repositories\UserRepo;
@@ -16,6 +15,7 @@ use Stancl\Tenancy\Features\UserImpersonation;
 class UserImpersonationController extends Controller
 {
     protected UserRepo $user;
+
     protected TenantRepo $tenant;
 
     public function __construct(
@@ -45,9 +45,11 @@ class UserImpersonationController extends Controller
     {
         try {
             session()->put('impersonated_from_central', true);
-            return UserImpersonation::makeResponse($token)->with('pop_success', "You have now logged in as the impersonated user - Super Admin.");
+
+            return UserImpersonation::makeResponse($token)->with('pop_success', 'You have now logged in as the impersonated user - Super Admin.');
         } catch (\Error) {
             session()->forget('impersonated_from_central');
+
             return back();
         }
     }
@@ -64,6 +66,7 @@ class UserImpersonationController extends Controller
         }
 
         $domain = Qs::formatDomain($tenant->domain->domain ?? $tenant->domain);
+
         return redirect("$domain/impersonate/{$token->token}");
     }
 

@@ -11,7 +11,7 @@ class DatabaseSeederNonTenancy extends Seeder
      */
     public function run(): void
     {
-        // Universal seeders       
+        // Universal seeders
         $this->call(WorldSeeder::class);
         $this->call(BloodGroupsTableSeeder::class);
         // Not tenancy specific seeders

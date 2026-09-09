@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\User;
-use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model as Eloquent;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -32,7 +32,7 @@ class StudentRecord extends Eloquent
         'disability',
         'chronic_health_problems',
         'parent_status',
-        'food_taboos'
+        'food_taboos',
     ];
 
     protected $casts = [

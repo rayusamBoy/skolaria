@@ -11,12 +11,12 @@ class PaymentRecord extends Eloquent
 {
     use LogsActivity;
 
-    protected $fillable =['student_id', 'payment_id', 'amount_paid', 'year', 'is_paid', 'balance', 'reference_number'];
+    protected $fillable = ['student_id', 'payment_id', 'amount_paid', 'year', 'is_paid', 'balance', 'reference_number'];
 
     protected $casts = [
         'is_paid' => 'boolean',
     ];
-    
+
     public function payment()
     {
         return $this->belongsTo(Payment::class);

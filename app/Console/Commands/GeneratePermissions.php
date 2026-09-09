@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Auth\Attributes\Permission;
+use App\Auth\Attributes\SkipPermission;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
@@ -13,12 +15,13 @@ use ReflectionMethod;
  * and generates permission names based on method names and configurable mapping rules.
  * The generated permission names are then printed to the console in a structured format.
  * This is intended as a developer tool to help maintain a consistent permission naming scheme across the application.
- * 
+ *
  * The printed permission names can be used to populate the permissions configuration or for reference when reviewing permissions.
  */
 class GeneratePermissions extends Command
 {
     protected $signature = 'permissions:generate';
+
     protected $description = 'Scan controllers and print permission names to the console';
 
     public function __construct(protected Filesystem $files)
@@ -29,8 +32,9 @@ class GeneratePermissions extends Command
     public function handle(): int
     {
         $base = base_path('app/Http/Controllers');
-        if (!$this->files->isDirectory($base)) {
+        if (! $this->files->isDirectory($base)) {
             $this->error("Controllers path not found: {$base}");
+
             return 1;
         }
 
@@ -44,27 +48,32 @@ class GeneratePermissions extends Command
         $centralOnly = [];
 
         foreach ($this->files->allFiles($base) as $file) {
-            if ($file->getExtension() !== 'php')
+            if ($file->getExtension() !== 'php') {
                 continue;
+            }
 
-            $relative = str_replace(app_path() . DIRECTORY_SEPARATOR, '', $file->getRealPath());
-            $fqcn = 'App\\' . str_replace([DIRECTORY_SEPARATOR, '.php'], ['\\', ''], $relative);
+            $relative = str_replace(app_path().DIRECTORY_SEPARATOR, '', $file->getRealPath());
+            $fqcn = 'App\\'.str_replace([DIRECTORY_SEPARATOR, '.php'], ['\\', ''], $relative);
 
-            if (!class_exists($fqcn)) {
+            if (! class_exists($fqcn)) {
                 require_once $file->getRealPath();
-                if (!class_exists($fqcn))
+                if (! class_exists($fqcn)) {
                     continue;
+                }
             }
 
             $rc = new ReflectionClass($fqcn);
-            if ($rc->isAbstract() || $rc->isInterface())
+            if ($rc->isAbstract() || $rc->isInterface()) {
                 continue;
-            if (!Str::startsWith($rc->getNamespaceName(), 'App\Http\Controllers'))
+            }
+            if (! Str::startsWith($rc->getNamespaceName(), 'App\Http\Controllers')) {
                 continue;
+            }
 
             $short = $rc->getShortName();
-            if (!Str::endsWith($short, 'Controller'))
+            if (! Str::endsWith($short, 'Controller')) {
                 continue;
+            }
 
             // ignore controllers by name
             if (\in_array($short, $ignoreControllers, true) || \in_array($rc->getName(), $ignoreControllers, true)) {
@@ -86,43 +95,49 @@ class GeneratePermissions extends Command
                     }
                 }
             }
-            if ($skipByPath)
+            if ($skipByPath) {
                 continue;
+            }
 
             // class-level quick skips
             if (method_exists($rc, 'getAttributes')) {
                 foreach ($rc->getAttributes() as $attr) {
                     $an = $attr->getName();
-                    if (str_ends_with($an, 'SkipPermissions') || $an === \App\Auth\Attributes\SkipPermission::class) {
+                    if (str_ends_with($an, 'SkipPermissions') || $an === SkipPermission::class) {
                         continue 2;
                     }
                 }
             }
             $classDoc = $rc->getDocComment() ?: '';
-            if ($classDoc && preg_match('/@permissions-ignore\b/', $classDoc))
+            if ($classDoc && preg_match('/@permissions-ignore\b/', $classDoc)) {
                 continue;
+            }
             $defaults = $rc->getDefaultProperties();
-            if (!empty($defaults['skipPermissions']))
+            if (! empty($defaults['skipPermissions'])) {
                 continue;
+            }
 
             $baseName = substr($short, 0, -10);
             $resource = Str::plural(Str::snake($baseName, '_'));
-            if (Str::contains($filepath, DIRECTORY_SEPARATOR . 'Central' . DIRECTORY_SEPARATOR)) {
+            if (Str::contains($filepath, DIRECTORY_SEPARATOR.'Central'.DIRECTORY_SEPARATOR)) {
                 $centralOnly[$resource] = true;
             }
 
             foreach ($rc->getMethods(ReflectionMethod::IS_PUBLIC) as $m) {
-                if ($m->getDeclaringClass()->getName() !== $rc->getName())
+                if ($m->getDeclaringClass()->getName() !== $rc->getName()) {
                     continue;
+                }
                 $mname = $m->getName();
-                if (str_starts_with($mname, '_'))
+                if (str_starts_with($mname, '_')) {
                     continue;
-                if (\in_array($mname, ['__construct', '__call', 'callAction', 'middleware', 'authorize', 'middlewarePriority'], true))
+                }
+                if (\in_array($mname, ['__construct', '__call', 'callAction', 'middleware', 'authorize', 'middlewarePriority'], true)) {
                     continue;
+                }
                 if (method_exists($m, 'getAttributes')) {
                     foreach ($m->getAttributes() as $attr) {
                         $an = $attr->getName();
-                        if ($an === \App\Auth\Attributes\SkipPermission::class || str_ends_with($an, 'SkipPermission')) {
+                        if ($an === SkipPermission::class || str_ends_with($an, 'SkipPermission')) {
                             continue 2;
                         }
                     }
@@ -143,7 +158,7 @@ class GeneratePermissions extends Command
         }
 
         $central = array_values(array_keys($centralOnly));
-        $this->line('Central-only resources: ' . ($central ? implode(', ', $central) : '(none)'));
+        $this->line('Central-only resources: '.($central ? implode(', ', $central) : '(none)'));
 
         return 0;
     }
@@ -168,10 +183,11 @@ class GeneratePermissions extends Command
         if (method_exists($m, 'getAttributes')) {
             foreach ($m->getAttributes() as $attr) {
                 $an = $attr->getName();
-                if (str_ends_with($an, 'Permission') || $an === \App\Auth\Attributes\Permission::class) {
+                if (str_ends_with($an, 'Permission') || $an === Permission::class) {
                     $args = $attr->getArguments();
-                    if (!empty($args[0]))
+                    if (! empty($args[0])) {
                         return (string) $args[0];
+                    }
                 }
             }
         }
@@ -181,7 +197,7 @@ class GeneratePermissions extends Command
         }
 
         // 2) explicit config overrides (controller short name first, then resource)
-        if (!empty($overrides)) {
+        if (! empty($overrides)) {
             if (isset($overrides[$controllerShort]) && isset($overrides[$controllerShort][$mname])) {
                 return $overrides[$controllerShort][$mname];
             }
@@ -205,14 +221,17 @@ class GeneratePermissions extends Command
 
         if (isset($methodMap[$verb])) {
             $action = $methodMap[$verb];
-            if (!empty($rest)) {
+            if (! empty($rest)) {
                 $tail = $useDots ? implode('.', $rest) : implode('_', $rest);
+
                 return "{$resource}.{$action}.{$tail}";
             }
+
             return "{$resource}.{$action}";
         }
 
         $suffix = $useDots ? str_replace('_', '.', $s) : $s;
+
         return "{$resource}.{$suffix}";
     }
 }

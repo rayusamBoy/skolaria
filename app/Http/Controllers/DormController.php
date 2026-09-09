@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Dorm\DormCreate;
 use App\Http\Requests\Dorm\DormUpdate;
 use App\Repositories\DormRepo;

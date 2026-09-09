@@ -1,4 +1,5 @@
 <?php
+
 use App\Helpers\Qs;
 
 return [
@@ -17,199 +18,199 @@ return [
         'icons' => [
             '16x16' => [
                 'path' => '/images/icons/icon-16x16.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '20x20' => [
                 'path' => '/images/icons/icon-20x20.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '29x29' => [
                 'path' => '/images/icons/icon-29x29.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '30x30' => [
                 'path' => '/images/icons/icon-30x30.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '32x32' => [
                 'path' => '/images/icons/icon-32x32.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '36x36' => [
                 'path' => '/images/icons/icon-36x36.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '40x40' => [
                 'path' => '/images/icons/icon-40x40.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '44x44' => [
                 'path' => '/images/icons/icon-44x44.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '48x48' => [
                 'path' => '/images/icons/icon-48x48.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '50x50' => [
                 'path' => '/images/icons/icon-50x50.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '55x55' => [
                 'path' => '/images/icons/icon-55x55.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '57x57' => [
                 'path' => '/images/icons/icon-57x57.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '58x58' => [
                 'path' => '/images/icons/icon-58x58.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '60x60' => [
                 'path' => '/images/icons/icon-60x60.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '62x62' => [
                 'path' => '/images/icons/icon-62x62.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '64x64' => [
                 'path' => '/images/icons/icon-64x64.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '66x66' => [
                 'path' => '/images/icons/icon-66x66.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '70x70' => [
                 'path' => '/images/icons/icon-70x70.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '71x71' => [
                 'path' => '/images/icons/icon-71x71.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '72x72' => [
                 'path' => '/images/icons/icon-72x72.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '76x76' => [
                 'path' => '/images/icons/icon-76x76.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '80x80' => [
                 'path' => '/images/icons/icon-80x80.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '87x87' => [
                 'path' => '/images/icons/icon-87x87.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '88x88' => [
                 'path' => '/images/icons/icon-88x88.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '92x92' => [
                 'path' => '/images/icons/icon-92x92.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '96x96' => [
                 'path' => '/images/icons/icon-96x96.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '100x100' => [
                 'path' => '/images/icons/icon-100x100.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '114x114' => [
                 'path' => '/images/icons/icon-114x114.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '120x120' => [
                 'path' => '/images/icons/icon-120x120.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '128x128' => [
                 'path' => '/images/icons/icon-128x128.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '144x144' => [
                 'path' => '/images/icons/icon-144x144.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '150x150' => [
                 'path' => '/images/icons/icon-150x150.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '152x152' => [
                 'path' => '/images/icons/icon-152x152.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '167x167' => [
                 'path' => '/images/icons/icon-167x167.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '170x170' => [
                 'path' => '/images/icons/icon-170x170.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '172x172' => [
                 'path' => '/images/icons/icon-172x172.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '180x180' => [
                 'path' => '/images/icons/icon-180x180.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '192x192' => [
                 'path' => '/images/icons/icon-192x192.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '196x196' => [
                 'path' => '/images/icons/icon-196x196.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '216x216' => [
                 'path' => '/images/icons/icon-216x216.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '256x256' => [
                 'path' => '/images/icons/icon-256x256.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '300x300' => [
                 'path' => '/images/icons/icon-300x300.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '310x310' => [
                 'path' => '/images/icons/icon-310x310.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '358x358' => [
                 'path' => '/images/icons/icon-358x358.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '360x360' => [
                 'path' => '/images/icons/icon-360x360.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '384x384' => [
                 'path' => '/images/icons/icon-384x384.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '512x512' => [
                 'path' => '/images/icons/icon-512x512.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '558x558' => [
                 'path' => '/images/icons/icon-558x558.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
             '1024x1024' => [
                 'path' => '/images/icons/icon-1024x1024.png',
-                'purpose' => 'any'
+                'purpose' => 'any',
             ],
         ],
         'splash' => [
@@ -248,79 +249,79 @@ return [
             '2796x1290' => '/images/icons/splash-2796x1290.png',
         ],
         'custom' => [
-            "description" => "The system is a progressive web app with offline access and customizable color modes with beautiful User Interface (UI), built-in messaging and notifications, and eight default distinct user roles—each with tailored permissions.",
-            "screenshots" => [
+            'description' => 'The system is a progressive web app with offline access and customizable color modes with beautiful User Interface (UI), built-in messaging and notifications, and eight default distinct user roles—each with tailored permissions.',
+            'screenshots' => [
                 [
-                    "src" => "/images/screenshots/tenancy/login.png",
-                    "sizes" => "1280x720",
-                    "type" => "image/png",
-                    "form_factor" => "wide",
-                    "label" => "Login Tenant",
+                    'src' => '/images/screenshots/tenancy/login.png',
+                    'sizes' => '1280x720',
+                    'type' => 'image/png',
+                    'form_factor' => 'wide',
+                    'label' => 'Login Tenant',
                 ],
                 [
-                    "src" => "/images/screenshots/tenancy/parent-my-dashboard-light.png",
-                    "sizes" => "1280x720",
-                    "type" => "image/png",
-                    "form_factor" => "wide",
-                    "label" => "Student My Account Light Tenant",
+                    'src' => '/images/screenshots/tenancy/parent-my-dashboard-light.png',
+                    'sizes' => '1280x720',
+                    'type' => 'image/png',
+                    'form_factor' => 'wide',
+                    'label' => 'Student My Account Light Tenant',
                 ],
                 [
-                    "src" => "/images/screenshots/tenancy/parent-my-profile-dark.png",
-                    "sizes" => "1280x720",
-                    "type" => "image/png",
-                    "form_factor" => "wide",
-                    "label" => "Parent My Profile",
+                    'src' => '/images/screenshots/tenancy/parent-my-profile-dark.png',
+                    'sizes' => '1280x720',
+                    'type' => 'image/png',
+                    'form_factor' => 'wide',
+                    'label' => 'Parent My Profile',
                 ],
                 [
-                    "src" => "/images/screenshots/non_tenancy/dashboard-dark.png",
-                    "sizes" => "1280x720",
-                    "type" => "image/png",
-                    "form_factor" => "wide",
-                    "label" => "Dashboard Dark Non-Tenant",
+                    'src' => '/images/screenshots/non_tenancy/dashboard-dark.png',
+                    'sizes' => '1280x720',
+                    'type' => 'image/png',
+                    'form_factor' => 'wide',
+                    'label' => 'Dashboard Dark Non-Tenant',
                 ],
                 [
-                    "src" => "/images/screenshots/non_tenancy/system-settings-light.png",
-                    "sizes" => "1280x720",
-                    "type" => "image/png",
-                    "form_factor" => "wide",
-                    "label" => "system Settings Light Non-Tenant",
+                    'src' => '/images/screenshots/non_tenancy/system-settings-light.png',
+                    'sizes' => '1280x720',
+                    'type' => 'image/png',
+                    'form_factor' => 'wide',
+                    'label' => 'system Settings Light Non-Tenant',
                 ],
                 [
-                    "src" => "/images/screenshots/non_tenancy/narrow-login.png",
-                    "sizes" => "375x812",
-                    "type" => "image/png",
-                    "form_factor" => "narrow",
-                    "label" => "Login Light Mobile",
+                    'src' => '/images/screenshots/non_tenancy/narrow-login.png',
+                    'sizes' => '375x812',
+                    'type' => 'image/png',
+                    'form_factor' => 'narrow',
+                    'label' => 'Login Light Mobile',
                 ],
                 [
-                    "src" => "/images/screenshots/non_tenancy/narrow-dashboard-light.png",
-                    "sizes" => "375x812",
-                    "type" => "image/png",
-                    "form_factor" => "narrow",
-                    "label" => "Dashboard Light Mobile",
+                    'src' => '/images/screenshots/non_tenancy/narrow-dashboard-light.png',
+                    'sizes' => '375x812',
+                    'type' => 'image/png',
+                    'form_factor' => 'narrow',
+                    'label' => 'Dashboard Light Mobile',
                 ],
                 [
-                    "src" => "/images/screenshots/tenancy/narrow-librarian-dashboard-light.png",
-                    "sizes" => "375x812",
-                    "type" => "image/png",
-                    "form_factor" => "narrow",
-                    "label" => "Librarian Dashboard Light Mobile",
+                    'src' => '/images/screenshots/tenancy/narrow-librarian-dashboard-light.png',
+                    'sizes' => '375x812',
+                    'type' => 'image/png',
+                    'form_factor' => 'narrow',
+                    'label' => 'Librarian Dashboard Light Mobile',
                 ],
                 [
-                    "src" => "/images/screenshots/tenancy/narrow-parent-my-children-light.png",
-                    "sizes" => "375x812",
-                    "type" => "image/png",
-                    "form_factor" => "narrow",
-                    "label" => "Parent My Children Light Mobile",
+                    'src' => '/images/screenshots/tenancy/narrow-parent-my-children-light.png',
+                    'sizes' => '375x812',
+                    'type' => 'image/png',
+                    'form_factor' => 'narrow',
+                    'label' => 'Parent My Children Light Mobile',
                 ],
                 [
-                    "src" => "/images/screenshots/tenancy/narrow-student-manage-timetables-light.png",
-                    "sizes" => "375x812",
-                    "type" => "image/png",
-                    "form_factor" => "narrow",
-                    "label" => "Student Manage Timetables Light Mobile",
+                    'src' => '/images/screenshots/tenancy/narrow-student-manage-timetables-light.png',
+                    'sizes' => '375x812',
+                    'type' => 'image/png',
+                    'form_factor' => 'narrow',
+                    'label' => 'Student Manage Timetables Light Mobile',
                 ],
             ],
-        ]
-    ]
+        ],
+    ],
 ];

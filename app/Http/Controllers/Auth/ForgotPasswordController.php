@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\View\View;
 
 class ForgotPasswordController extends Controller implements HasMiddleware
 {
@@ -36,7 +37,7 @@ class ForgotPasswordController extends Controller implements HasMiddleware
     /**
      * Display the form to request a password reset link.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function showLinkRequestForm()
     {

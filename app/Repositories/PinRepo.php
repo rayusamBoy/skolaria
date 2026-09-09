@@ -14,8 +14,7 @@ class PinRepo
     /**
      * Insert one or more pins via the DB facade.
      *
-     * @param array $values  single or multi‑dimensional array
-     * @return bool
+     * @param  array  $values  single or multi‑dimensional array
      */
     public function insertPins(array $values): bool
     {
@@ -24,8 +23,6 @@ class PinRepo
 
     /**
      * Count currently valid (unused) pins.
-     *
-     * @return int
      */
     public function countValidPins(): int
     {
@@ -35,9 +32,7 @@ class PinRepo
     /**
      * Update a pin by its primary key.
      *
-     * @param int   $id
-     * @param array $data
-     * @return int  Number of updated rows
+     * @return int Number of updated rows
      */
     public function updatePin(int $id, array $data): int
     {
@@ -46,11 +41,6 @@ class PinRepo
 
     /**
      * Get a query builder for a specific user/student pin.
-     *
-     * @param string $code
-     * @param int    $user_id
-     * @param int    $st_id
-     * @return Builder
      */
     public function getUserPinBuilder(string $code, int $user_id, int $st_id): Builder
     {
@@ -59,9 +49,6 @@ class PinRepo
 
     /**
      * Get a query builder for a valid (unused) pin by its code.
-     *
-     * @param string $code
-     * @return Builder
      */
     public function getValidPinByCode(string $code): Builder
     {
@@ -71,7 +58,7 @@ class PinRepo
     /**
      * Delete all used pins.
      *
-     * @return int  Number of deleted rows
+     * @return int Number of deleted rows
      */
     public function deleteUsedPins(): int
     {
@@ -80,9 +67,6 @@ class PinRepo
 
     /**
      * Raw query builder for pins matching conditions.
-     *
-     * @param array $where
-     * @return Builder
      */
     public function getPinBuilder(array $where): Builder
     {
@@ -91,8 +75,6 @@ class PinRepo
 
     /**
      * Get all valid (unused) pins.
-     *
-     * @return Collection
      */
     public function getValidPins(): Collection
     {
@@ -101,8 +83,6 @@ class PinRepo
 
     /**
      * Get all used pins with user and student relations.
-     *
-     * @return Collection
      */
     public function getUsedPins(): Collection
     {

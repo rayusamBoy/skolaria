@@ -25,14 +25,23 @@ use Illuminate\View\View;
 class HomeController extends Controller
 {
     protected UserRepo $user;
+
     protected MyClassRepo $class;
+
     protected MyClassRepo $section;
+
     protected BookRepo $book;
+
     protected ExamRepo $exam;
+
     protected PaymentRepo $payment;
+
     protected NoticeRepo $notice;
+
     protected StudentRepo $student;
+
     protected MarkRepo $mark;
+
     protected AssessmentRepo $assessment;
 
     public function __construct(
@@ -113,9 +122,9 @@ class HomeController extends Controller
         $months_count = 12;
         ['months' => $months, 'periods' => $periods] = $this->buildMonths($months_count);
 
-        $students_by_month = $this->countByPeriods($periods, $student_recs, fn($s) => $s->user->created_at);
+        $students_by_month = $this->countByPeriods($periods, $student_recs, fn ($s) => $s->user->created_at);
         $payments_collection = $this->payment->getPaidRecordsWithValidPayment();
-        $payments_by_month = $this->countByPeriods($periods, $payments_collection, fn($p) => $p->created_at);
+        $payments_by_month = $this->countByPeriods($periods, $payments_collection, fn ($p) => $p->created_at);
 
         $gender_counts = $this->getGenderCounts($student_recs, 'user.gender');
 
@@ -154,10 +163,11 @@ class HomeController extends Controller
             'grad_students_male_count' => $grad_students->where('user.gender', User::GENDER_MALE)->count(),
             'grad_students_female_count' => $grad_students->where('user.gender', User::GENDER_FEMALE)->count(),
             'students_per_class_labels' => $class_labels,
-            'students_per_class_counts' => $class_counts
+            'students_per_class_counts' => $class_counts,
         ];
 
         $view = Usr::tenancyInitialized() ? 'pages.dashboard' : 'pages.central.dashboard';
+
         return view($view, $data);
     }
 
@@ -175,7 +185,8 @@ class HomeController extends Controller
 
         [$unviewed, $viewed] = $notices->partition(function ($notice) use ($auth_id) {
             $viewers = $notice->viewers_ids;
-            return $viewers === null || !\is_array($viewers) || !\in_array($auth_id, $viewers, true);
+
+            return $viewers === null || ! \is_array($viewers) || ! \in_array($auth_id, $viewers, true);
         });
 
         return [$unviewed->count(), $unviewed, $viewed];
@@ -262,6 +273,7 @@ class HomeController extends Controller
                 $female++;
             }
         }
+
         return ['male' => $male, 'female' => $female];
     }
 

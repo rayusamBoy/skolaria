@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Http\Controllers\Controller;
 use App\Repositories\LogRepo;
 use App\Repositories\MyClassRepo;
 use App\Repositories\UserRepo;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Artisan;
@@ -16,7 +14,9 @@ use Illuminate\View\View;
 class LogController extends Controller
 {
     protected UserRepo $user;
+
     protected MyClassRepo $my_class;
+
     protected LogRepo $log;
 
     public function __construct(UserRepo $user, MyClassRepo $my_class, LogRepo $log)
@@ -59,7 +59,7 @@ class LogController extends Controller
 
         $ok = $status === 0;
         $message = $ok
-            ? 'All recorded activity older than ' . config('activitylog.delete_records_older_than_days') . ' days deleted successfully.'
+            ? 'All recorded activity older than '.config('activitylog.delete_records_older_than_days').' days deleted successfully.'
             : 'Activity log cleaning failed.';
 
         return Qs::json($message, $ok);

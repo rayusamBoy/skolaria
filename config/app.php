@@ -1,6 +1,13 @@
 <?php
 
+use App\Helpers\Evt;
+use App\Helpers\Mk;
+use App\Helpers\Pay;
+use App\Helpers\Qs;
+use App\Helpers\Usr;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Facade;
+use Maatwebsite\Excel\Facades\Excel;
 
 return [
 
@@ -129,13 +136,13 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
-        'Qs' => App\Helpers\Qs::class,
-        'Mk' => App\Helpers\Mk::class,
-        'Pay' => App\Helpers\Pay::class,
-        'Evt' => App\Helpers\Evt::class,
-        'Usr' => App\Helpers\Usr::class,
-        'Eloquent' => Illuminate\Database\Eloquent\Model::class,
-        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+        'Qs' => Qs::class,
+        'Mk' => Mk::class,
+        'Pay' => Pay::class,
+        'Evt' => Evt::class,
+        'Usr' => Usr::class,
+        'Eloquent' => Model::class,
+        'Excel' => Excel::class,
     ])->toArray(),
 
     /*
@@ -156,11 +163,10 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-
     /*
     |--------------------------------------------------------------------------
     | Impersonate Secret
-    |-------------------------------------------------------------------------- 
+    |--------------------------------------------------------------------------
     |
     | This key is used to encrypt the impersonate token in the URL
     |

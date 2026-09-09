@@ -14,9 +14,13 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 class MarksImport implements ToCollection, WithHeadingRow, WithValidation
 {
     protected array $data;
+
     protected string $marks_table;
+
     protected Collection $subjects;
+
     protected array $subject_student_map = [];
+
     protected array $existing_marks = [];
 
     public function __construct(array $data)
@@ -41,7 +45,7 @@ class MarksImport implements ToCollection, WithHeadingRow, WithValidation
                 ->where('user.username', $row['admission_number'])
                 ->first();
 
-            if (!$student_mark) {
+            if (! $student_mark) {
                 continue; // Skip if student not found
             }
 

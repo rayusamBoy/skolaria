@@ -23,7 +23,7 @@ class SubjectRecordUpdate extends FormRequest
     {
         return [
             'subject_id' => [
-                Rule::unique(SubjectRecord::class)->where(fn($query) => $query->where('subject_id', $this->subject_id)->where('section_id', $this->section_id)->where('teacher_id', $this->teacher_id))->ignore($this->record)
+                Rule::unique(SubjectRecord::class)->where(fn ($query) => $query->where('subject_id', $this->subject_id)->where('section_id', $this->section_id)->where('teacher_id', $this->teacher_id))->ignore($this->record),
             ],
             'section_id' => 'nullable|prohibited_unless:students_ids,null',
             'students_ids' => 'nullable',

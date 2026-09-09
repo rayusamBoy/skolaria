@@ -17,10 +17,6 @@ class Usr extends Qs
 {
     /**
      * Get users by IDs, optionally including soft‑deleted ones.
-     *
-     * @param array $ids
-     * @param bool  $with_trashed
-     * @return Collection
      */
     public static function getUsersByIds(array $ids, bool $with_trashed = false): Collection
     {
@@ -31,21 +27,16 @@ class Usr extends Qs
 
     /**
      * Get users by role names.
-     *
-     * @param array $role_names
-     * @param array $with
-     * @return Collection
      */
     public static function getUsersByRoleNames(array $role_names, array $with = []): Collection
     {
-        $userRepo = new UserRepo();
+        $userRepo = new UserRepo;
+
         return $userRepo->getUsersByRoleNames($role_names, $with);
     }
 
     /**
      * List of education levels.
-     *
-     * @return array
      */
     public static function getEducationLevels(): array
     {
@@ -54,8 +45,6 @@ class Usr extends Qs
 
     /**
      * List of staff designations.
-     *
-     * @return array
      */
     public static function getStaffDesignations(): array
     {
@@ -89,8 +78,6 @@ class Usr extends Qs
 
     /**
      * List of predefined subject names.
-     *
-     * @return array
      */
     public static function getPredefinedSubjects(): array
     {
@@ -157,8 +144,6 @@ class Usr extends Qs
 
     /**
      * Statuses for student parents.
-     *
-     * @return array
      */
     public static function getStudentParentsStatus(): array
     {
@@ -171,8 +156,6 @@ class Usr extends Qs
 
     /**
      * Disability types (values) with descriptions (keys).
-     *
-     * @return array
      */
     public static function getDisabilities(): array
     {
@@ -189,19 +172,14 @@ class Usr extends Qs
 
     /**
      * Get all classes ordered by a given column (cached).
-     *
-     * @param string $order_by
-     * @return Collection
      */
     public static function getAllClassesOrdered(string $order_by = 'name'): Collection
     {
-        return once(fn() => MyClass::with(['class_type', 'section'])->orderBy($order_by)->get());
+        return once(fn () => MyClass::with(['class_type', 'section'])->orderBy($order_by)->get());
     }
 
     /**
      * Get all class types ordered by ID.
-     *
-     * @return Collection
      */
     public static function getClassTypes(): Collection
     {
@@ -210,20 +188,14 @@ class Usr extends Qs
 
     /**
      * Get students matching given conditions, including user relation (cached once).
-     *
-     * @param array $where
-     * @return Collection
      */
     public static function getStudentsWhere(array $where): Collection
     {
-        return once(fn() => StudentRecord::with('user')->where($where)->get()->whereNotNull('user'));
+        return once(fn () => StudentRecord::with('user')->where($where)->get()->whereNotNull('user'));
     }
 
     /**
      * Get all students of a class (with user relation).
-     *
-     * @param int $class_id
-     * @return Collection
      */
     public static function getClassStudents(int $class_id): Collection
     {
@@ -232,10 +204,6 @@ class Usr extends Qs
 
     /**
      * Get student records by user IDs with optional relationships.
-     *
-     * @param array $ids
-     * @param array $relationship
-     * @return Collection
      */
     public static function getStudentRecordByUserIds(array $ids, array $relationship = []): Collection
     {
@@ -244,10 +212,6 @@ class Usr extends Qs
 
     /**
      * Get student records for a single user ID with optional relationships.
-     *
-     * @param int   $id
-     * @param array $relationship
-     * @return Collection
      */
     public static function getStudentRecordByUserId(int $id, array $relationship = []): Collection
     {
@@ -256,24 +220,19 @@ class Usr extends Qs
 
     /**
      * Render class names as table headers, spanning their sections.
-     *
-     * @param Collection $class_collection
-     * @return string
      */
     public static function renderClassHeaders(Collection $class_collection): string
     {
         $html = '';
         foreach ($class_collection as $class) {
-            $html .= '<th colspan="' . $class->section->count() . '" class="text-center">' . $class->name . '</th>';
+            $html .= '<th colspan="'.$class->section->count().'" class="text-center">'.$class->name.'</th>';
         }
+
         return $html;
     }
 
     /**
      * Render section names as table cells.
-     *
-     * @param Collection $class_collection
-     * @return string
      */
     public static function renderSectionCells(Collection $class_collection): string
     {
@@ -283,14 +242,12 @@ class Usr extends Qs
                 $html .= "<td>{$section->name}</td>";
             }
         }
+
         return $html;
     }
 
     /**
      * Render male student count per section (active students).
-     *
-     * @param Collection $class_collection
-     * @return string
      */
     public static function renderMaleCountPerSectionRow(Collection $class_collection): string
     {
@@ -305,14 +262,12 @@ class Usr extends Qs
                 $html .= "<td>$count</td>";
             }
         }
+
         return $html;
     }
 
     /**
      * Render female student count per section (active students).
-     *
-     * @param Collection $class_collection
-     * @return string
      */
     public static function renderFemaleCountPerSectionRow(Collection $class_collection): string
     {
@@ -327,14 +282,12 @@ class Usr extends Qs
                 $html .= "<td>$count</td>";
             }
         }
+
         return $html;
     }
 
     /**
      * Render total student count per section (active).
-     *
-     * @param Collection $class_collection
-     * @return string
      */
     public static function renderTotalPerSectionRow(Collection $class_collection): string
     {
@@ -349,30 +302,26 @@ class Usr extends Qs
                 $html .= "<td>$count</td>";
             }
         }
+
         return $html;
     }
 
     /**
      * Render total student count per class (active).
-     *
-     * @param Collection $class_collection
-     * @return string
      */
     public static function renderTotalPerClassCell(Collection $class_collection): string
     {
         $html = '';
         foreach ($class_collection as $class) {
             $count = self::getStudentsWhere(['my_class_id' => $class->id, 'is_graduated' => false])->count();
-            $html .= '<td colspan="' . $class->section->count() . '">' . $count . '</td>';
+            $html .= '<td colspan="'.$class->section->count().'">'.$count.'</td>';
         }
+
         return $html;
     }
 
     /**
      * Render a complete class/section/student breakdown table.
-     *
-     * @param Collection $class_collection
-     * @return string
      */
     public static function renderClassPopulationTable(Collection $class_collection): string
     {
@@ -382,25 +331,22 @@ class Usr extends Qs
 
         return '<table class="table table-sm table-responsive text-center">
             <thead>
-                <tr><th>Class</th>' . self::renderClassHeaders($class_collection) . '</tr>
-                <tr><th>Section</th>' . self::renderSectionCells($class_collection) . '</tr>
+                <tr><th>Class</th>'.self::renderClassHeaders($class_collection).'</tr>
+                <tr><th>Section</th>'.self::renderSectionCells($class_collection).'</tr>
             </thead>
             <tbody>
-                <tr><td>Male</td>' . self::renderMaleCountPerSectionRow($class_collection) . '</tr>
-                <tr><td>Female</td>' . self::renderFemaleCountPerSectionRow($class_collection) . '</tr>
+                <tr><td>Male</td>'.self::renderMaleCountPerSectionRow($class_collection).'</tr>
+                <tr><td>Female</td>'.self::renderFemaleCountPerSectionRow($class_collection).'</tr>
             </tbody>
             <tfoot>
-                <tr><td>Total per Section</td>' . self::renderTotalPerSectionRow($class_collection) . '</tr>
-                <tr><td>Total per Class</td>' . self::renderTotalPerClassCell($class_collection) . '</tr>
+                <tr><td>Total per Section</td>'.self::renderTotalPerSectionRow($class_collection).'</tr>
+                <tr><td>Total per Class</td>'.self::renderTotalPerClassCell($class_collection).'</tr>
             </tfoot>
         </table>';
     }
 
     /**
      * Get nationality by ID.
-     *
-     * @param int $nationality_id
-     * @return Collection
      */
     public static function getNationality(int $nationality_id): Collection
     {
@@ -409,18 +355,13 @@ class Usr extends Qs
 
     /**
      * Generate an avatar image for a user.
-     *
-     * @param string $name
-     * @param string $code
-     * @param string $user_role
-     * @return string
      */
     public static function createAvatar(string $name, string $code, string $user_role): string
     {
         $words = explode(' ', $name);
         $initials = strtoupper(
             substr($words[0], 0, 1)
-            . (isset($words[1]) && $words[1] !== ''
+            .(isset($words[1]) && $words[1] !== ''
                 ? substr($words[1], 0, 1)
                 : (isset($words[2]) && $words[2] !== ''
                     ? substr($words[2], 0, 1)
@@ -429,7 +370,7 @@ class Usr extends Qs
             )
         );
 
-        $textColor = '#' . substr(md5($name), 0, 6);
+        $textColor = '#'.substr(md5($name), 0, 6);
         $image = imagecreate(200, 200);
         $bg = imagecolorallocatealpha($image, 0, 0, 0, 127);
         $text = imagecolorallocate(
@@ -441,9 +382,9 @@ class Usr extends Qs
         imagefill($image, 0, 0, $bg);
         imagettftext($image, 60, 0, 40, 130, $text, public_path('global_assets/fonts/CASTELAR.ttf'), $initials);
 
-        $dir_for_db = Qs::getUploadPath($user_role) . $code;
-        $dir_for_store = storage_path() . '/app/public/' . $dir_for_db;
-        if (!is_dir($dir_for_store)) {
+        $dir_for_db = Qs::getUploadPath($user_role).$code;
+        $dir_for_store = storage_path().'/app/public/'.$dir_for_db;
+        if (! is_dir($dir_for_store)) {
             mkdir($dir_for_store, 0755, true);
         }
 
@@ -457,8 +398,6 @@ class Usr extends Qs
 
     /**
      * Get all blood groups.
-     *
-     * @return Collection
      */
     public static function getBloodGroups(): Collection
     {
@@ -467,8 +406,6 @@ class Usr extends Qs
 
     /**
      * Book statuses with explanations.
-     *
-     * @return array
      */
     public static function getBookStatuses(): array
     {
@@ -486,8 +423,6 @@ class Usr extends Qs
 
     /**
      * Check if tenancy is initialized.
-     *
-     * @return bool
      */
     public static function tenancyInitialized(): bool
     {
@@ -496,18 +431,17 @@ class Usr extends Qs
 
     /**
      * Account statuses, optionally excluding some.
-     *
-     * @param array $remove
-     * @return array
      */
     public static function getAccountStatuses(array $remove = []): array
     {
         $statuses = ['Active', 'Inactive', 'Suspended', 'Blocked'];
+
         return $remove ? array_values(array_diff($statuses, $remove)) : $statuses;
     }
 
     /**
      * Get the default user image. Used when a user does not have a photo.
+     *
      * @return string
      */
     public static function getDefaultUserImage()
@@ -518,19 +452,18 @@ class Usr extends Qs
     /**
      * Get tenancy‑aware asset URL for a photo with cache busting.
      *
-     * @param string|null $url Relative URL of the photo asset (e.g., "path/to/photo"). Defaults to the default user image.
-     * @return string
+     * @param  string|null  $url  Relative URL of the photo asset (e.g., "path/to/photo"). Defaults to the default user image.
      */
-    public static function getTenancyAwarePhotoUrl(string|null $url): string
+    public static function getTenancyAwarePhotoUrl(?string $url): string
     {
         $url ??= self::getDefaultUserImage();
         $base_url = self::tenancyInitialized()
             ? (str_contains($url, 'global_assets') ? asset($url) : tenant_asset($url))
             : asset($url);
 
-        $is_tenant_asset = self::tenancyInitialized() && !str_contains($url, 'global_assets');
+        $is_tenant_asset = self::tenancyInitialized() && ! str_contains($url, 'global_assets');
         $cache_key = $is_tenant_asset
-            ? "asset_version_tenant_" . tenant('id') . "_{$url}"
+            ? 'asset_version_tenant_'.tenant('id')."_{$url}"
             : "asset_version_global_{$url}";
 
         $ttl = 60 * 10; // 10 minutes
@@ -547,8 +480,6 @@ class Usr extends Qs
 
     /**
      * Placeholder used for student exam number generation.
-     *
-     * @return string
      */
     public static function getStudentExamNumberPlaceholder(): string
     {
@@ -557,8 +488,6 @@ class Usr extends Qs
 
     /**
      * Get the two genders.
-     *
-     * @return array
      */
     public static function getGenders(): array
     {
@@ -567,8 +496,6 @@ class Usr extends Qs
 
     /**
      * Get list of religions.
-     *
-     * @return array
      */
     public static function getReligions(): array
     {
@@ -577,8 +504,6 @@ class Usr extends Qs
 
     /**
      * Get the application date format.
-     *
-     * @return string
      */
     public static function getDateFormat(): string
     {
@@ -587,14 +512,12 @@ class Usr extends Qs
 
     /**
      * Get tickets assigned to a user that are not closed or archived (cached).
-     *
-     * @param int|null $user_id
-     * @return Collection
      */
     public static function userAssignedTickets(?int $user_id = null): Collection
     {
         $user_id ??= auth()->id();
-        return once(fn() => Ticket::where('assigned_to', $user_id)
+
+        return once(fn () => Ticket::where('assigned_to', $user_id)
             ->where('status', '!=', 'closed')
             ->where('is_archived', false)
             ->get());
@@ -602,19 +525,14 @@ class Usr extends Qs
 
     /**
      * Generate a unique heading color based on a name.
-     *
-     * @param string $name
-     * @return string
      */
     public static function getUserMediaHeadingColor(string $name): string
     {
-        return '#' . substr(md5($name), 0, 6);
+        return '#'.substr(md5($name), 0, 6);
     }
 
     /**
      * Root roles for the current tenancy context.
-     *
-     * @return array
      */
     public static function getTenancyAwareRootRoles(): array
     {
@@ -628,8 +546,6 @@ class Usr extends Qs
 
     /**
      * Default roles for the current tenancy context.
-     *
-     * @return array
      */
     public static function getTenancyAwareDefaultRoles(): array
     {
@@ -643,8 +559,6 @@ class Usr extends Qs
 
     /**
      * Staff roles for the current tenancy context.
-     *
-     * @return array
      */
     public static function getTenancyAwareStaffRoles(): array
     {
@@ -658,15 +572,11 @@ class Usr extends Qs
 
     /**
      * Delete user photo directories for the given roles and user code.
-     *
-     * @param Collection|array $role_names
-     * @param string           $code
-     * @return void
      */
     public static function deleteUserPhotoDirs(Collection|array $role_names, string $code): void
     {
         foreach ($role_names as $name) {
-            $path = self::getUploadPath(strtolower($name)) . $code;
+            $path = self::getUploadPath(strtolower($name)).$code;
             if (Storage::exists($path)) {
                 Storage::deleteDirectory($path);
             }
@@ -675,8 +585,6 @@ class Usr extends Qs
 
     /**
      * Get the available application skins/themes with short description.
-     *
-     * @return array
      */
     public static function getAvailableAppSkins(): array
     {
@@ -697,8 +605,6 @@ class Usr extends Qs
 
     /**
      * Default user preferences.
-     *
-     * @return array
      */
     public static function getDefaultUserPreferences(): array
     {
@@ -711,8 +617,6 @@ class Usr extends Qs
 
     /**
      * Default notification preference values for a newly created user.
-     *
-     * @return array
      */
     public static function getDefaultNotificationPreferences(): array
     {
@@ -726,8 +630,6 @@ class Usr extends Qs
 
     /**
      * Get the value (path) of the login/related pages background image.
-     *
-     * @return string
      */
     public static function getLoginAndRelatedPagesBgValue(): string
     {
@@ -737,8 +639,7 @@ class Usr extends Qs
     /**
      * Get a tenancy‑aware image URL (or the default background) with cache busting.
      *
-     * @param mixed $img must have value and updated_at properties.
-     * @return string
+     * @param  mixed  $img  must have value and updated_at properties.
      */
     public static function getTenancyAwareImgOrDefaultBgUrl($img): string
     {
@@ -747,6 +648,6 @@ class Usr extends Qs
             ? asset(path: self::getLoginAndRelatedPagesBgValue())
             : (self::tenancyInitialized() ? tenant_asset($img_desc) : asset($img_desc));
 
-        return "$img_url?" . strtotime($img->updated_at);
+        return "$img_url?".strtotime($img->updated_at);
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Pin\PinCreate;
 use App\Http\Requests\Pin\PinVerify;
 use App\Repositories\PinRepo;
@@ -15,6 +14,7 @@ use Illuminate\View\View;
 class PinController extends Controller
 {
     protected PinRepo $pin;
+
     protected UserRepo $user;
 
     public function __construct(PinRepo $pin, UserRepo $user)
@@ -57,7 +57,7 @@ class PinController extends Controller
         if (
             auth()->user()->hasAnyRole([
                 config('roles.root_roles.tenant.superadmin'),
-                config('roles.default_roles.tenant.admin')
+                config('roles.default_roles.tenant.admin'),
             ])
         ) {
             return redirect(route('dashboard'));
@@ -108,7 +108,7 @@ class PinController extends Controller
         $pins = [];
 
         for ($i = 0; $i < $count; $i++) {
-            $code = Str::random(5) . '-' . Str::random(5) . '-' . Str::random(6);
+            $code = Str::random(5).'-'.Str::random(5).'-'.Str::random(6);
             $pins[] = ['code' => strtoupper($code)];
         }
 
@@ -146,6 +146,7 @@ class PinController extends Controller
         if (session()->has('assessments_url')) {
             return redirect(session()->get('assessments_url'));
         }
+
         return redirect()->route('dashboard');
     }
 }

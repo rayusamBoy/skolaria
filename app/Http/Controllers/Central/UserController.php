@@ -20,8 +20,11 @@ use Illuminate\View\View;
 class UserController extends Controller
 {
     protected UserRepo $user;
+
     protected LocationRepo $loc;
+
     protected MyClassRepo $my_class;
+
     protected PermissionRepo $permission;
 
     public function __construct(
@@ -97,7 +100,7 @@ class UserController extends Controller
         $username = $req->username ?? $staff_id;
 
         // Validate username/email presence
-        if (!$username && !$req->email) {
+        if (! $username && ! $req->email) {
             return Usr::json(__('msg.user_invalid'), false);
         }
 
@@ -154,7 +157,7 @@ class UserController extends Controller
      */
     public function show($user_id): View|RedirectResponse
     {
-        if (!$user_id) {
+        if (! $user_id) {
             return back();
         }
 
@@ -203,7 +206,7 @@ class UserController extends Controller
         $except_role = config('roles.default_roles.tenant.student');
         $except_roles = [$except_role];
 
-        if (!Usr::userIsHead()) {
+        if (! Usr::userIsHead()) {
             $except_roles[] = config('roles.default_roles.tenant.superadmin');
         }
 
@@ -215,7 +218,7 @@ class UserController extends Controller
      */
     protected function cannotModifyHeadUser($user_id): bool
     {
-        return Usr::userIsHead($user_id) && !Usr::userIsHead();
+        return Usr::userIsHead($user_id) && ! Usr::userIsHead();
     }
 
     /**
@@ -225,7 +228,7 @@ class UserController extends Controller
     {
         $user = auth()->user();
 
-        return $user_id != $user->id && !$user->hasAnyRole(Usr::getTenancyAwareStaffRoles());
+        return $user_id != $user->id && ! $user->hasAnyRole(Usr::getTenancyAwareStaffRoles());
     }
 
     /**
@@ -234,7 +237,8 @@ class UserController extends Controller
     protected function generateStaffId($employment_date = null): string
     {
         $date = $employment_date ?? now();
-        return Usr::getSystemShortCode() . '/STAFF/' . date('Y/m', strtotime($date)) . '/' . mt_rand(1000, 9999);
+
+        return Usr::getSystemShortCode().'/STAFF/'.date('Y/m', strtotime($date)).'/'.mt_rand(1000, 9999);
     }
 
     /**
@@ -247,7 +251,7 @@ class UserController extends Controller
             ...Usr::getParentRelativeRecordFields(),
             '_token',
             '_method',
-            'roles'
+            'roles',
         ]);
 
         $name = ucwords(strtolower($req->name));
@@ -279,15 +283,15 @@ class UserController extends Controller
         if ($req->hasFile('photo')) {
             $photo = $req->file('photo');
             $file_meta = Usr::getFileMetaData($photo);
-            $file_meta['name'] = 'photo.' . $file_meta['ext'];
+            $file_meta['name'] = 'photo.'.$file_meta['ext'];
             $file_meta['path'] = $photo->storeAs(
-                Usr::getUploadPath($last_role_name) . $user_code,
+                Usr::getUploadPath($last_role_name).$user_code,
                 $file_meta['name']
             );
-            $data['photo_path'] = 'storage/' . $file_meta['path'];
+            $data['photo_path'] = 'storage/'.$file_meta['path'];
         } elseif ($req->route()->getActionMethod() === 'store') {
             // Only generate avatar if the request is for creating a new user.
-            $data['photo_path'] = 'storage/' . Usr::createAvatar($data['name'], $user_code, $last_role_name);
+            $data['photo_path'] = 'storage/'.Usr::createAvatar($data['name'], $user_code, $last_role_name);
         }
     }
 

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Mk;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Subject\SubjectCreate;
 use App\Http\Requests\Subject\SubjectRecordCreate;
 use App\Http\Requests\Subject\SubjectRecordUpdate;
@@ -17,6 +16,7 @@ use Illuminate\View\View;
 class SubjectController extends Controller
 {
     protected MyClassRepo $my_class;
+
     protected UserRepo $user;
 
     public function __construct(MyClassRepo $my_class, UserRepo $user)
@@ -48,7 +48,7 @@ class SubjectController extends Controller
             'my_class',
             'record',
             'record.section',
-            'record.teacher'
+            'record.teacher',
         ]);
 
         return view('pages.subjects.records.index', $data);
@@ -101,14 +101,14 @@ class SubjectController extends Controller
     {
         $subject_record = $this->my_class->getSubjectRecord(['id' => $id])->first();
 
-        if (!$subject_record) {
+        if (! $subject_record) {
             return Mk::goWithDanger('subjects.index');
         }
 
         $data['sub_rec'] = $subject_record;
         $data['teachers'] = $this->user->getUsersByRoleNames([config('roles.default_roles.tenant.teacher')]);
         $data['my_class_sections'] = $this->my_class->getSectionsByConditions([
-            'my_class_id' => $subject_record->subject->my_class_id
+            'my_class_id' => $subject_record->subject->my_class_id,
         ]);
 
         return view('pages.subjects.records.edit', $data);

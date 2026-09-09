@@ -21,28 +21,37 @@ use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use PhpOffice\PhpSpreadsheet\Style\Protection;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, WithProperties, WithEvents, WithColumnWidths
+class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithColumnWidths, WithEvents, WithProperties, WithStyles
 {
     protected array $data;
+
     protected LocationRepo $location;
+
     protected MyClassRepo $my_class;
+
     protected DormRepo $dorm;
+
     protected array $all_headings;
+
     protected StudentRecordCreate $student_record_request;
+
     protected array $parameters_columns_to_hide_and_populate;
+
     protected int $end_data_row;
 
     protected const int NUMBER_OF_HEADING_ROWS = 5;
+
     protected const int DEFAULT_END_ROW = 1000;
+
     protected const string SHEET_PASSWORD = 'AllahKnowsBest';
 
     public function __construct($data)
     {
         $this->data = $data;
-        $this->location = new LocationRepo();
-        $this->my_class = new MyClassRepo();
-        $this->dorm = new DormRepo();
-        $this->student_record_request = new StudentRecordCreate();
+        $this->location = new LocationRepo;
+        $this->my_class = new MyClassRepo;
+        $this->dorm = new DormRepo;
+        $this->student_record_request = new StudentRecordCreate;
 
         $user_headings = StudentRecordController::getUserHeadings();
         $student_headings = StudentRecordController::getStudentHeadings();
@@ -81,6 +90,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
     public function properties(): array
     {
         $system = Usr::getSystemName();
+
         return [
             'creator' => $system,
             'lastModifiedBy' => $system,
@@ -164,8 +174,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
         $rules = $this->student_record_request->rules();
         $required_params = array_keys(array_filter(
             $rules,
-            fn($rule) =>
-            \is_array($rule) ? \in_array('required', $rule) : str_contains($rule, 'required')
+            fn ($rule) => \is_array($rule) ? \in_array('required', $rule) : str_contains($rule, 'required')
         ));
 
         $this->data['parameters_with_rule_required'] = $required_params;
@@ -201,7 +210,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
             $col_letter = Usr::numberToColumnLetter($col_index);
             $range = "{$col_letter}{$start_row}:{$col_letter}{$end_row}";
 
-            $validation = $sheet->getCell($col_letter . $start_row + 1)->getDataValidation();
+            $validation = $sheet->getCell($col_letter.$start_row + 1)->getDataValidation();
             $validation->setType(DataValidation::TYPE_LIST);
             $validation->setErrorStyle(DataValidation::STYLE_STOP);
             $validation->setAllowBlank(false);
@@ -225,8 +234,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
     {
         return array_keys(array_filter(
             $this->student_record_request->rules(),
-            fn($rule) =>
-            \is_array($rule) ? \in_array('date', $rule) || \in_array('date_format', $rule) : str_contains($rule, 'date')
+            fn ($rule) => \is_array($rule) ? \in_array('date', $rule) || \in_array('date_format', $rule) : str_contains($rule, 'date')
         ));
     }
 
@@ -247,7 +255,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
             $col_letter = Usr::numberToColumnLetter($col_index);
             $range = "{$col_letter}{$start_row}:{$col_letter}{$end_row}";
 
-            $validation = $sheet->getCell($col_letter . $start_row + 1)->getDataValidation();
+            $validation = $sheet->getCell($col_letter.$start_row + 1)->getDataValidation();
             $validation->setType(DataValidation::TYPE_DATE);
             $validation->setErrorStyle(DataValidation::STYLE_STOP);
             $validation->setAllowBlank(false);
@@ -257,7 +265,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
             $validation->setErrorTitle('Input error');
             $validation->setError('Value is not a valid date.');
             $validation->setPromptTitle('Enter a date.');
-            $validation->setPrompt("Please, enter a valid date.\nDate format: " . str_replace('Y', 'yyyy', Usr::getDateFormat()));
+            $validation->setPrompt("Please, enter a valid date.\nDate format: ".str_replace('Y', 'yyyy', Usr::getDateFormat()));
             $validation->setFormula1('DATE(1900,01,01)');
             $validation->setFormula2('TODAY()');
 
@@ -271,14 +279,14 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
     protected function getDropdownMappings(): array
     {
         return [
-            'gender' => fn() => Usr::getGenders(),
-            'blood_group_id' => fn() => Usr::getBloodGroups()->pluck('name')->toArray(),
-            'lga_id' => fn() => $this->location->getStateById($this->data['state']->id)->pluck('name')->toArray(),
-            'religion' => fn() => Usr::getReligions(),
-            'section_id' => fn() => $this->my_class->getClassSections($this->data['class']->id)->pluck('name')->toArray(),
-            'disability' => fn() => array_values(Usr::getDisabilities()),
-            'parent_status' => fn() => Usr::getStudentParentsStatus(),
-            'dorm_id' => fn() => $this->dorm->getAllDorms()->pluck('name')->toArray(),
+            'gender' => fn () => Usr::getGenders(),
+            'blood_group_id' => fn () => Usr::getBloodGroups()->pluck('name')->toArray(),
+            'lga_id' => fn () => $this->location->getStateById($this->data['state']->id)->pluck('name')->toArray(),
+            'religion' => fn () => Usr::getReligions(),
+            'section_id' => fn () => $this->my_class->getClassSections($this->data['class']->id)->pluck('name')->toArray(),
+            'disability' => fn () => array_values(Usr::getDisabilities()),
+            'parent_status' => fn () => Usr::getStudentParentsStatus(),
+            'dorm_id' => fn () => $this->dorm->getAllDorms()->pluck('name')->toArray(),
         ];
     }
 
@@ -312,6 +320,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithStyles, Wi
     private function mapHeadingToLetter(string $heading): string
     {
         $index = array_search($heading, $this->all_headings);
+
         return Usr::numberToColumnLetter($index !== false ? $index + 1 : 1);
     }
 }

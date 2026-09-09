@@ -26,6 +26,6 @@ class Request extends FormRequest
 
     public function attributes()
     {
-        return  [];
+        return [];
     }
 }

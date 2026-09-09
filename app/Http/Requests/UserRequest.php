@@ -19,7 +19,7 @@ class UserRequest extends FormRequest
     }
 
     /**
-     * Get the user ID being acted upon. 
+     * Get the user ID being acted upon.
      * This is used for unique validation rules to ignore the current user's record.
      *
      * @return int|string|null
@@ -64,8 +64,8 @@ class UserRequest extends FormRequest
             'social_security_number' => 'sometimes|nullable|string|unique:staff_records|min:6|max:9',
             'licence_number' => 'sometimes|nullable|string|unique:staff_records|max:10',
             'place_of_living' => 'sometimes|nullable|string|max:100|min:3',
-            'date_of_birth' => 'sometimes|nullable|date_format:' . Usr::getDateFormat(),
-            // The regex allows for alphabetic characters and spaces within each subject (for example, "Literature in English" is valid). 
+            'date_of_birth' => 'sometimes|nullable|date_format:'.Usr::getDateFormat(),
+            // The regex allows for alphabetic characters and spaces within each subject (for example, "Literature in English" is valid).
             // Each subject can be followed by a comma and optional spaces, before the next valid subject.
             'subjects_studied' => 'sometimes|nullable|max:250|regex:/^([a-zA-Z\s]+)(,\s*[a-zA-Z\s]+)*$/',
         ];
@@ -78,7 +78,7 @@ class UserRequest extends FormRequest
             'secondary_mobile' => ['sometimes', 'nullable', 'string', 'max:16', Rule::unique(User::class)->ignore($this->userId()), new StartsWithProperPhoneCode],
             'relative_primary_mobile' => ['sometimes', 'nullable', 'string', 'max:16', Rule::unique(ParentRelative::class)->ignore($this->userId()), new StartsWithProperPhoneCode],
             'relative_secondary_mobile' => ['sometimes', 'nullable', 'string', 'max:16', Rule::unique(ParentRelative::class)->ignore($this->userId()), new StartsWithProperPhoneCode],
-            'email' => ["sometimes", "nullable", "email", "max:100", Rule::unique(User::class)->ignore($this->userId())],
+            'email' => ['sometimes', 'nullable', 'email', 'max:100', Rule::unique(User::class)->ignore($this->userId())],
             'photo' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:2048',
             'address' => 'required|string|min:3|max:120',
             'state_id' => 'required',
@@ -96,7 +96,7 @@ class UserRequest extends FormRequest
             'social_security_number' => ['sometimes', 'nullable', 'string', 'min:3', 'max:15', Rule::unique('staff_records')->ignore($this->userId(), 'user_id')],
             'licence_number' => ['sometimes', 'nullable', 'string', 'max:10', Rule::unique('staff_records')->ignore($this->userId(), 'user_id')],
             'place_of_living' => 'sometimes|nullable|string|max:100|min:3',
-            'date_of_birth' => 'sometimes|nullable|date_format:' . Usr::getDateFormat(),
+            'date_of_birth' => 'sometimes|nullable|date_format:'.Usr::getDateFormat(),
             'subjects_studied' => 'sometimes|nullable|max:250|regex:/^([a-zA-Z\s]+)(,\s*[a-zA-Z\s]+)*$/',
         ];
 

@@ -6,7 +6,6 @@ use Illuminate\Database\Seeder;
 
 class ParentRelativesTableSeeder extends Seeder
 {
-
     /**
      * Auto generated seed file
      *
@@ -14,23 +13,20 @@ class ParentRelativesTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
         \DB::table('parent_relatives')->delete();
-        
-        \DB::table('parent_relatives')->insert(array (
-            0 => 
-            array (
+
+        \DB::table('parent_relatives')->insert([
+            0 => [
                 'user_id' => \DB::table('users')->where('username', 'parent')->value('id'),
                 'name' => 'Relative Name',
                 'primary_mobile' => '+255111122233',
-                'secondary_mobile' => NULL,
+                'secondary_mobile' => null,
                 'relation' => 'Brother',
-                'created_at' => NULL,
-                'updated_at' => NULL,
-            ),
-        ));
-        
-        
+                'created_at' => null,
+                'updated_at' => null,
+            ],
+        ]);
+
     }
 }

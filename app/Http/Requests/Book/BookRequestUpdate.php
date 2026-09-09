@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class BookRequestUpdate extends FormRequest
 {
-
     public function authorize()
     {
         return true;
@@ -22,7 +21,7 @@ class BookRequestUpdate extends FormRequest
         return [
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'remarks' => 'sometimes|nullable|string|max:500'
+            'remarks' => 'sometimes|nullable|string|max:500',
         ];
     }
 }

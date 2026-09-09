@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -14,8 +15,8 @@ return new class extends Migration {
             $table->unsignedInteger('exam_id');
             $table->unsignedInteger('assessment_id');
 
-            $table->foreign('exam_id', "exam_has_assessment_ibfk_1")->references(['id'])->on('exams')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreign('assessment_id', "exam_has_assessment_ibfk_2")->references(['id'])->on('assessments')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign('exam_id', 'exam_has_assessment_ibfk_1')->references(['id'])->on('exams')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign('assessment_id', 'exam_has_assessment_ibfk_2')->references(['id'])->on('assessments')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

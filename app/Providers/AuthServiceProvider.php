@@ -3,9 +3,9 @@
 namespace App\Providers;
 
 use App\Helpers\Usr;
+use App\Services\SyncMasterDataService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
-use App\Services\SyncMasterDataService;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -25,7 +25,7 @@ class AuthServiceProvider extends ServiceProvider
         if (config('tenancy.active_identification_mode') === 'request_data') {
             Gate::before(function ($user, $ability) {
                 $tenant = tenancy()->tenant;
-                if (!$tenant) {
+                if (! $tenant) {
                     return null; // central side – no lock enforcement
                 }
 
@@ -34,11 +34,11 @@ class AuthServiceProvider extends ServiceProvider
                     return null;
                 }
 
-                $tablePermissionMap = (new SyncMasterDataService())->getSyncableMappedTables();
+                $tablePermissionMap = (new SyncMasterDataService)->getSyncableMappedTables();
 
                 foreach ($lockedTables as $table) {
                     $prefix = $tablePermissionMap[$table] ?? null;
-                    if (!$prefix) {
+                    if (! $prefix) {
                         continue;
                     }
 
@@ -47,7 +47,7 @@ class AuthServiceProvider extends ServiceProvider
                         $verb = substr($ability, \strlen($prefix) + 1);
                         // Safe verbs that only read data
                         $readVerbs = ['view', 'show', 'list', 'index']; // adjust to your mapping
-                        if (!\in_array($verb, $readVerbs)) {
+                        if (! \in_array($verb, $readVerbs)) {
                             return false; // deny
                         }
                     }
@@ -57,6 +57,6 @@ class AuthServiceProvider extends ServiceProvider
             });
         }
 
-        Gate::before(static fn($user, string $ability) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()) ? true : null);
+        Gate::before(static fn ($user, string $ability) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()) ? true : null);
     }
 }

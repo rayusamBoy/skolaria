@@ -9,7 +9,6 @@ use Illuminate\Validation\Rule;
 
 class SectionCreate extends FormRequest
 {
-
     public function authorize()
     {
         return true;
@@ -26,7 +25,7 @@ class SectionCreate extends FormRequest
             'name' => [
                 'required',
                 'string',
-                Rule::unique(Section::class)->where(fn($query) => $query->where('name', $this->name)->where('my_class_id', $this->my_class_id))
+                Rule::unique(Section::class)->where(fn ($query) => $query->where('name', $this->name)->where('my_class_id', $this->my_class_id)),
             ],
             'my_class_id' => 'required',
             'teacher_id' => 'sometimes|nullable|exists:users,id',

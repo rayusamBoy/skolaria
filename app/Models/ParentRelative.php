@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\User;
-use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model as Eloquent;
 
 class ParentRelative extends Eloquent
 {

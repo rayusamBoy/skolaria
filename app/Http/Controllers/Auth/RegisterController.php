@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -45,7 +46,6 @@ class RegisterController extends Controller implements HasMiddleware
     /**
      * Get a validator for an incoming registration request.
      *
-     * @param  array  $data
      * @return \Illuminate\Contracts\Validation\Validator
      */
     protected function validator(array $data)
@@ -60,8 +60,7 @@ class RegisterController extends Controller implements HasMiddleware
     /**
      * Create a new user instance after a valid registration.
      *
-     * @param  array  $data
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return Model
      */
     protected function create(array $data)
     {

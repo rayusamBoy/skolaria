@@ -57,7 +57,7 @@ class AccountSecurityController extends Controller
      */
     public function get_recovery_codes(): array
     {
-        $recovery = new Recovery();
+        $recovery = new Recovery;
         $recovery->setBlocks(3);
 
         session()->put('twofa_recovery_codes', $recovery->toArray());
@@ -80,6 +80,7 @@ class AccountSecurityController extends Controller
                     'twofa_secret_code' => null,
                     'twofa_recovery_codes' => null,
                 ]);
+
                 return redirect()->route('index');
             }
 
@@ -164,7 +165,7 @@ class AccountSecurityController extends Controller
             ->where('user_id', auth()->id())
             ->latest('last_activity')
             ->get()
-            ->map(fn($session) => $this->formatSessionData($session));
+            ->map(fn ($session) => $this->formatSessionData($session));
     }
 
     /**
@@ -192,7 +193,7 @@ class AccountSecurityController extends Controller
             ->latest('last_activity')
             ->first();
 
-        if (!$last_activity) {
+        if (! $last_activity) {
             return $human ? 'Never' : now();
         }
 
@@ -231,7 +232,7 @@ class AccountSecurityController extends Controller
      */
     protected function createAgent($session): Agent
     {
-        return tap(new Agent(), fn($agent) => $agent->setUserAgent($session->user_agent));
+        return tap(new Agent, fn ($agent) => $agent->setUserAgent($session->user_agent));
     }
 
     /**
@@ -264,6 +265,7 @@ class AccountSecurityController extends Controller
     public function getGoogle2FASecretKey(): bool
     {
         $secret = auth()->user()->twofa_secret_code;
+
         return $secret !== null && $secret !== '';
     }
 
@@ -272,6 +274,6 @@ class AccountSecurityController extends Controller
      */
     protected function canNullSecretCode($user_id): bool
     {
-        return $user_id !== auth()->id() && !Qs::userIsHead();
+        return $user_id !== auth()->id() && ! Qs::userIsHead();
     }
 }

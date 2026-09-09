@@ -17,9 +17,6 @@ class MyClassRepo
 
     /**
      * Get classes matching the given conditions.
-     *
-     * @param array $where
-     * @return EloquentCollection
      */
     public function getClassesByConditions(array $where): EloquentCollection
     {
@@ -28,9 +25,6 @@ class MyClassRepo
 
     /**
      * Get a query builder for classes matching conditions, including sections.
-     *
-     * @param array $where
-     * @return Builder
      */
     public function getClassesWithSections(array $where): Builder
     {
@@ -39,8 +33,6 @@ class MyClassRepo
 
     /**
      * Get only soft‑deleted classes.
-     *
-     * @return EloquentCollection
      */
     public function getTrashedClasses(): EloquentCollection
     {
@@ -50,8 +42,7 @@ class MyClassRepo
     /**
      * Restore a soft‑deleted class by ID.
      *
-     * @param int $id
-     * @return int  Number of restored rows
+     * @return int Number of restored rows
      */
     public function restoreClass(int $id): int
     {
@@ -61,8 +52,7 @@ class MyClassRepo
     /**
      * Permanently delete a soft‑deleted class.
      *
-     * @param int $id
-     * @return int  Number of deleted rows
+     * @return int Number of deleted rows
      */
     public function forceDeleteClass(int $id): int
     {
@@ -71,9 +61,6 @@ class MyClassRepo
 
     /**
      * Find a class by its primary key.
-     *
-     * @param int $id
-     * @return MyClass|null
      */
     public function findClass(int $id): ?MyClass
     {
@@ -82,9 +69,6 @@ class MyClassRepo
 
     /**
      * Create a new class.
-     *
-     * @param array $data
-     * @return MyClass
      */
     public function createClass(array $data): MyClass
     {
@@ -93,10 +77,6 @@ class MyClassRepo
 
     /**
      * Update a class by ID.
-     *
-     * @param int   $id
-     * @param array $data
-     * @return int
      */
     public function updateClass(int $id, array $data): int
     {
@@ -105,9 +85,6 @@ class MyClassRepo
 
     /**
      * Delete a class by ID (soft delete).
-     *
-     * @param int $id
-     * @return int
      */
     public function deleteClass(int $id): int
     {
@@ -116,9 +93,6 @@ class MyClassRepo
 
     /**
      * Check if a class has student records.
-     *
-     * @param int $id
-     * @return bool
      */
     public function hasAnyClassStudents(int $id): bool
     {
@@ -129,8 +103,6 @@ class MyClassRepo
 
     /**
      * Get all class types ordered by name ascending.
-     *
-     * @return EloquentCollection
      */
     public function getAllClassTypes(): EloquentCollection
     {
@@ -139,9 +111,6 @@ class MyClassRepo
 
     /**
      * Find a class type by its primary key.
-     *
-     * @param int $class_type_id
-     * @return ClassType|null
      */
     public function findClassType(int $class_type_id): ?ClassType
     {
@@ -150,21 +119,16 @@ class MyClassRepo
 
     /**
      * Get the class type associated with a given class ID.
-     *
-     * @param int $class_id
-     * @return ClassType|null
      */
     public function findClassTypeByClassId(int $class_id): ?ClassType
     {
         $class = $this->findClass($class_id);
+
         return $class ? $this->findClassType($class->class_type_id) : null;
     }
 
     /**
      * Create a new class type.
-     *
-     * @param array $data
-     * @return ClassType
      */
     public function createClassType(array $data): ClassType
     {
@@ -175,9 +139,6 @@ class MyClassRepo
 
     /**
      * Create a new section.
-     *
-     * @param array $data
-     * @return Section
      */
     public function createSection(array $data): Section
     {
@@ -186,9 +147,6 @@ class MyClassRepo
 
     /**
      * Get sections matching the given conditions.
-     *
-     * @param array $data
-     * @return EloquentCollection
      */
     public function getSectionsByConditions(array $data): EloquentCollection
     {
@@ -197,9 +155,6 @@ class MyClassRepo
 
     /**
      * Find a section by its primary key.
-     *
-     * @param int $id
-     * @return Section|null
      */
     public function findSection(int $id): ?Section
     {
@@ -208,10 +163,6 @@ class MyClassRepo
 
     /**
      * Update a section by ID.
-     *
-     * @param int   $id
-     * @param array $data
-     * @return int
      */
     public function updateSection(int $id, array $data): int
     {
@@ -220,9 +171,6 @@ class MyClassRepo
 
     /**
      * Delete a section by ID.
-     *
-     * @param int $id
-     * @return int
      */
     public function deleteSection(int $id): int
     {
@@ -231,8 +179,6 @@ class MyClassRepo
 
     /**
      * Get all sections with their class and teacher, ordered by name ascending.
-     *
-     * @return EloquentCollection
      */
     public function getAllSections(): EloquentCollection
     {
@@ -241,9 +187,6 @@ class MyClassRepo
 
     /**
      * Get all sections belonging to a specific class, ordered by name ascending.
-     *
-     * @param int $class_id
-     * @return EloquentCollection
      */
     public function getClassSections(int $class_id): EloquentCollection
     {
@@ -254,10 +197,6 @@ class MyClassRepo
 
     /**
      * Get sections belonging to a class and assigned to a specific teacher.
-     *
-     * @param int $class_id
-     * @param int $teacher_id
-     * @return EloquentCollection
      */
     public function getTeacherClassSections(int $class_id, int $teacher_id): EloquentCollection
     {
@@ -271,9 +210,6 @@ class MyClassRepo
 
     /**
      * Create a new subject.
-     *
-     * @param array $data
-     * @return Subject
      */
     public function createSubject(array $data): Subject
     {
@@ -282,9 +218,6 @@ class MyClassRepo
 
     /**
      * Find a subject by its primary key.
-     *
-     * @param int $id
-     * @return Subject|null
      */
     public function findSubject(int $id): ?Subject
     {
@@ -293,10 +226,6 @@ class MyClassRepo
 
     /**
      * Get subjects for a class, ordered by a given column.
-     *
-     * @param int    $class_id
-     * @param string $order_by
-     * @return EloquentCollection
      */
     public function findSubjectByClass(int $class_id, string $order_by = 'name'): EloquentCollection
     {
@@ -307,22 +236,17 @@ class MyClassRepo
 
     /**
      * Get all subjects taught by a specific teacher.
-     *
-     * @param int $user_id
-     * @return EloquentCollection
      */
     public function findSubjectsByTeacher(int $user_id): EloquentCollection
     {
         $subject_ids = $this->whereSubjectRecord(['teacher_id' => $user_id])
             ->pluck('subject_id');
+
         return Subject::whereIn('id', $subject_ids)->get();
     }
 
     /**
      * Get a query builder for subjects matching conditions.
-     *
-     * @param array $where
-     * @return Builder
      */
     public function whereSubject(array $where): Builder
     {
@@ -331,15 +255,11 @@ class MyClassRepo
 
     /**
      * Get subjects that have a record in a given section, or are global (NULL section).
-     *
-     * @param int $section_id
-     * @param int $class_id
-     * @return EloquentCollection
      */
     public function getSubjectsWithRecordsInSection(int $section_id, int $class_id): EloquentCollection
     {
         return Subject::with('record')
-            ->whereHas('record', fn($q) => $q->where('section_id', $section_id)
+            ->whereHas('record', fn ($q) => $q->where('section_id', $section_id)
                 ->orWhereNull('section_id'))
             ->where('my_class_id', $class_id)
             ->get();
@@ -347,10 +267,6 @@ class MyClassRepo
 
     /**
      * Get subjects by a list of IDs, with optional relations.
-     *
-     * @param array|Collection $ids
-     * @param array            $with
-     * @return EloquentCollection
      */
     public function getSubjectsByIds(array|Collection $ids, array $with = ['record']): EloquentCollection
     {
@@ -362,10 +278,6 @@ class MyClassRepo
 
     /**
      * Update a subject by ID.
-     *
-     * @param int   $id
-     * @param array $data
-     * @return int
      */
     public function updateSubject(int $id, array $data): int
     {
@@ -374,9 +286,6 @@ class MyClassRepo
 
     /**
      * Delete a subject by ID.
-     *
-     * @param int $id
-     * @return int
      */
     public function deleteSubject(int $id): int
     {
@@ -385,9 +294,6 @@ class MyClassRepo
 
     /**
      * Get all subjects with optional relations, ordered by name ascending.
-     *
-     * @param array $with
-     * @return EloquentCollection
      */
     public function getAllSubjects(array $with = ['my_class', 'record']): EloquentCollection
     {
@@ -396,8 +302,6 @@ class MyClassRepo
 
     /**
      * Get distinct subject names with their class.
-     *
-     * @return EloquentCollection
      */
     public function getUniqueSubjectsNames(): EloquentCollection
     {
@@ -410,25 +314,21 @@ class MyClassRepo
 
     /**
      * Get the array of column names for a subject (for imports/exports).
-     *
-     * @param array $remove
-     * @return array
      */
     public function getSubjectData(array $remove = []): array
     {
         $data = ['name', 'slug', 'my_class_id', 'is_core', 'credits'];
+
         return $remove ? array_values(array_diff($data, $remove)) : $data;
     }
 
     /**
      * Get the array of column names for a subject record.
-     *
-     * @param array $remove
-     * @return array
      */
     public function getSubjectRecordData(array $remove = []): array
     {
         $data = ['subject_id', 'section_id', 'teacher_id', 'students_ids'];
+
         return $remove ? array_values(array_diff($data, $remove)) : $data;
     }
 
@@ -436,9 +336,6 @@ class MyClassRepo
 
     /**
      * Find a subject record by ID.
-     *
-     * @param int $id
-     * @return SubjectRecord|null
      */
     public function findSubjectRecord(int $id): ?SubjectRecord
     {
@@ -447,9 +344,6 @@ class MyClassRepo
 
     /**
      * Create a new subject record.
-     *
-     * @param array $data
-     * @return SubjectRecord
      */
     public function createSubjectRecord(array $data): SubjectRecord
     {
@@ -458,9 +352,6 @@ class MyClassRepo
 
     /**
      * Get a query builder for subject records matching conditions.
-     *
-     * @param array $where
-     * @return Builder
      */
     public function whereSubjectRecord(array $where): Builder
     {
@@ -469,10 +360,6 @@ class MyClassRepo
 
     /**
      * Get subject records matching conditions with optional relations.
-     *
-     * @param array $where
-     * @param array $with
-     * @return EloquentCollection
      */
     public function getSubjectRecord(array $where, array $with = ['subject']): EloquentCollection
     {
@@ -481,10 +368,6 @@ class MyClassRepo
 
     /**
      * Get subject records for a teacher, ordered by a column.
-     *
-     * @param int    $teacher_id
-     * @param string $order_by
-     * @return EloquentCollection
      */
     public function findSubjectRecordsByTeacher(int $teacher_id, string $order_by = 'id'): EloquentCollection
     {
@@ -496,10 +379,6 @@ class MyClassRepo
 
     /**
      * Update subject records matching conditions.
-     *
-     * @param array $where
-     * @param array $data
-     * @return int
      */
     public function updateSubjectRecords(array $where, array $data): int
     {
@@ -508,9 +387,6 @@ class MyClassRepo
 
     /**
      * Delete subject records matching conditions.
-     *
-     * @param array $where
-     * @return int
      */
     public function deleteSubjectRecords(array $where): int
     {
@@ -519,10 +395,6 @@ class MyClassRepo
 
     /**
      * Get distinct subject records for a teacher with additional relations.
-     *
-     * @param int   $teacher_id
-     * @param array $relations
-     * @return EloquentCollection
      */
     public function getSubjectRecordsForTeacher(int $teacher_id, array $relations): EloquentCollection
     {
@@ -534,11 +406,6 @@ class MyClassRepo
 
     /**
      * Get subjects taught by a teacher in a specific class, sorted by subject name.
-     *
-     * @param int    $teacher_id
-     * @param int    $class_id
-     * @param string $sort_by
-     * @return EloquentCollection
      */
     public function findSubjectsByTeacherAndClass(int $teacher_id, int $class_id, string $sort_by = 'subject.name'): EloquentCollection
     {

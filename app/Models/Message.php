@@ -11,7 +11,6 @@ class Message extends OriginalMessage
     /**
      * Delete a message.
      *
-     * @param int $messageId
      *
      * @return mixed
      */
@@ -22,7 +21,7 @@ class Message extends OriginalMessage
 
     public function deleteMessageForever(int $messageId)
     {
-        return DB::table($this->table)->where("id", $messageId)->delete();
+        return DB::table($this->table)->where('id', $messageId)->delete();
     }
 
     public function restoreDeletedMessage(int $messageId)

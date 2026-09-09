@@ -16,6 +16,7 @@ use Illuminate\View\View;
 class TicketController extends Controller
 {
     protected TicketRepo $ticket;
+
     protected UserRepo $user;
 
     public function __construct(TicketRepo $ticket, UserRepo $user)
@@ -176,6 +177,7 @@ class TicketController extends Controller
             if (isset($ticket)) {
                 $this->ticket->deleteTicket($ticket->id);
             }
+
             return back()->with('flash_error', __('msg.store_error'));
         }
 
@@ -274,7 +276,7 @@ class TicketController extends Controller
             ->pluck('id')
             ->toArray();
 
-        if (!\in_array($ticket_id, $user_ticket_ids)) {
+        if (! \in_array($ticket_id, $user_ticket_ids)) {
             return back()->with('flash_danger', __('msg.denied'));
         }
 
@@ -293,12 +295,12 @@ class TicketController extends Controller
             ->pluck('id')
             ->toArray();
 
-        if (!\in_array($ticket_id, $user_ticket_ids)) {
+        if (! \in_array($ticket_id, $user_ticket_ids)) {
             return back()->with('flash_danger', __('msg.denied'));
         }
 
         $ticket = $this->ticket->findTicket($ticket_id);
-        if (!$ticket->is_closed()) {
+        if (! $ticket->is_closed()) {
             return back()->with('flash_warning', __('msg.close_ticket_before_archive'));
         }
 
@@ -317,7 +319,7 @@ class TicketController extends Controller
             ->pluck('id')
             ->toArray();
 
-        if (!\in_array($ticket_id, $user_ticket_ids)) {
+        if (! \in_array($ticket_id, $user_ticket_ids)) {
             return back()->with('flash_danger', __('msg.denied'));
         }
 

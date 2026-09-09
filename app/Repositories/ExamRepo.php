@@ -14,11 +14,13 @@ use App\Models\Grade;
 use App\Models\Mark;
 use App\Models\Section;
 use App\Models\Skill;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class ExamRepo
 {
     protected string $marks_table;
+
     protected string $exam_records_table;
 
     public function __construct()
@@ -31,8 +33,6 @@ class ExamRepo
 
     /**
      * Get all exam categories.
-     *
-     * @return Collection
      */
     public function getCategories(): Collection
     {
@@ -43,9 +43,6 @@ class ExamRepo
 
     /**
      * Create or get an existing exam announcement.
-     *
-     * @param array $data
-     * @return ExamAnnounce
      */
     public function announce(array $data): ExamAnnounce
     {
@@ -56,9 +53,6 @@ class ExamRepo
 
     /**
      * Create a new exam number format if it doesn't exist.
-     *
-     * @param array $data
-     * @return ExamNumberFormat
      */
     public function createNumberFormat(array $data): ExamNumberFormat
     {
@@ -67,10 +61,6 @@ class ExamRepo
 
     /**
      * Update an exam number format by ID.
-     *
-     * @param int   $id
-     * @param array $data
-     * @return int
      */
     public function updateNumberFormat(int $id, array $data): int
     {
@@ -79,10 +69,6 @@ class ExamRepo
 
     /**
      * Update or create an exam number format.
-     *
-     * @param array $attributes
-     * @param array $values
-     * @return ExamNumberFormat
      */
     public function updateOrCreateNumberFormat(array $attributes, array $values): ExamNumberFormat
     {
@@ -91,9 +77,6 @@ class ExamRepo
 
     /**
      * Delete an exam number format by ID.
-     *
-     * @param int $id
-     * @return bool|null
      */
     public function deleteNumberFormat(int $id): ?bool
     {
@@ -104,9 +87,6 @@ class ExamRepo
 
     /**
      * Get only published exams with optional relations.
-     *
-     * @param array $with
-     * @return Collection
      */
     public function getPublishedExams(array $with = ['category']): Collection
     {
@@ -119,9 +99,6 @@ class ExamRepo
 
     /**
      * Get published exams filtered by given conditions.
-     *
-     * @param array $where
-     * @return Collection
      */
     public function getPublished(array $where): Collection
     {
@@ -130,9 +107,6 @@ class ExamRepo
 
     /**
      * Get all exams with optional relations.
-     *
-     * @param array $with
-     * @return Collection
      */
     public function getAllExams(array $with = ['category', 'class_type']): Collection
     {
@@ -141,27 +115,17 @@ class ExamRepo
 
     /**
      * Get an exam by ID, optionally restricting to published ones.
-     *
-     * @param int   $id
-     * @param bool  $only_published
-     * @param array $with
-     * @return Exam|null
      */
     public function findExam(int $id, bool $only_published = true, array $with = ['category', 'class_type']): ?Exam
     {
         $query = Exam::where('id', $id)->with($with)
-            ->when($only_published, fn($query) => $query->where('is_published', true));
+            ->when($only_published, fn ($query) => $query->where('is_published', true));
 
         return $query->first();
     }
 
     /**
      * Get exams matching conditions, with optional filtering of locked ones.
-     *
-     * @param array $where
-     * @param bool  $without_locked_ones
-     * @param array $with
-     * @return Collection
      */
     public function getExamsByConditions(array $where, bool $without_locked_ones = true, array $with = []): Collection
     {
@@ -169,14 +133,12 @@ class ExamRepo
         if ($without_locked_ones) {
             $query->where('is_locked', false);
         }
+
         return $query->get();
     }
 
     /**
      * Check if an exam exists by ID.
-     *
-     * @param int $exam_id
-     * @return bool
      */
     public function exists(int $exam_id): bool
     {
@@ -185,9 +147,6 @@ class ExamRepo
 
     /**
      * Get soft-deleted exams.
-     *
-     * @param array $with
-     * @return Collection
      */
     public function getTrashed(array $with = ['category']): Collection
     {
@@ -196,8 +155,6 @@ class ExamRepo
 
     /**
      * Check if there is at least one exam.
-     *
-     * @return bool
      */
     public function hasAnyExam(): bool
     {
@@ -206,9 +163,6 @@ class ExamRepo
 
     /**
      * Find an exam by its primary key.
-     *
-     * @param int $id
-     * @return Exam|null
      */
     public function find(int $id): ?Exam
     {
@@ -217,9 +171,6 @@ class ExamRepo
 
     /**
      * Find an exam by attributes or create a new one.
-     *
-     * @param array $data
-     * @return Exam
      */
     public function firstOrCreate(array $data): Exam
     {
@@ -228,8 +179,6 @@ class ExamRepo
 
     /**
      * Get published exams ordered by latest.
-     *
-     * @return Collection
      */
     public function getLatestPublished(): Collection
     {
@@ -238,8 +187,6 @@ class ExamRepo
 
     /**
      * Count published exams.
-     *
-     * @return int
      */
     public function countPublishedExams(): int
     {
@@ -248,10 +195,6 @@ class ExamRepo
 
     /**
      * Update an exam by ID.
-     *
-     * @param int   $id
-     * @param array $data
-     * @return int
      */
     public function update(int $id, array $data): int
     {
@@ -260,9 +203,6 @@ class ExamRepo
 
     /**
      * Soft-delete an exam by ID.
-     *
-     * @param int $id
-     * @return int
      */
     public function delete(int $id): int
     {
@@ -271,9 +211,6 @@ class ExamRepo
 
     /**
      * Restore a soft-deleted exam by ID.
-     *
-     * @param int $id
-     * @return int
      */
     public function restore(int $id): int
     {
@@ -282,9 +219,6 @@ class ExamRepo
 
     /**
      * Permanently delete an exam.
-     *
-     * @param int $id
-     * @return int
      */
     public function forceDelete(int $id): int
     {
@@ -293,8 +227,6 @@ class ExamRepo
 
     /**
      * Get distinct years from exams.
-     *
-     * @return Collection
      */
     public function getDistinctExamYears(): Collection
     {
@@ -305,9 +237,6 @@ class ExamRepo
 
     /**
      * Create an exam record if it doesn't exist.
-     *
-     * @param array $data
-     * @return ExamRecord
      */
     public function firstOrCreateExamRecord(array $data): ExamRecord
     {
@@ -316,10 +245,6 @@ class ExamRepo
 
     /**
      * Update or create an exam record.
-     *
-     * @param array $attributes
-     * @param array $values
-     * @return ExamRecord
      */
     public function updateOrCreateExamRecord(array $attributes, array $values): ExamRecord
     {
@@ -328,9 +253,6 @@ class ExamRepo
 
     /**
      * Delete exam records matching conditions.
-     *
-     * @param array $where
-     * @return int
      */
     public function deleteExamRecords(array $where): int
     {
@@ -339,10 +261,6 @@ class ExamRepo
 
     /**
      * Update exam records matching conditions.
-     *
-     * @param array $where
-     * @param array $data
-     * @return int
      */
     public function updateExamRecords(array $where, array $data): int
     {
@@ -351,10 +269,6 @@ class ExamRepo
 
     /**
      * Mass upsert exam records.
-     *
-     * @param array $values
-     * @param array $unique_by
-     * @return int
      */
     public function massUpdateExamRecords(array $values, array $unique_by = ['id']): int
     {
@@ -366,10 +280,6 @@ class ExamRepo
 
     /**
      * Get exam records with optional relations.
-     *
-     * @param array $where
-     * @param array $with
-     * @return Collection
      */
     public function getExamRecords(array $where, array $with = []): Collection
     {
@@ -379,21 +289,17 @@ class ExamRepo
     /**
      * Get exam records for a specific student.
      *
-     * @param int $id  student_id
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  int  $id  student_id
      */
-    public function getExamRecordsByStudent(int $id): \Illuminate\Database\Eloquent\Builder
+    public function getExamRecordsByStudent(int $id): Builder
     {
         return ExamRecord::with('exam')->with('student')->where('student_id', $id);
     }
 
     /**
      * Get exam records for a specific exam (with class relation).
-     *
-     * @param int $exam_id
-     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function getExamRecordsByExam(int $exam_id): \Illuminate\Database\Eloquent\Builder
+    public function getExamRecordsByExam(int $exam_id): Builder
     {
         return ExamRecord::with('my_class')->where('exam_id', $exam_id);
     }
@@ -401,10 +307,9 @@ class ExamRepo
     /**
      * Get exam records for multiple students (with exam and student).
      *
-     * @param array $ids  student IDs
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  array  $ids  student IDs
      */
-    public function getExamRecordsByStudents(array $ids): \Illuminate\Database\Eloquent\Builder
+    public function getExamRecordsByStudents(array $ids): Builder
     {
         return ExamRecord::with('exam')->with('student')->whereIn('student_id', $ids);
     }
@@ -413,14 +318,10 @@ class ExamRepo
      * Calculate a student's position (1‑based) directly via the database,
      * using the sort order supplied.
      *
-     * @param int      $st_id
-     * @param int      $exam_id
-     * @param int      $class_id
-     * @param string   $year
-     * @param string   $value        column to compare (e.g., 'total', 'ave', 'gpa', 'points')
-     * @param string   $sort_order    'asc' (lower is better) or 'desc' (higher is better)
-     * @param int|null $section_id   optional section filter
-     * @return int|null              position (1‑based) or null if not applicable
+     * @param  string  $value  column to compare (e.g., 'total', 'ave', 'gpa', 'points')
+     * @param  string  $sort_order  'asc' (lower is better) or 'desc' (higher is better)
+     * @param  int|null  $section_id  optional section filter
+     * @return int|null position (1‑based) or null if not applicable
      */
     public function getStudentPositionByColumn(
         int $st_id,
@@ -443,7 +344,7 @@ class ExamRepo
         }
 
         $student_record = (clone $base_query)->where('student_id', $st_id)->first();
-        if (!$student_record || $student_record->$value === null) {
+        if (! $student_record || $student_record->$value === null) {
             return null;
         }
         $student_value = $student_record->$value;
@@ -462,8 +363,6 @@ class ExamRepo
 
     /**
      * Get all grades ordered by class type and name.
-     *
-     * @return Collection
      */
     public function getAllGrades(): Collection
     {
@@ -472,10 +371,6 @@ class ExamRepo
 
     /**
      * Get grades matching conditions with optional relations.
-     *
-     * @param array $data
-     * @param array $with
-     * @return Collection
      */
     public function getGradesByConditions(array $data, array $with = []): Collection
     {
@@ -484,9 +379,6 @@ class ExamRepo
 
     /**
      * Find a grade by ID.
-     *
-     * @param int $id
-     * @return Grade|null
      */
     public function findGradeById(int $id): ?Grade
     {
@@ -495,9 +387,6 @@ class ExamRepo
 
     /**
      * Create a new grade.
-     *
-     * @param array $data
-     * @return Grade
      */
     public function createGrade(array $data): Grade
     {
@@ -506,10 +395,6 @@ class ExamRepo
 
     /**
      * Update a grade by ID.
-     *
-     * @param int   $id
-     * @param array $data
-     * @return int
      */
     public function updateGrade(int $id, array $data): int
     {
@@ -518,9 +403,6 @@ class ExamRepo
 
     /**
      * Delete a grade by ID.
-     *
-     * @param int $id
-     * @return int
      */
     public function deleteGrade(int $id): int
     {
@@ -531,9 +413,6 @@ class ExamRepo
 
     /**
      * Create a mark if it doesn't exist.
-     *
-     * @param array $data
-     * @return Mark
      */
     public function firstOrCreateMark(array $data): Mark
     {
@@ -542,9 +421,6 @@ class ExamRepo
 
     /**
      * Delete marks matching conditions.
-     *
-     * @param array $where
-     * @return int
      */
     public function deleteMarksByConditions(array $where): int
     {
@@ -553,10 +429,6 @@ class ExamRepo
 
     /**
      * Update a mark by ID.
-     *
-     * @param int   $id
-     * @param array $data
-     * @return int
      */
     public function updateMark(int $id, array $data): int
     {
@@ -565,10 +437,6 @@ class ExamRepo
 
     /**
      * Mass upsert marks.
-     *
-     * @param array $values
-     * @param array $unique_by
-     * @return int
      */
     public function massUpdateMark(array $values, array $unique_by = ['id']): int
     {
@@ -580,9 +448,6 @@ class ExamRepo
 
     /**
      * Get distinct exam years for a student from marks.
-     *
-     * @param int $student_id
-     * @return Collection
      */
     public function getDistinctMarkYears(int $student_id): Collection
     {
@@ -594,10 +459,6 @@ class ExamRepo
 
     /**
      * Get marks matching conditions with optional relations.
-     *
-     * @param array $where
-     * @param array $with
-     * @return Collection
      */
     public function getMarksByConditions(array $where, array $with = ['grade', 'user', 'subject', 'section']): Collection
     {
@@ -606,19 +467,14 @@ class ExamRepo
 
     /**
      * Get marks for a set of student IDs.
-     *
-     * @param array $ids
-     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function getMarksByStudentIds(array $ids): \Illuminate\Database\Eloquent\Builder
+    public function getMarksByStudentIds(array $ids): Builder
     {
         return Mark::whereIn('student_id', $ids);
     }
 
     /**
      * Get all grades (used for marks context).
-     *
-     * @return Collection
      */
     public function getGrades(): Collection
     {
@@ -629,9 +485,6 @@ class ExamRepo
 
     /**
      * Get skills matching conditions.
-     *
-     * @param array $where
-     * @return Collection
      */
     public function getSkills(array $where): Collection
     {
@@ -640,10 +493,6 @@ class ExamRepo
 
     /**
      * Get skills for a class type, optionally filtered by skill type.
-     *
-     * @param int|null    $class_type_id
-     * @param string|null $skill_type
-     * @return Collection
      */
     public function getSkillsByClassType(?int $class_type_id = null, ?string $skill_type = null): Collection
     {
@@ -651,6 +500,7 @@ class ExamRepo
         if ($skill_type) {
             $where['skill_type'] = $skill_type;
         }
+
         return $this->getSkills($where);
     }
 
@@ -658,9 +508,6 @@ class ExamRepo
 
     /**
      * Get sections matching conditions.
-     *
-     * @param array $where
-     * @return Collection
      */
     public function getSectionsByConditions(array $where): Collection
     {
@@ -671,8 +518,6 @@ class ExamRepo
 
     /**
      * Get all divisions ordered by class type and name.
-     *
-     * @return Collection
      */
     public function getAllDivisions(): Collection
     {
@@ -681,10 +526,6 @@ class ExamRepo
 
     /**
      * Get divisions matching conditions with optional relations.
-     *
-     * @param array $where
-     * @param array $with
-     * @return Collection
      */
     public function getDivisionsByConditions(array $where, array $with): Collection
     {
@@ -693,9 +534,6 @@ class ExamRepo
 
     /**
      * Create a new division.
-     *
-     * @param array $data
-     * @return Division
      */
     public function createDivision(array $data): Division
     {
@@ -704,10 +542,6 @@ class ExamRepo
 
     /**
      * Update a division by ID.
-     *
-     * @param int   $id
-     * @param array $data
-     * @return int
      */
     public function updateDivision(int $id, array $data): int
     {
@@ -716,9 +550,6 @@ class ExamRepo
 
     /**
      * Delete a division by ID.
-     *
-     * @param int $id
-     * @return int
      */
     public function deleteDivision(int $id): int
     {
@@ -729,8 +560,6 @@ class ExamRepo
 
     /**
      * Get all class types.
-     *
-     * @return Collection
      */
     public function getAllClassTypes(): Collection
     {
@@ -741,9 +570,6 @@ class ExamRepo
 
     /**
      * Create or find an exam‑assessment association.
-     *
-     * @param array $data
-     * @return ExamHasAssessment
      */
     public function firstOrCreateExamAssessment(array $data): ExamHasAssessment
     {

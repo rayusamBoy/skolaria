@@ -12,7 +12,9 @@ use Illuminate\View\View;
 class LogController extends Controller
 {
     protected UserRepo $user;
+
     protected MyClassRepo $my_class;
+
     protected LogRepo $log;
 
     public function __construct(UserRepo $user, MyClassRepo $my_class, LogRepo $log)

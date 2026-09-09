@@ -34,8 +34,8 @@ return [
     |--------------------------------------------------------------------------
     | Permission naming overrides
     |--------------------------------------------------------------------------
-    | Optional: explicit per-controller (short name) overrides. Keys are 
-    | controller class short names (e.g. "NoticeController") or resource names 
+    | Optional: explicit per-controller (short name) overrides. Keys are
+    | controller class short names (e.g. "NoticeController") or resource names
     | (e.g. ("notices"). This lets you fix special cases without attributes.
     |
     | Example:
@@ -77,13 +77,13 @@ return [
     /*
     |--------------------------------------------------------------------------
     | Permission names
-    |-------------------------------------------------------------------------- 
-    | Nested array of permission names. The first level keys are controller short names 
-    | or resource names, and the second level keys are method names. 
-    | Each entry should have a 'permission' key for the permission name, 
+    |--------------------------------------------------------------------------
+    | Nested array of permission names. The first level keys are controller short names
+    | or resource names, and the second level keys are method names.
+    | Each entry should have a 'permission' key for the permission name,
     | and optionally 'label' and 'description' for human-readable information.
     |
-    | You can use the GeneratePermissions artisan command to print out the scanned permission names, 
+    | You can use the GeneratePermissions artisan command to print out the scanned permission names,
     | then copy-paste and edit them here to add labels and descriptions.
     */
     'names' => [
@@ -1365,99 +1365,99 @@ return [
                 'active_students' => [
                     'permission' => 'dashboard.stats.active_students',
                     'label' => 'View Active Students statistic',
-                    'description' => 'Shows the Active Students card with male/female breakdown.'
+                    'description' => 'Shows the Active Students card with male/female breakdown.',
                 ],
                 'graduated_students' => [
                     'permission' => 'dashboard.stats.graduated_students',
                     'label' => 'View Graduated Students statistic',
-                    'description' => 'Shows the Graduated Students card.'
+                    'description' => 'Shows the Graduated Students card.',
                 ],
                 'overall_students' => [
                     'permission' => 'dashboard.stats.overall_students',
                     'label' => 'View Overall Students statistic',
-                    'description' => 'Shows the Overall Students card with sparkline and gender counts.'
+                    'description' => 'Shows the Overall Students card with sparkline and gender counts.',
                 ],
                 'administrators' => [
                     'permission' => 'dashboard.stats.administrators',
                     'label' => 'View Administrators statistic',
-                    'description' => 'Shows the Total Administrators card.'
+                    'description' => 'Shows the Total Administrators card.',
                 ],
                 'teachers' => [
                     'permission' => 'dashboard.stats.teachers',
                     'label' => 'View Teachers statistic',
-                    'description' => 'Shows the Total Teachers card.'
+                    'description' => 'Shows the Total Teachers card.',
                 ],
                 'accountants_librarians' => [
                     'permission' => 'dashboard.stats.accountants_librarians',
                     'label' => 'View Accountants & Librarians statistic',
-                    'description' => 'Shows the combined Accountants and Librarians card.'
+                    'description' => 'Shows the combined Accountants and Librarians card.',
                 ],
                 'assessments_declared' => [
                     'permission' => 'dashboard.stats.assessments_declared',
                     'label' => 'View Assessments Declared statistic',
-                    'description' => 'Shows the number of declared assessments.'
+                    'description' => 'Shows the number of declared assessments.',
                 ],
                 'parents' => [
                     'permission' => 'dashboard.stats.parents',
                     'label' => 'View Parents statistic',
-                    'description' => 'Shows the Total Parents card.'
+                    'description' => 'Shows the Total Parents card.',
                 ],
                 'subjects' => [
                     'permission' => 'dashboard.stats.subjects',
                     'label' => 'View Subjects statistic',
-                    'description' => 'Shows the Total Subjects card.'
+                    'description' => 'Shows the Total Subjects card.',
                 ],
                 'classes' => [
                     'permission' => 'dashboard.stats.classes',
                     'label' => 'View Classes statistic',
-                    'description' => 'Shows the Total Classes card.'
+                    'description' => 'Shows the Total Classes card.',
                 ],
                 'results_declared' => [
                     'permission' => 'dashboard.stats.results_declared',
                     'label' => 'View Results Declared statistic',
-                    'description' => 'Shows the number of published exam results.'
+                    'description' => 'Shows the number of published exam results.',
                 ],
                 'payments_done' => [
                     'permission' => 'dashboard.stats.payments_done',
                     'label' => 'View Payments Done statistic',
-                    'description' => 'Shows the Total Payments Done card.'
+                    'description' => 'Shows the Total Payments Done card.',
                 ],
                 'books' => [
                     'permission' => 'dashboard.stats.books',
                     'label' => 'View Books statistic',
-                    'description' => 'Shows the Total Books card.'
+                    'description' => 'Shows the Total Books card.',
                 ],
                 'book_requests' => [
                     'permission' => 'dashboard.stats.book_requests',
                     'label' => 'View Book Requests statistic',
-                    'description' => 'Shows the Book Requests card with returned/out breakdown.'
+                    'description' => 'Shows the Book Requests card with returned/out breakdown.',
                 ],
                 'gender_chart' => [
                     'permission' => 'dashboard.charts.gender',
                     'label' => 'View Gender Distribution chart',
-                    'description' => 'Access to the Gender Distribution chart.'
+                    'description' => 'Access to the Gender Distribution chart.',
                 ],
                 'payments_chart' => [
                     'permission' => 'dashboard.charts.payments',
                     'label' => 'View Payments (12 months) chart',
-                    'description' => 'Access to the Payments trend chart.'
+                    'description' => 'Access to the Payments trend chart.',
                 ],
                 'students_per_class_chart' => [
                     'permission' => 'dashboard.charts.students_per_class',
                     'label' => 'View Students per Class chart',
-                    'description' => 'Access to the Students per Class chart.'
+                    'description' => 'Access to the Students per Class chart.',
                 ],
                 'student_breakdown_modal' => [
                     'permission' => 'dashboard.modal.students_breakdown',
                     'label' => 'View Student number breakdown modal',
-                    'description' => 'Allows opening the detailed student breakdown modal.'
+                    'description' => 'Allows opening the detailed student breakdown modal.',
                 ],
             ],
             'system' => [
                 'view_warnings' => [
                     'permission' => 'system.view_warnings',
                     'label' => 'View system warnings',
-                    'description' => 'Shows session/year mismatch warnings.'
+                    'description' => 'Shows session/year mismatch warnings.',
                 ],
             ],
         ],
@@ -1794,8 +1794,8 @@ return [
                     'permission' => 'master_data_syncs.sync',
                     'label' => 'Sync Master Data',
                     'description' => 'Sync master data between template tenant and selected tenant(s).',
-                ]
-            ]
+                ],
+            ],
         ],
     ],
 ];

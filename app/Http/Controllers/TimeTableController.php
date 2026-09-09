@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\TimeTable\TSRequest;
 use App\Http\Requests\TimeTable\TTRecordRequest;
 use App\Http\Requests\TimeTable\TTRequest;
@@ -19,8 +18,11 @@ use Illuminate\View\View;
 class TimeTableController extends Controller
 {
     protected TimeTableRepo $tt;
+
     protected MyClassRepo $my_class;
+
     protected ExamRepo $exam;
+
     protected string $year;
 
     public function __construct(TimeTableRepo $tt, MyClassRepo $my_class, ExamRepo $exam)

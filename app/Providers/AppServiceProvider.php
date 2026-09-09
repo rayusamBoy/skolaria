@@ -44,9 +44,9 @@ class AppServiceProvider extends ServiceProvider
     {
         require_once base_path('routes/tenant/channels.php');
 
-        RateLimiter::for('api', static fn(Request $request) => Limit::perMinute(60)->by($request->user()?->id ?: $request->ip()));
+        RateLimiter::for('api', static fn (Request $request) => Limit::perMinute(60)->by($request->user()?->id ?: $request->ip()));
         Event::subscribe(TenantEventSubscriber::class);
         Paginator::useBootstrapFour();
-        Model::preventLazyLoading(!app()->isProduction());
+        Model::preventLazyLoading(! app()->isProduction());
     }
 }

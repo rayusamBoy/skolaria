@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Analytic\GoogleSetup;
 use App\Http\Requests\Analytic\Request as AnalyticRequest;
 use App\Repositories\SettingRepo;
@@ -68,6 +67,7 @@ class AnalyticController extends Controller
             } catch (\Exception $e) {
                 unset($view_data['google_analytics_setup_ok']);
                 session()->flash('pop_error', $e->getMessage());
+
                 return view('pages.analytics', $view_data);
             }
         }
@@ -83,7 +83,7 @@ class AnalyticController extends Controller
         $params = $req->only(['period_number', 'period_name']);
         $allowed = array_keys(Qs::getSpatieAnalyticsPackagePeriods());
 
-        if (!\in_array($params['period_name'], $allowed)) {
+        if (! \in_array($params['period_name'], $allowed)) {
             return redirect()->route('analytics.index')
                 ->with('flash_warning', __('msg.invalid_period_name'));
         }
@@ -109,7 +109,7 @@ class AnalyticController extends Controller
         if ($req->hasFile('service_account_credential_file')) {
             $file = $req->file('service_account_credential_file');
             $meta = Qs::getFileMetaData($file);
-            $store_path = 'analytics/service-acc-credential-file.' . $meta['ext'];
+            $store_path = 'analytics/service-acc-credential-file.'.$meta['ext'];
             $file->storeAs($store_path);
             $this->setting->update('google_analytic_service_account_credential_file', $store_path);
         }

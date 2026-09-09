@@ -13,6 +13,7 @@ class TenantEventCompleted extends Notification
      * Create a new notification instance.
      */
     protected $data;
+
     public function __construct($data)
     {
         $this->data = $data;
@@ -49,7 +50,7 @@ class TenantEventCompleted extends Notification
             'url' => $this->data['url'] ?? route('tenants.index'),
         ];
 
-        return (new FcmMessage())
+        return (new FcmMessage)
             ->data($data)
             ->custom([
                 'android' => [
@@ -64,7 +65,7 @@ class TenantEventCompleted extends Notification
                 'apns' => [
                     'payload' => [
                         'aps' => [
-                            'sound' => 'default'
+                            'sound' => 'default',
                         ],
                     ],
                     'fcm_options' => [

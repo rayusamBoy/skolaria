@@ -15,6 +15,7 @@ class NotificationMarkedAsRead extends Notification
      * Create a new notification instance.
      */
     protected $notification_id;
+
     public function __construct($notification_id)
     {
         $this->notification_id = $notification_id;
@@ -28,7 +29,8 @@ class NotificationMarkedAsRead extends Notification
     public function via(object $notifiable): array
     {
         $channels = Qs::getActiveNotificationChannels($notifiable, false, false, true);
-        return $channels;    
+
+        return $channels;
     }
 
     public function toFcm(): FcmMessage
@@ -38,6 +40,6 @@ class NotificationMarkedAsRead extends Notification
             'type' => 'notification_marked_as_read',
         ];
 
-        return (new FcmMessage())->data($data);
+        return (new FcmMessage)->data($data);
     }
 }

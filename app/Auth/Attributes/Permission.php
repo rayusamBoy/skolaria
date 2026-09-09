@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Auth\Attributes;
 
 use Attribute;

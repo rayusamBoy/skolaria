@@ -14,6 +14,7 @@ use Illuminate\View\View;
 class SettingController extends Controller
 {
     protected SettingRepo $setting;
+
     protected MyClassRepo $my_class;
 
     public function __construct(SettingRepo $setting, MyClassRepo $my_class)
@@ -79,14 +80,14 @@ class SettingController extends Controller
     {
         $file = $req->file('login_and_related_pages_bg');
         $file_meta = Qs::getFileMetaData($file);
-        $file_name = 'login_and_related_pages_bg.' . $file_meta['ext'];
+        $file_name = 'login_and_related_pages_bg.'.$file_meta['ext'];
 
         // Store file in public upload path
-        $storage_path = Qs::getPublicUploadPath() . $file_name;
+        $storage_path = Qs::getPublicUploadPath().$file_name;
         $file->storeAs($storage_path);
 
         // Update setting with accessible URL
-        $public_path = 'storage/' . Qs::getPublicUploadPath() . '/' . $file_name;
+        $public_path = 'storage/'.Qs::getPublicUploadPath().'/'.$file_name;
         $this->setting->update('login_and_related_pages_bg', $public_path);
 
         // Handle text/background colors based on user selection
@@ -110,12 +111,12 @@ class SettingController extends Controller
                 $dominant_color = (array) ColorThief::getColor($file->getPathname());
                 $bg_color = \sprintf('rgb(%d,%d,%d)', ...$dominant_color);
                 $texts_color = Qs::getContrastColor($bg_color);
-                $colors = $texts_color . Qs::getDelimiter() . $bg_color;
+                $colors = $texts_color.Qs::getDelimiter().$bg_color;
 
                 $this->setting->update('login_and_related_pgs_txts_and_bg_colors', $colors);
             } catch (\Exception $e) {
                 // Log error but don't break the update process
-                logger()->error('Failed to extract dominant color from image: ' . $e->getMessage());
+                logger()->error('Failed to extract dominant color from image: '.$e->getMessage());
                 $this->setting->update('login_and_related_pgs_txts_and_bg_colors', null);
             }
         } else {

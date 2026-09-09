@@ -13,8 +13,6 @@ class LocationRepo
 
     /**
      * Get all states without ordering.
-     *
-     * @return Collection
      */
     public function getStates(): Collection
     {
@@ -23,8 +21,6 @@ class LocationRepo
 
     /**
      * Get all states ordered by name ascending.
-     *
-     * @return Collection
      */
     public function getAllStates(): Collection
     {
@@ -33,9 +29,6 @@ class LocationRepo
 
     /**
      * Get states belonging to a given nationality (country).
-     *
-     * @param int $country_id
-     * @return Collection
      */
     public function getStatesByCountryId(int $country_id): Collection
     {
@@ -46,9 +39,6 @@ class LocationRepo
 
     /**
      * Get a single state by its ID.
-     *
-     * @param int $id
-     * @return State|null
      */
     public function getState(int $id): ?State
     {
@@ -59,8 +49,6 @@ class LocationRepo
 
     /**
      * Get all nationalities ordered by name ascending.
-     *
-     * @return Collection
      */
     public function getAllNationalities(): Collection
     {
@@ -69,9 +57,6 @@ class LocationRepo
 
     /**
      * Get a single nationality by its ID.
-     *
-     * @param int $id
-     * @return Nationality|null
      */
     public function getNationalityById(int $id): ?Nationality
     {
@@ -82,9 +67,6 @@ class LocationRepo
 
     /**
      * Get all LGAs/States for a given state, ordered by name ascending.
-     *
-     * @param int $state_id
-     * @return Collection
      */
     public function getStateById(int $state_id): Collection
     {

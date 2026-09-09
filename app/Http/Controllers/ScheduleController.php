@@ -40,7 +40,7 @@ class ScheduleController extends Controller
         $data['user_id'] = auth()->id();
         $this->event->create($data);
 
-        return Qs::json('The event "' . $data['name'] . '" added successfully.');
+        return Qs::json('The event "'.$data['name'].'" added successfully.');
     }
 
     /**

@@ -14,6 +14,7 @@ class MessageArrived implements ShouldBroadcastNow
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $message;
+
     public $message_html;
 
     /**
@@ -30,6 +31,6 @@ class MessageArrived implements ShouldBroadcastNow
      */
     public function broadcastOn(): Channel
     {
-        return new PrivateChannel('messages.' . $this->message->thread_id . '.' . tenant()?->getTenantKey());
+        return new PrivateChannel('messages.'.$this->message->thread_id.'.'.tenant()?->getTenantKey());
     }
 }

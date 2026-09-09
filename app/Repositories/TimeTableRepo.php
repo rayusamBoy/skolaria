@@ -7,6 +7,7 @@ use App\Models\TimeTable;
 use App\Models\TimeTableRecord;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TimeTableRepo
 {
@@ -14,9 +15,6 @@ class TimeTableRepo
 
     /**
      * Get timetable entries with subject and time slot, ordered by time.
-     *
-     * @param array $where
-     * @return Collection
      */
     public function getTimeTableEntries(array $where): Collection
     {
@@ -28,9 +26,6 @@ class TimeTableRepo
 
     /**
      * Create a new timetable entry.
-     *
-     * @param array $data
-     * @return TimeTable
      */
     public function create(array $data): TimeTable
     {
@@ -39,10 +34,6 @@ class TimeTableRepo
 
     /**
      * Update a timetable entry by ID.
-     *
-     * @param int   $id
-     * @param array $data
-     * @return int
      */
     public function update(int $id, array $data): int
     {
@@ -51,9 +42,6 @@ class TimeTableRepo
 
     /**
      * Delete a timetable entry by ID.
-     *
-     * @param int $id
-     * @return int
      */
     public function delete(int $id): int
     {
@@ -64,9 +52,6 @@ class TimeTableRepo
 
     /**
      * Get a query builder for time slots matching conditions, ordered by start time.
-     *
-     * @param array $where
-     * @return Builder
      */
     public function getTimeSlotsQuery(array $where): Builder
     {
@@ -75,9 +60,6 @@ class TimeTableRepo
 
     /**
      * Get all time slots belonging to a specific timetable record.
-     *
-     * @param int $ttr_id
-     * @return Collection
      */
     public function getTimeSlotsByRecord(int $ttr_id): Collection
     {
@@ -86,9 +68,6 @@ class TimeTableRepo
 
     /**
      * Get distinct timetable record IDs from time slots, optionally excluding one.
-     *
-     * @param int|null $remove_ttr
-     * @return \Illuminate\Support\Collection
      */
     protected function getDistinctRecordIds(?int $remove_ttr = null): \Illuminate\Support\Collection
     {
@@ -103,21 +82,16 @@ class TimeTableRepo
 
     /**
      * Get existing timetable records (excluding a given one if provided) that have time slots defined.
-     *
-     * @param int|null $remove_ttr
-     * @return Collection
      */
     public function getRecordsWithTimeSlots(?int $remove_ttr = null): Collection
     {
         $ids = $this->getDistinctRecordIds($remove_ttr);
+
         return $this->getRecordsByIds($ids);
     }
 
     /**
      * Create a new time slot.
-     *
-     * @param array $data
-     * @return TimeSlot
      */
     public function createTimeSlot(array $data): TimeSlot
     {
@@ -126,9 +100,6 @@ class TimeTableRepo
 
     /**
      * Delete a single time slot by ID.
-     *
-     * @param int $id
-     * @return int
      */
     public function deleteTimeSlot(int $id): int
     {
@@ -137,9 +108,6 @@ class TimeTableRepo
 
     /**
      * Delete time slots matching conditions.
-     *
-     * @param array $where
-     * @return int
      */
     public function deleteTimeSlots(array $where): int
     {
@@ -148,10 +116,6 @@ class TimeTableRepo
 
     /**
      * Update a time slot by ID.
-     *
-     * @param int   $id
-     * @param array $data
-     * @return int
      */
     public function updateTimeSlot(int $id, array $data): int
     {
@@ -161,10 +125,8 @@ class TimeTableRepo
     /**
      * Find a time slot by ID or fail with 404.
      *
-     * @param int $id
-     * @return TimeSlot
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws ModelNotFoundException
      */
     public function findTimeSlot(int $id): TimeSlot
     {
@@ -175,8 +137,6 @@ class TimeTableRepo
 
     /**
      * Get all timetable records with class, exam, and section.
-     *
-     * @return Collection
      */
     public function getAllTimetableRecords(): Collection
     {
@@ -188,8 +148,7 @@ class TimeTableRepo
     /**
      * Get timetable records by a list of IDs.
      *
-     * @param array|\Illuminate\Support\Collection $ids
-     * @return Collection
+     * @param  array|\Illuminate\Support\Collection  $ids
      */
     public function getRecordsByIds($ids): Collection
     {
@@ -200,9 +159,6 @@ class TimeTableRepo
 
     /**
      * Create a new timetable record.
-     *
-     * @param array $data
-     * @return TimeTableRecord
      */
     public function createTimetableRecord(array $data): TimeTableRecord
     {
@@ -211,10 +167,6 @@ class TimeTableRepo
 
     /**
      * Update a timetable record by ID.
-     *
-     * @param int   $id
-     * @param array $data
-     * @return int
      */
     public function updateTimetableRecord(int $id, array $data): int
     {
@@ -223,9 +175,6 @@ class TimeTableRepo
 
     /**
      * Delete a timetable record by ID.
-     *
-     * @param int $id
-     * @return int
      */
     public function deleteTimetableRecord(int $id): int
     {
@@ -234,9 +183,6 @@ class TimeTableRepo
 
     /**
      * Find a timetable record by ID (may return null).
-     *
-     * @param int $id
-     * @return TimeTableRecord|null
      */
     public function findTimetableRecord(int $id): ?TimeTableRecord
     {

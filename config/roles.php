@@ -7,7 +7,7 @@ use App\Enums\RoleKey;
 | Roles Configuration
 |--------------------------------------------------------------------------
 | This file defines the roles for both central and tenant contexts.
-| Enums constants are used for role keys and are used internally in the system. 
+| Enums constants are used for role keys and are used internally in the system.
 | Changing the values (names) is safe, but keys should remain constant.
 |
 | Important: if you change the central root role name, make sure to update
@@ -43,7 +43,7 @@ $tenantStaff = [
 $tenantDefault = [
     ...$tenantStaff,
     RoleKey::PARENT->value => 'Parent',
-    RoleKey::STUDENT->value => 'Student'
+    RoleKey::STUDENT->value => 'Student',
 ];
 
 return [

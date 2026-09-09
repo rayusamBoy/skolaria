@@ -45,7 +45,7 @@ class SyncMasterDataService
         tenancy()->initialize($sourceTenant);
         $tableData = [];
         foreach ($tablesToSync as $table) {
-            $tableData[$table] = DB::table($table)->get()->map(fn($row) => (array) $row)->toArray();
+            $tableData[$table] = DB::table($table)->get()->map(fn ($row) => (array) $row)->toArray();
         }
         tenancy()->end();
 
@@ -58,7 +58,7 @@ class SyncMasterDataService
             DB::statement('SET FOREIGN_KEY_CHECKS=0');
             foreach ($orderedTables as $table) {
                 DB::table($table)->truncate();
-                if (!empty($tableData[$table])) {
+                if (! empty($tableData[$table])) {
                     DB::table($table)->insert($tableData[$table]);
                 }
             }
@@ -71,6 +71,7 @@ class SyncMasterDataService
             foreach ($targetTenants as $targetTenant) {
                 if (\in_array($targetTenant->id, $excludeLockTenantIds)) {
                     $targetTenant->update(['locked_master_tables' => []]); // Unlock if previously locked
+
                     continue;
                 }
 

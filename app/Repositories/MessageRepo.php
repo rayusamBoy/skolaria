@@ -4,14 +4,12 @@ namespace App\Repositories;
 
 use App\Models\Message;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class MessageRepo
 {
     /**
      * Create a new message.
-     *
-     * @param array $data
-     * @return Message
      */
     public function create(array $data): Message
     {
@@ -20,9 +18,6 @@ class MessageRepo
 
     /**
      * Find a message by ID.
-     *
-     * @param int $id
-     * @return Message|null
      */
     public function find(int $id): ?Message
     {
@@ -32,9 +27,7 @@ class MessageRepo
     /**
      * Find a message or throw a 404 exception.
      *
-     * @param int $id
-     * @return Message
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws ModelNotFoundException
      */
     public function findOrFail(int $id): Message
     {
@@ -43,23 +36,16 @@ class MessageRepo
 
     /**
      * Permanently delete a message (including soft‑deleted ones).
-     *
-     * @param int $id
-     * @return bool
      */
     public function forceDeleteMessage(int $id): bool
     {
         $message = Message::withTrashed()->find($id);
+
         return $message ? (bool) $message->forceDelete() : false;
     }
 
     /**
      * Get messages before a given ID for pagination (infinite scroll).
-     *
-     * @param int $thread_id
-     * @param int $before_id
-     * @param int $limit
-     * @return Collection
      */
     public function getPreviousMessages(int $thread_id, int $before_id, int $limit = 5): Collection
     {
@@ -74,9 +60,6 @@ class MessageRepo
 
     /**
      * Get a single trashed message with its relationships.
-     *
-     * @param int $id
-     * @return Message|null
      */
     public function getTrashedMessageWithRelations(int $id): ?Message
     {

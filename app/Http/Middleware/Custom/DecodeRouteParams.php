@@ -22,7 +22,7 @@ class DecodeRouteParams
         'notice',
         'tenant',
         'ticket',
-        'pin'
+        'pin',
     ];
 
     /**
@@ -31,9 +31,7 @@ class DecodeRouteParams
      * Decodes specified route parameters using Qs::decodeHash before the request
      * is processed by the controller. If decoding fails, aborts with 404.
      *
-     * @param  Request  $request
      * @param  Closure(Request): Response  $next
-     * @return Response
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -41,7 +39,7 @@ class DecodeRouteParams
         $parameters = $route->parameters();
 
         foreach (self::KEYS_TO_DECODE as $key) {
-            if (!\array_key_exists($key, $parameters) || $parameters[$key] === null) {
+            if (! \array_key_exists($key, $parameters) || $parameters[$key] === null) {
                 continue;
             }
 

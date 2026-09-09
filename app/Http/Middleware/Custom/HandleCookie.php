@@ -24,9 +24,7 @@ class HandleCookie
      * Sets cookies for hidden alert IDs and active system skin based on user
      * preferences or defaults. Cookies are queued on the response.
      *
-     * @param  Request  $request
      * @param  Closure(Request): Response  $next
-     * @return Response
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -83,6 +81,7 @@ class HandleCookie
 
         // Default: first available skin key
         $available_skins = Usr::getAvailableAppSkins();
+
         return array_key_first($available_skins) ?? 'default';
     }
 }

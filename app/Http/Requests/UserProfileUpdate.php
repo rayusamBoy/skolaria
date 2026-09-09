@@ -10,7 +10,6 @@ use Illuminate\Validation\Rule;
 
 class UserProfileUpdate extends FormRequest
 {
-
     public function authorize()
     {
         return true;
@@ -43,8 +42,8 @@ class UserProfileUpdate extends FormRequest
             'tin_number' => ['sometimes', 'nullable', 'alpha_num', 'min:3', 'max:15', Rule::unique(StaffRecord::class, 'tin_number')->ignore($this->getAuthUserId(), 'user_id')],
             'social_security_number' => ['sometimes', 'nullable', 'string', 'min:3', 'max:15', Rule::unique(StaffRecord::class, 'social_security_number')->ignore($this->getAuthUserId(), 'user_id')],
             'licence_number' => ['sometimes', 'nullable', 'string', 'max:10', Rule::unique(StaffRecord::class, 'licence_number')->ignore($this->getAuthUserId(), 'user_id')],
-            'date_of_birth' => 'sometimes|nullable|date_format:' . Usr::getDateFormat(),
-            // The regex allows for alphabetic characters and spaces within each subject (for example, "Literature in English" is valid). 
+            'date_of_birth' => 'sometimes|nullable|date_format:'.Usr::getDateFormat(),
+            // The regex allows for alphabetic characters and spaces within each subject (for example, "Literature in English" is valid).
             // Each subject can be followed by a comma and optional spaces, before the next valid subject.
             'subjects_studied' => 'sometimes|nullable|max:250|regex:/^([a-zA-Z\s]+)(,\s*[a-zA-Z\s]+)*$/',
         ];

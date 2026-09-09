@@ -9,7 +9,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Payment extends Eloquent
 {
-    use SoftDeletes, LogsActivity;
+    use LogsActivity, SoftDeletes;
 
     protected $fillable = ['title', 'amount', 'my_class_id', 'description', 'year', 'reference_number'];
 

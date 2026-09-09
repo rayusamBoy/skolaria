@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Auth\Attributes\Permission;
 use Illuminate\Support\Facades\Gate;
 use ReflectionMethod;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -29,13 +30,14 @@ trait AuthorizesPermissions
     protected function getCurrentAction(): ?string
     {
         $route = request()->route();
+
         return $route?->getActionMethod();
     }
 
     protected function enforceResolvedPermission(): void
     {
         $action = $this->getCurrentAction();
-        if (!$action) {
+        if (! $action) {
             return;
         }
 
@@ -47,13 +49,14 @@ trait AuthorizesPermissions
 
         // permission may be string or array
         if (\is_array($permission)) {
-            if (!$this->userHasAny($permission)) {
+            if (! $this->userHasAny($permission)) {
                 $this->forbidden();
             }
+
             return;
         }
 
-        if (!$this->userHas($permission)) {
+        if (! $this->userHas($permission)) {
             $this->forbidden();
         }
     }
@@ -78,7 +81,7 @@ trait AuthorizesPermissions
             // Check the method first (more specific)
             try {
                 $methodRef = new ReflectionMethod($this, $action);
-                if (!empty($methodRef->getAttributes(\App\Auth\Attributes\SkipPermission::class))) {
+                if (! empty($methodRef->getAttributes(\App\Auth\Attributes\SkipPermission::class))) {
                     return null;
                 }
             } catch (\ReflectionException $e) {
@@ -87,13 +90,13 @@ trait AuthorizesPermissions
 
             // Check the class
             $classRef = new \ReflectionClass($this);
-            if (!empty($classRef->getAttributes(\App\Auth\Attributes\SkipPermission::class))) {
+            if (! empty($classRef->getAttributes(\App\Auth\Attributes\SkipPermission::class))) {
                 return null;
             }
         }
 
         // 1) Route action explicit
-        if (!empty($actionArr) && \array_key_exists('permission', $actionArr) && $actionArr['permission']) {
+        if (! empty($actionArr) && \array_key_exists('permission', $actionArr) && $actionArr['permission']) {
             return $actionArr['permission']; // can be string or array
         }
 
@@ -101,9 +104,10 @@ trait AuthorizesPermissions
         if (class_exists(ReflectionMethod::class)) {
             try {
                 $ref = new ReflectionMethod($this, $action);
-                $attributes = $ref->getAttributes(\App\Auth\Attributes\Permission::class);
-                if (!empty($attributes)) {
+                $attributes = $ref->getAttributes(Permission::class);
+                if (! empty($attributes)) {
                     $instance = $attributes[0]->newInstance();
+
                     return $instance->value ?? null;
                 }
             } catch (\ReflectionException $e) {
@@ -116,6 +120,7 @@ trait AuthorizesPermissions
             if (\is_array($perm) && isset($perm['permission'])) {
                 return $perm['permission'];
             }
+
             return $perm;
         };
 
@@ -123,6 +128,7 @@ trait AuthorizesPermissions
         if (property_exists($this, 'permissionMap') && \is_array($this->permissionMap)) {
             if (\array_key_exists($action, $this->permissionMap)) {
                 $mapped = $this->permissionMap[$action];
+
                 return $extractPermissionString($mapped);
             }
         }
@@ -137,7 +143,7 @@ trait AuthorizesPermissions
                 if (function_exists('fnmatch')) {
                     $matches = @fnmatch($pattern, $action);
                 } else {
-                    $regex = '/^' . str_replace('\*', '.*', preg_quote($pattern, '/')) . '$/i';
+                    $regex = '/^'.str_replace('\*', '.*', preg_quote($pattern, '/')).'$/i';
                     $matches = (bool) preg_match($regex, $action);
                 }
                 if ($matches) {
@@ -218,10 +224,11 @@ trait AuthorizesPermissions
     {
         if ($model !== null) {
             $this->authorize($permission, $model);
+
             return;
         }
 
-        if (!$this->userHas($permission)) {
+        if (! $this->userHas($permission)) {
             $this->forbidden();
         }
     }
@@ -234,11 +241,13 @@ trait AuthorizesPermissions
         if ($model !== null) {
             try {
                 $this->authorize($permission, $model);
+
                 return true;
             } catch (\Throwable $e) {
                 return false;
             }
         }
+
         return $this->userHas($permission);
     }
 }

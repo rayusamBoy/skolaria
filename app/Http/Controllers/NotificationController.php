@@ -4,14 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Usr;
-use App\Http\Controllers\Controller;
 use App\Notifications\NotificationMarkedAsRead;
 use App\Repositories\UserRepo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use NotificationChannels\Fcm\FcmChannel;
 use Illuminate\View\View;
+use NotificationChannels\Fcm\FcmChannel;
 
 class NotificationController extends Controller
 {
@@ -67,9 +66,7 @@ class NotificationController extends Controller
     /**
      * Mark a single notification as read.
      *
-     * @param  string $id
-     * @param  bool   $flash  If false, returns true instead of a redirect (used internally)
-     * @return RedirectResponse|bool
+     * @param  bool  $flash  If false, returns true instead of a redirect (used internally)
      */
     public function mark_as_read(string $id, bool $flash = true): RedirectResponse|bool
     {
@@ -106,13 +103,14 @@ class NotificationController extends Controller
         // DELETE request: remove token(s)
         if ($request->isMethod('DELETE')) {
             $this->deleteDeviceToken([$request->token], $user);
+
             return Usr::jsonUpdateOk();
         }
 
         $incoming_token = $request->token;
         $current_tokens = $user->firebase_device_tokens ?? [];
 
-        if (!\in_array($incoming_token, $current_tokens, true)) {
+        if (! \in_array($incoming_token, $current_tokens, true)) {
             $current_tokens[] = $incoming_token;
             $user->update(['firebase_device_tokens' => $current_tokens]);
         }

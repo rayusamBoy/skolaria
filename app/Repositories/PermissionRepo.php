@@ -12,8 +12,6 @@ class PermissionRepo
 
     /**
      * Get all permissions ordered by name.
-     *
-     * @return Collection
      */
     public function getAllPermissions(): Collection
     {
@@ -25,9 +23,8 @@ class PermissionRepo
     /**
      * Get roles optionally excluding some by name and eager loading relations.
      *
-     * @param array $except  Role names to exclude
-     * @param array $with    Relations to eager load
-     * @return Collection
+     * @param  array  $except  Role names to exclude
+     * @param  array  $with  Relations to eager load
      */
     public function getAllRoles(array $except = [], array $with = ['permissions']): Collection
     {
@@ -39,9 +36,6 @@ class PermissionRepo
 
     /**
      * Create a new role.
-     *
-     * @param array $attributes
-     * @return Role
      */
     public function createRole(array $attributes): Role
     {
@@ -50,10 +44,6 @@ class PermissionRepo
 
     /**
      * Get a single role by conditions, with its permissions.
-     *
-     * @param array $where
-     * @param array $with
-     * @return Role|null
      */
     public function getRoleByConditions(array $where, array $with = ['permissions']): ?Role
     {

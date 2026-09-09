@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
 use App\Helpers\Usr;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\QueryBuilderRequest;
 use App\Repositories\PermissionRepo;
 use App\Repositories\UserRepo;
+use App\User;
 use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request as HttpRequest;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
@@ -18,6 +19,7 @@ use Illuminate\View\View;
 class QueryBuilderController extends Controller
 {
     protected UserRepo $user;
+
     protected PermissionRepo $permission;
 
     public function __construct(UserRepo $user, PermissionRepo $permission)
@@ -84,7 +86,7 @@ class QueryBuilderController extends Controller
     /**
      * Build and execute the actual query based on the extracted parameters.
      *
-     * @return array  keys: 'records' (collection), 'query2' (string) or 'msg' (error string)
+     * @return array keys: 'records' (collection), 'query2' (string) or 'msg' (error string)
      */
     private function getData($req, $expression): array
     {
@@ -118,12 +120,13 @@ class QueryBuilderController extends Controller
         // Build query string for display
         $display_query = $this->buildDisplayQuery($from, $where, $where_two, $condition, $condition_two, $has_first_where, $has_second_where, $orderby_column, $orderby_direction, $limit);
 
-        if (!$has_first_where) {
+        if (! $has_first_where) {
             if ($has_second_where) {
-                return ['msg' => "The first where clause is empty. You must use it first before using the second where clause."];
+                return ['msg' => 'The first where clause is empty. You must use it first before using the second where clause.'];
             }
             // No where conditions
             $records = $this->buildBaseQuery($from, $expression, $orderby_column, $orderby_direction, $limit);
+
             return ['records' => $records, 'query2' => $display_query];
         }
 
@@ -146,22 +149,18 @@ class QueryBuilderController extends Controller
     /**
      * Build the base query (shared between with/without where clauses).
      *
-     * @param string      $from
-     * @param mixed       $expression
-     * @param string      $orderby_column
-     * @param string      $orderby_direction
-     * @param int|null    $limit
-     * @param array       $wheres        array of [column, operator, value] (value placeholder '?' recommended)
-     * @param array       $bindings      values to bind in order
-     * @return \Illuminate\Support\Collection
+     * @param  mixed  $expression
+     * @param  array  $wheres  array of [column, operator, value] (value placeholder '?' recommended)
+     * @param  array  $bindings  values to bind in order
      */
-    private function buildBaseQuery(string $from, $expression, string $orderby_column, string $orderby_direction, ?int $limit, array $wheres = [], array $bindings = []): \Illuminate\Support\Collection
+    private function buildBaseQuery(string $from, $expression, string $orderby_column, string $orderby_direction, ?int $limit, array $wheres = [], array $bindings = []): Collection
     {
         // Special tables that require joins
         $special_tables = ['student_records', 'staff_records', 'exam_records', 'grades', 'subjects'];
-        if (!\in_array($from, $special_tables)) {
+        if (! \in_array($from, $special_tables)) {
             $query = DB::table($from)->select($expression);
             $this->applyWheresAndOrderLimit($query, $wheres, $bindings, $orderby_column, $orderby_direction, $limit);
+
             return $query->get();
         }
 
@@ -195,7 +194,7 @@ class QueryBuilderController extends Controller
     /**
      * Build student records query with all needed joins.
      */
-    private function buildStudentRecordsQuery($expression, $orderby_column, $orderby_direction, $limit, $wheres, $bindings): \Illuminate\Support\Collection
+    private function buildStudentRecordsQuery($expression, $orderby_column, $orderby_direction, $limit, $wheres, $bindings): Collection
     {
         $query = DB::table('student_records')
             ->join('users', 'users.id', '=', 'student_records.user_id')
@@ -208,13 +207,14 @@ class QueryBuilderController extends Controller
             ->distinct();
 
         $this->applyWheresAndOrderLimit($query, $wheres, $bindings, $orderby_column, $orderby_direction, $limit);
+
         return $query->get();
     }
 
     /**
      * Build staff records query.
      */
-    private function buildStaffRecordsQuery($expression, $orderby_column, $orderby_direction, $limit, $wheres, $bindings): \Illuminate\Support\Collection
+    private function buildStaffRecordsQuery($expression, $orderby_column, $orderby_direction, $limit, $wheres, $bindings): Collection
     {
         $query = DB::table('staff_records')
             ->join('users', 'users.id', '=', 'staff_records.user_id')
@@ -222,13 +222,14 @@ class QueryBuilderController extends Controller
             ->distinct();
 
         $this->applyWheresAndOrderLimit($query, $wheres, $bindings, $orderby_column, $orderby_direction, $limit);
+
         return $query->get();
     }
 
     /**
      * Build exam records query.
      */
-    private function buildExamRecordsQuery($expression, $orderby_column, $orderby_direction, $limit, $wheres, $bindings): \Illuminate\Support\Collection
+    private function buildExamRecordsQuery($expression, $orderby_column, $orderby_direction, $limit, $wheres, $bindings): Collection
     {
         $query = DB::table('exam_records')
             ->join('users', 'users.id', '=', 'exam_records.student_id')
@@ -241,13 +242,14 @@ class QueryBuilderController extends Controller
             ->distinct();
 
         $this->applyWheresAndOrderLimit($query, $wheres, $bindings, $orderby_column, $orderby_direction, $limit);
+
         return $query->get();
     }
 
     /**
      * Build grades query.
      */
-    private function buildGradesQuery($expression, $orderby_column, $orderby_direction, $limit, $wheres, $bindings): \Illuminate\Support\Collection
+    private function buildGradesQuery($expression, $orderby_column, $orderby_direction, $limit, $wheres, $bindings): Collection
     {
         $query = DB::table('grades')
             ->join('class_types', 'class_types.id', '=', 'grades.class_type_id')
@@ -255,13 +257,14 @@ class QueryBuilderController extends Controller
             ->distinct();
 
         $this->applyWheresAndOrderLimit($query, $wheres, $bindings, $orderby_column, $orderby_direction, $limit);
+
         return $query->get();
     }
 
     /**
      * Build subjects query.
      */
-    private function buildSubjectsQuery($expression, $orderby_column, $orderby_direction, $limit, $wheres, $bindings): \Illuminate\Support\Collection
+    private function buildSubjectsQuery($expression, $orderby_column, $orderby_direction, $limit, $wheres, $bindings): Collection
     {
         $query = DB::table('subjects')
             ->join('my_classes', 'my_classes.id', '=', 'subjects.my_class_id')
@@ -269,6 +272,7 @@ class QueryBuilderController extends Controller
             ->distinct();
 
         $this->applyWheresAndOrderLimit($query, $wheres, $bindings, $orderby_column, $orderby_direction, $limit);
+
         return $query->get();
     }
 
@@ -291,7 +295,7 @@ class QueryBuilderController extends Controller
         $orderby_direction_extended = "{$orderby_direction}ending";
         $limit_str = $limit ? " limit $limit" : '';
 
-        if (!$has_first && !$has_second) {
+        if (! $has_first && ! $has_second) {
             // no where
             $base .= " orderby $orderby_column $orderby_direction_extended $limit_str";
         } else {
@@ -310,7 +314,7 @@ class QueryBuilderController extends Controller
         Validator::make($req->toArray(), [
             'user_roles' => 'required|array',
             'per_page' => 'integer|min:3|max:15|required',
-            'paper_size' => 'required|string|in:' . implode(',', array_keys(Qs::getDompdfSupportedPaperSizes())),
+            'paper_size' => 'required|string|in:'.implode(',', array_keys(Qs::getDompdfSupportedPaperSizes())),
             'paper_orientation' => 'sometimes|nullable|in:landscape',
         ], [], ['per_page' => 'number of data per page'])->validate();
 
@@ -349,13 +353,14 @@ class QueryBuilderController extends Controller
                             ->from('roles')
                             ->whereIn('name', $req->user_roles);
                     })
-                    ->where('model_type', \App\User::class);
+                    ->where('model_type', User::class);
             })
             ->orderBy('users.name')
             ->get();
 
         $users = $users->map(function ($user) {
             $user->photo_path = Qs::imgToBase64($user->photo_path);
+
             return $user;
         });
 
@@ -403,6 +408,6 @@ class QueryBuilderController extends Controller
         $dompdf->setPaper($paper_size, $paper_orientation);
         $dompdf->render();
 
-        return $dompdf->stream(Qs::getSystemShortCode() . ' Users Data.pdf');
+        return $dompdf->stream(Qs::getSystemShortCode().' Users Data.pdf');
     }
 }

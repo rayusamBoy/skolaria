@@ -168,12 +168,14 @@ class ArtisanCommandsController extends Controller
             }
 
             $message = "The $response_name command run successfully for the specified tenant.";
+
             return back()->with('pop_success', $message)->with('pop_timer', 0);
         } catch (Throwable $e) {
-            Log::error("Error running $response_name for tenant ID $tenant: " . $e->getMessage(), [
+            Log::error("Error running $response_name for tenant ID $tenant: ".$e->getMessage(), [
                 'exception' => $e,
                 'tenant_id' => $tenant,
             ]);
+
             return back()->with('pop_error', $e->getMessage())->with('pop_timer', 0);
         } finally {
             tenancy()->end();
@@ -185,7 +187,7 @@ class ArtisanCommandsController extends Controller
      */
     protected function executeArtisan(string $command): JsonResponse
     {
-        $output_buffer = new BufferedOutput();
+        $output_buffer = new BufferedOutput;
         $response_name = str_replace([':', '--'], [' ', ' '], $command);
 
         try {
@@ -197,17 +199,18 @@ class ArtisanCommandsController extends Controller
             }
 
             $error_message = "The $response_name command failed.";
-            if (!empty(trim($output))) {
+            if (! empty(trim($output))) {
                 $error_message .= " Details: $output";
             }
 
             return Qs::json($error_message, false);
         } catch (Throwable $e) {
-            Log::error("Error running $response_name command: " . $e->getMessage(), [
+            Log::error("Error running $response_name command: ".$e->getMessage(), [
                 'exception' => $e,
                 'command' => $command,
             ]);
-            return Qs::json("The $response_name command threw an exception: " . $e->getMessage(), false);
+
+            return Qs::json("The $response_name command threw an exception: ".$e->getMessage(), false);
         }
     }
 }

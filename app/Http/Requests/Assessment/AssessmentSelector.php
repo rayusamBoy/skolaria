@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class AssessmentSelector extends FormRequest
 {
-
     public function authorize()
     {
         return true;

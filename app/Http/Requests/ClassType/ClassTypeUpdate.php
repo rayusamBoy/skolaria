@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class ClassTypeUpdate extends FormRequest
 {
-
     public function authorize()
     {
         return true;

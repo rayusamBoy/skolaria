@@ -28,7 +28,7 @@ class RoleController extends Controller
         $permissions = $this->permission->getAllPermissions();
         $data['permissions'] = $permissions;
         $data['grouped_permissions'] = $permissions->groupBy(
-            fn($perm) => explode('.', $perm->name)[0]
+            fn ($perm) => explode('.', $perm->name)[0]
         );
         $data['roles'] = $this->permission->getAllRoles([], ['users', 'permissions']);
 
@@ -69,7 +69,7 @@ class RoleController extends Controller
 
         $permissions = $this->permission->getAllPermissions();
         $data['grouped_permissions'] = $permissions->groupBy(
-            fn($perm) => explode('.', $perm->name)[0]
+            fn ($perm) => explode('.', $perm->name)[0]
         );
         $data['role'] = $role;
 

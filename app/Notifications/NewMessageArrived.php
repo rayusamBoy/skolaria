@@ -15,6 +15,7 @@ class NewMessageArrived extends Notification
      * Create a new notification instance.
      */
     protected $message;
+
     public function __construct($message)
     {
         $this->message = $message;
@@ -28,6 +29,7 @@ class NewMessageArrived extends Notification
     public function via(object $notifiable): array
     {
         $channels = Qs::getActiveNotificationChannels($notifiable, false, false, true);
+
         return $channels;
     }
 
@@ -36,15 +38,15 @@ class NewMessageArrived extends Notification
         $url = route('message_threads.show', Qs::hash($this->message->thread_id));
         $data = [
             'title' => mb_strimwidth("New message from {$this->message->user->name}", 0, 35, '...'),
-            'body' => mb_strimwidth($this->message->body, 0, 50, "..."),
+            'body' => mb_strimwidth($this->message->body, 0, 50, '...'),
             'icon' => Qs::getAppIcon(),
             'type' => 'messages',
             'url' => $url,
-            'url_title' => "view message",
+            'url_title' => 'view message',
             'created_at' => $this->message->created_at->toISOString(),
         ];
 
-        return (new FcmMessage())
+        return (new FcmMessage)
             ->data($data)
             ->custom([
                 'android' => [
@@ -59,7 +61,7 @@ class NewMessageArrived extends Notification
                 'apns' => [
                     'payload' => [
                         'aps' => [
-                            'sound' => 'default'
+                            'sound' => 'default',
                         ],
                     ],
                     'fcm_options' => [

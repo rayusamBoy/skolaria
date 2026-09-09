@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Pay;
 use App\Helpers\Qs;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\NotificationController;
 use App\Http\Requests\Payment\PaymentCreate;
 use App\Http\Requests\Payment\PaymentUpdate;
 use App\Notifications\StudentPaymentPaid;
@@ -22,8 +20,11 @@ use Illuminate\View\View;
 class PaymentController extends Controller
 {
     protected MyClassRepo $my_class;
+
     protected PaymentRepo $pay;
+
     protected StudentRepo $student;
+
     protected string $year;
 
     public function __construct(MyClassRepo $my_class, PaymentRepo $pay, StudentRepo $student)
@@ -87,7 +88,7 @@ class PaymentController extends Controller
      */
     public function invoice($st_id, $year = null): View|RedirectResponse
     {
-        if (!$st_id) {
+        if (! $st_id) {
             return Qs::goWithDanger();
         }
 
@@ -113,7 +114,7 @@ class PaymentController extends Controller
             return back()->with('flash_danger', __('msg.year_invalid'));
         }
 
-        if (!$st_id) {
+        if (! $st_id) {
             return Qs::goWithDanger();
         }
 
@@ -134,7 +135,7 @@ class PaymentController extends Controller
      */
     public function receipts($pr_id, $notification_id = null): View|RedirectResponse
     {
-        if (!$pr_id) {
+        if (! $pr_id) {
             return Qs::goWithDanger();
         }
 
@@ -163,7 +164,7 @@ class PaymentController extends Controller
     public function pay_now(Request $req, $pr_id): JsonResponse
     {
         Validator::make($req->toArray(), [
-            'amount_paid' => 'required|numeric'
+            'amount_paid' => 'required|numeric',
         ], [], ['amount_paid' => 'Amount Paid'])->validate();
 
         $record = $this->pay->findPaymentRecord($pr_id);
@@ -228,7 +229,7 @@ class PaymentController extends Controller
     public function select_class(Request $req): RedirectResponse
     {
         Validator::make($req->toArray(), [
-            'my_class_id' => 'required|exists:my_classes,id'
+            'my_class_id' => 'required|exists:my_classes,id',
         ], [], ['my_class_id' => 'Class'])->validate();
 
         $class_id = $req->my_class_id;
@@ -252,7 +253,7 @@ class PaymentController extends Controller
                         'year' => $this->year,
                     ]);
 
-                    if (!$record->reference_number) {
+                    if (! $record->reference_number) {
                         $record->update(['reference_number' => mt_rand(100000, 99999999)]);
                     }
                 }

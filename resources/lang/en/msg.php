@@ -1,4 +1,5 @@
 <?php
+
 return
     [
         'denied' => 'Access denied for unauthorized action.',

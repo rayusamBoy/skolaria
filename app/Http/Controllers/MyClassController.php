@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\MyClass\ClassCreate;
 use App\Http\Requests\MyClass\ClassUpdate;
 use App\Repositories\MyClassRepo;
@@ -15,6 +14,7 @@ use Illuminate\View\View;
 class MyClassController extends Controller
 {
     protected MyClassRepo $my_class;
+
     protected UserRepo $user;
 
     public function __construct(MyClassRepo $my_class, UserRepo $user)

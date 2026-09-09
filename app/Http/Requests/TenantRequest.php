@@ -8,7 +8,6 @@ use Illuminate\Validation\Rule;
 
 class TenantRequest extends FormRequest
 {
-
     public function authorize()
     {
         return true;
@@ -17,8 +16,9 @@ class TenantRequest extends FormRequest
     protected function getRouteTenantIdParameter()
     {
         // If not data store
-        if ($this->method() !== "POST")
+        if ($this->method() !== 'POST') {
             return $this->route('tenant');
+        }
     }
 
     /**
@@ -40,8 +40,7 @@ class TenantRequest extends FormRequest
                 'nullable',
                 'in:0,1',
                 Rule::requiredIf(
-                    fn() =>
-                    $this->identification_mode === 'request_data'
+                    fn () => $this->identification_mode === 'request_data'
                     && (int) $this->is_template === 0
                 ),
                 function ($attribute, $value, $fail) {
@@ -68,8 +67,7 @@ class TenantRequest extends FormRequest
                 'nullable',
                 'in:0,1',
                 Rule::requiredIf(
-                    fn() =>
-                    $this->identification_mode === 'request_data'
+                    fn () => $this->identification_mode === 'request_data'
                     && (int) $this->is_template === 0
                 ),
                 function ($attribute, $value, $fail) {

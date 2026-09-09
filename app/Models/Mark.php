@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use App\User;
-use Illuminate\Database\Eloquent\Model as Eloquent;
 use Iksaku\Laravel\MassUpdate\MassUpdatable;
+use Illuminate\Database\Eloquent\Model as Eloquent;
 
 class Mark extends Eloquent
 {
     use MassUpdatable;
-    
+
     protected $fillable = ['exam_mark', 'tex1', 'tex2', 'tex3', 'subject_position', 'cumulative', 'cumulative_average', 'grade_id', 'year', 'exam_id', 'subject_id', 'my_class_id', 'student_id', 'section_id'];
 
     public function exam()

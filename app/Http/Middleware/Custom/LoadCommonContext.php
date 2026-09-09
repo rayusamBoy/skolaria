@@ -14,7 +14,7 @@ class LoadCommonContext
      * Handle an incoming request.
      * Loads common data into the view context, such as user preferences, classes, settings, and permissions.
      *
-     * @param  \Closure(Request): (Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {

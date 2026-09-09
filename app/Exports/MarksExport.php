@@ -10,19 +10,23 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithProperties;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Protection;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Events\AfterSheet;
 
-class MarksExport implements FromView, ShouldAutoSize, WithStyles, WithProperties, WithEvents
+class MarksExport implements FromView, ShouldAutoSize, WithEvents, WithProperties, WithStyles
 {
     protected array $data;
+
     // S/N, ADMISSION NUMBER, FULL NAME, GENDER, SECTION
     protected const int INITIAL_COLS = 5;
-    // Title and subject name rows         
+
+    // Title and subject name rows
     protected const int HEADER_ROWS = 4;
+
     protected const string SHEET_PASSWORD = 'AllahKnowsBest';
 
     public function __construct(array $data)
@@ -33,6 +37,7 @@ class MarksExport implements FromView, ShouldAutoSize, WithStyles, WithPropertie
     public function properties(): array
     {
         $system_name = Mk::getSystemName();
+
         return [
             'creator' => $system_name,
             'lastModifiedBy' => $system_name,
@@ -84,8 +89,8 @@ class MarksExport implements FromView, ShouldAutoSize, WithStyles, WithPropertie
         $validation->setFormula2(100);
 
         // Build range string (e.g., "E5:G20")
-        $range = Coordinate::stringFromColumnIndex($start_col) . $start_row . ':' .
-            Coordinate::stringFromColumnIndex($end_col) . $end_row;
+        $range = Coordinate::stringFromColumnIndex($start_col).$start_row.':'.
+            Coordinate::stringFromColumnIndex($end_col).$end_row;
 
         $sheet->setDataValidation($range, clone $validation);
     }
@@ -119,7 +124,7 @@ class MarksExport implements FromView, ShouldAutoSize, WithStyles, WithPropertie
         $header_range = [1, 1, $end_col, self::HEADER_ROWS];
         $sheet->getStyle($header_range)
             ->getFill()
-            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()
             ->setRGB($bg_color);
 
@@ -168,6 +173,7 @@ class MarksExport implements FromView, ShouldAutoSize, WithStyles, WithPropertie
     public function view(): View
     {
         $this->data['initial_cols'] = self::INITIAL_COLS;
+
         return view('pages.marks.batch.table', $this->data);
     }
 }

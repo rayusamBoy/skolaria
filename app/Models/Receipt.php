@@ -16,7 +16,7 @@ class Receipt extends Eloquent
     {
         return $this->belongsTo(PaymentRecord::class, 'payment_record_id');
     }
-    
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

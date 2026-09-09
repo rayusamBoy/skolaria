@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Grade\GradeCreate;
 use App\Http\Requests\Grade\GradeUpdate;
 use App\Repositories\ExamRepo;
@@ -15,6 +14,7 @@ use Illuminate\View\View;
 class GradeController extends Controller
 {
     protected ExamRepo $exam;
+
     protected MyClassRepo $my_class;
 
     public function __construct(ExamRepo $exam, MyClassRepo $my_class)

@@ -35,8 +35,9 @@ class DeleteIDCardsThemeDir implements ShouldQueue
         event(new TenantDeletingIDCardsThemeDir($this->tenant));
 
         $dir = Qs::getTenancyAwareIDCardsThemeDir();
-        if (is_dir($dir))
-            File::deleteDirectory($dir); // Delete tenant's students id cards theme file's specific dir.
+        if (is_dir($dir)) {
+            File::deleteDirectory($dir);
+        } // Delete tenant's students id cards theme file's specific dir.
 
         event(new TenantIDCardsThemeDirDeleted($this->tenant));
     }

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest;
+use App\Models\UserRegistrationInvite;
 use App\Repositories\LocationRepo;
 use App\Repositories\MyClassRepo;
 use App\Repositories\PermissionRepo;
@@ -18,10 +18,15 @@ use Illuminate\Support\Str;
 class UserInvitationController extends Controller
 {
     protected UserRepo $user;
+
     protected StudentRepo $student;
+
     protected LocationRepo $loc;
+
     protected MyClassRepo $my_class;
+
     protected PermissionRepo $permission;
+
     protected UserService $userService;
 
     public function __construct(
@@ -90,8 +95,8 @@ class UserInvitationController extends Controller
      */
     public function show_registration_form($token)
     {
-        /** @var \App\Models\UserRegistrationInvite $invitation */
-        $data['invitation'] =  $invitation = $this->user->whereInvitationBuilder(['token' => $token, 'status' => 'pending'])->firstOrFail();
+        /** @var UserRegistrationInvite $invitation */
+        $data['invitation'] = $invitation = $this->user->whereInvitationBuilder(['token' => $token, 'status' => 'pending'])->firstOrFail();
 
         if ($invitation->isExpired()) {
             abort(404, 'This invitation has expired.');
@@ -114,15 +119,15 @@ class UserInvitationController extends Controller
      */
     public function submit_registration(Request $request, $token)
     {
-        $validator = Validator::make($request->all(), (new UserRequest())->rules());
+        $validator = Validator::make($request->all(), (new UserRequest)->rules());
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
-        /** @var \App\Models\UserRegistrationInvite $invitation */
+        /** @var UserRegistrationInvite $invitation */
         $invitation = $this->user->whereInvitationBuilder(['token' => $token, 'status' => 'pending'])->firstOrFail();
-        
+
         if ($invitation->isExpired()) {
             abort(404, 'This invitation has expired.');
         }
@@ -149,7 +154,7 @@ class UserInvitationController extends Controller
     {
         $invitation = $this->user->findInvitationOrFail($id);
 
-        if ($invitation->status !== 'pending' || !$invitation->submitted_data) {
+        if ($invitation->status !== 'pending' || ! $invitation->submitted_data) {
             return back()->with('flash_error', 'This request cannot be approved.');
         }
 
@@ -177,6 +182,7 @@ class UserInvitationController extends Controller
     {
         $invitation = $this->user->findInvitationOrFail($id);
         $invitation->update(['status' => 'rejected']);
+
         return back()->with('flash_success', __('msg.invitation_rejected'));
     }
 }

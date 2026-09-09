@@ -1,16 +1,24 @@
 <?php
 
+use App\Http\Middleware\Custom\CheckForPasswordUpdate;
+use App\Http\Middleware\Custom\DecodeRouteParams;
+use App\Http\Middleware\Custom\HandleCookie;
+use App\Http\Middleware\Custom\LoadCommonContext;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 use Stancl\Tenancy\Middleware\PreventAccessFromUnwantedDomains;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        commands: __DIR__ . '/../routes/console.php',
+        commands: __DIR__.'/../routes/console.php',
         using: function () {
             $centralDomains = config('tenancy.identification.central_domains');
             $activeIdentificationMode = config('tenancy.active_identification_mode');
@@ -25,7 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
                 Route::middleware([
                     InitializeTenancyByDomain::class,
-                    PreventAccessFromUnwantedDomains::class
+                    PreventAccessFromUnwantedDomains::class,
                 ])->group(function () {
                     Route::middleware('web')
                         ->namespace('App\Http\Controllers')
@@ -48,24 +56,24 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web([
-            \App\Http\Middleware\Custom\LoadCommonContext::class,
-            \App\Http\Middleware\Custom\HandleCookie::class,
+            LoadCommonContext::class,
+            HandleCookie::class,
         ]);
         $middleware->alias([
-            'checkForPassUpdate' => \App\Http\Middleware\Custom\CheckForPasswordUpdate::class,
-            '2fa' => \PragmaRX\Google2FALaravel\Middleware::class,
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'roleOrPermission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-            'decodeRouteParams' => \App\Http\Middleware\Custom\DecodeRouteParams::class,
+            'checkForPassUpdate' => CheckForPasswordUpdate::class,
+            '2fa' => PragmaRX\Google2FALaravel\Middleware::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'roleOrPermission' => RoleOrPermissionMiddleware::class,
+            'decodeRouteParams' => DecodeRouteParams::class,
         ]);
         $middleware->encryptCookies(except: [
             'do_not_show_els_with_these_ids_again',
             'active_system_skin',
         ]);
         $middleware->prependToPriorityList(
-            before: \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            prepend: \App\Http\Middleware\Custom\DecodeRouteParams::class,
+            before: SubstituteBindings::class,
+            prepend: DecodeRouteParams::class,
         );
     })
     ->withExceptions(function (Exceptions $exceptions) {

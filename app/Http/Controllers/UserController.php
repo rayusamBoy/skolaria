@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Usr;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\UserBlockedState;
 use App\Http\Requests\UserRequest;
 use App\Http\Requests\UserStaffDataEditState;
@@ -13,20 +12,25 @@ use App\Repositories\MyClassRepo;
 use App\Repositories\PermissionRepo;
 use App\Repositories\StudentRepo;
 use App\Repositories\UserRepo;
+use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
-use App\Services\UserService;
 
 class UserController extends Controller
 {
     protected UserRepo $user;
+
     protected StudentRepo $student;
+
     protected LocationRepo $loc;
+
     protected MyClassRepo $my_class;
+
     protected PermissionRepo $permission;
+
     protected UserService $userService;
 
     public function __construct(
@@ -112,7 +116,7 @@ class UserController extends Controller
             return Usr::json($e->getMessage(), false);
         }
 
-        return Usr::json(__('msg.store_ok') . " Default password: $last_role_name");
+        return Usr::json(__('msg.store_ok')." Default password: $last_role_name");
     }
 
     /**
@@ -150,7 +154,7 @@ class UserController extends Controller
      */
     public function show($user_id): View|RedirectResponse
     {
-        if (!$user_id) {
+        if (! $user_id) {
             return back();
         }
 
@@ -234,7 +238,7 @@ class UserController extends Controller
         $except_role = config('roles.default_roles.tenant.student');
         $except_roles = [$except_role];
 
-        if (!Usr::userIsHead()) {
+        if (! Usr::userIsHead()) {
             $except_roles[] = config('roles.default_roles.tenant.superadmin');
         }
 
@@ -246,7 +250,7 @@ class UserController extends Controller
      */
     protected function cannotModifyHeadUser($user_id): bool
     {
-        return Usr::userIsHead($user_id) && !Usr::userIsHead();
+        return Usr::userIsHead($user_id) && ! Usr::userIsHead();
     }
 
     /**
@@ -256,7 +260,7 @@ class UserController extends Controller
     {
         $user = auth()->user();
 
-        return $user_id != $user->id && !$user->hasAnyRole(Usr::getTenancyAwareStaffRoles());
+        return $user_id != $user->id && ! $user->hasAnyRole(Usr::getTenancyAwareStaffRoles());
     }
 
     /**
@@ -280,7 +284,7 @@ class UserController extends Controller
             ...Usr::getStaffRecordFields(),
             ...Usr::getParentRelativeRecordFields(),
             '_token',
-            '_method'
+            '_method',
         ];
 
         $data = $req->except($exclude);
@@ -310,7 +314,8 @@ class UserController extends Controller
     protected function generateStaffId($employment_date = null): string
     {
         $date = $employment_date ?: now();
-        return Usr::getSystemShortCode() . '/STAFF/' . date('Y/m', strtotime($date)) . '/' . mt_rand(1000, 9999);
+
+        return Usr::getSystemShortCode().'/STAFF/'.date('Y/m', strtotime($date)).'/'.mt_rand(1000, 9999);
     }
 
     /**
@@ -325,8 +330,8 @@ class UserController extends Controller
         if ($req->hasFile('photo')) {
             $photo = $req->file('photo');
             $file_meta = Usr::getFileMetaData($photo);
-            $file_meta['name'] = 'photo.' . $file_meta['ext'];
-            $file_meta['path'] = Usr::getUploadPath($last_role_name) . $user_code . '/' . $file_meta['name'];
+            $file_meta['name'] = 'photo.'.$file_meta['ext'];
+            $file_meta['path'] = Usr::getUploadPath($last_role_name).$user_code.'/'.$file_meta['name'];
             $photo->storeAs($file_meta['path']);
             $data['photo_path'] = $file_meta['path'];
         } elseif ($req->route()->getActionMethod() === 'store') {
@@ -388,7 +393,7 @@ class UserController extends Controller
      */
     protected function handleParentRecordUpdate(int $user_id, bool $is_parent, UserRequest $req): void
     {
-        if (!$is_parent) {
+        if (! $is_parent) {
             return;
         }
 

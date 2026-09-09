@@ -11,8 +11,6 @@ class EventRepo
 
     /**
      * Count all events in the database.
-     *
-     * @return int
      */
     public function countEvents(): int
     {
@@ -21,9 +19,6 @@ class EventRepo
 
     /**
      * Create a new event.
-     *
-     * @param array $data
-     * @return Event
      */
     public function create(array $data): Event
     {
@@ -32,9 +27,6 @@ class EventRepo
 
     /**
      * Get events matching certain conditions.
-     *
-     * @param array $where
-     * @return Collection
      */
     public function getEventsByConditions(array $where): Collection
     {
@@ -43,8 +35,6 @@ class EventRepo
 
     /**
      * Get all events with their owning user.
-     *
-     * @return Collection
      */
     public function getAllEvents(): Collection
     {
@@ -54,9 +44,7 @@ class EventRepo
     /**
      * Update an event by ID.
      *
-     * @param int   $id
-     * @param array $data
-     * @return int  Number of updated rows
+     * @return int Number of updated rows
      */
     public function update(int $id, array $data): int
     {
@@ -66,8 +54,7 @@ class EventRepo
     /**
      * Delete an event by ID.
      *
-     * @param int $id
-     * @return int  Number of deleted rows
+     * @return int Number of deleted rows
      */
     public function delete(int $id): int
     {

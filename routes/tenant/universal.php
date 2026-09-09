@@ -8,8 +8,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MyAccountController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\UserImpersonationController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\UserImpersonationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -25,11 +25,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group(["middleware" => ['universal']], function () {
+Route::group(['middleware' => ['universal']], function () {
     Auth::routes();
 
     // The helper route page only sets theme and skin preferences for the PWA GeneratePwaScreenshots command
-    Route::get('pwa-set-preferences', fn() => view('pwa.set_preferences'));
+    Route::get('pwa-set-preferences', fn () => view('pwa.set_preferences'));
 
     Route::group(['prefix' => 'impersonation', 'middleware' => ['auth', 'checkForPassUpdate', '2fa']], function () {
         Route::get('/', [UserImpersonationController::class, 'index'])->name('tenant.impersonation');
@@ -75,6 +75,7 @@ Route::group(["middleware" => ['universal']], function () {
 
             Route::get('email/verification/notification', function (Request $request) {
                 $request->user()->sendEmailVerificationNotification();
+
                 return back()->with('flash_success', __('msg.verification_sent'));
             })->middleware(['throttle:6,1'])->name('verification.send');
 

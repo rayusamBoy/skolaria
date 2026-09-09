@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Qs;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Notice\NoticeCreate;
 use App\Http\Requests\Notice\NoticeSetAsViewed;
 use App\Http\Requests\Notice\NoticeUpdate;
@@ -18,7 +17,9 @@ use Illuminate\View\View;
 class NoticeController extends Controller
 {
     protected NoticeRepo $notice;
+
     protected UserRepo $user;
+
     protected string $year;
 
     public function __construct(NoticeRepo $notice, UserRepo $user)

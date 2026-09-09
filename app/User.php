@@ -23,7 +23,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, SoftDeletes, Messagable, CanResetPassword, LogsActivity, HasRoles;
+    use CanResetPassword, HasFactory, HasRoles, LogsActivity, Messagable, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -59,7 +59,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'message_media_heading_color',
         'firebase_device_tokens',
         'hidden_alert_ids',
-        'password_updated_at'
+        'password_updated_at',
     ];
 
     protected $casts = [
@@ -73,6 +73,7 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     public const string GENDER_MALE = 'Male';
+
     public const string GENDER_FEMALE = 'Female';
 
     /**

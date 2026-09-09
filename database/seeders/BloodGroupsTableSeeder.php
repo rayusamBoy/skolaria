@@ -6,7 +6,6 @@ use Illuminate\Database\Seeder;
 
 class BloodGroupsTableSeeder extends Seeder
 {
-
     /**
      * Auto generated seed file
      *
@@ -14,69 +13,59 @@ class BloodGroupsTableSeeder extends Seeder
      */
     public function run()
     {
-        
 
         \DB::table('blood_groups')->delete();
-        
-        \DB::table('blood_groups')->insert(array (
-            0 => 
-            array (
+
+        \DB::table('blood_groups')->insert([
+            0 => [
                 'id' => 1,
                 'name' => 'O-',
                 'created_at' => '2022-07-19 01:52:38',
                 'updated_at' => '2022-07-19 01:52:38',
-            ),
-            1 => 
-            array (
+            ],
+            1 => [
                 'id' => 2,
                 'name' => 'O+',
                 'created_at' => '2022-07-19 01:52:38',
                 'updated_at' => '2022-07-19 01:52:38',
-            ),
-            2 => 
-            array (
+            ],
+            2 => [
                 'id' => 3,
                 'name' => 'A+',
                 'created_at' => '2022-07-19 01:52:38',
                 'updated_at' => '2022-07-19 01:52:38',
-            ),
-            3 => 
-            array (
+            ],
+            3 => [
                 'id' => 4,
                 'name' => 'A-',
                 'created_at' => '2022-07-19 01:52:38',
                 'updated_at' => '2022-07-19 01:52:38',
-            ),
-            4 => 
-            array (
+            ],
+            4 => [
                 'id' => 5,
                 'name' => 'B+',
                 'created_at' => '2022-07-19 01:52:38',
                 'updated_at' => '2022-07-19 01:52:38',
-            ),
-            5 => 
-            array (
+            ],
+            5 => [
                 'id' => 6,
                 'name' => 'B-',
                 'created_at' => '2022-07-19 01:52:38',
                 'updated_at' => '2022-07-19 01:52:38',
-            ),
-            6 => 
-            array (
+            ],
+            6 => [
                 'id' => 7,
                 'name' => 'AB+',
                 'created_at' => '2022-07-19 01:52:38',
                 'updated_at' => '2022-07-19 01:52:38',
-            ),
-            7 => 
-            array (
+            ],
+            7 => [
                 'id' => 8,
                 'name' => 'AB-',
                 'created_at' => '2022-07-19 01:52:38',
                 'updated_at' => '2022-07-19 01:52:38',
-            ),
-        ));
-        
-        
+            ],
+        ]);
+
     }
 }

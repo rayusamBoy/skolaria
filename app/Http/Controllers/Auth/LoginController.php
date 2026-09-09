@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class LoginController extends Controller implements HasMiddleware
 {
@@ -41,7 +42,7 @@ class LoginController extends Controller implements HasMiddleware
     /**
      * Show the application's login form.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function showLoginForm()
     {
@@ -49,15 +50,17 @@ class LoginController extends Controller implements HasMiddleware
 
         // If account not active ie., blocked, suspended etc., abort as forbidden.
         if (\in_array($account_status, Usr::getAccountStatuses(['Active']))) {
-            $message = 'ACCOUNT ' . strtoupper($account_status);
+            $message = 'ACCOUNT '.strtoupper($account_status);
             session()->flash('tenant_account_not_active', $message);
             abort(403, $message);
         }
 
         // If the user was logged out due to session expire
-        if (!$this->cookieService->has('has_logged_out'))
-            if ($this->cookieService->has('was_logged_in') && $this->cookieService->get('was_logged_in') == true)
+        if (! $this->cookieService->has('has_logged_out')) {
+            if ($this->cookieService->has('was_logged_in') && $this->cookieService->get('was_logged_in') == true) {
                 session()->flash('session_expired', __('msg.session_expired'));
+            }
+        }
 
         return view('auth.login');
     }
@@ -75,7 +78,6 @@ class LoginController extends Controller implements HasMiddleware
 
     /**
      *  Login with Username or Email
-     * 
      */
     public function username()
     {
@@ -89,7 +91,6 @@ class LoginController extends Controller implements HasMiddleware
     /**
      * The user has logged out of the application.
      *
-     * @param  Request  $request
      * @return mixed
      */
     protected function loggedOut(Request $request)
@@ -98,7 +99,7 @@ class LoginController extends Controller implements HasMiddleware
         $this->cookieService->setForever('has_logged_out', true);
         // Delete was logged in
         $this->cookieService->delete('was_logged_in');
-        
+
         session()->forget('impersonated_from_central');
 
         return redirect()->route('login');
@@ -107,7 +108,6 @@ class LoginController extends Controller implements HasMiddleware
     /**
      * The user has been authenticated.
      *
-     * @param  Request  $request
      * @param  mixed  $user
      * @return mixed
      */
@@ -116,7 +116,8 @@ class LoginController extends Controller implements HasMiddleware
         $user ??= auth()->user();
         if ($user->is_blocked) {
             Auth::logout();
-            return redirect()->route('login')->with('access_denied', __('msg.restricted') . ' ACCOUNT BLOCKED.');
+
+            return redirect()->route('login')->with('access_denied', __('msg.restricted').' ACCOUNT BLOCKED.');
         }
 
         $this->cookieService->delete('has_logged_out');

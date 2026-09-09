@@ -23,8 +23,9 @@ class HandleFailedFcmNotifications
     {
         $report = Arr::get($event->data, 'report');
 
-        if (!$report) {
+        if (! $report) {
             $this->logMissingReport($event);
+
             return;
         }
 
@@ -37,24 +38,28 @@ class HandleFailedFcmNotifications
         if ($this->isInvalidTokenError($error)) {
             logger()->info('FCM token expired or invalid – removing', $context);
             $this->removeToken($token, $event->notifiable);
+
             return;
         }
 
         // Server‑side errors → retry later (no token cleanup)
         if ($error instanceof ServerError) {
             logger()->warning('FCM server error – retry', $context);
+
             return;
         }
 
         // Rate limiting
         if ($error instanceof QuotaExceeded) {
             logger()->warning('FCM quota exceeded', $context);
+
             return;
         }
 
         // SSL / network issues – transient, no cleanup
         if ($this->isTransientNetworkError($error)) {
             logger()->warning('FCM transient network issue', $context);
+
             return;
         }
 
@@ -75,6 +80,7 @@ class HandleFailedFcmNotifications
 
         if ($target && method_exists($target, 'value')) {
             $token = $target->value();
+
             return \is_string($token) && $token !== '' ? $token : null;
         }
 
@@ -88,6 +94,7 @@ class HandleFailedFcmNotifications
     {
         if (method_exists($report, 'error')) {
             $error = $report->error();
+
             return $error instanceof \Throwable ? $error : null;
         }
 
@@ -120,7 +127,7 @@ class HandleFailedFcmNotifications
      */
     protected function isInvalidTokenError(?\Throwable $error): bool
     {
-        if (!$error) {
+        if (! $error) {
             return false;
         }
 
@@ -132,12 +139,14 @@ class HandleFailedFcmNotifications
         // InvalidMessage with a token‑format complaint is also a dead token
         if ($error instanceof InvalidMessage) {
             $message = strtolower($error->getMessage());
+
             return str_contains($message, 'registration token')
                 || str_contains($message, 'registration-token-not-registered');
         }
 
         // Fallback string‑based check for any other exception
         $message = strtolower($error->getMessage());
+
         return str_contains($message, 'not found')
             || str_contains($message, 'registration-token-not-registered')
             || str_contains($message, 'unregistered');
@@ -148,11 +157,12 @@ class HandleFailedFcmNotifications
      */
     protected function isTransientNetworkError(?\Throwable $error): bool
     {
-        if (!$error) {
+        if (! $error) {
             return false;
         }
 
         $message = strtolower($error->getMessage());
+
         return str_contains($message, 'timed out')
             || str_contains($message, 'could not resolve host')
             || str_contains($message, 'connection refused')
@@ -164,7 +174,7 @@ class HandleFailedFcmNotifications
      */
     protected function removeToken(?string $token, $notifiable): void
     {
-        if (!$token) {
+        if (! $token) {
             return;
         }
 

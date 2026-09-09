@@ -77,6 +77,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         /****************** Email Verification ***************/
         Route::get('email/verify/{id}/{hash}', function (CustomEmailVerificationRequest $request) {
             $request->fulfill();
+
             return redirect('/home')->with('pop_success', __('msg.email_verified'));
         })->middleware(['signed'])->name('verification.verify');
 

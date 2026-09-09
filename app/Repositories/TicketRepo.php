@@ -16,8 +16,6 @@ class TicketRepo
 
     /**
      * Get all tickets.
-     *
-     * @return Collection
      */
     public function getAllTickets(): Collection
     {
@@ -26,9 +24,6 @@ class TicketRepo
 
     /**
      * Find a ticket by its primary key.
-     *
-     * @param int $id
-     * @return Ticket|null
      */
     public function findTicket(int $id): ?Ticket
     {
@@ -37,9 +32,6 @@ class TicketRepo
 
     /**
      * Create a new ticket.
-     *
-     * @param array $attributes
-     * @return Ticket
      */
     public function createTicket(array $attributes): Ticket
     {
@@ -49,8 +41,7 @@ class TicketRepo
     /**
      * Delete a ticket by ID.
      *
-     * @param int $id
-     * @return int  Number of deleted rows (0 or 1)
+     * @return int Number of deleted rows (0 or 1)
      */
     public function deleteTicket(int $id): int
     {
@@ -59,9 +50,6 @@ class TicketRepo
 
     /**
      * Get tickets matching the given conditions.
-     *
-     * @param array $where
-     * @return Collection
      */
     public function getTicketsByConditions(array $where): Collection
     {
@@ -71,9 +59,7 @@ class TicketRepo
     /**
      * Update ticket(s) matching an ID.
      *
-     * @param int   $id
-     * @param array $attributes
-     * @return int  Number of updated rows
+     * @return int Number of updated rows
      */
     public function updateTicket(int $id, array $attributes): int
     {
@@ -84,9 +70,6 @@ class TicketRepo
 
     /**
      * Create a new ticket message.
-     *
-     * @param array $attributes
-     * @return TicketMessage
      */
     public function createMessage(array $attributes): TicketMessage
     {
@@ -95,9 +78,6 @@ class TicketRepo
 
     /**
      * Query builder for ticket messages matching conditions.
-     *
-     * @param array $where
-     * @return Builder|TicketMessage
      */
     public function getMessagesQuery(array $where): Builder|TicketMessage
     {
@@ -108,8 +88,6 @@ class TicketRepo
 
     /**
      * Get all ticket categories.
-     *
-     * @return Collection
      */
     public function getCategories(): Collection
     {
@@ -118,10 +96,6 @@ class TicketRepo
 
     /**
      * Update or create a ticket category.
-     *
-     * @param array $attributes
-     * @param array $values
-     * @return TicketCategory
      */
     public function updateOrCreateCategory(array $attributes, array $values): TicketCategory
     {
@@ -130,10 +104,6 @@ class TicketRepo
 
     /**
      * Delete category(ies) where a column is not in a given list.
-     *
-     * @param string $column
-     * @param array  $values
-     * @return int
      */
     public function deleteCategoryWhereNotIn(string $column, array $values): int
     {
@@ -144,8 +114,6 @@ class TicketRepo
 
     /**
      * Get all ticket labels.
-     *
-     * @return Collection
      */
     public function getLabels(): Collection
     {
@@ -154,10 +122,6 @@ class TicketRepo
 
     /**
      * Update or create a ticket label.
-     *
-     * @param array $attributes
-     * @param array $values
-     * @return TicketLabel
      */
     public function updateOrCreateLabel(array $attributes, array $values): TicketLabel
     {
@@ -166,10 +130,6 @@ class TicketRepo
 
     /**
      * Delete label(s) where a column is not in a given list.
-     *
-     * @param string $column
-     * @param array  $values
-     * @return int
      */
     public function deleteLabelWhereNotIn(string $column, array $values): int
     {
@@ -181,10 +141,6 @@ class TicketRepo
     /**
      * Assign labels to a ticket by inserting rows in the pivot table.
      * Note: This does **not** remove existing labels first.
-     *
-     * @param int   $ticket_id
-     * @param array $label_ids
-     * @return bool
      */
     public function assignLabelsToTicket(int $ticket_id, array $label_ids): bool
     {
@@ -195,6 +151,7 @@ class TicketRepo
                 'label_id' => $labelId,
             ];
         }
+
         return TicketHasLabel::insert($values);
     }
 }

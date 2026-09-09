@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UserBlockedState extends FormRequest
 {
-
     public function authorize()
     {
         return true;

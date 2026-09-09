@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Http\Controllers\Controller;
 use App\Models\Mark;
 use App\Repositories\MyClassRepo;
 use App\Repositories\StudentRepo;
@@ -16,7 +15,9 @@ use Illuminate\View\View;
 class PromotionController extends Controller
 {
     protected MyClassRepo $my_class;
+
     protected StudentRepo $student;
+
     protected $year;
 
     public function __construct(MyClassRepo $my_class, StudentRepo $student)
@@ -35,7 +36,7 @@ class PromotionController extends Controller
     {
         $old_year = $this->year;
         $old_yr = explode('-', $old_year);
-        $new_year = ++$old_yr[0] . '-' . ++$old_yr[1];
+        $new_year = ++$old_yr[0].'-'.++$old_yr[1];
 
         $data = [
             'old_year' => $old_year,
@@ -98,7 +99,7 @@ class PromotionController extends Controller
     {
         $old_year = Qs::getSetting('current_session');
         $old_yr = explode('-', $old_year);
-        $new_year = ++$old_yr[0] . '-' . ++$old_yr[1];
+        $new_year = ++$old_yr[0].'-'.++$old_yr[1];
 
         $students = ($status == 1)
             ? $this->student->getActiveStudentsQueryWithRelations([
@@ -241,7 +242,7 @@ class PromotionController extends Controller
     {
         $prom = $this->student->findPromotion($promotion_id);
 
-        if (!$prom) {
+        if (! $prom) {
             return;
         }
 

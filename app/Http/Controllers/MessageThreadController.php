@@ -6,7 +6,6 @@ use App\Auth\Attributes\SkipPermission;
 use App\Events\MessageArrived;
 use App\Events\MessageDeleted;
 use App\Helpers\Usr;
-use App\Http\Controllers\Controller;
 use App\Models\StudentRecord;
 use App\Notifications\NewMessageArrived;
 use App\Repositories\MessageRepo;
@@ -28,8 +27,11 @@ use Throwable;
 class MessageThreadController extends Controller
 {
     protected int $extra_messages_to_count;
+
     protected UserRepo $user;
+
     protected ThreadRepo $thread;
+
     protected MessageRepo $message;
 
     public function __construct(UserRepo $user, ThreadRepo $thread, MessageRepo $message)
@@ -90,6 +92,7 @@ class MessageThreadController extends Controller
     public function create(): View
     {
         $users = $this->getUsersExceptAuth();
+
         return view('messenger.create', compact('users'));
     }
 
@@ -118,7 +121,7 @@ class MessageThreadController extends Controller
         Participant::create([
             'thread_id' => $thread->id,
             'user_id' => auth()->id(),
-            'last_read' => new Carbon(),
+            'last_read' => new Carbon,
         ]);
 
         if ($request->has('recipients')) {
@@ -153,7 +156,8 @@ class MessageThreadController extends Controller
         try {
             $message = $this->createMessageAndUpdateParticipant($thread, $input);
         } catch (Throwable $e) {
-            Log::error("Error in MessageController@update while creating a message: " . $e->getMessage());
+            Log::error('Error in MessageController@update while creating a message: '.$e->getMessage());
+
             return Usr::json(null, false, [
                 'msg' => 'Something went wrong. Cannot create a message.',
                 'ok' => false,
@@ -163,10 +167,12 @@ class MessageThreadController extends Controller
 
         try {
             $this->broadcastNewMessage($message, $thread);
+
             return Usr::jsonWithSingleKey('scrollToBtn');
         } catch (Throwable $e) {
             $this->message->forceDeleteMessage($message->id);
-            Log::error("Error in MessageController@update while sending a message: " . $e->getMessage());
+            Log::error('Error in MessageController@update while sending a message: '.$e->getMessage());
+
             return Usr::json(null, false, [
                 'msg' => 'Something went wrong. Cannot send a message.',
                 'ok' => false,
@@ -182,6 +188,7 @@ class MessageThreadController extends Controller
     public function update_participant_last_read(int $thread_id): JsonResponse
     {
         $this->thread->markThreadAsReadForUser($thread_id, auth()->id());
+
         return Usr::jsonUpdateOk();
     }
 
@@ -197,6 +204,7 @@ class MessageThreadController extends Controller
         }
 
         $thread->delete();
+
         return redirect()->route('message_threads.index')->with('flash_success', __('msg.del_ok'));
     }
 
@@ -214,10 +222,12 @@ class MessageThreadController extends Controller
             if ($this->thread->exists($thread_id)) {
                 return redirect()->back()->with('flash_info', 'You must restore the thread first to remove the participant.');
             }
+
             return redirect()->back()->with('flash_error', 'The thread was not found.');
         }
 
         $this->thread->removeParticipantFromThread($thread_id, $participant_id);
+
         return redirect()->back()->with('flash_success', 'Participant has been removed.');
     }
 
@@ -242,6 +252,7 @@ class MessageThreadController extends Controller
             $message_html = view('messenger.partials.messages', ['message' => $deleted_message])->render();
 
             broadcast(new MessageDeleted($deleted_message, $message_html));
+
             return Usr::jsonWithSingleKey('complete');
         } catch (Throwable $e) {
             $message->update(['deleted_by' => null]);
@@ -269,6 +280,7 @@ class MessageThreadController extends Controller
         }
 
         $this->thread->activateAllThreadParticipants($thread_id);
+
         return redirect()->back()->with('flash_success', 'Participants have been activated successfully.');
     }
 
@@ -323,12 +335,12 @@ class MessageThreadController extends Controller
                     ->where('user.user_type', 'student')
                     ->pluck('user_id')
                     ->toArray(),
-                default => User::whereHas('roles', fn($q) => $q->where('name', $role))
+                default => User::whereHas('roles', fn ($q) => $q->where('name', $role))
                     ->pluck('id')
                     ->toArray(),
             };
 
-            if (!empty($user_ids)) {
+            if (! empty($user_ids)) {
                 $this->thread->addParticipantsToThread($thread->id, $user_ids);
             }
         }
@@ -349,7 +361,7 @@ class MessageThreadController extends Controller
             'thread_id' => $thread->id,
             'user_id' => auth()->id(),
         ]);
-        $participant->last_read = new Carbon();
+        $participant->last_read = new Carbon;
         $participant->save();
 
         if (isset($input['recipients'])) {
@@ -371,7 +383,7 @@ class MessageThreadController extends Controller
             ->with('user')
             ->get()
             ->pluck('user')
-            ->filter(fn($u) => $u && $u->id !== auth()->id());
+            ->filter(fn ($u) => $u && $u->id !== auth()->id());
 
         Notification::sendNow($recipients, new NewMessageArrived($message));
         broadcast(new MessageArrived($message, $message_html));

@@ -24,7 +24,7 @@ class StudentRecordCreate extends FormRequest
             'name' => 'required|string|min:6|max:150',
             'admission_number' => 'sometimes|nullable|regex:/^[a-zA-Z0-9\s\-\/]+$/|min:4|max:20|unique:student_records',
             'gender' => 'required|string',
-            'date_admitted' => 'required|date_format:' . Usr::getDateFormat(),
+            'date_admitted' => 'required|date_format:'.Usr::getDateFormat(),
             'primary_mobile' => ['sometimes', 'nullable', 'string', 'max:16', new StartsWithProperPhoneCode],
             'secondary_mobile' => ['sometimes', 'nullable', 'string', 'max:16', new StartsWithProperPhoneCode],
             'email' => 'sometimes|nullable|email|max:100|unique:users',
@@ -45,8 +45,8 @@ class StudentRecordCreate extends FormRequest
             'chronic_health_problems' => 'sometimes|nullable|string',
             'food_taboos' => 'sometimes|nullable|string',
             'parent_status' => 'required|string',
-            'date_of_birth' => 'required|date_format:' . Usr::getDateFormat(),
-            'religion' => 'required'
+            'date_of_birth' => 'required|date_format:'.Usr::getDateFormat(),
+            'religion' => 'required',
         ];
     }
 

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Auth\Attributes\SkipPermission;
 use App\Exports\StudentsBatchAddExport;
 use App\Helpers\Usr;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\StudentRecordCreate;
 use App\Http\Requests\Student\StudentRecordUpdate;
 use App\Imports\StudentsBatchStoreImport;
@@ -22,15 +21,21 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Validators\ValidationException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class StudentRecordController extends Controller
 {
     protected LocationRepo $loc;
+
     protected MyClassRepo $my_class;
+
     protected UserRepo $user;
+
     protected StudentRepo $student;
+
     protected string $students_batch_file_name_description;
+
     protected string $session;
 
     public function __construct(
@@ -183,14 +188,15 @@ class StudentRecordController extends Controller
         ], [], ['template' => 'students batch add template'])->validate();
 
         try {
-            Excel::import(new StudentsBatchStoreImport(), $template);
+            Excel::import(new StudentsBatchStoreImport, $template);
+
             return Usr::jsonStoreOk();
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+        } catch (ValidationException $e) {
             $errors = [];
 
             foreach ($e->failures() as $failure) {
                 $actual_row = $failure->row() + 1; // 1 = The very first data row (visible heading row, row 5, skipped)
-                $errors[$failure->attribute()] = "There was an error on row $actual_row. " . implode(', ', $failure->errors());
+                $errors[$failure->attribute()] = "There was an error on row $actual_row. ".implode(', ', $failure->errors());
             }
 
             return Usr::json(arr: ['errors' => $errors, 'hasAjaxErrors' => true]);
@@ -233,7 +239,7 @@ class StudentRecordController extends Controller
     public function mark_not_graduated($sr_id, $prom_id)
     {
         $d['is_graduated'] = false;
-        $d['graduated_session'] = NULL;
+        $d['graduated_session'] = null;
         $d['session'] = $this->session;
 
         $this->student->updateStudentRecords($sr_id, $d);
@@ -256,7 +262,7 @@ class StudentRecordController extends Controller
      */
     public function show($student): View|RedirectResponse
     {
-        if (!$student) {
+        if (! $student) {
             return Usr::goWithDanger();
         }
 
@@ -274,7 +280,7 @@ class StudentRecordController extends Controller
      */
     public function edit($student): View|RedirectResponse
     {
-        if (!$student) {
+        if (! $student) {
             return Usr::goWithDanger();
         }
 
@@ -293,7 +299,7 @@ class StudentRecordController extends Controller
      */
     public function update(StudentRecordUpdate $req, $student): JsonResponse
     {
-        if (!$student) {
+        if (! $student) {
             return Usr::json(__('msg.srnf'), false);
         }
 
@@ -375,7 +381,8 @@ class StudentRecordController extends Controller
     protected function generateStudentUsername(string $class_code, string $date_admitted, $admission_number): string
     {
         $year = date('Y', strtotime($date_admitted));
-        return strtoupper(Usr::getSystemShortCode() . '/' . $class_code . '/' . $year . '/' . $admission_number);
+
+        return strtoupper(Usr::getSystemShortCode().'/'.$class_code.'/'.$year.'/'.$admission_number);
     }
 
     /**
@@ -383,14 +390,14 @@ class StudentRecordController extends Controller
      */
     protected function handleFileUpload(HttpReq $req, string $field, array &$data, string $user_code, string $role): void
     {
-        if (!$req->hasFile($field)) {
+        if (! $req->hasFile($field)) {
             return;
         }
 
         $file = $req->file($field);
         $file_meta = Usr::getFileMetaData($file);
-        $file_meta['name'] = "$field." . $file_meta['ext'];
-        $file_meta['path'] = Usr::getUploadPath($role) . $user_code . '/' . $file_meta['name'];
+        $file_meta['name'] = "$field.".$file_meta['ext'];
+        $file_meta['path'] = Usr::getUploadPath($role).$user_code.'/'.$file_meta['name'];
 
         $file->storeAs($file_meta['path']);
         $data['photo_path'] = $file_meta['path'];
@@ -423,7 +430,7 @@ class StudentRecordController extends Controller
     {
         $user = auth()->user();
 
-        return $student != $user->id && !$user->hasAnyRole(Usr::getTenancyAwareStaffRoles());
+        return $student != $user->id && ! $user->hasAnyRole(Usr::getTenancyAwareStaffRoles());
     }
 
     /**

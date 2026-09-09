@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Book\BookCreate;
 use App\Http\Requests\Book\BookUpdate;
 use App\Repositories\BookRepo;
@@ -15,6 +14,7 @@ use Illuminate\View\View;
 class BookController extends Controller
 {
     protected BookRepo $book;
+
     protected MyClassRepo $my_class;
 
     public function __construct(BookRepo $book, MyClassRepo $my_class)

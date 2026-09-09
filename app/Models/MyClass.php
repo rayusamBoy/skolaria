@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class MyClass extends Eloquent
 {
     use SoftDeletes;
-    
+
     protected $fillable = ['name', 'class_type_id'];
 
     public function section()

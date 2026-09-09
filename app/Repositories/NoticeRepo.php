@@ -12,30 +12,27 @@ class NoticeRepo
     /**
      * Get all notices (or only those created by the current user if not a superadmin).
      *
-     * @param array $with  Relations to eager load
-     * @return Collection
+     * @param  array  $with  Relations to eager load
      */
     public function getAllOrOwnNotices(array $with = ['user']): Collection
     {
         return Notice::with($with)
             ->when(
-                !auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')),
-                fn($query) => $query->where('creator_id', auth()->id())
+                ! auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')),
+                fn ($query) => $query->where('creator_id', auth()->id())
             )
             ->get();
     }
 
     /**
      * Get all notices except those created by the current user (unless superadmin, who sees all).
-     *
-     * @return Collection
      */
     public function getAllExceptOwn(): Collection
     {
         return Notice::with('user')
             ->when(
-                !auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')),
-                fn($query) => $query->where('creator_id', '!=', auth()->id())
+                ! auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin')),
+                fn ($query) => $query->where('creator_id', '!=', auth()->id())
             )
             ->get();
     }
@@ -43,8 +40,7 @@ class NoticeRepo
     /**
      * Get notices by ID (returns a collection, even for a single ID).
      *
-     * @param mixed $id
-     * @return Collection
+     * @param  mixed  $id
      */
     public function getNoticesById($id): Collection
     {
@@ -53,9 +49,6 @@ class NoticeRepo
 
     /**
      * Create a new notice.
-     *
-     * @param array $data
-     * @return Notice
      */
     public function createNotice(array $data): Notice
     {
@@ -64,10 +57,6 @@ class NoticeRepo
 
     /**
      * Update a notice by ID.
-     *
-     * @param int   $id
-     * @param array $data
-     * @return int
      */
     public function updateNotice(int $id, array $data): int
     {

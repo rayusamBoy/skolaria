@@ -95,18 +95,18 @@ return [
                     'route' => 'dashboard',
                     'output' => 'tenancy/superadmin-dashboard-dark.png',
                     'viewport' => 'desktop',
-                    'theme' => 'dark'
+                    'theme' => 'dark',
                 ],
                 [
                     'route' => 'students.create',
                     'output' => 'tenancy/superadmin-admit-student-dark.png',
                     'viewport' => 'desktop',
-                    'theme' => 'dark'
+                    'theme' => 'dark',
                 ],
                 [
                     'route' => 'users.index',
                     'output' => 'tenancy/superadmin-manage-users-light.png',
-                    'viewport' => 'desktop'
+                    'viewport' => 'desktop',
                 ],
             ],
         ],
@@ -124,7 +124,7 @@ return [
                     'route' => 'dashboard',
                     'output' => 'tenancy/teacher-dashboard-dark.png',
                     'viewport' => 'desktop',
-                    'theme' => 'dark'
+                    'theme' => 'dark',
                 ],
                 [
                     'route' => 'dashboard',
@@ -135,19 +135,19 @@ return [
                     'route' => 'marks.batch',
                     'output' => 'tenancy/teacher-batch-marks-dark.png',
                     'viewport' => 'desktop',
-                    'theme' => 'dark'
+                    'theme' => 'dark',
                 ],
                 [
                     'route' => 'message_threads.index',
                     'output' => 'tenancy/teacher-messaging-dark.png',
                     'viewport' => 'desktop',
-                    'theme' => 'dark'
+                    'theme' => 'dark',
                 ],
                 [
                     'route' => 'statistics.index',
                     'output' => 'tenancy/teacher-statistics-dark.png',
                     'viewport' => 'desktop',
-                    'theme' => 'dark'
+                    'theme' => 'dark',
                 ],
             ],
         ],
@@ -165,12 +165,12 @@ return [
                     'route' => 'dashboard',
                     'output' => 'tenancy/narrow-accountant-dashboard-dark.png',
                     'viewport' => 'mobile',
-                    'theme' => 'dark'
+                    'theme' => 'dark',
                 ],
                 [
                     'route' => 'payments.manage',
                     'output' => 'tenancy/accountant-manage-payment-light.png',
-                    'viewport' => 'desktop'
+                    'viewport' => 'desktop',
                 ],
             ],
         ],
@@ -188,12 +188,12 @@ return [
                     'route' => 'books.index',
                     'output' => 'tenancy/librarian-manage-books-dark.png',
                     'viewport' => 'desktop',
-                    'theme' => 'dark'
+                    'theme' => 'dark',
                 ],
                 [
                     'route' => 'dashboard',
                     'output' => 'tenancy/narrow-librarian-dashboard-light.png',
-                    'viewport' => 'mobile'
+                    'viewport' => 'mobile',
                 ],
             ],
         ],
@@ -210,18 +210,18 @@ return [
                 [
                     'route' => 'parent.my_children',
                     'output' => 'tenancy/parent-my-dashboard-light.png',
-                    'viewport' => 'desktop'
+                    'viewport' => 'desktop',
                 ],
                 [
                     'route' => 'parent.my_children',
                     'output' => 'tenancy/narrow-parent-my-children-light.png',
-                    'viewport' => 'mobile'
+                    'viewport' => 'mobile',
                 ],
                 [
                     'route' => 'my_account.edit',
                     'output' => 'tenancy/parent-my-profile-dark.png',
                     'viewport' => 'desktop',
-                    'theme' => 'dark'
+                    'theme' => 'dark',
                 ],
                 [
                     'route' => 'notifications.index',
@@ -243,12 +243,12 @@ return [
                 [
                     'route' => 'my_account.edit',
                     'output' => 'tenancy/student-my-account-light.png',
-                    'viewport' => 'desktop'
+                    'viewport' => 'desktop',
                 ],
                 [
                     'route' => 'timetables.index',
                     'output' => 'tenancy/narrow-student-manage-timetables-light.png',
-                    'viewport' => 'mobile'
+                    'viewport' => 'mobile',
                 ],
             ],
         ],
@@ -265,23 +265,23 @@ return [
                     'route' => 'dashboard',
                     'output' => 'non_tenancy/dashboard-dark.png',
                     'theme' => 'dark',
-                    'viewport' => 'desktop'
+                    'viewport' => 'desktop',
                 ],
                 [
                     'route' => 'dashboard',
                     'output' => 'non_tenancy/narrow-dashboard-light.png',
-                    'viewport' => 'mobile'
+                    'viewport' => 'mobile',
                 ],
                 [
                     'route' => 'settings.index',
                     'output' => 'non_tenancy/system-settings-light.png',
-                    'viewport' => 'desktop'
+                    'viewport' => 'desktop',
                 ],
                 [
                     'route' => 'tenants.index',
                     'output' => 'non_tenancy/manage-tenants-dark.png',
                     'theme' => 'dark',
-                    'viewport' => 'desktop'
+                    'viewport' => 'desktop',
                 ],
             ],
         ],
@@ -302,7 +302,7 @@ return [
                 [
                     'route' => 'login',
                     'output' => 'non_tenancy/narrow-login.png',
-                    'viewport' => 'mobile'
+                    'viewport' => 'mobile',
                 ],
             ],
         ],

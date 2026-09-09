@@ -12,6 +12,7 @@ use Illuminate\View\View;
 class SoftDeleteController extends Controller
 {
     protected UserRepo $user;
+
     protected TenantRepo $tenant;
 
     public function __construct(UserRepo $user, TenantRepo $tenant)
@@ -30,10 +31,12 @@ class SoftDeleteController extends Controller
         $data['users'] = $users = $this->user->getTrashedUsers();
         $data['tenants'] = $tenants = $this->tenant->getTrashedTenants();
         $model_names_to_remove = [];
-        if ($users->isEmpty())
+        if ($users->isEmpty()) {
             $model_names_to_remove[] = 'users';
-        if ($tenants->isEmpty())
+        }
+        if ($tenants->isEmpty()) {
             $model_names_to_remove[] = 'tenants';
+        }
 
         $data['model_names_to_remove'] = $model_names_to_remove;
 
@@ -48,7 +51,7 @@ class SoftDeleteController extends Controller
         $allowed_models = Usr::getCanSoftDeleteModelNames([], false);
         $model_name = strtolower($model_name);
 
-        if (!\in_array($model_name, $allowed_models, true) || !auth()->user()->hasRole(config('roles.default_roles.central.root'))) {
+        if (! \in_array($model_name, $allowed_models, true) || ! auth()->user()->hasRole(config('roles.default_roles.central.root'))) {
             return back()->with('pop_error', __('msg.denied'));
         }
 
@@ -64,7 +67,8 @@ class SoftDeleteController extends Controller
         }
 
         $model_name = str_replace('_', ' ', $model_name);
-        return redirect()->back()->with('flash_success', ucfirst($model_name) . ' ' . __('msg.force_del_ok'));
+
+        return redirect()->back()->with('flash_success', ucfirst($model_name).' '.__('msg.force_del_ok'));
     }
 
     /********** Users **********/
@@ -72,7 +76,8 @@ class SoftDeleteController extends Controller
     public function user_restore(int $id): RedirectResponse
     {
         $this->user->restoreUser($id);
-        return redirect()->route('central_bin')->with('flash_success', 'User ' . __('msg.restore_ok'));
+
+        return redirect()->route('central_bin')->with('flash_success', 'User '.__('msg.restore_ok'));
     }
 
     public function user_force_delete(int $id): RedirectResponse
@@ -81,7 +86,7 @@ class SoftDeleteController extends Controller
         $this->user->forceDeleteUser($id);
         Usr::deleteUserPhotoDirs($user->roles->pluck('name'), $user->code);
 
-        return redirect()->route('central_bin')->with('flash_success', 'User ' . __('msg.force_del_ok'));
+        return redirect()->route('central_bin')->with('flash_success', 'User '.__('msg.force_del_ok'));
     }
 
     /********** Tenants **********/
@@ -89,12 +94,14 @@ class SoftDeleteController extends Controller
     public function tenant_restore(int $id): RedirectResponse
     {
         $this->tenant->restoreTenant($id);
-        return redirect()->route('central_bin')->with('flash_success', 'Tenant ' . __('msg.restore_ok'));
+
+        return redirect()->route('central_bin')->with('flash_success', 'Tenant '.__('msg.restore_ok'));
     }
 
     public function tenant_force_delete(int $id): RedirectResponse
     {
         $this->tenant->forceDeleteTenant($id);
-        return redirect()->route('central_bin')->with('flash_success', 'Tenant ' . __('msg.force_del_ok'));
+
+        return redirect()->route('central_bin')->with('flash_success', 'Tenant '.__('msg.force_del_ok'));
     }
 }

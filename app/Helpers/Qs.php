@@ -10,8 +10,12 @@ use App\Models\StudentRecord;
 use DateTime;
 use Dompdf\Adapter\CPDF;
 use Hashids\Hashids;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use NotificationChannels\Fcm\FcmChannel;
@@ -21,8 +25,6 @@ class Qs
 {
     /**
      * Get the application code (short system title).
-     *
-     * @return string
      */
     public static function getSystemShortCode(): string
     {
@@ -31,8 +33,6 @@ class Qs
 
     /**
      * Return standard panel options HTML (collapse/remove buttons).
-     *
-     * @return string
      */
     public static function getPanelOptionsHtml(): string
     {
@@ -47,8 +47,7 @@ class Qs
     /**
      * Get the parent relative record for a given user ID.
      *
-     * @param mixed $user_id
-     * @return ParentRelative|null
+     * @param  mixed  $user_id
      */
     public static function getParentRelativeByUserId($user_id): ?ParentRelative
     {
@@ -60,23 +59,19 @@ class Qs
 
     /**
      * Get or create the Hashids instance (uses tenant key or app key as salt).
-     *
-     * @return Hashids
      */
     protected static function getHashidsInstance(): Hashids
     {
-        if (!self::$hashids) {
+        if (! self::$hashids) {
             $salt = tenant()?->getTenantKey() ?? config('app.key');
             self::$hashids = new Hashids($salt, 10);
         }
+
         return self::$hashids;
     }
 
     /**
      * Hash an ID using Hashids.
-     *
-     * @param mixed $id
-     * @return string
      */
     public static function hash(mixed $id): string
     {
@@ -86,22 +81,20 @@ class Qs
     /**
      * Decode a hashed string back to the original ID(s).
      *
-     * @param string $str
-     * @param bool   $to_string Whether to return a comma-separated string or an array
-     * @return string|array
+     * @param  bool  $to_string  Whether to return a comma-separated string or an array
      */
     public static function decodeHash(string $str, bool $to_string = true): string|array
     {
         $decoded = self::getHashidsInstance()->decode($str);
+
         return $to_string ? implode(',', $decoded) : $decoded;
     }
 
     /**
      * Get the user record fields (name → column mapping).
      *
-     * @param array $remove       Keys to exclude
-     * @param bool  $values_only  Return only column names if true
-     * @return array
+     * @param  array  $remove  Keys to exclude
+     * @param  bool  $values_only  Return only column names if true
      */
     public static function getUserRecordFields(array $remove = [], bool $values_only = true): array
     {
@@ -117,19 +110,16 @@ class Qs
             'Nationality' => 'nationality_id',
             'State' => 'state_id',
             'LGA' => 'lga_id',
-            'Religion' => 'religion'
+            'Religion' => 'religion',
         ];
 
         $filtered = $remove ? array_diff($data, $remove) : $data;
+
         return $values_only ? array_values($filtered) : $filtered;
     }
 
     /**
      * Get the staff record fields (name → column mapping).
-     *
-     * @param array $remove
-     * @param bool  $values_only
-     * @return array
      */
     public static function getStaffRecordFields(array $remove = [], bool $values_only = true): array
     {
@@ -149,19 +139,16 @@ class Qs
             'Subjects studied' => 'subjects_studied',
             'Bank name' => 'bank_name',
             'Number of periods' => 'number_of_periods',
-            'Place of living' => 'place_of_living'
+            'Place of living' => 'place_of_living',
         ];
 
         $filtered = $remove ? array_diff($data, $remove) : $data;
+
         return $values_only ? array_values($filtered) : $filtered;
     }
 
     /**
      * Get parent/relative record fields (name → column mapping).
-     *
-     * @param array $remove
-     * @param bool  $values_only
-     * @return array
      */
     public static function getParentRelativeRecordFields(array $remove = [], bool $values_only = true): array
     {
@@ -170,19 +157,16 @@ class Qs
             'Relative Full name' => 'relative_name',
             'Relative secondary mobile' => 'secondary_mobile',
             'Relative primary mobile' => 'primary_mobile',
-            'Relation with relative' => 'relation'
+            'Relation with relative' => 'relation',
         ];
 
         $filtered = $remove ? array_diff($data, $remove) : $data;
+
         return $values_only ? array_values($filtered) : $filtered;
     }
 
     /**
      * Get student data fields (name → column mapping).
-     *
-     * @param array $remove
-     * @param bool  $values_only
-     * @return array
      */
     public static function getStudentDataFields(array $remove = [], bool $values_only = true): array
     {
@@ -202,18 +186,16 @@ class Qs
             'Disability' => 'disability',
             'Chronic health problems' => 'chronic_health_problems',
             'Parents status' => 'parent_status',
-            'Food taboos' => 'food_taboos'
+            'Food taboos' => 'food_taboos',
         ];
 
         $filtered = $remove ? array_diff($data, $remove) : $data;
+
         return $values_only ? array_values($filtered) : $filtered;
     }
 
     /**
      * Convert a number (1‑based) to its corresponding uppercase letter (1 -> A, 2 -> B, etc.).
-     *
-     * @param int $number
-     * @return string
      */
     public static function numberToColumnLetter(int $number): string
     {
@@ -222,8 +204,6 @@ class Qs
 
     /**
      * Check if the authenticated user is a class teacher for any section.
-     *
-     * @return bool
      */
     public static function userIsClassSectionTeacher(): bool
     {
@@ -234,20 +214,16 @@ class Qs
 
     /**
      * Determine if a user (default: auth) is the system head.
-     *
-     * @param int|null $user_id
-     * @return bool
      */
     public static function userIsHead(?int $user_id = null): bool
     {
         $user_id ??= auth()->id();
+
         return \in_array($user_id, self::getHeadIds());
     }
 
     /**
      * Return an array of user IDs considered as system heads.
-     *
-     * @return array
      */
     public static function getHeadIds(): array
     {
@@ -256,21 +232,16 @@ class Qs
 
     /**
      * Get staff role names, optionally excluding some.
-     *
-     * @param array $remove
-     * @return array
      */
     public static function getStaffRoleNames(array $remove = []): array
     {
         $data = array_values(config('roles.staff_roles.tenant'));
+
         return $remove ? array_values(array_diff($data, $remove)) : $data;
     }
 
     /**
      * Get the list of exam data fields, optionally excluding some.
-     *
-     * @param array $remove
-     * @return array
      */
     public static function getExamFieldNames(array $remove = []): array
     {
@@ -288,17 +259,14 @@ class Qs
             'cw_denominator',
             'hw_denominator',
             'tt_denominator',
-            'tdt_denominator'
+            'tdt_denominator',
         ];
+
         return $remove ? array_values(array_diff($data, $remove)) : $data;
     }
 
     /**
      * Check if a given student is a child of a parent.
-     *
-     * @param int $student_id
-     * @param int $parent_id
-     * @return bool
      */
     public static function isStudentChildOfParent(int $student_id, int $parent_id): bool
     {
@@ -307,9 +275,6 @@ class Qs
 
     /**
      * Get the student record by user ID.
-     *
-     * @param int $user_id
-     * @return StudentRecord|null
      */
     public static function getSRByUserID(int $user_id): ?StudentRecord
     {
@@ -318,8 +283,6 @@ class Qs
 
     /**
      * Get the public upload path (relative).
-     *
-     * @return string
      */
     public static function getPublicUploadPath(): string
     {
@@ -328,9 +291,6 @@ class Qs
 
     /**
      * Get role‑specific upload path.
-     *
-     * @param string $user_role_name
-     * @return string
      */
     public static function getUploadPath(string $user_role_name): string
     {
@@ -339,11 +299,8 @@ class Qs
 
     /**
      * Extract file metadata (name, extension, MIME, size).
-     *
-     * @param \Illuminate\Http\UploadedFile $file
-     * @return array
      */
-    public static function getFileMetaData(\Illuminate\Http\UploadedFile $file): array
+    public static function getFileMetaData(UploadedFile $file): array
     {
         return [
             'name' => $file->getClientOriginalName(),
@@ -355,8 +312,6 @@ class Qs
 
     /**
      * Return the delimiter used in combined strings (e.g., file names).
-     *
-     * @return string
      */
     public static function getDelimiter(): string
     {
@@ -365,49 +320,39 @@ class Qs
 
     /**
      * Format a byte value into a human‑readable size.
-     *
-     * @param int $size
-     * @param int $precision
-     * @return string
      */
     public static function formatBytes(int $size, int $precision = 2): string
     {
         $base = log($size, 1024);
         $suffixes = ['B', 'KB', 'MB', 'GB', 'TB'];
-        return round(pow(1024, $base - floor($base)), $precision) . ' ' . $suffixes[floor($base)];
+
+        return round(pow(1024, $base - floor($base)), $precision).' '.$suffixes[floor($base)];
     }
 
     // ------ Settings helpers ------
 
     /**
      * Retrieve a setting by type, optionally from the central database.
-     *
-     * @param string $key
-     * @param bool   $use_central_connection
-     * @return mixed
      */
     public static function getSetting(string $key, bool $use_central_connection = false): mixed
     {
         if ($use_central_connection) {
-            return tenancy()->central(fn() => once(fn() => Setting::where('key', $key)->value('value')));
+            return tenancy()->central(fn () => once(fn () => Setting::where('key', $key)->value('value')));
         }
-        return once(fn() => Setting::where('key', $key)->value('value'));
+
+        return once(fn () => Setting::where('key', $key)->value('value'));
     }
 
     /**
      * Get all settings (cached once per request).
-     *
-     * @return \Illuminate\Support\Collection
      */
-    public static function getSettings(): \Illuminate\Support\Collection
+    public static function getSettings(): Collection
     {
-        return once(fn() => Setting::all());
+        return once(fn () => Setting::all());
     }
 
     /**
      * Return the current academic session string (e.g., "2023-2024").
-     *
-     * @return string|null
      */
     public static function getCurrentSession(): ?string
     {
@@ -416,20 +361,17 @@ class Qs
 
     /**
      * Compute the next academic session based on the current one.
-     *
-     * @return string
      */
     public static function getNextSession(): string
     {
         $oy = self::getCurrentSession();
         $years = explode('-', $oy);
-        return ++$years[0] . '-' . ++$years[1];
+
+        return ++$years[0].'-'.++$years[1];
     }
 
     /**
      * Get the system name.
-     *
-     * @return string|null
      */
     public static function getSystemName(): ?string
     {
@@ -438,22 +380,17 @@ class Qs
 
     /**
      * Get the abbreviation (first letter of each word) of a string or the system name.
-     *
-     * @param string|null $string
-     * @return string
      */
     public static function getStringAbbreviation(?string $string = null): string
     {
         $string ??= self::getSystemName();
         preg_match_all('/(?<=\b)\w/iu', $string, $matches);
+
         return mb_strtoupper(implode('', $matches[0]));
     }
 
     /**
      * Find a student record by user ID.
-     *
-     * @param int $user_id
-     * @return StudentRecord|null
      */
     public static function findStudentRecord(int $user_id): ?StudentRecord
     {
@@ -465,23 +402,19 @@ class Qs
     /**
      * Return a JSON response (clearing any output buffering).
      *
-     * @param string|null $msg
-     * @param bool   $ok
-     * @param array  $arr this will take precedence if provided
-     * @return JsonResponse
+     * @param  array  $arr  this will take precedence if provided
      */
-    public static function json(string|null $msg = null, bool $ok = true, array $arr = []): JsonResponse
+    public static function json(?string $msg = null, bool $ok = true, array $arr = []): JsonResponse
     {
         while (ob_get_level() > 0) {
             ob_end_clean();
         }
+
         return $arr ? response()->json($arr) : response()->json(['ok' => $ok, 'msg' => $msg]);
     }
 
     /**
      * JSON store success response.
-     *
-     * @return JsonResponse
      */
     public static function jsonStoreOk(): JsonResponse
     {
@@ -490,8 +423,6 @@ class Qs
 
     /**
      * JSON update success response.
-     *
-     * @return JsonResponse
      */
     public static function jsonUpdateOk(): JsonResponse
     {
@@ -500,8 +431,6 @@ class Qs
 
     /**
      * JSON update denied response.
-     *
-     * @return JsonResponse
      */
     public static function jsonUpdateDenied(): JsonResponse
     {
@@ -510,10 +439,6 @@ class Qs
 
     /**
      * JSON response with a single key/value pair.
-     *
-     * @param string $msg
-     * @param bool   $ok
-     * @return JsonResponse
      */
     public static function jsonWithSingleKey(string $msg, bool $ok = true): JsonResponse
     {
@@ -524,9 +449,6 @@ class Qs
 
     /**
      * Redirect to a route with a store success flash message.
-     *
-     * @param string $routeName
-     * @return RedirectResponse
      */
     public static function redirectStoreSuccess(string $routeName): RedirectResponse
     {
@@ -535,9 +457,6 @@ class Qs
 
     /**
      * Redirect to a route with a delete success flash message.
-     *
-     * @param string $routeName
-     * @return RedirectResponse
      */
     public static function redirectDeleteSuccess(string $routeName): RedirectResponse
     {
@@ -546,9 +465,6 @@ class Qs
 
     /**
      * Redirect to a route with an update success flash message.
-     *
-     * @param string $routeName
-     * @return RedirectResponse
      */
     public static function redirectUpdateSuccess(string $routeName): RedirectResponse
     {
@@ -557,12 +473,6 @@ class Qs
 
     /**
      * Redirect to a named route, optionally passing parameters.
-     *
-     * @param string|array $goto
-     * @param int          $status
-     * @param array        $headers
-     * @param bool|null    $secure
-     * @return RedirectResponse
      */
     public static function goToRoute(array|string $goto, int $status = 302, array $headers = [], ?bool $secure = null): RedirectResponse
     {
@@ -572,28 +482,22 @@ class Qs
             array_shift($goto);
             $data = $goto;
         }
+
         return app('redirect')->to(route($to, $data), $status, $headers, $secure);
     }
 
     /**
      * Redirect to a route with a danger flash message (default: record not found).
-     *
-     * @param string      $to
-     * @param string|null $msg
-     * @return RedirectResponse
      */
     public static function goWithDanger(string $to = 'dashboard', ?string $msg = null): RedirectResponse
     {
         $msg ??= __('msg.rnf');
+
         return self::goToRoute($to)->with('flash_danger', $msg);
     }
 
     /**
      * Redirect to a route with a success flash message.
-     *
-     * @param string $to
-     * @param string $msg
-     * @return RedirectResponse
      */
     public static function goWithSuccess(string $to, string $msg): RedirectResponse
     {
@@ -604,8 +508,6 @@ class Qs
 
     /**
      * Get the days of the week.
-     *
-     * @return array
      */
     public static function getDaysOfTheWeek(): array
     {
@@ -614,8 +516,6 @@ class Qs
 
     /**
      * Get currently valid exam announcements (not expired).
-     *
-     * @return \Illuminate\Database\Eloquent\Collection
      */
     public static function getValidExamAnnounces(): \Illuminate\Database\Eloquent\Collection
     {
@@ -625,28 +525,30 @@ class Qs
     /**
      * Format a timestamp to a friendly date string.
      *
-     * @param mixed $timestamp
-     * @return string|null
+     * @param  mixed  $timestamp
      */
     public static function formatDate($timestamp): ?string
     {
-        if (empty($timestamp))
+        if (empty($timestamp)) {
             return null;
+        }
         $datetime = new DateTime($timestamp);
+
         return $datetime->format('l, j F Y');
     }
 
     /**
      * Format a timestamp to a full date and time string.
      *
-     * @param mixed $timestamp
-     * @return string|null
+     * @param  mixed  $timestamp
      */
     public static function formatDateTime($timestamp): ?string
     {
-        if (empty($timestamp))
+        if (empty($timestamp)) {
             return null;
+        }
         $datetime = new DateTime($timestamp);
+
         return $datetime->format('l, j F Y. h:i A');
     }
 
@@ -654,154 +556,149 @@ class Qs
 
     /**
      * Map of table identifiers to human‑readable names.
-     *
-     * @return array
      */
     public static function getTableNames(): array
     {
         return [
-            "books" => "books",
-            "my_classes" => "classes",
-            "class_types" => "class types",
-            "dorms" => "dorms",
-            "exams" => "exams",
-            "exam_categories" => "exam categories",
-            "grades" => "grades",
-            "payments" => "payments",
-            "subjects" => "subjects",
-            "student_records" => "students",
-            "staff_records" => "staff",
-            "users" => "users",
-            "exam_records" => "exam records"
+            'books' => 'books',
+            'my_classes' => 'classes',
+            'class_types' => 'class types',
+            'dorms' => 'dorms',
+            'exams' => 'exams',
+            'exam_categories' => 'exam categories',
+            'grades' => 'grades',
+            'payments' => 'payments',
+            'subjects' => 'subjects',
+            'student_records' => 'students',
+            'staff_records' => 'staff',
+            'users' => 'users',
+            'exam_records' => 'exam records',
         ];
     }
 
     /**
      * Get the list of columns for a given table (used by query builder).
-     *
-     * @param string $table_name
-     * @return array|null
      */
     public static function getTableCols(string $table_name): ?array
     {
         return match ($table_name) {
-            "users" => [
-                "photo_path" => "photo",
-                "name" => "full name",
-                "religion" => "religion",
-                "primary_identification_number" => "primary ID number",
-                "secondary_identification_number" => "secondary ID number",
-                "occupation" => "occupation",
-                "address" => "address",
-                "email" => "email",
-                "gender" => "gender",
-                "date_of_birth" => "date of birth",
-                "primary_mobile" => "primary mobile",
-                "secondary_mobile" => "secondary mobile"
+            'users' => [
+                'photo_path' => 'photo',
+                'name' => 'full name',
+                'religion' => 'religion',
+                'primary_identification_number' => 'primary ID number',
+                'secondary_identification_number' => 'secondary ID number',
+                'occupation' => 'occupation',
+                'address' => 'address',
+                'email' => 'email',
+                'gender' => 'gender',
+                'date_of_birth' => 'date of birth',
+                'primary_mobile' => 'primary mobile',
+                'secondary_mobile' => 'secondary mobile',
             ],
-            "subjects" => [
-                "subjects.name as subject_name" => "full name",
-                "slug" => "short name",
-                "my_classes.name as class_name" => "class name",
-                "is_core" => "is core"
+            'subjects' => [
+                'subjects.name as subject_name' => 'full name',
+                'slug' => 'short name',
+                'my_classes.name as class_name' => 'class name',
+                'is_core' => 'is core',
             ],
-            "student_records" => [
-                "users.name as user" => "full name",
-                "users.religion as religion" => "religion",
-                "users.date_of_birth as date_of_birth" => "date of birth",
-                "users.gender as gender" => "gender",
-                "primary_school_name" => "primary school",
-                "secondary_school_name" => "secondary school",
-                "disability" => "disability",
-                "food_taboos" => "food taboos",
-                "admission_number" => "admission number",
-                "house_number" => "house number",
-                "my_classes.name as class" => "class name",
-                "sections.name as section" => "section name",
-                "dorms.name as dorm" => "dormitory name",
-                "dorm_room_no" => "dormitory room number",
-                "date_admitted" => "date admitted",
-                "users.address as address" => "address",
-                "parent_status" => "parent status",
-                "parents.name as parent" => "parent name",
-                "parents.primary_mobile" => "parent primary mobile",
-                "parents.secondary_mobile" => "parent secondary mobile",
-                "session" => "session"
+            'student_records' => [
+                'users.name as user' => 'full name',
+                'users.religion as religion' => 'religion',
+                'users.date_of_birth as date_of_birth' => 'date of birth',
+                'users.gender as gender' => 'gender',
+                'primary_school_name' => 'primary school',
+                'secondary_school_name' => 'secondary school',
+                'disability' => 'disability',
+                'food_taboos' => 'food taboos',
+                'admission_number' => 'admission number',
+                'house_number' => 'house number',
+                'my_classes.name as class' => 'class name',
+                'sections.name as section' => 'section name',
+                'dorms.name as dorm' => 'dormitory name',
+                'dorm_room_no' => 'dormitory room number',
+                'date_admitted' => 'date admitted',
+                'users.address as address' => 'address',
+                'parent_status' => 'parent status',
+                'parents.name as parent' => 'parent name',
+                'parents.primary_mobile' => 'parent primary mobile',
+                'parents.secondary_mobile' => 'parent secondary mobile',
+                'session' => 'session',
             ],
-            "staff_records" => [
-                "users.name as user" => "full name",
-                "users.username as username" => "username",
-                "users.email as email" => "email",
-                "users.date_of_birth as date_of_birth" => "date of birth",
-                "users.gender as gender" => "gender",
-                "users.religion as religion" => "religion",
-                "users.primary_identification_number" => "primary ID number",
-                "users.secondary_identification_number" => "secondary ID number",
-                "users.primary_mobile" => "primary mobile",
-                "users.secondary_mobile" => "secondary mobile",
-                "place_of_living" => "place of living",
-                "designation" => "designation",
-                "users.address as address" => "address",
-                "users.date_of_birth as birthday" => "date of birth",
-                "employment_date" => "employment date",
-                "employment_number" => "employment number",
-                "file_number" => "file number",
-                "tin_number" => "tin number",
-                "licence_number" => "licence number",
-                "bank_account_number" => "bank account number",
-                "bank_name" => "bank name",
-                "social_security_number" => "Social Security number",
-                "number_of_periods" => "number of periods",
-                "education_level" => "education level",
-                "college_attended" => "college attended",
-                "year_graduated" => "year graduated",
-                "subjects_studied" => "subjects studied"
+            'staff_records' => [
+                'users.name as user' => 'full name',
+                'users.username as username' => 'username',
+                'users.email as email' => 'email',
+                'users.date_of_birth as date_of_birth' => 'date of birth',
+                'users.gender as gender' => 'gender',
+                'users.religion as religion' => 'religion',
+                'users.primary_identification_number' => 'primary ID number',
+                'users.secondary_identification_number' => 'secondary ID number',
+                'users.primary_mobile' => 'primary mobile',
+                'users.secondary_mobile' => 'secondary mobile',
+                'place_of_living' => 'place of living',
+                'designation' => 'designation',
+                'users.address as address' => 'address',
+                'users.date_of_birth as birthday' => 'date of birth',
+                'employment_date' => 'employment date',
+                'employment_number' => 'employment number',
+                'file_number' => 'file number',
+                'tin_number' => 'tin number',
+                'licence_number' => 'licence number',
+                'bank_account_number' => 'bank account number',
+                'bank_name' => 'bank name',
+                'social_security_number' => 'Social Security number',
+                'number_of_periods' => 'number of periods',
+                'education_level' => 'education level',
+                'college_attended' => 'college attended',
+                'year_graduated' => 'year graduated',
+                'subjects_studied' => 'subjects studied',
             ],
-            "payments" => [
-                "title" => "title",
-                "amount" => "amount paid",
-                "description" => "description",
-                "method" => "payment method",
-                "year" => "year"
+            'payments' => [
+                'title' => 'title',
+                'amount' => 'amount paid',
+                'description' => 'description',
+                'method' => 'payment method',
+                'year' => 'year',
             ],
-            "grades" => [
-                "grades.name as grade_name" => "name",
-                "class_types.name as class_type_name" => "class type",
-                "mark_from" => "mark from",
-                "mark_to" => "mark to",
-                "point" => "point",
-                "remarks" => "remarks"
+            'grades' => [
+                'grades.name as grade_name' => 'name',
+                'class_types.name as class_type_name' => 'class type',
+                'mark_from' => 'mark from',
+                'mark_to' => 'mark to',
+                'point' => 'point',
+                'remarks' => 'remarks',
             ],
-            "exam_categories" => ["name" => "name"],
-            "exams" => ["name" => "name", "term" => "term", "year" => "year"],
-            "dorms" => ["name" => "name", "description" => "description"],
-            "class_types" => ["name" => "name", "code" => "code", "minimum_subjects_required" => "subjects considered"],
-            "my_classes" => ["name" => "name"],
-            "books" => [
-                "name" => "name",
-                "author" => "author",
-                "description" => "description",
-                "book_type" => "boot type",
-                "url" => "website address",
-                "location" => "location",
-                "total_copies" => "total copies",
-                "issued_copies" => "issued copies"
+            'exam_categories' => ['name' => 'name'],
+            'exams' => ['name' => 'name', 'term' => 'term', 'year' => 'year'],
+            'dorms' => ['name' => 'name', 'description' => 'description'],
+            'class_types' => ['name' => 'name', 'code' => 'code', 'minimum_subjects_required' => 'subjects considered'],
+            'my_classes' => ['name' => 'name'],
+            'books' => [
+                'name' => 'name',
+                'author' => 'author',
+                'description' => 'description',
+                'book_type' => 'boot type',
+                'url' => 'website address',
+                'location' => 'location',
+                'total_copies' => 'total copies',
+                'issued_copies' => 'issued copies',
             ],
-            "exam_records" => [
-                "users.name as student" => "student",
-                "my_classes.name as class" => "class",
-                "sections.name as section" => "section",
-                "exams.name as exam" => "exam",
-                "total" => "total",
-                "average" => "average",
-                "grades.name as grade" => "grade",
-                "divisions.name as division" => "division",
-                "points" => "points",
-                "section_position" => "section position",
-                "class_position" => "class position",
-                "p_comment" => "principal comment",
-                "t_comment" => "teacher comment",
-                "exam_records.year" => "exam year"
+            'exam_records' => [
+                'users.name as student' => 'student',
+                'my_classes.name as class' => 'class',
+                'sections.name as section' => 'section',
+                'exams.name as exam' => 'exam',
+                'total' => 'total',
+                'average' => 'average',
+                'grades.name as grade' => 'grade',
+                'divisions.name as division' => 'division',
+                'points' => 'points',
+                'section_position' => 'section position',
+                'class_position' => 'class position',
+                'p_comment' => 'principal comment',
+                't_comment' => 'teacher comment',
+                'exam_records.year' => 'exam year',
             ],
             default => null,
         };
@@ -809,48 +706,39 @@ class Qs
 
     /**
      * Get a comma‑separated string of actual column names for a given table, filtered by requested columns.
-     *
-     * @param string $name
-     * @param array  $columns
-     * @return string
      */
     public static function getSelectedTableColumns(string $name, array $columns = []): string
     {
         $cols = self::getTableCols($name);
         $flipped = array_flip($cols);
 
-        if (\in_array("*", $columns)) {
-            return implode(",", $flipped);
+        if (\in_array('*', $columns)) {
+            return implode(',', $flipped);
         }
-        return implode(",", array_intersect($columns, $flipped));
+
+        return implode(',', array_intersect($columns, $flipped));
     }
 
     /**
      * Get a presentable column mapping (original column name → human readable) filtered by requested columns.
-     *
-     * @param string $name
-     * @param array  $columns
-     * @return array
      */
     public static function getPresentableTableColumns(string $name, array $columns = []): array
     {
         $data = self::getTableCols($name);
         $flipped = array_flip($data);
 
-        if (\in_array("*", $columns)) {
+        if (\in_array('*', $columns)) {
             return $data;
         }
         $intersected = array_intersect($flipped, $columns);
+
         return array_flip($intersected);
     }
 
     /**
      * Generate a human‑readable "from … to … of total" string from a paginator instance.
-     *
-     * @param \Illuminate\Pagination\LengthAwarePaginator $paginator
-     * @return string
      */
-    public static function getPaginationFromToTotalAsString(\Illuminate\Pagination\LengthAwarePaginator $paginator): string
+    public static function getPaginationFromToTotalAsString(LengthAwarePaginator $paginator): string
     {
         $total = $paginator->total();
         $perPage = $paginator->perPage();
@@ -861,52 +749,47 @@ class Qs
         if ($currentPage == $paginator->lastPage()) {
             $to = $total;
         }
+
         return "$from to $to of $total";
     }
 
     /**
      * Check if the current academic session matches the current calendar year.
-     *
-     * @return bool
      */
     public static function currentSessionMatchesCurrentYear(): bool
     {
         $session = self::getCurrentSession();
         $year = explode('-', $session)[0];
+
         return $year === date('Y');
     }
 
     /**
      * Student statuses (active / graduated).
-     *
-     * @return array
      */
     public static function getStudentStatuses(): array
     {
-        return [1 => "Active", 0 => "Graduated"];
+        return [1 => 'Active', 0 => 'Graduated'];
     }
 
     // ------ Image / file utilities ------
 
     /**
      * Convert an image file to a base64 data URI.
-     *
-     * @param string $img_path
-     * @return string|null
      */
     public static function imgToBase64(string $img_path): ?string
     {
-        if (!file_exists($img_path))
+        if (! file_exists($img_path)) {
             return null;
+        }
         $type = pathinfo($img_path, PATHINFO_EXTENSION);
         $data = file_get_contents($img_path, false);
-        return "data:image/$type;base64," . base64_encode($data);
+
+        return "data:image/$type;base64,".base64_encode($data);
     }
 
     /**
      * Return the supported paper sizes for Dompdf.
-     *
-     * @return array
      */
     public static function getDompdfSupportedPaperSizes(): array
     {
@@ -917,12 +800,11 @@ class Qs
 
     /**
      * Check if Google Analytics is correctly set up and enabled.
-     *
-     * @return bool
      */
     public static function googleAnalyticsSetUpOkAndEnabled(): bool
     {
-        $credentialFile = storage_path('/app/public/' . self::getSetting('google_analytic_service_account_credential_file'));
+        $credentialFile = storage_path('/app/public/'.self::getSetting('google_analytic_service_account_credential_file'));
+
         return file_exists($credentialFile)
             && self::getSetting('google_analytic_property_id') !== null
             && self::getSetting('google_analytic_tag_id') !== null
@@ -931,34 +813,26 @@ class Qs
 
     /**
      * Period options for Spatie Analytics package.
-     *
-     * @return array
      */
     public static function getSpatieAnalyticsPackagePeriods(): array
     {
         return [
             'days' => 'Days',
             'months' => 'Months',
-            'years' => 'Years'
+            'years' => 'Years',
         ];
     }
 
     /**
      * Return a query builder instance for a given table.
-     *
-     * @param string $table_name
-     * @return \Illuminate\Database\Query\Builder
      */
-    public static function getDbFacadesTable(string $table_name): \Illuminate\Database\Query\Builder
+    public static function getDbFacadesTable(string $table_name): Builder
     {
         return DB::table($table_name);
     }
 
     /**
      * Generate a text color (inverted) based on a background RGB color string.
-     *
-     * @param string $rgb
-     * @return string|null
      */
     public static function getContrastColor(string $rgb): ?string
     {
@@ -977,44 +851,36 @@ class Qs
 
             $color = "rgb($ired,$igreen,$iblue)";
         }
+
         return $color;
     }
 
     /**
      * Get the application icon URL.
-     *
-     * @return string
      */
     public static function getAppIcon(): string
     {
-        return asset("images/icons/icon-rounded.png");
+        return asset('images/icons/icon-rounded.png');
     }
 
     /**
      * Determine the path to the tenant‑specific ID card themes directory.
-     *
-     * @param int|null $tenant_id
-     * @return string
      */
     public static function getTenancyAwareIDCardsThemeDir(?int $tenant_id = null): string
     {
         $id = $tenant_id ?? tenant()?->getTenantKey();
-        return resource_path() . '/views/pages/students/id_cards/themes/' . config('tenancy.database.prefix') . $id . '/';
+
+        return resource_path().'/views/pages/students/id_cards/themes/'.config('tenancy.database.prefix').$id.'/';
     }
 
     /**
      * Determine the active notification channels based on notifiable preferences.
      *
-     * @param mixed $notifiable
-     * @param bool  $include_database
-     * @param bool  $include_email
-     * @param bool  $include_push_notification
-     * @param bool  $include_sms
-     * @return array
+     * @param  mixed  $notifiable
      */
     public static function getActiveNotificationChannels($notifiable, bool $include_database = false, bool $include_email = false, bool $include_push_notification = false, bool $include_sms = false): array
     {
-        if (!$notifiable->notification_preferences || !\is_array($notifiable->notification_preferences)) {
+        if (! $notifiable->notification_preferences || ! \is_array($notifiable->notification_preferences)) {
             return [];
         }
 
@@ -1044,25 +910,21 @@ class Qs
 
     /**
      * Parse Markdown to HTML using Parsedown.
-     *
-     * @param string $input
-     * @return string
      */
     public static function parseMarkdown(string $input): string
     {
-        $parsedown = new Parsedown();
+        $parsedown = new Parsedown;
+
         return $parsedown->text($input);
     }
 
     /**
      * List of model names that support soft‑deletion and can be emptied from the bin.
-     *
-     * @param array $remove
-     * @return array
      */
     public static function getCanSoftDeleteModelNames(array $remove = [], $is_tenant_context = true): array
     {
         $names = $is_tenant_context ? ['users', 'payments', 'my_classes', 'exams', 'threads'] : ['users', 'tenants'];
+
         return $remove ? array_values(array_diff($names, $remove)) : $names;
     }
 
@@ -1071,8 +933,10 @@ class Qs
         if (str_contains($domain, 'localhost') || str_contains($domain, '127.0.0.1')) {
             $port = Str::afterLast(config('app.url'), ':');
             $port = $port === '' ? '8000' : $port;
+
             return "http://$domain:$port";
         }
+
         return "https://$domain";
     }
 }

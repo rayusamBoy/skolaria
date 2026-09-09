@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Jobs\DeleteIDCardsThemeDir;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Stancl\JobPipeline\JobPipeline;
+use Stancl\Tenancy\Bootstrappers\RootUrlBootstrapper;
 use Stancl\Tenancy\Events;
 use Stancl\Tenancy\Jobs;
 use Stancl\Tenancy\Listeners;
@@ -38,7 +40,7 @@ class TenancyServiceProvider extends ServiceProvider
     public function events()
     {
         return [
-                // Tenant events
+            // Tenant events
             Events\CreatingTenant::class => [],
             Events\TenantCreated::class => [
                 JobPipeline::make([
@@ -81,13 +83,13 @@ class TenancyServiceProvider extends ServiceProvider
             Events\TenantMaintenanceModeEnabled::class => [],
             Events\TenantMaintenanceModeDisabled::class => [],
 
-                // Pending tenant events
+            // Pending tenant events
             Events\CreatingPendingTenant::class => [],
             Events\PendingTenantCreated::class => [],
             Events\PullingPendingTenant::class => [],
             Events\PendingTenantPulled::class => [],
 
-                // Domain events
+            // Domain events
             Events\CreatingDomain::class => [],
             Events\DomainCreated::class => [],
             Events\SavingDomain::class => [],
@@ -97,14 +99,14 @@ class TenancyServiceProvider extends ServiceProvider
             Events\DeletingDomain::class => [],
             Events\DomainDeleted::class => [],
 
-                // Database events
+            // Database events
             Events\DatabaseCreated::class => [],
             Events\DatabaseMigrated::class => [],
             Events\DatabaseSeeded::class => [],
             Events\DatabaseRolledBack::class => [],
             Events\DatabaseDeleted::class => [],
 
-                // Tenancy events
+            // Tenancy events
             Events\InitializingTenancy::class => [],
             Events\TenancyInitialized::class => [
                 Listeners\BootstrapTenancy::class,
@@ -120,7 +122,7 @@ class TenancyServiceProvider extends ServiceProvider
             Events\RevertingToCentralContext::class => [],
             Events\RevertedToCentralContext::class => [],
 
-                // Resource syncing
+            // Resource syncing
             ResourceSyncing\Events\SyncedResourceSaved::class => [
                 ResourceSyncing\Listeners\UpdateOrCreateSyncedResource::class,
             ],
@@ -136,10 +138,10 @@ class TenancyServiceProvider extends ServiceProvider
             ResourceSyncing\Events\CentralResourceDetachedFromTenant::class => [
                 ResourceSyncing\Listeners\DeleteResourceInTenant::class,
             ],
-                // Fired only when a synced resource is changed in a different DB than the origin DB (to avoid infinite loops)
+            // Fired only when a synced resource is changed in a different DB than the origin DB (to avoid infinite loops)
             ResourceSyncing\Events\SyncedResourceSavedInForeignDatabase::class => [],
 
-                // Storage symlinks
+            // Storage symlinks
             Events\CreatingStorageSymlink::class => [],
             Events\StorageSymlinkCreated::class => [],
             Events\RemovingStorageSymlink::class => [],
@@ -151,7 +153,7 @@ class TenancyServiceProvider extends ServiceProvider
      * Set \Stancl\Tenancy\Bootstrappers\RootUrlBootstrapper::$rootUrlOverride here
      * to override the root URL used in CLI while in tenant context.
      *
-     * @see \Stancl\Tenancy\Bootstrappers\RootUrlBootstrapper
+     * @see RootUrlBootstrapper
      */
     protected function overrideUrlInTenantContext(): void
     {
@@ -186,7 +188,7 @@ class TenancyServiceProvider extends ServiceProvider
         $this->makeTenancyMiddlewareHighestPriority();
         $this->overrideUrlInTenantContext();
 
-        InitializeTenancyByRequestData::$onFail = fn($exception, $request, $next) => $next($request);
+        InitializeTenancyByRequestData::$onFail = fn ($exception, $request, $next) => $next($request);
 
         // // Include soft deleted resources in synced resource queries.
         // ResourceSyncing\Listeners\UpdateOrCreateSyncedResource::$scopeGetModelQuery = function (Builder $query) {
@@ -220,7 +222,7 @@ class TenancyServiceProvider extends ServiceProvider
         $tenancyMiddleware = [Middleware\PreventAccessFromUnwantedDomains::class, ...config('tenancy.identification.middleware')];
 
         foreach (array_reverse($tenancyMiddleware) as $middleware) {
-            $this->app[\Illuminate\Contracts\Http\Kernel::class]->prependToMiddlewarePriority($middleware);
+            $this->app[Kernel::class]->prependToMiddlewarePriority($middleware);
         }
     }
 }

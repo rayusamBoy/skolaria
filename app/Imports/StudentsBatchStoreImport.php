@@ -24,32 +24,45 @@ use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
-class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollection, WithHeadingRow, WithValidation, SkipsEmptyRows, WithCustomValueBinder, WithCalculatedFormulas
+class StudentsBatchStoreImport extends DefaultValueBinder implements SkipsEmptyRows, ToCollection, WithCalculatedFormulas, WithCustomValueBinder, WithHeadingRow, WithValidation
 {
     protected LocationRepo $location;
+
     protected DormRepo $dorm;
+
     protected MyClassRepo $my_class;
+
     protected UserRepo $user;
+
     protected StudentRepo $student;
+
     protected StudentRecordCreate $student_record_request;
+
     protected string $session;
+
     protected array $user_parameters;
+
     protected array $student_parameters;
+
     protected array $all_parameters;
+
     protected array $parameters_columns_to_hide_and_populate;
+
     protected array $date_columns;
+
     protected array $rules_cache;
+
     protected bool $first_row_seen = false;
 
     public function __construct()
     {
         $this->session = Usr::getCurrentSession();
-        $this->my_class = new MyClassRepo();
-        $this->user = new UserRepo();
-        $this->student = new StudentRepo();
-        $this->location = new LocationRepo();
-        $this->dorm = new DormRepo();
-        $this->student_record_request = new StudentRecordCreate();
+        $this->my_class = new MyClassRepo;
+        $this->user = new UserRepo;
+        $this->student = new StudentRepo;
+        $this->location = new LocationRepo;
+        $this->dorm = new DormRepo;
+        $this->student_record_request = new StudentRecordCreate;
 
         $this->user_parameters = StudentRecordController::getUserHeadings(false);
         $this->student_parameters = StudentRecordController::getStudentHeadings(false);
@@ -66,11 +79,12 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
      */
     public function bindValue(Cell $cell, $value)
     {
-        if (!empty($value) && \in_array($cell->getColumn(), $this->date_columns)) {
+        if (! empty($value) && \in_array($cell->getColumn(), $this->date_columns)) {
             $cell->setValueExplicit(
                 Date::excelToDateTimeObject($value)->format(Usr::getDateFormat()),
                 DataType::TYPE_STRING
             );
+
             return true;
         }
 
@@ -87,11 +101,13 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
         // Skip the very first data row (visible heading row, row 5)
         if ($this->first_row_seen === false) {
             $this->first_row_seen = true;
+
             return true;
         }
 
         // Skip rows that contain only hidden parameters (no actual data)
-        $nonNull = array_keys(array_filter($row, fn($value) => $value !== null));
+        $nonNull = array_keys(array_filter($row, fn ($value) => $value !== null));
+
         return \count(array_diff($nonNull, $this->parameters_columns_to_hide_and_populate)) === 0;
     }
 
@@ -156,8 +172,8 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
 
     /**
      * Extract user‑related data from a row.
-     * @param array|Collection $row If is a collection, must implement ArrayAccess interface.
-     * @return array
+     *
+     * @param  array|Collection  $row  If is a collection, must implement ArrayAccess interface.
      */
     protected function extractUserData(array|Collection $row): array
     {
@@ -179,7 +195,7 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
         $ct = $this->my_class->findClassTypeByClassId($row['my_class_id'])->code;
         $admission_number = $row['admission_number'];
         $data['username'] = strtoupper(
-            Usr::getSystemShortCode() . '/' . $ct . '/' . date('Y', strtotime($row['date_admitted'])) . '/' . ($admission_number ?: mt_rand(1000, 99999))
+            Usr::getSystemShortCode().'/'.$ct.'/'.date('Y', strtotime($row['date_admitted'])).'/'.($admission_number ?: mt_rand(1000, 99999))
         );
 
         return $data;
@@ -187,8 +203,8 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
 
     /**
      * Extract student‑related data from a row.
-     * @param array|Collection $row If is a collection, must implement ArrayAccess interface.
-     * @return array
+     *
+     * @param  array|Collection  $row  If is a collection, must implement ArrayAccess interface.
      */
     protected function extractStudentData(array|Collection $row, string $username): array
     {
@@ -214,11 +230,10 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
     {
         $date_params = array_keys(array_filter(
             $this->rules_cache,
-            fn($rule) =>
-            \is_array($rule) ? \in_array('date', $rule) || \in_array('date_format', $rule) : str_contains($rule, 'date')
+            fn ($rule) => \is_array($rule) ? \in_array('date', $rule) || \in_array('date_format', $rule) : str_contains($rule, 'date')
         ));
 
-        return array_map(fn($param) => $this->mapHeadingToLetter($param), $date_params);
+        return array_map(fn ($param) => $this->mapHeadingToLetter($param), $date_params);
     }
 
     /**
@@ -228,6 +243,7 @@ class StudentsBatchStoreImport extends DefaultValueBinder implements ToCollectio
     {
         $all = array_values($this->all_parameters);
         $index = array_search($heading_param, $all);
+
         return Usr::numberToColumnLetter(($index !== false ? $index : 0) + 1);
     }
 }

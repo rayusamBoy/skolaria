@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class SettingUpdate extends FormRequest
 {
-
     public function authorize()
     {
         return true;
@@ -32,12 +31,11 @@ class SettingUpdate extends FormRequest
 
     public function attributes()
     {
-        return  [
+        return [
             'system_name' => 'School Name',
             'system_email' => 'School Email',
             'current_session' => 'Current Session',
             'login_and_related_pages_bg' => 'Login page background',
         ];
     }
-
 }

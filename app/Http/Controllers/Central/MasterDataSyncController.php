@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Central;
 
+use App\Auth\Attributes\SkipPermission;
 use App\Http\Controllers\Controller;
 use App\Repositories\TenantRepo;
 use App\Services\SyncMasterDataService;
 use Illuminate\Http\Request;
-use App\Auth\Attributes\SkipPermission;
 
 class MasterDataSyncController extends Controller
 {
@@ -46,7 +46,7 @@ class MasterDataSyncController extends Controller
             'target_tenants' => 'required|array',
             'target_tenants.*' => 'exists:tenants,id',
             'tables' => 'required|array',
-            'tables.*' => 'in:' . implode(',', $service->getSyncableTables()),
+            'tables.*' => 'in:'.implode(',', $service->getSyncableTables()),
             'lock_after_sync' => 'boolean',
             'exclude_lock_tenants' => 'nullable|array',
             'exclude_lock_tenants.*' => 'exists:tenants,id',

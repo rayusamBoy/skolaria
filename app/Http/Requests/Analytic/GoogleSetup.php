@@ -9,7 +9,14 @@ use Illuminate\Validation\Rule;
 
 class GoogleSetup extends FormRequest
 {
-    protected $property_id_type, $tag_id_type, $credential_file_attr, $credential_file_name;
+    protected $property_id_type;
+
+    protected $tag_id_type;
+
+    protected $credential_file_attr;
+
+    protected $credential_file_name;
+
     public function __construct()
     {
         $this->property_id_type = 'google_analytic_property_id';
@@ -38,24 +45,25 @@ class GoogleSetup extends FormRequest
                 $this->attributeDescriptionIsNull($this->tag_id_type)
             ), new Uppercase],
             $this->credential_file_attr => ['file', 'mimes:json', 'max:2048', Rule::requiredIf(
-                !$this->credentialFileExists($this->credential_file_name)
-            )]
+                ! $this->credentialFileExists($this->credential_file_name)
+            )],
         ];
     }
 
     private function attributeDescriptionIsNull($attribute)
     {
-        return Qs::getSetting($attribute) === NULL;
+        return Qs::getSetting($attribute) === null;
     }
 
     private function credentialFileExists($file_name)
     {
-        $credential_file = storage_path('/app/public/' . Qs::getSetting('google_analytic_service_account_credential_file'));
+        $credential_file = storage_path('/app/public/'.Qs::getSetting('google_analytic_service_account_credential_file'));
+
         return file_exists($credential_file);
     }
 
     public function attributes()
     {
-        return  [];
+        return [];
     }
 }

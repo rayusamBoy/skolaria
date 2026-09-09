@@ -15,7 +15,9 @@ use Stancl\Tenancy\Resolvers\DomainTenantResolver;
 class TenantController extends Controller
 {
     protected TenantRepo $tenant;
+
     protected UserRepo $user;
+
     protected SettingRepo $setting;
 
     public function __construct(TenantRepo $tenant, UserRepo $user, SettingRepo $setting)
@@ -32,10 +34,10 @@ class TenantController extends Controller
      */
     public function index()
     {
-        $data["tenants"] = $tenants = $this->tenant->getAllTenants();
-        $data["user_roles"] = $this->user->getRolesByName();
-        $data["active_identification_mode"] = config('tenancy.active_identification_mode');
-        $data["active_identification_mode_is_domain"] = config('tenancy.active_identification_mode') === "domain";
+        $data['tenants'] = $tenants = $this->tenant->getAllTenants();
+        $data['user_roles'] = $this->user->getRolesByName();
+        $data['active_identification_mode'] = config('tenancy.active_identification_mode');
+        $data['active_identification_mode_is_domain'] = config('tenancy.active_identification_mode') === 'domain';
 
         // Check if each tenant is active ie., has data other than the initial ones
         foreach ($tenants as $tenant) {
@@ -52,14 +54,14 @@ class TenantController extends Controller
             }
         }
 
-        return view("pages.central.tenants.index", $data);
+        return view('pages.central.tenants.index', $data);
     }
 
     public function show(string $tenant)
     {
-        $data["tenant"] = $this->tenant->findOrFailTenant($tenant);
+        $data['tenant'] = $this->tenant->findOrFailTenant($tenant);
 
-        return view("pages.central.tenants.show", $data);
+        return view('pages.central.tenants.show', $data);
     }
 
     /**
@@ -76,7 +78,8 @@ class TenantController extends Controller
             $tenant = $this->tenant->createTenant($data);
         } catch (\Throwable $t) {
             logger()->error('Tenant creation failed', ['error' => $t->getMessage()]);
-            return Qs::json(msg: "", arr: ['msg' => $t->getMessage(), 'ok' => false, 'pop' => true, 'pop_timer' => 0]);
+
+            return Qs::json(msg: '', arr: ['msg' => $t->getMessage(), 'ok' => false, 'pop' => true, 'pop_timer' => 0]);
         }
 
         // Handle domain or request‑data fields
@@ -85,20 +88,21 @@ class TenantController extends Controller
                 'tenant_slug' => $request->tenant_slug,
             ]);
 
-            tenancy()->run($tenant, function () use ($request, $tenant) {
+            tenancy()->run($tenant, function () use ($request) {
                 $this->setting->update('system_name', $request->name);
-                $this->setting->update('system_title', Qs::getStringAbbreviation($request->name));               
+                $this->setting->update('system_title', Qs::getStringAbbreviation($request->name));
             });
         } else {
             try {
                 $tenant->createDomain(['domain' => $request->domain]);
             } catch (\Throwable $t) {
                 logger()->error('Domain creation failed', ['error' => $t->getMessage()]);
-                return Qs::json(msg: "", arr: ['msg' => $t->getMessage(), 'ok' => false, 'pop' => true, 'pop_timer' => 0]);
+
+                return Qs::json(msg: '', arr: ['msg' => $t->getMessage(), 'ok' => false, 'pop' => true, 'pop_timer' => 0]);
             }
         }
 
-        return Qs::json(msg: "", arr: ['msg' => __('msg.store_ok'), 'ok' => true, 'pop' => true, 'pop_timer' => 0]);
+        return Qs::json(msg: '', arr: ['msg' => __('msg.store_ok'), 'ok' => true, 'pop' => true, 'pop_timer' => 0]);
     }
 
     /**
@@ -106,9 +110,9 @@ class TenantController extends Controller
      */
     public function edit(string $tenant)
     {
-        $data["tenant"] = $this->tenant->findOrFailTenant($tenant);
+        $data['tenant'] = $this->tenant->findOrFailTenant($tenant);
 
-        return view("pages.central.tenants.edit", $data);
+        return view('pages.central.tenants.edit', $data);
     }
 
     /**
@@ -136,7 +140,7 @@ class TenantController extends Controller
 
         $tenant->update($data);
 
-        return Qs::json(msg: "", arr: ['msg' => __('msg.update_ok'), 'ok' => true, 'pop' => true]);
+        return Qs::json(msg: '', arr: ['msg' => __('msg.update_ok'), 'ok' => true, 'pop' => true]);
     }
 
     /**

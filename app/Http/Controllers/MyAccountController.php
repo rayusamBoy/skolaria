@@ -44,7 +44,7 @@ class MyAccountController extends Controller
     {
         $current_user = auth()->user();
 
-        if (!$current_user->username && !$req->username && !$req->email) {
+        if (! $current_user->username && ! $req->username && ! $req->email) {
             return back()->with('pop_error', __('msg.user_invalid'));
         }
 
@@ -58,14 +58,14 @@ class MyAccountController extends Controller
         if ($req->hasFile('photo')) {
             $photo = $req->file('photo');
             $file_meta = Qs::getFileMetaData($photo);
-            $file_meta['name'] = 'photo.' . $file_meta['ext'];
+            $file_meta['name'] = 'photo.'.$file_meta['ext'];
 
             if (Usr::tenancyInitialized()) {
-                $file_meta['path'] = $profile_data['photo_path'] = Qs::getUploadPath($user_role) . '/' . $user_code . '/' . $file_meta['name'];
+                $file_meta['path'] = $profile_data['photo_path'] = Qs::getUploadPath($user_role).'/'.$user_code.'/'.$file_meta['name'];
                 $photo->storeAs($file_meta['path']);
             } else {
-                $file_meta['path'] = $photo->storeAs(Qs::getUploadPath($user_role) . $user_code, $file_meta['name']);
-                $profile_data['photo_path'] = 'storage/' . $file_meta['path'];
+                $file_meta['path'] = $photo->storeAs(Qs::getUploadPath($user_role).$user_code, $file_meta['name']);
+                $profile_data['photo_path'] = 'storage/'.$file_meta['path'];
             }
         }
 
