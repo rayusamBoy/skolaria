@@ -3,13 +3,19 @@
 @section('page_title', 'Message Threads')
 
 @section('content')
+    @include('messenger.partials.flash')
 
-@include('messenger.partials.flash')
+    @each('messenger.partials.thread', $threads, 'thread', 'messenger.partials.no-threads')
 
-@each('messenger.partials.thread', $threads, 'thread', 'messenger.partials.no-threads')
-
-@can($tenant_permissions['message_threads']['store']['permission'])
-@include('messenger.create')
-<button type="button" id="new-message" onclick="showFormCard()" class="btn btn-success btn-sm float-right position-fixed bottom-p5em right-3">New Message thread</button>
-@endcan
+    @can($tenant_permissions['message_threads']['store']['permission'])
+        @include('messenger.create')
+        <button
+            type="button"
+            id="new-message"
+            onclick="showFormCard()"
+            class="btn btn-success btn-sm position-fixed bottom-p5em right-3 float-right"
+        >
+            New Message thread
+        </button>
+    @endcan
 @stop

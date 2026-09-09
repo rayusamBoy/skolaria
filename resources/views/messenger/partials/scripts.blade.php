@@ -5,7 +5,7 @@
      *-------------------------------------------------------------
      */
     const authId = {{ auth()->id() }};
-    const authUserRoles = JSON.parse('@json(auth()->user()->roles->pluck("name"))');
+    const authUserRoles = JSON.parse('@json(auth()->user()->roles->pluck('name'))');
     const superAdminRoleName = "{{ config('roles.default_roles.tenant.superadmin') }}";
     const $textarea = $('#message');
     const $sendBtn = $('#send-message-btn');
@@ -13,9 +13,10 @@
     const $typingIndicator = $('#typing-indicator');
     const $messagesRow = $('#messages-row');
     const $msgTxtAreaHint = $('#message-textarea-actions-subtle-hint');
-  
-    let typingNow = 0, typingTimeout;
-  
+
+    let typingNow = 0,
+        typingTimeout;
+
     // Open a private channel using Echo (server-side values injected)
     const channel = Echo.private(`messages.{{ $thread->id }}.{{ tenant()?->getTenantKey() }}`);
 
@@ -27,10 +28,10 @@
     const isTyping = (status) => {
         channel.whisper('typing', {
             user_name: "{{ auth()->user()->name }}",
-            typing: status
+            typing: status,
         });
     };
-  
+
     /**
      *-------------------------------------------------------------
      * On keydown in the message textarea, trigger typing indicator
@@ -54,7 +55,7 @@
             $sendBtn.click();
         }
     });
-  
+
     /**
      *-------------------------------------------------------------
      * Bind connection state change and check internet connectivity
@@ -63,7 +64,7 @@
     Echo.connector.pusher.connection.bind('state_change', (states) => {
         checkInternet(states.current);
     });
-  
+
     /**
      *-------------------------------------------------------------
      * Listen for typing whispers from other users
@@ -72,12 +73,12 @@
     channel.listenForWhisper('typing', (e) => {
         if (e.typing) {
             $typingStatus.html(`${e.user_name} is typing`);
-            $typingIndicator.css("display", "inline-block");
+            $typingIndicator.css('display', 'inline-block');
         } else {
             $typingIndicator.hide();
         }
     });
-  
+
     /**
      *-------------------------------------------------------------
      * Listen for new messages and update UI accordingly
@@ -88,16 +89,16 @@
         updateParticipantLastRead(e.message.thread_id);
         playNotificationSound('message-notification.mp3', true);
         initializePopover(); // Re-initialize popover for new elements
-        scrollTo($sendBtn);  // Scroll to bottom (or to button)
+        scrollTo($sendBtn); // Scroll to bottom (or to button)
     });
-  
+
     /**
      *-------------------------------------------------------------
      * Listen for message deletion events
      *-------------------------------------------------------------
      */
     channel.listen('MessageDeleted', (e) => {
-        $("#confirm-message-delete").find('.close').click(); // Close modal if open
+        $('#confirm-message-delete').find('.close').click(); // Close modal if open
         $(`#message-${e.message.id}`).replaceWith(e.message_html);
     });
 </script>
@@ -119,13 +120,13 @@
     function prepareDeleteUserMessageForm(messageId) {
         hideAllPopover();
         const actionUrl = '{{ route("threads.messages.user_delete", ":message_id") }}'.replace(':message_id', messageId);
-        $("form#delete-user-message").attr("action", actionUrl);
+        $('form#delete-user-message').attr('action', actionUrl);
         popOutIntendedMesg(messageId);
     }
 
     function popOutIntendedMesg(messageId) {
-        $("div#messages-row").find("div.right, div.left").css("z-index", "initial");
-        $(`#message-${messageId}`).find('div.right, div.left').css("z-index", "99999");
+        $('div#messages-row').find('div.right, div.left').css('z-index', 'initial');
+        $(`#message-${messageId}`).find('div.right, div.left').css('z-index', '99999');
     }
 
     /**
@@ -135,12 +136,14 @@
      */
     $loadPrevBtn.on('click', (e) => {
         e.preventDefault();
-        const currentFirstMsgId = $messagesRow.children(":first").attr('id').split('-')[1];
-        let url = '{{ route("threads.messages.previous", [":thread_id", ":current_first_msg_id_in_view"]) }}'.replace(':thread_id', '{{ $thread->id }}').replace(':current_first_msg_id_in_view', currentFirstMsgId);
+        const currentFirstMsgId = $messagesRow.children(':first').attr('id').split('-')[1];
+        let url = '{{ route("threads.messages.previous", [":thread_id", ":current_first_msg_id_in_view"]) }}'
+            .replace(':thread_id', '{{ $thread->id }}')
+            .replace(':current_first_msg_id_in_view', currentFirstMsgId);
         const requestData = {
-            url, 
-            prepend_previous_messages: true, 
-            show_loading_previous: true, 
+            url,
+            prepend_previous_messages: true,
+            show_loading_previous: true,
         };
         processRequest(requestData);
     });
@@ -154,7 +157,7 @@
         if (document.hidden) return;
         let url = '{{ route("threads.participants.update.last_read", [":thread_id"]) }}'.replace(':thread_id', threadId);
         processRequest({
-            url: url
+            url: url,
         });
     }
 
@@ -172,15 +175,15 @@
         }
 
         $.ajax({
-                url: data.url, 
-                type: 'POST', 
-                cache: false, 
-                processData: false, 
-                dataType: 'json', 
-                contentType: false, 
-                data: formData,
-                global: false
-            })
+            url: data.url,
+            type: 'POST',
+            cache: false,
+            processData: false,
+            dataType: 'json',
+            contentType: false,
+            data: formData,
+            global: false,
+        })
             .done((resp) => {
                 if (data.prepend_previous_messages) {
                     if (!resp.msg) {
@@ -199,8 +202,8 @@
             })
             .fail((e) => {
                 pop({
-                    msg: 'Sorry, something went wrong. You may try again!', 
-                    type: 'error'
+                    msg: 'Sorry, something went wrong. You may try again!',
+                    type: 'error',
                 });
                 if (data.show_loading_previous) {
                     $loadingPrevDiv.hide();
@@ -219,28 +222,27 @@
         const $alertRow = $('.alert-row');
         const dotIndicatorClass = getRandomDotIndicatorClass();
 
-        if (state === "connected") {
+        if (state === 'connected') {
             $alertRow.hide();
             $msgRow.show();
-        } else if (state === "connecting") {
+        } else if (state === 'connecting') {
             $msgRow.hide();
             $alertRow.find('.alert').removeClass('text-center');
-            $alertRow.find('.dot-indicator')
+            $alertRow
+                .find('.dot-indicator')
                 .removeClass('display-none')
                 .css({
-                    top: '45%', 
-                    right: '2rem', 
-                    position: 'absolute'
+                    top: '45%',
+                    right: '2rem',
+                    position: 'absolute',
                 })
                 .addClass(dotIndicatorClass);
-            $alertRow.show().find('i').text("Connecting");
+            $alertRow.show().find('i').text('Connecting');
         } else {
             $msgRow.hide();
             $alertRow.find('.alert').addClass('text-center');
-            $alertRow.find('.dot-indicator')
-                .addClass('display-none')
-                .removeClass(dotIndicatorClass);
-            $alertRow.show().find('i').text("No connection");
+            $alertRow.find('.dot-indicator').addClass('display-none').removeClass(dotIndicatorClass);
+            $alertRow.show().find('i').text('No connection');
         }
     }
 
@@ -250,8 +252,7 @@
      *-------------------------------------------------------------
      */
     function getRandomDotIndicatorClass() {
-        const dotClasses = ["dot-flashing", "dot-elastic", "dot-collision"];
+        const dotClasses = ['dot-flashing', 'dot-elastic', 'dot-collision'];
         return dotClasses[Math.floor(Math.random() * dotClasses.length)];
     }
-
 </script>

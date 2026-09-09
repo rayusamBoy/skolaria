@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>TimeTable - {{ "{$ttr->name} - {$ttr->year}" }}</title>
     <style>
         @media print {
-
             td,
             th {
                 padding: 20px 5px;
@@ -20,7 +19,7 @@
             }
 
             html {
-                background-color: #FFFFFF;
+                background-color: #ffffff;
                 margin: 0;
                 /* this affects the margin on the html before sending to printer */
             }
@@ -34,7 +33,6 @@
         td {
             text-align: center;
         }
-
     </style>
 
     @laravelPWA
@@ -47,46 +45,88 @@
             <table width="100%">
                 <tr>
                     <td>
-                        <strong><span style="color: #1b0c80; font-size: 25px;">{{ strtoupper(config('app.name')) }}</span></strong><br />
-                        <strong><span style="color: #000; font-size: 15px;"><i>{{ ucwords($settings->firstWhere('key', 'address')->value) }}</i></span></strong><br />
-                        <strong><span style="color: #000; text-decoration: underline; font-size: 15px;"><i>{{ url()->current() }}</i></span></strong>
-                        <br /> <br />
-                        <strong><span style="color: #000; font-size: 15px;"> TIMETABLE FOR {{ strtoupper($my_class->name . ' ' . $ttr->section?->name . ' ') . ' ('.$ttr->year.')'  }}</span></strong>
+                        <strong
+                            ><span
+                                style="color: #1b0c80; font-size: 25px"
+                                >{{ strtoupper(config('app.name')) }}</span
+                            ></strong
+                        ><br />
+                        <strong
+                            ><span style="color: #000; font-size: 15px"
+                                ><i>{{ ucwords($settings->firstWhere('key', 'address')->value) }}</i></span
+                            ></strong
+                        ><br />
+                        <strong
+                            ><span style="color: #000; text-decoration: underline; font-size: 15px"
+                                ><i>{{ url()->current() }}</i></span
+                            ></strong>
+                        <br />
+                        <br />
+                        <strong
+                            ><span style="color: #000; font-size: 15px">
+                                TIMETABLE FOR {{ strtoupper($my_class->name . ' ' . $ttr->section?->name . ' ') . ' ('.$ttr->year.')' }}</span
+                            ></strong>
                     </td>
                 </tr>
             </table>
 
             {{--Background Logo--}}
-            <div style="position: relative;  text-align: center; ">
-                <img src="{{ $settings->firstWhere('key', 'logo')->value }}" style="max-width: 500px; max-height:600px; margin-top: 60px; position:absolute ; opacity: 0.2; margin-left: auto;margin-right: auto; left: 0; right: 0;" />
+            <div style="position: relative; text-align: center">
+                <img
+                    src="{{ $settings->firstWhere('key', 'logo')->value }}"
+                    style="
+                        max-width: 500px;
+                        max-height: 600px;
+                        margin-top: 60px;
+                        position: absolute;
+                        opacity: 0.2;
+                        margin-left: auto;
+                        margin-right: auto;
+                        left: 0;
+                        right: 0;
+                    "
+                />
             </div>
 
             {{-- Tabulation Begins --}}
-            <table cellpadding="20" style="width:100%; border-collapse:collapse; border: 1px solid #000; margin: 10px auto;" border="1">
+            <table
+                cellpadding="20"
+                style="width: 100%; border-collapse: collapse; border: 1px solid #000; margin: 10px auto"
+                border="1"
+            >
                 <thead>
                     <tr>
-                        <th rowspan="2">Time <br> Date<i class="icon-arrow-down7 ml-2"></i></th>
-                        @foreach($time_slots as $tms)
-                        <th rowspan="2">{{ $tms->time_from }} <br>
-                            {{ $tms->time_to }}
+                        <th rowspan="2">
+                            Time <br />
+                            Date<i class="icon-arrow-down7 ml-2"></i>
                         </th>
+                        @foreach ($time_slots as $tms)
+                            <th rowspan="2">
+                                {{ $tms->time_from }} <br />
+                                {{ $tms->time_to }}
+                            </th>
                         @endforeach
                     </tr>
                 </thead>
 
                 <tbody>
-                    @foreach($days as $day)
-                    <tr>
-                        @if($ttr->exam_id)
-                        <td><strong>{{ date('l', strtotime($day)) }} <br> {{ date('d/m/Y', strtotime($day)) }} </strong></td>
-                        @else
-                        <td><strong>{{ $day }}</strong></td>
-                        @endif
+                    @foreach ($days as $day)
+                        <tr>
+                            @if ($ttr->exam_id)
+                                <td>
+                                    <strong
+                                        >{{ date('l', strtotime($day)) }} <br />
+                                        {{ date('d/m/Y', strtotime($day)) }}
+                                    </strong>
+                                </td>
+                            @else
+                                <td><strong>{{ $day }}</strong></td>
+                            @endif
 
-                        @foreach($d_time->where('day', $day) as $dt)
-                        <td>{{ $dt['subject'] }}</td>
-                        @endforeach
-                    </tr>
+                            @foreach ($d_time->where('day', $day) as $dt)
+                                <td>{{ $dt['subject'] }}</td>
+                            @endforeach
+                        </tr>
                     @endforeach
                 </tbody>
             </table>
@@ -94,12 +134,10 @@
     </div>
 
     <script>
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             window.print();
         });
-
     </script>
-
 </body>
 
 </html>

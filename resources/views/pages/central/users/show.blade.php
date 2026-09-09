@@ -3,189 +3,197 @@
 @section('page_title', "User Profile - {$user->name}")
 
 @section('content')
-
-<div class="row">
-    <div class="col-md-3 text-center">
-        <div class="card">
-            <div class="card-body">
-                <img style="width: 90%; height:90%" src="{{ Usr::getTenancyAwarePhotoUrl($user->photo_path) }}" alt="photo" class="rounded-circle">
-                <br>
-                <h3 class="mt-3">{{ $user->name }}</h3>
+    <div class="row">
+        <div class="col-md-3 text-center">
+            <div class="card">
+                <div class="card-body">
+                    <img
+                        style="width: 90%; height: 90%"
+                        src="{{ Usr::getTenancyAwarePhotoUrl($user->photo_path) }}"
+                        alt="photo"
+                        class="rounded-circle"
+                    />
+                    <br />
+                    <h3 class="mt-3">{{ $user->name }}</h3>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-9">
-        <div class="card">
-            <div class="card-body">
-                <ul class="nav nav-tabs nav-tabs-highlight">
-                    <li class="nav-item">
-                        <a href="#basic-info" class="nav-link active" data-toggle="tab">Basic Info</a>
-                    </li>
-                    @if((isset($staff_rec) && $staff_rec != null) && (Qs::userIsHead() || $user->id == auth()->id()))
-                    <li class="nav-item">
-                        <a href="#staff-info" class="nav-link" data-toggle="tab">Staff Info</a>
-                    </li>
-                    @endif
-                </ul>
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-tabs nav-tabs-highlight">
+                        <li class="nav-item">
+                            <a href="#basic-info" class="nav-link active" data-toggle="tab">Basic Info</a>
+                        </li>
+                        @if ((isset($staff_rec) && $staff_rec != null) && (Qs::userIsHead() || $user->id == auth()->id()))
+                            <li class="nav-item">
+                                <a href="#staff-info" class="nav-link" data-toggle="tab">Staff Info</a>
+                            </li>
+                        @endif
+                    </ul>
 
-                <div class="tab-content">
-                    {{--Basic Info--}}
-                    <div class="tab-pane fade show active" id="basic-info">
-                        <table class="table table-bordered">
-                            <tbody>
-                                <tr>
-                                    <td class="font-weight-bold">Name</td>
-                                    <td class="break-all">{{ $user->name }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">Gender</td>
-                                    <td>{{ $user->gender }}</td>
-                                </tr>
-                                @if($user->religion)
-                                <tr>
-                                    <td class="font-weight-bold">Religion</td>
-                                    <td class="break-all">{{ $user->religion }}</td>
-                                </tr>
-                                @endif
-                                @if($user->email)
-                                <tr>
-                                    <td class="font-weight-bold">Email</td>
-                                    <td class="break-all">{{ $user->email }}</td>
-                                </tr>
-                                @endif
-                                @if($user->primary_identification_number)
-                                <tr>
-                                    <td class="font-weight-bold">Primary ID number</td>
-                                    <td class="break-all">{{ $user->primary_identification_number ?? '—' }}</td>
-                                </tr>
-                                @endif
-                                @if($user->secondary_identification_number)
-                                <tr>
-                                    <td class="font-weight-bold">Secondary ID number</td>
-                                    <td class="break-all">{{ $user->secondary_identification_number ?? '—' }}</td>
-                                </tr>
-                                @endif
-                                @if($user->username)
-                                <tr>
-                                    <td class="font-weight-bold">Username</td>
-                                    <td class="break-all">{{ $user->username }}</td>
-                                </tr>
-                                @endif
-                                @if($user->primary_mobile || $user->secondary_mobile)
-                                <tr>
-                                    <td class="font-weight-bold">Mobile</td>
-                                    <td>{{ $user->primary_mobile.' '.$user->secondary_mobile }}</td>
-                                </tr>
-                                @endif
-                                @if($user->date_of_birth)
-                                <tr>
-                                    <td class="font-weight-bold">Birthdate</td>
-                                    <td class="break-all">{{ $user->date_of_birth }}</td>
-                                </tr>
-                                @endif
-                                @if($user->blood_group_id)
-                                <tr>
-                                    <td class="font-weight-bold">Blood Group</td>
-                                    <td>{{ $user->blood_group->name }}</td>
-                                </tr>
-                                @endif
-                                @if($user->nationality_id)
-                                <tr>
-                                    <td class="font-weight-bold">Nationality</td>
-                                    <td>{{ $user->nationality->name }}</td>
-                                </tr>
-                                @endif
-                                @if($user->state_id)
-                                <tr>
-                                    <td class="font-weight-bold">State</td>
-                                    <td>{{ $user->state->name }}</td>
-                                </tr>
-                                @endif
-                                @if($user->lga_id)
-                                <tr>
-                                    <td class="font-weight-bold">LGA</td>
-                                    <td>{{ $user->lga->name }}</td>
-                                </tr>
-                                @endif
-                                @if($user->address)
-                                <tr>
-                                    <td class="font-weight-bold">Address</td>
-                                    <td class="break-all">{{ $user->address }}</td>
-                                </tr>
-                                @endif
-                            </tbody>
-                        </table>
-                    </div>
+                    <div class="tab-content">
+                        {{--Basic Info--}}
+                        <div class="tab-pane fade show active" id="basic-info">
+                            <table class="table-bordered table">
+                                <tbody>
+                                    <tr>
+                                        <td class="font-weight-bold">Name</td>
+                                        <td class="break-all">{{ $user->name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="font-weight-bold">Gender</td>
+                                        <td>{{ $user->gender }}</td>
+                                    </tr>
+                                    @if ($user->religion)
+                                        <tr>
+                                            <td class="font-weight-bold">Religion</td>
+                                            <td class="break-all">{{ $user->religion }}</td>
+                                        </tr>
+                                    @endif
+                                    @if ($user->email)
+                                        <tr>
+                                            <td class="font-weight-bold">Email</td>
+                                            <td class="break-all">{{ $user->email }}</td>
+                                        </tr>
+                                    @endif
+                                    @if ($user->primary_identification_number)
+                                        <tr>
+                                            <td class="font-weight-bold">Primary ID number</td>
+                                            <td class="break-all">{{ $user->primary_identification_number ?? '—' }}</td>
+                                        </tr>
+                                    @endif
+                                    @if ($user->secondary_identification_number)
+                                        <tr>
+                                            <td class="font-weight-bold">Secondary ID number</td>
+                                            <td class="break-all">
+                                                {{ $user->secondary_identification_number ?? '—' }}
+                                            </td>
+                                        </tr>
+                                    @endif
+                                    @if ($user->username)
+                                        <tr>
+                                            <td class="font-weight-bold">Username</td>
+                                            <td class="break-all">{{ $user->username }}</td>
+                                        </tr>
+                                    @endif
+                                    @if ($user->primary_mobile || $user->secondary_mobile)
+                                        <tr>
+                                            <td class="font-weight-bold">Mobile</td>
+                                            <td>{{ $user->primary_mobile.' '.$user->secondary_mobile }}</td>
+                                        </tr>
+                                    @endif
+                                    @if ($user->date_of_birth)
+                                        <tr>
+                                            <td class="font-weight-bold">Birthdate</td>
+                                            <td class="break-all">{{ $user->date_of_birth }}</td>
+                                        </tr>
+                                    @endif
+                                    @if ($user->blood_group_id)
+                                        <tr>
+                                            <td class="font-weight-bold">Blood Group</td>
+                                            <td>{{ $user->blood_group->name }}</td>
+                                        </tr>
+                                    @endif
+                                    @if ($user->nationality_id)
+                                        <tr>
+                                            <td class="font-weight-bold">Nationality</td>
+                                            <td>{{ $user->nationality->name }}</td>
+                                        </tr>
+                                    @endif
+                                    @if ($user->state_id)
+                                        <tr>
+                                            <td class="font-weight-bold">State</td>
+                                            <td>{{ $user->state->name }}</td>
+                                        </tr>
+                                    @endif
+                                    @if ($user->lga_id)
+                                        <tr>
+                                            <td class="font-weight-bold">LGA</td>
+                                            <td>{{ $user->lga->name }}</td>
+                                        </tr>
+                                    @endif
+                                    @if ($user->address)
+                                        <tr>
+                                            <td class="font-weight-bold">Address</td>
+                                            <td class="break-all">{{ $user->address }}</td>
+                                        </tr>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
 
-                    {{--Staff Info--}}
-                    @if((isset($staff_rec) && $staff_rec != null) && (Qs::userIsHead() || $user->id == auth()->id()))
-                    <div class="tab-pane fade" id="staff-info">
-                        <table class="table table-bordered">
-                            <tbody>
-                                <tr>
-                                    <td class="font-weight-bold">Date of Employment</td>
-                                    <td class="break-all">{{ $staff_rec->employment_date ?? '—' }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">Confirmation Date</td>
-                                    <td class="break-all">{{ $staff_rec->confirmation_date ?? '—' }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">Licence Number</td>
-                                    <td class="break-all">{{ $staff_rec->licence_number ?? '—' }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">File Number</td>
-                                    <td class="break-all">{{ $staff_rec->file_number ?? '—' }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">ZSSSF Number</td>
-                                    <td class="break-all">{{ $staff_rec->social_security_number ?? '—' }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">Employment Number</td>
-                                    <td class="break-all">{{ $staff_rec->employment_number ?? '—' }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">TIN Number</td>
-                                    <td class="break-all">{{ $staff_rec->tin_number ?? '—' }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">Bank Account</td>
-                                    <td class="break-all">{{ $staff_rec->bank_account_number ?? '—' }} {{ $staff_rec->bank_name ?? '' }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">Education Level</td>
-                                    <td class="break-all">{{ $staff_rec->education_level ?? '—' }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">College Attended</td>
-                                    <td class="break-all">{{ $staff_rec->college_attended ?? '—' }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">Graduation Yaar</td>
-                                    <td class="break-all">{{ $staff_rec->year_graduated ?? '—' }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">Designation</td>
-                                    <td class="break-all">{{ $staff_rec->designation ?? '—' }}</td>
-                                </tr>
-                                @if(isset($staff_rec->subjects_studied))
-                                <tr>
-                                    <td class="font-weight-bold">Subjects Studied</td>
-                                    <td class="break-all">{{ $staff_rec->subjects_studied }}</td>
-                                </tr>
-                                @endif
-                            </tbody>
-                        </table>
+                        {{--Staff Info--}}
+                        @if ((isset($staff_rec) && $staff_rec != null) && (Qs::userIsHead() || $user->id == auth()->id()))
+                            <div class="tab-pane fade" id="staff-info">
+                                <table class="table-bordered table">
+                                    <tbody>
+                                        <tr>
+                                            <td class="font-weight-bold">Date of Employment</td>
+                                            <td class="break-all">{{ $staff_rec->employment_date ?? '—' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-weight-bold">Confirmation Date</td>
+                                            <td class="break-all">{{ $staff_rec->confirmation_date ?? '—' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-weight-bold">Licence Number</td>
+                                            <td class="break-all">{{ $staff_rec->licence_number ?? '—' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-weight-bold">File Number</td>
+                                            <td class="break-all">{{ $staff_rec->file_number ?? '—' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-weight-bold">ZSSSF Number</td>
+                                            <td class="break-all">{{ $staff_rec->social_security_number ?? '—' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-weight-bold">Employment Number</td>
+                                            <td class="break-all">{{ $staff_rec->employment_number ?? '—' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-weight-bold">TIN Number</td>
+                                            <td class="break-all">{{ $staff_rec->tin_number ?? '—' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-weight-bold">Bank Account</td>
+                                            <td class="break-all">
+                                                {{ $staff_rec->bank_account_number ?? '—' }} {{ $staff_rec->bank_name ?? '' }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-weight-bold">Education Level</td>
+                                            <td class="break-all">{{ $staff_rec->education_level ?? '—' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-weight-bold">College Attended</td>
+                                            <td class="break-all">{{ $staff_rec->college_attended ?? '—' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-weight-bold">Graduation Yaar</td>
+                                            <td class="break-all">{{ $staff_rec->year_graduated ?? '—' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="font-weight-bold">Designation</td>
+                                            <td class="break-all">{{ $staff_rec->designation ?? '—' }}</td>
+                                        </tr>
+                                        @if (isset($staff_rec->subjects_studied))
+                                            <tr>
+                                                <td class="font-weight-bold">Subjects Studied</td>
+                                                <td class="break-all">{{ $staff_rec->subjects_studied }}</td>
+                                            </tr>
+                                        @endif
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
                     </div>
-                    @endif
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-{{--User Profile Ends--}}
+    {{--User Profile Ends--}}
 
 @endsection

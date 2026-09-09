@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>Tabulation Sheet - {{ strtoupper($settings->firstWhere('key', 'system_title')->value) }} - {{ $my_class->name }} @if(isset($section)) {{ $section->name }} @endif {{ $ex->name }} ({{ $year }})</title>
-    <link rel="stylesheet" href="{{ asset('assets/css/print_tabulation.css') }}">
+    <meta charset="utf-8" />
+    <title>
+        Tabulation Sheet - {{ strtoupper($settings->firstWhere('key', 'system_title')->value) }} - {{ $my_class->name }}
+        @if (isset($section)) {{ $section->name }} @endif
+        {{ $ex->name }} ({{ $year }})
+    </title>
+    <link rel="stylesheet" href="{{ asset('assets/css/print_tabulation.css') }}" />
 
     @laravelPWA
 </head>
 
 <body>
-    <div class="hide" style="margin-bottom: 20px;">
+    <div class="hide" style="margin-bottom: 20px">
         <button class="btn" onclick="window.print()">Print</button>
         <div class="float-right">
             <select id="hide-select" onchange="hideSelected(this.value)">
@@ -27,8 +31,9 @@
         @include('pages.marks.tabulation.partials.table')
         <div style="page-break-after: always"></div>
         @include('pages.marks.tabulation.partials.performance_summary')
-        <p class="copyright text-center mt-4">
-            {{ date('Y') }}. {{ ucwords(strtolower($settings->firstWhere('key', 'system_name')->value)) }}. All rights reserved.
+        <p class="copyright mt-4 text-center">
+            {{ date('Y') }}. {{ ucwords(strtolower($settings->firstWhere('key', 'system_name')->value)) }}. All rights
+            reserved.
         </p>
     </div>
 
@@ -38,14 +43,14 @@
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
-        (function() {
+        (function () {
             const toggleables = document.querySelectorAll('[data-toggle-target]');
             const hideSelect = document.getElementById('hide-select');
             const unhideSelect = document.getElementById('unhide-select');
 
             const items = new Map();
 
-            toggleables.forEach(el => {
+            toggleables.forEach((el) => {
                 const selector = el.dataset.toggleTarget;
                 if (!selector) return;
 
@@ -63,10 +68,11 @@
                 unhideSelect.add(new Option(label, selector));
             });
 
-            window.hideSelected = (selector) => document.querySelectorAll(selector).forEach(el => el.style.display = 'none');
-            window.unhideSelected = (selector) => document.querySelectorAll(selector).forEach(el => el.style.display = '');
+            window.hideSelected = (selector) =>
+                document.querySelectorAll(selector).forEach((el) => (el.style.display = 'none'));
+            window.unhideSelected = (selector) =>
+                document.querySelectorAll(selector).forEach((el) => (el.style.display = ''));
         })();
     </script>
 </body>
-
 </html>

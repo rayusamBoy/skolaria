@@ -1,11 +1,12 @@
 <html>
-
 <head>
     <title>Assessment Cover for - {{ $student->user->name }}</title>
 
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-family:
+                -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
+                'Helvetica Neue', sans-serif;
         }
 
         .hide .btn {
@@ -18,7 +19,7 @@
             display: table;
             padding-left: 1e;
             margin: 0px;
-            border-spacing: 0 !important
+            border-spacing: 0 !important;
         }
 
         table:not(.photo) tr td:last-child {
@@ -48,14 +49,14 @@
                 margin: 0 !important;
             }
         }
-
     </style>
 </head>
 
 <body>
     <div class="hide">
-        <p>Set background color you like
-            <select onchange="setBgColor(this.value);">
+        <p>
+            Set background color you like
+            <select onchange="setBgColor(this.value)">
                 <option selected disabled>here</option>
                 <option value="white">white</option>
                 <option value="seagreen">seagreen</option>
@@ -79,15 +80,20 @@
             </select>
             . Once finished click the <strong>Print</strong> button to print.
         </p>
-        <button onclick="printPage();" class="btn"><strong>Print</strong></button>
+        <button onclick="printPage()" class="btn"><strong>Print</strong></button>
     </div>
 
-    <div id="print" style="margin: 3em;" xmlns:margin-top="http://www.w3.org/1999/xhtml">
+    <div id="print" style="margin: 3em" xmlns:margin-top="http://www.w3.org/1999/xhtml">
         {{-- Logo N School Details--}}
         <table class="photo" width="100%">
             <tr>
-                <td style="width: 120px; height: 120px; float: right;">
-                    <img src="{{ Usr::getTenancyAwarePhotoUrl($student->user->photo_path) }}" alt="{{ $student->user->name }}" width="120" height="120">
+                <td style="width: 120px; height: 120px; float: right">
+                    <img
+                        src="{{ Usr::getTenancyAwarePhotoUrl($student->user->photo_path) }}"
+                        alt="{{ $student->user->name }}"
+                        width="120"
+                        height="120"
+                    />
                 </td>
             </tr>
         </table>
@@ -121,7 +127,9 @@
                     <h4><strong>Race and Religion:</strong></h4>
                 </td>
                 <td class="student-info">
-                    <h5>{{ Usr::getNationality($student->user->nationality_id)->value('subregion') . ' - ' . $student->user->religion }}</h5>
+                    <h5>
+                        {{ Usr::getNationality($student->user->nationality_id)->value('subregion') . ' - ' . $student->user->religion }}
+                    </h5>
                 </td>
             </tr>
 
@@ -180,6 +188,5 @@
         function printPage() {
             return window.print();
         }
-
     </script>
 </body>

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>Setting preferences</title>
 </head>
 <body>
     <script>
-        (function() {
+        (function () {
             const params = new URLSearchParams(window.location.search);
             const theme = params.get('theme');
             const skin = params.get('skin');
@@ -28,12 +28,11 @@
                     return;
                 }
 
-                setTimeout(function() {
+                setTimeout(function () {
                     window.location.href = url;
                 }, 200);
             }
         })();
-
     </script>
 </body>
 </html>

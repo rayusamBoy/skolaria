@@ -6,10 +6,10 @@
 
     <div class="card-body">
         @php
-        $canEdit = auth()->user()->can($tenant_permissions['schedules']['edit_event']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['schedules']['delete_event']['permission']);
-        $canUpdate = auth()->user()->can($tenant_permissions['schedules']['update_event']['permission']);
-        $hasActions = $canEdit || $canDelete;
+            $canEdit = auth()->user()->can($tenant_permissions['schedules']['edit_event']['permission']);
+            $canDelete = auth()->user()->can($tenant_permissions['schedules']['delete_event']['permission']);
+            $canUpdate = auth()->user()->can($tenant_permissions['schedules']['update_event']['permission']);
+            $hasActions = $canEdit || $canDelete;
         @endphp
 
         <ul class="nav nav-tabs nav-tabs-highlight">
@@ -18,19 +18,17 @@
                     Manage Events
                 </a>
             </li>
-            @if($selected && $canUpdate)
-            <li class="nav-item">
-                <a href="#edit-event" class="nav-link active" data-toggle="tab">
-                    Edit Event
-                </a>
-            </li>
+            @if ($selected && $canUpdate)
+                <li class="nav-item">
+                    <a href="#edit-event" class="nav-link active" data-toggle="tab"> Edit Event </a>
+                </li>
             @endif
         </ul>
 
         <div class="tab-content">
             {{-- All Events --}}
             <div class="{{ $selected ? 'tab-pane fade' : 'tab-pane fade show active' }}" id="all-events">
-                <table class="table datatable-button-html5-columns">
+                <table class="datatable-button-html5-columns table">
                     <thead>
                         <tr>
                             <th>S/N</th>
@@ -41,97 +39,158 @@
                             <th>Day</th>
                             <th>Status</th>
                             <th>By</th>
-                            @if($hasActions)
-                            <th class="text-center">Action</th>
+                            @if ($hasActions)
+                                <th class="text-center">Action</th>
                             @endif
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($events as $evt)
-                        <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td class="break-all break-spaces">{{ $evt->name }}</td>
-                            <td class="break-all break-spaces">{{ $evt->description }}</td>
-                            <td>{{ $evt->year }}</td>
-                            <td>{{ $evt->month }}</td>
-                            <td>{{ $evt->day }}</td>
-                            <td>{{ $evt->status }}</td>
-                            <td>{{ $evt->user->name }}</td>
-                            @if($hasActions)
-                            <td class="text-center">
-                                <div class="list-icons">
-                                    <div class="dropdown">
-                                        <a class="material-symbols-rounded" href="#" data-toggle="dropdown">lists</a>
-                                        <div class="dropdown-menu dropdown-menu-left">
-                                            @if($canEdit)
-                                            <a href="{{ route('schedule.events.edit', $evt->id) }}" class="dropdown-item">
-                                                <i class="material-symbols-rounded">edit</i> Edit
-                                            </a>
-                                            @endif
-                                            @if($canDelete)
-                                            <a id="{{ $evt->id }}" onclick="confirmDelete(this.id)" href="javascript:;" class="dropdown-item text-danger">
-                                                <i class="material-symbols-rounded">delete</i> Delete
-                                            </a>
-                                            <form method="get" id="item-delete-{{ $evt->id }}" action="{{ route('schedule.events.delete', $evt->id) }}" class="d-none">
-                                                @csrf
-                                                <input type="hidden" name="id" value="{{ $evt->id }}">
-                                            </form>
-                                            @endif
+                        @foreach ($events as $evt)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td class="break-spaces break-all">{{ $evt->name }}</td>
+                                <td class="break-spaces break-all">{{ $evt->description }}</td>
+                                <td>{{ $evt->year }}</td>
+                                <td>{{ $evt->month }}</td>
+                                <td>{{ $evt->day }}</td>
+                                <td>{{ $evt->status }}</td>
+                                <td>{{ $evt->user->name }}</td>
+                                @if ($hasActions)
+                                    <td class="text-center">
+                                        <div class="list-icons">
+                                            <div class="dropdown">
+                                                <a class="material-symbols-rounded" href="#" data-toggle="dropdown"
+                                                    >lists</a>
+                                                <div class="dropdown-menu dropdown-menu-left">
+                                                    @if ($canEdit)
+                                                        <a
+                                                            href="{{ route('schedule.events.edit', $evt->id) }}"
+                                                            class="dropdown-item"
+                                                        >
+                                                            <i class="material-symbols-rounded">edit</i> Edit
+                                                        </a>
+                                                    @endif
+                                                    @if ($canDelete)
+                                                        <a
+                                                            id="{{ $evt->id }}"
+                                                            onclick="confirmDelete(this.id)"
+                                                            href="javascript:;"
+                                                            class="dropdown-item text-danger"
+                                                        >
+                                                            <i class="material-symbols-rounded">delete</i> Delete
+                                                        </a>
+                                                        <form
+                                                            method="get"
+                                                            id="item-delete-{{ $evt->id }}"
+                                                            action="{{ route('schedule.events.delete', $evt->id) }}"
+                                                            class="d-none"
+                                                        >
+                                                            @csrf
+                                                            <input type="hidden" name="id" value="{{ $evt->id }}" />
+                                                        </form>
+                                                    @endif
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </td>
-                            @endif
-                        </tr>
+                                    </td>
+                                @endif
+                            </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
 
-            @if($selected && $canUpdate)
-            {{-- Edit Event --}}
-            <div class="tab-pane fade show active" id="edit-event">
-                <form class="ajax-update" method="post" action="{{ route('schedule.events.update', $event->id) }}">
-                    @csrf
-                    <div class="row">
-                        <div class="form-group col-md-5">
-                            <label for="name" class="font-weight-semibold">Name <span class="text-danger">*</span></label>
-                            <input maxlength="50" name="name" required type="text" class="form-control" value="{{ $event->name }}" id="name">
+            @if ($selected && $canUpdate)
+                {{-- Edit Event --}}
+                <div class="tab-pane fade show active" id="edit-event">
+                    <form class="ajax-update" method="post" action="{{ route('schedule.events.update', $event->id) }}">
+                        @csrf
+                        <div class="row">
+                            <div class="form-group col-md-5">
+                                <label for="name" class="font-weight-semibold"
+                                    >Name <span class="text-danger">*</span></label>
+                                <input
+                                    maxlength="50"
+                                    name="name"
+                                    required
+                                    type="text"
+                                    class="form-control"
+                                    value="{{ $event->name }}"
+                                    id="name"
+                                />
+                            </div>
+                            <div class="form-group col-md-7">
+                                <label for="description" class="font-weight-semibold"
+                                    >Description <span class="text-danger">*</span></label>
+                                <input
+                                    maxlength="150"
+                                    name="description"
+                                    required
+                                    type="text"
+                                    class="form-control"
+                                    value="{{ $event->description }}"
+                                    id="description"
+                                />
+                            </div>
                         </div>
-                        <div class="form-group col-md-7">
-                            <label for="description" class="font-weight-semibold">Description <span class="text-danger">*</span></label>
-                            <input maxlength="150" name="description" required type="text" class="form-control" value="{{ $event->description }}" id="description">
+                        <div class="row">
+                            <div class="form-group col-md-3">
+                                <label for="year" class="font-weight-semibold"
+                                    >Year <span class="text-danger">*</span></label>
+                                <input
+                                    name="year"
+                                    required
+                                    type="number"
+                                    min="2000"
+                                    class="form-control"
+                                    value="{{ $event->year }}"
+                                    id="year"
+                                />
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="month" class="font-weight-semibold"
+                                    >Month <span class="text-danger">*</span></label>
+                                <input
+                                    name="month"
+                                    required
+                                    type="number"
+                                    min="1"
+                                    max="12"
+                                    class="form-control"
+                                    value="{{ $event->month }}"
+                                    id="month"
+                                />
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="day" class="font-weight-semibold"
+                                    >Day <span class="text-danger">*</span></label>
+                                <input
+                                    name="day"
+                                    required
+                                    type="number"
+                                    min="1"
+                                    max="31"
+                                    class="form-control"
+                                    value="{{ $event->day }}"
+                                    id="day"
+                                />
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="status" class="font-weight-semibold">Status</label>
+                                <select required class="form-control select" name="status" id="status">
+                                    @foreach (Evt::getStatusOptions() as $st)
+                                        <option @selected($event->status == $st) value="{{ $st }}">{{ $st }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-md-3">
-                            <label for="year" class="font-weight-semibold">Year <span class="text-danger">*</span></label>
-                            <input name="year" required type="number" min="2000" class="form-control" value="{{ $event->year }}" id="year">
+                        <div class="text-right">
+                            <button type="submit" id="ajax-btn" class="btn btn-primary">
+                                Submit form <i class="material-symbols-rounded ml-2">send</i>
+                            </button>
                         </div>
-                        <div class="form-group col-md-3">
-                            <label for="month" class="font-weight-semibold">Month <span class="text-danger">*</span></label>
-                            <input name="month" required type="number" min="1" max="12" class="form-control" value="{{ $event->month }}" id="month">
-                        </div>
-                        <div class="form-group col-md-3">
-                            <label for="day" class="font-weight-semibold">Day <span class="text-danger">*</span></label>
-                            <input name="day" required type="number" min="1" max="31" class="form-control" value="{{ $event->day }}" id="day">
-                        </div>
-                        <div class="form-group col-md-3">
-                            <label for="status" class="font-weight-semibold">Status</label>
-                            <select required class="form-control select" name="status" id="status">
-                                @foreach(Evt::getStatusOptions() as $st)
-                                <option @selected($event->status == $st) value="{{ $st }}">{{ $st }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <button type="submit" id="ajax-btn" class="btn btn-primary">
-                            Submit form <i class="material-symbols-rounded ml-2">send</i>
-                        </button>
-                    </div>
-                </form>
-            </div>
+                    </form>
+                </div>
             @endif
         </div>
     </div>

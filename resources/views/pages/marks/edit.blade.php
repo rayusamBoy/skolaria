@@ -1,6 +1,11 @@
-<form class="ajax-update" action="{{ route('marks.update', [$exam->id, $my_class_id, $subject_id, $section_id ?? null]) }}" method="post">
-    @csrf @method('put')
-    <table class="table table-striped data-table marks float-head">
+<form
+    class="ajax-update"
+    action="{{ route('marks.update', [$exam->id, $my_class_id, $subject_id, $section_id ?? null]) }}"
+    method="post"
+>
+    @csrf
+    @method('put')
+    <table class="table-striped data-table marks float-head table">
         <thead>
             <tr class="text-center">
                 <th>S/N</th>
@@ -11,19 +16,32 @@
             </tr>
         </thead>
         <tbody class="exam-tbody">
-            @foreach($marks->sortBy('user.name')->sortBy('user.gender') as $mk)
-            <tr>
-                <td class="text-center">{{ $loop->iteration }}</td>
-                <td>{{ $mk->user->name }}</td>
-                <td class="text-center">{{ substr($mk->user->gender, 0, 1) }}</td>
-                <td class="text-center">{{ $mk->user->exam_record->first()->exam_number }}</td>
-                <td class="text-center"><input @readonly($is_restricted) title="EXAM" min="0" max="{{ $mk->exam->exam_denominator }}" class="{{ $is_restricted ? 'text-center form-control form-control-sm cursor-not-allowed' : 'text-center form-control form-control-sm' }}" name="exm_{{ $mk->id }}" value="{{ $mk->exam_mark }}" type="number"></td>
-            </tr>
+            @foreach ($marks->sortBy('user.name')->sortBy('user.gender') as $mk)
+                <tr>
+                    <td class="text-center">{{ $loop->iteration }}</td>
+                    <td>{{ $mk->user->name }}</td>
+                    <td class="text-center">{{ substr($mk->user->gender, 0, 1) }}</td>
+                    <td class="text-center">{{ $mk->user->exam_record->first()->exam_number }}</td>
+                    <td class="text-center">
+                        <input
+                            @readonly($is_restricted)
+                            title="EXAM"
+                            min="0"
+                            max="{{ $mk->exam->exam_denominator }}"
+                            class="{{ $is_restricted ? 'text-center form-control form-control-sm cursor-not-allowed' : 'text-center form-control form-control-sm' }}"
+                            name="exm_{{ $mk->id }}"
+                            value="{{ $mk->exam_mark }}"
+                            type="number"
+                        />
+                    </td>
+                </tr>
             @endforeach
         </tbody>
     </table>
     {{-- Update Button --}}
-    <div class="text-center mt-2">
-        <button type="submit" class="btn btn-primary" @disabled($is_restricted) id="update">Update Marks <i class="material-symbols-rounded ml-2">send</i></button>
+    <div class="mt-2 text-center">
+        <button type="submit" class="btn btn-primary" @disabled($is_restricted) id="update">
+            Update Marks <i class="material-symbols-rounded ml-2">send</i>
+        </button>
     </div>
 </form>

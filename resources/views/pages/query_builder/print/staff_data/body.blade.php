@@ -1,24 +1,39 @@
 {{--Print Body--}}
 {{--If is the last page, do not break page--}}
-<div class="print" xmlns:margin-top="http://www.w3.org/1999/xhtml" style="{{ ($page_number === $last_page) ? 'min-height: 100vh; display: block; position: relative' : 'min-height: 100vh; display: block; position: relative; page-break-after: always' }}">
+<div
+    class="print"
+    xmlns:margin-top="http://www.w3.org/1999/xhtml"
+    style="{{ ($page_number === $last_page) ? 'min-height: 100vh; display: block; position: relative' : 'min-height: 100vh; display: block; position: relative; page-break-after: always' }}"
+>
     {{--Top Logo--}}
-    <div style="position: relative; text-align: center; ">
-        <img src="{{ $logo }}" style="max-width: 60px; max-height: 60px;" />
+    <div style="position: relative; text-align: center">
+        <img src="{{ $logo }}" style="max-width: 60px; max-height: 60px" />
     </div>
     {{--Headings--}}
-    <h2 style="text-align: center;">KNOW OUR USERS OF {{ strtoupper($settings->firstWhere("key", "system_name")->value) }}</h2>
-    <h3 style="text-align: center;">USERS INFORMATION</h3>
+    <h2 style="text-align: center">
+        KNOW OUR USERS OF {{ strtoupper($settings->firstWhere("key", "system_name")->value) }}
+    </h2>
+    <h3 style="text-align: center">USERS INFORMATION</h3>
     {{--Table Data--}}
-    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; margin: 10px auto; table-layout: fixed" border="1">
+    <table
+        style="width: 100%; border-collapse: collapse; border: 1px solid #000; margin: 10px auto; table-layout: fixed"
+        border="1"
+    >
         <tbody>
-            @foreach($keys as $key)
-            <tr>
-                <th style="text-align: start">{{ str_replace('_', ' ', ucfirst($key)) }}</th>
-                @foreach($staff as $stf)
-                @php $data = $stf->$key @endphp
-                <td style="text-align: center; word-wrap: break-word">@if($key == 'photo_path') <img src="{{ $data }}" alt="photo" width="60px" height="60px" style="padding: 3px"> @else {{ $data }} @endif</td>
-                @endforeach
-            </tr>
+            @foreach ($keys as $key)
+                <tr>
+                    <th style="text-align: start">{{ str_replace('_', ' ', ucfirst($key)) }}</th>
+                    @foreach ($staff as $stf)
+                        @php $data = $stf->$key @endphp
+                        <td style="text-align: center; word-wrap: break-word">
+                            @if ($key == 'photo_path')
+                                <img src="{{ $data }}" alt="photo" width="60px" height="60px" style="padding: 3px" />
+                            @else
+                                {{ $data }}
+                            @endif
+                        </td>
+                    @endforeach
+                </tr>
             @endforeach
         </tbody>
     </table>

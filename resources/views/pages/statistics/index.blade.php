@@ -3,8 +3,7 @@
 @section('page_title', 'Statistics')
 
 @section('content')
-
-{{-- Charts --}}
-@include('pages.statistics.charts')
+    {{-- Charts --}}
+    @include('pages.statistics.charts')
 
 @endsection

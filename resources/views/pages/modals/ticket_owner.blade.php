@@ -1,15 +1,23 @@
 <!-- Modal -->
-<div class="modal fade" id="ticket-owner-modal-{{ $owner->id }}" tabindex="-1" aria-labelledby="tenant-user-info-heading" aria-hidden="true">
+<div
+    class="modal fade"
+    id="ticket-owner-modal-{{ $owner->id }}"
+    tabindex="-1"
+    aria-labelledby="tenant-user-info-heading"
+    aria-hidden="true"
+>
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title font-weight-bold text-center" id="tenant-user-info-heading">Tenant User Information</h5>
+                <h5 class="modal-title font-weight-bold text-center" id="tenant-user-info-heading">
+                    Tenant User Information
+                </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">Close</span>
                 </button>
             </div>
             <div class="modal-body">
-                <table class="table table-bordered table-responsive">
+                <table class="table-bordered table-responsive table">
                     <tr>
                         <td class="font-weight-bold">Name</td>
                         <td>{{ $owner->name }} ({{ $owner->roles->pluck('name')->implode(', ') }})</td>
@@ -20,7 +28,9 @@
                     </tr>
                     <tr>
                         <td class="font-weight-bold">Mobile</td>
-                        <td><a href="tel: {{ $owner->primary_mobile ?? $owner->secondary_mobile }}">{{ $owner->primary_mobile ?? $owner->secondary_mobile }}</a></td>
+                        <td>
+                            <a href="tel: {{ $owner->primary_mobile ?? $owner->secondary_mobile }}">{{ $owner->primary_mobile ?? $owner->secondary_mobile }}</a>
+                        </td>
                     </tr>
                 </table>
             </div>

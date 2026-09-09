@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta id="csrf-token" name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="author" content="Rashidi Said (rayusam)">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta id="csrf-token" name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="author" content="Rashidi Said (rayusam)" />
 
-    @includeUnless(!Qs::googleAnalyticsSetUpOkAndEnabled(), 'partials.js.google_tag')
+    @includeUnless(! Qs::googleAnalyticsSetUpOkAndEnabled(), 'partials.js.google_tag')
 
-    <title>@yield('page_title') &bull; {{ Qs::getStringAbbreviation(config('app.name')) }}</title>
+    <title>
+        @yield('page_title')
+        &bull; {{ Qs::getStringAbbreviation(config('app.name')) }}
+    </title>
 
     @laravelPWA
 
@@ -23,7 +25,8 @@
     {{-- Block UI -- Loading page indicator; Will be removed by js script on page load; Copied from Block UI interface implementation --}}
     <div class="blockUI blockOverlay custom"></div>
     <div class="blockUI blockMsg blockPage custom">
-        <div class="mr-3 mt-1 d-inline-flex dot-carousel"></div> Loading. Please wait...
+        <div class="d-inline-flex dot-carousel mt-1 mr-3"></div>
+        Loading. Please wait...
     </div>
 
     @include('partials.top_menu')
@@ -34,15 +37,15 @@
 
             <div class="content">
                 {{-- Error Alert Area --}}
-                @if($errors->any())
-                <div class="alert alert-danger border-0 alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+                @if ($errors->any())
+                    <div class="alert alert-danger alert-dismissible border-0">
+                        <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
 
-                    @foreach($errors->all() as $er)
-                    <span><i class="material-symbols-rounded pb-2px">hdr_strong</i> {{ $er }}</span> <br>
-                    @endforeach
-
-                </div>
+                        @foreach ($errors->all() as $er)
+                            <span><i class="material-symbols-rounded pb-2px">hdr_strong</i> {{ $er }}</span>
+                            <br />
+                        @endforeach
+                    </div>
                 @endif
 
                 <div class="display-none" id="ajax-alert"></div>
@@ -54,10 +57,17 @@
 
     {{-- Go to Bottom Button --}}
     <div class="go-to-bottom">
-        <button type="button" class="material-symbols-rounded btn btn-to-bottom float-right" title="Go to Bottom">arrow_downward</button>
+        <button type="button" class="material-symbols-rounded btn btn-to-bottom float-right" title="Go to Bottom">
+            arrow_downward
+        </button>
     </div>
     {{-- Notification Sounds --}}
-    <span class="d-none" id="notification-sounds" data-allow_system_sounds="{{ $user_preferences['allow_system_sounds'] }}" data-base_url="{{ asset('global_assets/sounds') }}"></span>
+    <span
+        class="d-none"
+        id="notification-sounds"
+        data-allow_system_sounds="{{ $user_preferences['allow_system_sounds'] }}"
+        data-base_url="{{ asset('global_assets/sounds') }}"
+    ></span>
     {{-- Offline Indicator --}}
     <div id="offline-alert">Application Offline</div>
 
@@ -65,5 +75,4 @@
 
     @stack('scripts')
 </body>
-
 </html>

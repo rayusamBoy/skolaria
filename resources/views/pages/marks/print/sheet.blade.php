@@ -1,5 +1,5 @@
 {{-- NAME , CLASS AND OTHER INFO --}}
-<table style="width:100%; border-collapse:collapse; ">
+<table style="width: 100%; border-collapse: collapse">
     <tbody>
         <tr>
             <td><strong>NAME:</strong> {{ strtoupper($sr->user->name) }}</td>
@@ -10,36 +10,45 @@
         <tr>
             <td><strong>RESULT SHEET FOR</strong> {!! strtoupper(Mk::getOrdinalSuffix($ex->term)) !!} TERM</td>
             <td><strong>EXAM:</strong> {{ strtoupper($exr->exam->name) }} ({{ $ex->year }})</td>
-            <td><strong>AGE:</strong> {{ $sr->age ?: ($sr->user->date_of_birth ? date_diff(date_create($sr->user->date_of_birth), date_create('now'))->y . ' years' : '—') }}</td>
+            <td>
+                <strong>AGE:</strong>
+                {{ $sr->age ?: ($sr->user->date_of_birth ? date_diff(date_create($sr->user->date_of_birth), date_create('now'))->y . ' years' : '—') }}
+            </td>
         </tr>
     </tbody>
 </table>
 
 {{--Exam Table--}}
-<table style="width:100%; border-collapse:collapse; border: 1px solid #000; margin: 10px auto;" border="1">
+<table style="width: 100%; border-collapse: collapse; border: 1px solid #000; margin: 10px auto" border="1">
     <thead>
         <tr>
             <th rowspan="2">SUBJECTS</th>
-            <th rowspan="2">MARK <br> ({{ $ex->exam_denominator }})</th>
+            <th rowspan="2">
+                MARK <br />
+                ({{ $ex->exam_denominator }})
+            </th>
             <th rowspan="2">GRADE</th>
-            <th rowspan="2">SUBJECT <br> POSITION</th>
+            <th rowspan="2">
+                SUBJECT <br />
+                POSITION
+            </th>
             <th rowspan="2">REMARKS</th>
         </tr>
     </thead>
     <tbody>
-        @foreach($subjects as $sub)
-        @php $subject_marks = $marks->where('subject_id', $sub->id)->where('exam_id', $ex->id)->where('section_id', $exr->section->id) @endphp
-        @if($subject_marks->isNotEmpty())
-        <tr>
-            <td style="font-weight: bold">{{ $sub->name }}</td>
-            @foreach($subject_marks as $mk)
-            <td>{{ $mk->$tex ?: '—'}}</td>
-            <td>{{ $mk->grade?->name ?? '—' }}</td>
-            <td>{!! $mk->grade ? Mk::getOrdinalSuffix($mk->subject_position) : '—' !!}</td>
-            <td>{{ $mk->grade?->remarks ?? '—' }}</td>
-            @endforeach
-        </tr>
-        @endif
+        @foreach ($subjects as $sub)
+            @php $subject_marks = $marks->where('subject_id', $sub->id)->where('exam_id', $ex->id)->where('section_id', $exr->section->id) @endphp
+            @if ($subject_marks->isNotEmpty())
+                <tr>
+                    <td style="font-weight: bold">{{ $sub->name }}</td>
+                    @foreach ($subject_marks as $mk)
+                        <td>{{ $mk->$tex ?: '—' }}</td>
+                        <td>{{ $mk->grade?->name ?? '—' }}</td>
+                        <td>{!! $mk->grade ? Mk::getOrdinalSuffix($mk->subject_position) : '—' !!}</td>
+                        <td>{{ $mk->grade?->remarks ?? '—' }}</td>
+                    @endforeach
+                </tr>
+            @endif
         @endforeach
         <tr>
             <td colspan="1"><strong>TOTAL SCORES: </strong> {{ $exr->total ?? 'N/A' }}</td>
@@ -48,13 +57,24 @@
             <td colspan="2"><strong>CLASS AVERAGE: </strong> {{ $exr->class_average ?? 'N/A' }}</td>
         </tr>
         <tr>
-            <td colspan="2"><strong>DIVISION: </strong>{{ $exr->division->name ?? 'N/A' }} <strong> of points </strong>{{ $exr->points ?? 'N/A' }}</td>
+            <td colspan="2">
+                <strong>DIVISION: </strong>{{ $exr->division->name ?? 'N/A' }}
+                <strong> of points </strong>{{ $exr->points ?? 'N/A' }}
+            </td>
             <td colspan="2"><strong>FINAL AVERAGE GRADE: </strong> {{ $exr->grade?->name ?? 'N/A' }}</td>
-            <td colspan="2"><strong>CLASS AVERAGE GRADE: </strong> {{ Mk::getGradeNameByScore($exr->class_average) ?? 'N/A' }}</td>
+            <td colspan="2">
+                <strong>CLASS AVERAGE GRADE: </strong> {{ Mk::getGradeNameByScore($exr->class_average) ?? 'N/A' }}
+            </td>
         </tr>
         <tr>
-            <td colspan="3"><strong>FINAL POSITION SECTIONWISE ({{ $exr->section->name }}): </strong>{{ $exr->section_position }} of {{ Mk::getSectionCount($ex->id, $exr->my_class_id, $exr->section_id) }}</td>
-            <td colspan="3"><strong>FINAL POSITION CLASSWISE: </strong>{{ $exr->class_position }} of {{ Mk::getClassCount($ex->id, $exr->my_class_id) }}</td>
+            <td colspan="3">
+                <strong>FINAL POSITION SECTIONWISE ({{ $exr->section->name }}): </strong
+                >{{ $exr->section_position }} of {{ Mk::getSectionCount($ex->id, $exr->my_class_id, $exr->section_id) }}
+            </td>
+            <td colspan="3">
+                <strong>FINAL POSITION CLASSWISE: </strong
+                >{{ $exr->class_position }} of {{ Mk::getClassCount($ex->id, $exr->my_class_id) }}
+            </td>
         </tr>
     </tbody>
 </table>

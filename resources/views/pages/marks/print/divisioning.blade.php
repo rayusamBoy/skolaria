@@ -1,19 +1,17 @@
 @php
-$division_list = Mk::getDivisionList($class_type->id)
+    $division_list = Mk::getDivisionList($class_type->id)
 @endphp
 
-@if($division_list->isNotEmpty())
-<div style="margin-bottom: 5px; text-align: center">
-    <table border="0" cellpadding="5" cellspacing="5" style="text-align: center; margin: 0 auto;">
-        <tr>
-            <td><strong>KEY TO THE DIVISIONING </strong>[<strong>name</strong> => points from - points to]</td>
+@if ($division_list->isNotEmpty())
+    <div style="margin-bottom: 5px; text-align: center">
+        <table border="0" cellpadding="5" cellspacing="5" style="text-align: center; margin: 0 auto">
+            <tr>
+                <td><strong>KEY TO THE DIVISIONING </strong>[<strong>name</strong> => points from - points to]</td>
 
-            @foreach($division_list as $dv)
-            <td>
-                <strong>{{ $dv->name }}</strong> => {{ "{$dv->points_from} - {$dv->points_to}" }}
-            </td>
-            @endforeach
-        </tr>
-    </able>
-</div>
+                @foreach ($division_list as $dv)
+                    <td><strong>{{ $dv->name }}</strong> => {{ "{$dv->points_from} - {$dv->points_to}" }}</td>
+                @endforeach
+            </tr>
+            </able>
+    </div>
 @endif
