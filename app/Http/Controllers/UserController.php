@@ -18,6 +18,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use App\Services\UserService;
 
 class UserController extends Controller
 {
@@ -26,13 +27,15 @@ class UserController extends Controller
     protected LocationRepo $loc;
     protected MyClassRepo $my_class;
     protected PermissionRepo $permission;
+    protected UserService $userService;
 
     public function __construct(
         UserRepo $user,
         StudentRepo $student,
         LocationRepo $loc,
         MyClassRepo $my_class,
-        PermissionRepo $permission
+        PermissionRepo $permission,
+        UserService $userService
     ) {
         $this->permissionMap = config('permissions.names.tenant.users');
         parent::__construct();
@@ -41,6 +44,7 @@ class UserController extends Controller
         $this->loc = $loc;
         $this->my_class = $my_class;
         $this->permission = $permission;
+        $this->userService = $userService;
     }
 
     /**
@@ -98,29 +102,14 @@ class UserController extends Controller
     {
         $role_names = $req->roles;
         $last_role_name = strtolower(last($role_names));
-        $user_is_staff = $this->hasStaffRole($role_names);
 
-        $user_data = $this->prepareUserData($req, $last_role_name, $user_is_staff);
-        $user_data['password'] = Hash::make($req->password ?: $last_role_name);
+        $data = $req->validated();
+        $permissions = $req->filled('permissions') ? $req->permissions : null;
 
-        // Validate username/email presence
-        if (empty($user_data['username']) && empty($req->email)) {
-            return Usr::json(__('msg.user_invalid'), false);
-        }
-
-        $user = $this->user->createUser($user_data);
-        $user->syncRoles($role_names);
-
-        if ($req->filled('permissions')) {
-            $user->syncPermissions($req->permissions);
-        }
-
-        if ($user_is_staff) {
-            $this->createStaffRecord($user->id, $req);
-        }
-
-        if ($user->hasRole(config('roles.default_roles.tenant.parent'))) {
-            $this->createParentRecord($user->id, $req);
+        try {
+            $user = $this->userService->storeUser($data, $role_names, $permissions);
+        } catch (\InvalidArgumentException $e) {
+            return Usr::json($e->getMessage(), false);
         }
 
         return Usr::json(__('msg.store_ok') . " Default password: $last_role_name");
@@ -135,27 +124,14 @@ class UserController extends Controller
             return Usr::json(__('msg.denied'), false);
         }
 
-        $user = $this->user->findUser($user_id);
         $role_names = $req->roles;
-        $last_role_name = strtolower(last($role_names));
+        $permissions = $req->filled('permissions') ? $req->permissions : null;
 
-        $user_was_staff = $this->hasStaffRole($user->roles->pluck('name')->toArray());
-        $user_is_staff = $this->hasStaffRole($role_names);
-        $user_is_parent = $user->hasRole(config('roles.default_roles.tenant.parent'));
-
-        $user_data = $this->prepareUserData($req, $last_role_name, $user_is_staff, $user->code);
-        $user_data['occupation'] = $user_is_parent ? $req->occupation : null;
-
-        $this->handlePhotoUpload($req, $user_data, $user->code, $last_role_name);
-        $user->update($user_data);
-
-        $user->syncRoles($role_names);
-        if ($req->filled('permissions')) {
-            $user->syncPermissions($req->permissions);
+        try {
+            $this->userService->updateUser($user_id, $req->validated(), $role_names, $permissions);
+        } catch (\Throwable $e) {
+            return Usr::json($e->getMessage(), false);
         }
-
-        $this->handleStaffRecordTransition($user->id, $user_was_staff, $user_is_staff, $req);
-        $this->handleParentRecordUpdate($user->id, $user_is_parent, $req);
 
         return Usr::jsonUpdateOk();
     }
@@ -252,7 +228,8 @@ class UserController extends Controller
     /**
      * Get roles excluded from selection based on current user's permissions.
      */
-    protected function getExcludedRoles(): array
+    #[SkipPermission]
+    public function getExcludedRoles(): array
     {
         $except_role = config('roles.default_roles.tenant.student');
         $except_roles = [$except_role];
@@ -366,7 +343,7 @@ class UserController extends Controller
         $staff_data['user_id'] = $user_id;
         $staff_data['code'] = $this->generateStaffId($req->employment_date);
 
-        $this->user->getStaffRecordsQuery($staff_data);
+        $this->user->createStaffRecordsQuery($staff_data);
     }
 
     /**
@@ -402,7 +379,7 @@ class UserController extends Controller
             $staff_data = $req->only(Usr::getStaffRecordFields());
             $staff_data['user_id'] = $user_id;
             $staff_data['code'] = $this->generateStaffId($req->employment_date);
-            $this->user->getStaffRecordsQuery($staff_data);
+            $this->user->createStaffRecordsQuery($staff_data);
         }
     }
 

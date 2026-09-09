@@ -310,7 +310,7 @@ class UserController extends Controller
         $staff_data['user_id'] = $user_id;
         $staff_data['code'] = $staff_id;
 
-        $this->user->getStaffRecordsQuery($staff_data);
+        $this->user->createStaffRecordsQuery($staff_data);
     }
 
     /**

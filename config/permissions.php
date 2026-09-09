@@ -134,6 +134,16 @@ return [
                     'label' => 'Block/Unblock Users',
                     'description' => 'Block or unblock user accounts.',
                 ],
+                'invite_user' => [
+                    'permission' => 'users.invite',
+                    'label' => 'Invite Users',
+                    'description' => 'Generate registration invitation links.',
+                ],
+                'view_registrations' => [
+                    'permission' => 'users.registrations',
+                    'label' => 'View Registration Requests',
+                    'description' => 'Review and approve pending user registrations.',
+                ],
             ],
 
             'roles' => [

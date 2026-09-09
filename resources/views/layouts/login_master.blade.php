@@ -26,13 +26,24 @@
 
     @include('partials.login.footer')
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize uniform
-            $('.form-input-styled').uniform();
-        });
+    {{-- Theme JS files --}}
+    <script src="{{ asset('global_assets/js/plugins/extensions/jquery_ui/interactions.min.js') }} "></script>
+    <script src="{{ asset('global_assets/js/plugins/forms/selects/select2.min.js') }} "></script>
+    {{-- Forms --}}
+    <script src="{{ asset('global_assets/js/plugins/forms/wizards/steps.min.js') }}"></script>
+    <script src="{{ asset('global_assets/js/plugins/forms/styling/uniform.min.js') }}"></script>
+    <script src="{{ asset('global_assets/js/plugins/forms/validation/validate.min.js') }}"></script>
+    <script src="{{ asset('global_assets/js/plugins/forms/wizards/form_wizard.js') }}"></script>
+    <script src="{{ asset('global_assets/js/plugins/forms/selects/form_select2.js') }}"></script>
 
+    <script src="{{ asset('global_assets/js/plugins/uploaders/uploader_bootstrap.js') }}"></script>
+    <script src="{{ asset('global_assets/js/plugins/ui/autosize.min.js') }}"></script>
+    <script src="{{ asset('assets/js/custom-min.js') }}"></script>
+    <script>
+        const get_state_url = '{{ route("ajax.get_state", [":id"]) }}';
+        const get_lga_url = '{{ route("ajax.get_lga", [":id"]) }}';
     </script>
+
 </body>
 
 </html>

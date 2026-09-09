@@ -60,4 +60,6 @@ return
         'role_in_use' => 'This role is currently assigned to one or more users and cannot be deleted.',
         'subject_in_use' => 'This subject is currently assigned to one or more records and cannot be deleted.',
         'file_required' => 'File is required.',
+        'invitation_approved' => 'The registration request has been approved successfully.',
+        'invitation_rejected' => 'The registration request has been rejected successfully.',
     ];

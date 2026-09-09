@@ -6,6 +6,7 @@ use App\Models\BloodGroup;
 use App\Models\Notification;
 use App\Models\ParentRelative;
 use App\Models\StaffRecord;
+use App\Models\UserRegistrationInvite;
 use App\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -189,7 +190,7 @@ class UserRepo
      * @param array $where
      * @return Builder
      */
-    public function whereStaffRecord(array $where): Builder
+    public function whereStaffRecord(array $where): Builder|StaffRecord
     {
         return StaffRecord::where($where);
     }
@@ -200,7 +201,7 @@ class UserRepo
      * @param array $data
      * @return StaffRecord
      */
-    public function getStaffRecordsQuery(array $data): StaffRecord
+    public function createStaffRecordsQuery(array $data): StaffRecord
     {
         return StaffRecord::create($data);
     }
@@ -300,5 +301,51 @@ class UserRepo
     public function getRolesByName(array $except = []): Collection
     {
         return Role::whereNotIn('name', $except)->get();
+    }
+
+    /********** INVITATIONS **********/
+
+    /**
+     * Get all user registration invitations with their creators.
+     *
+     * @return Collection
+     */
+    public function getInvitations(): Collection
+    {
+        return UserRegistrationInvite::with('creator')
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    /**
+     * Create a new user registration invitation.
+     *
+     * @param array $data
+     * @return UserRegistrationInvite
+     */
+    public function createInvitation(array $data): UserRegistrationInvite
+    {
+        return UserRegistrationInvite::create($data);
+    }
+
+    /**
+     * Find an invitation by ID or fail.
+     *
+     * @param int $id
+     * @return UserRegistrationInvite
+     */
+    public function findInvitationOrFail(int $id): UserRegistrationInvite
+    {
+        return UserRegistrationInvite::findOrFail($id);
+    }
+
+    /**
+     * Query builder for invitations matching conditions.
+     * @param array $where
+     * @return Builder|UserRegistrationInvite
+     */
+    public function whereInvitationBuilder(array $where): Builder|UserRegistrationInvite
+    {
+        return UserRegistrationInvite::where($where);
     }
 }

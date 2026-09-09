@@ -214,7 +214,7 @@
 </div>
 
 @if($user_is_parent)
-@include('pages/modals/parent_relative')
+@include('pages.modals.parent_relative')
 @endif
 
 {{--User Profile Ends--}}

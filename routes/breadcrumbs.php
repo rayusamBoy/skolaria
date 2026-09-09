@@ -158,6 +158,12 @@ Breadcrumbs::for('central_users_profile.show', function (BreadcrumbTrail $trail,
     $trail->push('My Profile', route('central_users_profile.show', $user));
 });
 
+// Invitations
+Breadcrumbs::for('users.invitations.index', function (BreadcrumbTrail $trail): void {
+    $trail->parent('dashboard');
+    $trail->push('Manage Invitations', route('users.invitations.index'));
+});
+
 // ----------------------------------------------------------------------
 // Classes / Dorms / Sections / Class Types
 // ----------------------------------------------------------------------

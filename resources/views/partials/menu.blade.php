@@ -459,10 +459,24 @@
                     </a>
                     <ul class="nav nav-group-sub" data-submenu-title="Users & Roles">
                         @canany(array_column($tenant_permissions['users'], 'permission'))
-                        <li class="nav-item">
-                            <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                        <li class="nav-item nav-item-submenu {{ request()->routeIs('users.*') ? 'nav-item-expanded' : '' }}">
+                            <a href="#" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
                                 Users
                             </a>
+                            <ul class="nav nav-group-sub">
+                                @can($tenant_permissions['books']['index']['permission'])
+                                <li class="nav-item">
+                                    <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.index','users.edit','users.show') ? 'active' : '' }}">
+                                        Manage
+                                    </a>
+                                </li>
+                                @endcan
+                                <li class="nav-item">
+                                    <a href="{{ route('users.invitations.index') }}" class="nav-link {{ request()->routeIs('users.invitations.*') ? 'active' : '' }}">
+                                        Invitations
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                         @endcanany
                         @can($tenant_permissions['roles']['index']['permission'])

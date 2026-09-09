@@ -35,6 +35,7 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\TimeTableController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserImpersonationController;
+use App\Http\Controllers\UserInvitationController;
 use App\Http\Requests\CustomEmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 
@@ -122,6 +123,10 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             Route::post('toggle/staff-data-editing', [UserController::class, 'toggle_staff_data_editing'])->name('users.toggle_staff_data_editing');
             Route::post('update/blocked-state', [UserController::class, 'toggle_user_block'])->name('users.toggle_user_block');
             Route::get('my-profile/{user}', [UserController::class, 'show_profile'])->name('users_profile.show')->middleware('decodeRouteParams');
+            Route::get('invitations', [UserInvitationController::class, 'index'])->name('users.invitations.index');
+            Route::post('invite', [UserInvitationController::class, 'store'])->name('users.invitations.store');
+            Route::post('registrations/{id}/approve', [UserInvitationController::class, 'approve'])->name('users.registrations.approve');
+            Route::post('registrations/{id}/reject', [UserInvitationController::class, 'reject'])->name('users.registrations.reject');
         });
 
         /*************** Query Builder (reports / printing) *****************/
@@ -373,5 +378,9 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
 
         // Resourceful controller for tickets
         Route::resource('tickets', TicketController::class);
+
+        // Public registration routes (no auth)
+        Route::get('/register/{token}', [UserInvitationController::class, 'show_registration_form'])->name('users.registrations.show');
+        Route::post('/register/{token}', [UserInvitationController::class, 'submit_registration'])->name('users.registrations.submit');
     });
 });
