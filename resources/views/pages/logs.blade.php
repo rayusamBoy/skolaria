@@ -81,7 +81,7 @@ $canDeleteActivity = auth()->user()->can($tenant_permissions['logs']['delete_act
                                         <a href="javascript:;" class="material-symbols-rounded" data-toggle="dropdown">lists</a>
                                         <div class="dropdown-menu dropdown-menu-left">
                                             @if($canViewProfile)
-                                            <a href="{{ route('users.show', Qs::hash($lh->user->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> View Profile</a>
+                                            <a href="{{ route('users.show', Qs::hash($lh->first()->user->id)) }}" class="dropdown-item"><i class="material-symbols-rounded">visibility</i> View Profile</a>
                                             @endif
                                         </div>
                                     </div>
