@@ -6,7 +6,7 @@ use App\Models\Nationality;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Str;
+use Illuminate\Support\Str;
 
 class StartsWithProperPhoneCode implements ValidationRule, DataAwareRule
 {
@@ -17,6 +17,11 @@ class StartsWithProperPhoneCode implements ValidationRule, DataAwareRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        if (!isset($this->data['nationality_id']) && !isset($this->data[0]['nationality_id'])) {
+            $fail("The :attribute cannot be validated because Nationality is not set.");
+            return;
+        }
+
         // Attempt to get the ID from the data (as usual for form request validation), 
         // or take one value for Excel validation, since the Excel package validates in batches 
         // and the value is the same for all rows.
