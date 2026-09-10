@@ -9,6 +9,7 @@ use App\Repositories\PermissionRepo;
 use App\Repositories\UserRepo;
 use App\User;
 use Dompdf\Dompdf;
+use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Support\Collection;
@@ -18,15 +19,7 @@ use Illuminate\View\View;
 
 class QueryBuilderController extends Controller
 {
-    protected UserRepo $user;
-
-    protected PermissionRepo $permission;
-
-    public function __construct(UserRepo $user, PermissionRepo $permission)
-    {
-        $this->user = $user;
-        $this->permission = $permission;
-    }
+    public function __construct(protected UserRepo $user, protected PermissionRepo $permission) {}
 
     /**
      * Show the query builder index page.
@@ -88,7 +81,7 @@ class QueryBuilderController extends Controller
      *
      * @return array keys: 'records' (collection), 'query2' (string) or 'msg' (error string)
      */
-    private function getData($req, $expression): array
+    private function getData(QueryBuilderRequest $req, Expression $expression): array
     {
         $from = $req->from;
         $where = $req->where;
@@ -149,11 +142,10 @@ class QueryBuilderController extends Controller
     /**
      * Build the base query (shared between with/without where clauses).
      *
-     * @param  mixed  $expression
      * @param  array  $wheres  array of [column, operator, value] (value placeholder '?' recommended)
      * @param  array  $bindings  values to bind in order
      */
-    private function buildBaseQuery(string $from, $expression, string $orderby_column, string $orderby_direction, ?int $limit, array $wheres = [], array $bindings = []): Collection
+    private function buildBaseQuery(string $from, Expression $expression, string $orderby_column, string $orderby_direction, ?int $limit, array $wheres = [], array $bindings = []): Collection
     {
         // Special tables that require joins
         $special_tables = ['student_records', 'staff_records', 'exam_records', 'grades', 'subjects'];
@@ -177,7 +169,7 @@ class QueryBuilderController extends Controller
     /**
      * Apply where conditions, ordering, and limit to a generic query builder.
      */
-    private function applyWheresAndOrderLimit($query, array $wheres, array $bindings, string $orderby_column, string $orderby_direction, ?int $limit): void
+    private function applyWheresAndOrderLimit(mixed $query, array $wheres, array $bindings, string $orderby_column, string $orderby_direction, ?int $limit): void
     {
         foreach ($wheres as $index => $w) {
             $query->where($w[0], $w[1], $w[2]);
@@ -194,7 +186,7 @@ class QueryBuilderController extends Controller
     /**
      * Build student records query with all needed joins.
      */
-    private function buildStudentRecordsQuery($expression, $orderby_column, $orderby_direction, $limit, $wheres, $bindings): Collection
+    private function buildStudentRecordsQuery(Expression $expression, string $orderby_column, string $orderby_direction, ?int $limit, array $wheres, array $bindings): Collection
     {
         $query = DB::table('student_records')
             ->join('users', 'users.id', '=', 'student_records.user_id')
@@ -214,7 +206,7 @@ class QueryBuilderController extends Controller
     /**
      * Build staff records query.
      */
-    private function buildStaffRecordsQuery($expression, $orderby_column, $orderby_direction, $limit, $wheres, $bindings): Collection
+    private function buildStaffRecordsQuery(Expression $expression, string $orderby_column, string $orderby_direction, ?int $limit, array $wheres, array $bindings): Collection
     {
         $query = DB::table('staff_records')
             ->join('users', 'users.id', '=', 'staff_records.user_id')
@@ -229,7 +221,7 @@ class QueryBuilderController extends Controller
     /**
      * Build exam records query.
      */
-    private function buildExamRecordsQuery($expression, $orderby_column, $orderby_direction, $limit, $wheres, $bindings): Collection
+    private function buildExamRecordsQuery(Expression $expression, string $orderby_column, string $orderby_direction, ?int $limit, array $wheres, array $bindings): Collection
     {
         $query = DB::table('exam_records')
             ->join('users', 'users.id', '=', 'exam_records.student_id')
@@ -249,7 +241,7 @@ class QueryBuilderController extends Controller
     /**
      * Build grades query.
      */
-    private function buildGradesQuery($expression, $orderby_column, $orderby_direction, $limit, $wheres, $bindings): Collection
+    private function buildGradesQuery(Expression $expression, string $orderby_column, string $orderby_direction, ?int $limit, array $wheres, array $bindings): Collection
     {
         $query = DB::table('grades')
             ->join('class_types', 'class_types.id', '=', 'grades.class_type_id')
@@ -264,7 +256,7 @@ class QueryBuilderController extends Controller
     /**
      * Build subjects query.
      */
-    private function buildSubjectsQuery($expression, $orderby_column, $orderby_direction, $limit, $wheres, $bindings): Collection
+    private function buildSubjectsQuery(Expression $expression, string $orderby_column, string $orderby_direction, ?int $limit, array $wheres, array $bindings): Collection
     {
         $query = DB::table('subjects')
             ->join('my_classes', 'my_classes.id', '=', 'subjects.my_class_id')
@@ -279,7 +271,7 @@ class QueryBuilderController extends Controller
     /**
      * Build the human‑readable query string for display.
      */
-    private function buildDisplayQuery(string $from, $where, $where_two, $condition, $condition_two, bool $has_first, bool $has_second, $orderby_column, $orderby_direction, $limit): string
+    private function buildDisplayQuery(string $from, string $where, string $where_two, string $condition, string $condition_two, bool $has_first, bool $has_second, string $orderby_column, string $orderby_direction, ?int $limit): string
     {
         $base = "select distinct placeholder from $from";
 

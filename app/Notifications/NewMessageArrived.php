@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Helpers\Qs;
+use App\Models\Message;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Fcm\FcmMessage;
@@ -11,15 +12,7 @@ class NewMessageArrived extends Notification
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
-    protected $message;
-
-    public function __construct($message)
-    {
-        $this->message = $message;
-    }
+    public function __construct(protected Message $message) {}
 
     /**
      * Get the notification's delivery channels.

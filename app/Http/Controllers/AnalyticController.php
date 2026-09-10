@@ -13,13 +13,10 @@ use Spatie\Analytics\Period;
 
 class AnalyticController extends Controller
 {
-    protected SettingRepo $setting;
-
-    public function __construct(SettingRepo $setting)
+    public function __construct(protected SettingRepo $setting)
     {
         $this->permissionMap = config('permissions.names.tenant.analytics');
         parent::__construct();
-        $this->setting = $setting;
     }
 
     /**

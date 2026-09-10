@@ -14,16 +14,10 @@ use Illuminate\View\View;
 
 class SectionController extends Controller
 {
-    protected MyClassRepo $my_class;
-
-    protected UserRepo $user;
-
-    public function __construct(MyClassRepo $my_class, UserRepo $user)
+    public function __construct(protected MyClassRepo $my_class, protected UserRepo $user)
     {
         $this->permissionMap = config('permissions.names.tenant.sections');
         parent::__construct();
-        $this->my_class = $my_class;
-        $this->user = $user;
     }
 
     /**

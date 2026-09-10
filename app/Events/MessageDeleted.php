@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\Message;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -13,18 +14,10 @@ class MessageDeleted implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $message;
-
-    public $message_html;
-
     /**
      * Create a new event instance.
      */
-    public function __construct($message, $message_html)
-    {
-        $this->message = $message;
-        $this->message_html = $message_html;
-    }
+    public function __construct(public Message $message, public string $message_html) {}
 
     /**
      * Get the channels the event should broadcast on.

@@ -15,16 +15,10 @@ use Illuminate\View\View;
 
 class SubjectController extends Controller
 {
-    protected MyClassRepo $my_class;
-
-    protected UserRepo $user;
-
-    public function __construct(MyClassRepo $my_class, UserRepo $user)
+    public function __construct(protected MyClassRepo $my_class, protected UserRepo $user)
     {
         $this->permissionMap = config('permissions.names.tenant.subjects');
         parent::__construct();
-        $this->my_class = $my_class;
-        $this->user = $user;
     }
 
     /**
@@ -85,7 +79,7 @@ class SubjectController extends Controller
     /**
      * Show the form for editing the specified subject.
      */
-    public function edit($id): View|RedirectResponse
+    public function edit(int $id): View|RedirectResponse
     {
         $subject = $this->my_class->findSubject($id);
 
@@ -97,7 +91,7 @@ class SubjectController extends Controller
     /**
      * Show the form for editing the specified subject record.
      */
-    public function edit_record($id): View|RedirectResponse
+    public function edit_record(int $id): View|RedirectResponse
     {
         $subject_record = $this->my_class->getSubjectRecord(['id' => $id])->first();
 
@@ -117,7 +111,7 @@ class SubjectController extends Controller
     /**
      * Update the specified subject.
      */
-    public function update(SubjectUpdate $req, $id): JsonResponse
+    public function update(SubjectUpdate $req, int $id): JsonResponse
     {
         $data = $req->only($this->my_class->getSubjectData(['my_class_id']));
         $this->my_class->updateSubject($id, $data);
@@ -128,7 +122,7 @@ class SubjectController extends Controller
     /**
      * Update the specified subject record.
      */
-    public function update_record(SubjectRecordUpdate $req, $id): JsonResponse
+    public function update_record(SubjectRecordUpdate $req, int $id): JsonResponse
     {
         if ($req->filled('students_ids')) {
             $data = $req->only($this->my_class->getSubjectRecordData(['section_id']));
@@ -146,7 +140,7 @@ class SubjectController extends Controller
     /**
      * Remove the specified subject if it has no records.
      */
-    public function destroy($subject): RedirectResponse
+    public function destroy(int $subject): RedirectResponse
     {
         $has_records = $this->my_class->whereSubject(['id' => $subject])->with('record')->exists();
         if ($has_records) {
@@ -161,7 +155,7 @@ class SubjectController extends Controller
     /**
      * Remove the specified subject record.
      */
-    public function delete_record($record): RedirectResponse
+    public function delete_record(int $record): RedirectResponse
     {
         $this->my_class->deleteSubjectRecords(['id' => $record]);
 

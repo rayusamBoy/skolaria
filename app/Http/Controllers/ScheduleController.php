@@ -11,13 +11,10 @@ use Illuminate\View\View;
 
 class ScheduleController extends Controller
 {
-    protected EventRepo $event;
-
-    public function __construct(EventRepo $event)
+    public function __construct(protected EventRepo $event)
     {
         $this->permissionMap = config('permissions.names.tenant.schedules');
         parent::__construct();
-        $this->event = $event;
     }
 
     /**
@@ -46,7 +43,7 @@ class ScheduleController extends Controller
     /**
      * Show the form for editing the specified event.
      */
-    public function edit_event($event_id): View
+    public function edit_event(int $event_id): View
     {
         $data['event'] = $this->event->getEventsByConditions(['id' => $event_id])->first();
         $data['events'] = $this->event->getAllEvents();
@@ -58,7 +55,7 @@ class ScheduleController extends Controller
     /**
      * Update the specified event.
      */
-    public function update_event(Request $request, $event_id): JsonResponse
+    public function update_event(Request $request, int $event_id): JsonResponse
     {
         $this->event->update($event_id, $request->except('_token'));
 

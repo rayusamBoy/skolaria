@@ -2,6 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Models\Receipt;
+use App\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,22 +16,13 @@ class StudentPaymentPaid extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
-    protected $receipt;
+    protected string $subject;
 
-    protected $subject;
+    protected string $url;
 
-    protected $student;
-
-    protected $url;
-
-    public function __construct($receipt, $student)
+    public function __construct(protected Receipt $receipt, protected User $student)
     {
-        $this->receipt = $receipt;
         $this->subject = "{$student->user->name} Payment has been made";
-        $this->student = $student;
         $this->url = route('payments.receipts', [Pay::hash($this->receipt->payment_record_id), $this->id]);
     }
 

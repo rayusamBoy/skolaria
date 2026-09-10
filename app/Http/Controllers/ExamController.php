@@ -8,6 +8,8 @@ use App\Http\Requests\Exam\ExamAnnounce;
 use App\Http\Requests\Exam\ExamCreate;
 use App\Http\Requests\Exam\ExamUpdate;
 use App\Http\Requests\Exam\ExamUpdateLockState;
+use App\Models\Exam;
+use App\Models\MyClass;
 use App\Repositories\AssessmentRepo;
 use App\Repositories\ExamRepo;
 use App\Repositories\MyClassRepo;
@@ -17,29 +19,18 @@ use App\Rules\Uppercase;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 class ExamController extends Controller
 {
-    protected ExamRepo $exam;
-
-    protected AssessmentRepo $assessment;
-
-    protected MyClassRepo $my_class;
-
-    protected StudentRepo $student;
-
     protected string $year;
 
-    public function __construct(ExamRepo $exam, AssessmentRepo $assessment, MyClassRepo $my_class, StudentRepo $student)
+    public function __construct(protected ExamRepo $exam, protected AssessmentRepo $assessment, protected MyClassRepo $my_class, protected StudentRepo $student)
     {
         $this->permissionMap = config('permissions.names.tenant.exams');
         parent::__construct();
-        $this->exam = $exam;
-        $this->assessment = $assessment;
-        $this->my_class = $my_class;
-        $this->student = $student;
         $this->year = Mk::getSetting('current_session');
     }
 
@@ -80,7 +71,7 @@ class ExamController extends Controller
     /**
      * Show the form for editing the specified exam.
      */
-    public function edit($id): View
+    public function edit(int $id): View
     {
         $data['ex'] = $this->exam->findExam($id, false, ['category', 'class_type']);
         $data['exams_cat'] = $this->exam->getCategories();
@@ -91,7 +82,7 @@ class ExamController extends Controller
     /**
      * Update the specified exam.
      */
-    public function update(ExamUpdate $req, $id): JsonResponse
+    public function update(ExamUpdate $req, int $id): JsonResponse
     {
         $exam = $this->exam->getExamsByConditions(['id' => $id], false, ['assessment'])->first();
 
@@ -117,7 +108,7 @@ class ExamController extends Controller
     /**
      * Remove the specified exam.
      */
-    public function destroy($id): RedirectResponse
+    public function destroy(int $id): RedirectResponse
     {
         $exam = $this->exam->findExam($id);
         if ($exam->is_locked) {
@@ -147,7 +138,7 @@ class ExamController extends Controller
     /**
      * Publish an exam.
      */
-    public function publish($exam_id): RedirectResponse
+    public function publish(int $exam_id): RedirectResponse
     {
         $this->exam->update($exam_id, ['is_published' => true, 'is_locked' => true]);
         $exam = $this->exam->findExam($exam_id);
@@ -243,7 +234,7 @@ class ExamController extends Controller
     /**
      * Get exam data keys based on whether assessment is enabled.
      */
-    protected function getExamDataKeys($req): array
+    protected function getExamDataKeys(Request $req): array
     {
         $has_assessment = $req->boolean('has_assessment');
 
@@ -255,7 +246,7 @@ class ExamController extends Controller
     /**
      * Validate and save number formats for each class during exam creation.
      */
-    protected function validateAndSaveNumberFormats($req, $classes, int $exam_id): void
+    protected function validateAndSaveNumberFormats(Request $req, Collection $classes, int $exam_id): void
     {
         foreach ($classes as $class) {
             $this->validateNumberFormat($req, $class);
@@ -274,7 +265,7 @@ class ExamController extends Controller
     /**
      * Validate and update/delete number formats for each class during exam update.
      */
-    protected function validateAndUpdateNumberFormats($req, $classes, int $exam_id): void
+    protected function validateAndUpdateNumberFormats(Request $req, Collection $classes, int $exam_id): void
     {
         foreach ($classes as $class) {
             $this->validateNumberFormat($req, $class);
@@ -296,7 +287,7 @@ class ExamController extends Controller
     /**
      * Validate number format input for a single class.
      */
-    protected function validateNumberFormat($req, $class): void
+    protected function validateNumberFormat(Request $req, MyClass $class): void
     {
         Validator::make(
             $req->toArray(),
@@ -326,7 +317,7 @@ class ExamController extends Controller
     /**
      * Handle assessment creation or deletion based on request input.
      */
-    protected function handleAssessmentForExam($req, $exam): void
+    protected function handleAssessmentForExam(Request $req, Exam $exam): void
     {
         if ($req->boolean('has_assessment')) {
             $this->createAssessmentForExam($exam->id);

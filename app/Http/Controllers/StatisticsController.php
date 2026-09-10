@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Mk;
+use App\Models\Exam;
 use App\Repositories\ExamRepo;
 use App\Repositories\MarkRepo;
 use App\Repositories\MyClassRepo;
@@ -14,32 +15,17 @@ use Illuminate\View\View;
 
 class StatisticsController extends Controller
 {
-    protected UserRepo $user;
-
-    protected MyClassRepo $class;
-
-    protected ExamRepo $exam;
-
-    protected StudentRepo $student;
-
-    protected MarkRepo $mark;
-
     protected string $year;
 
     public function __construct(
-        UserRepo $user,
-        MyClassRepo $class,
-        ExamRepo $exam,
-        StudentRepo $student,
-        MarkRepo $mark
+        protected UserRepo $user,
+        protected MyClassRepo $class,
+        protected ExamRepo $exam,
+        protected StudentRepo $student,
+        protected MarkRepo $mark
     ) {
         $this->permissionMap = config('permissions.names.tenant.statistics');
         parent::__construct();
-        $this->user = $user;
-        $this->class = $class;
-        $this->exam = $exam;
-        $this->student = $student;
-        $this->mark = $mark;
         $this->year = Mk::getSetting('current_session');
     }
 
@@ -64,7 +50,7 @@ class StatisticsController extends Controller
         $user_is_parent = $user->hasRole(config('roles.default_roles.tenant.parent'));
         $user_is_student = $user->hasRole(config('roles.default_roles.tenant.student'));
         $user_roles_count = $user->roles->count();
-        $user_is_staff = ($user_is_parent && $user_roles_count > 1) || (! $user_is_student && ! $user_is_parent && $user_roles_count === 1);
+        $user_is_staff = $user_is_parent && $user_roles_count > 1 || ! $user_is_student && ! $user_is_parent && $user_roles_count === 1;
 
         $data = [
             'last_exam' => $last_exam,
@@ -92,7 +78,7 @@ class StatisticsController extends Controller
     /**
      * Get statistics for parent users.
      */
-    protected function getParentStatistics($last_exam): array
+    protected function getParentStatistics(Exam $last_exam): array
     {
         $student_ids = $this->student->getActiveStudentsQuery()
             ->where('my_parent_id', auth()->id())
@@ -118,7 +104,7 @@ class StatisticsController extends Controller
     /**
      * Get statistics for student users.
      */
-    protected function getStudentStatistics($last_exam): array
+    protected function getStudentStatistics(Exam $last_exam): array
     {
         return [
             'exams_recs' => $this->exam->getExamRecordsByStudent(auth()->id())
@@ -133,7 +119,7 @@ class StatisticsController extends Controller
     /**
      * Get statistics for staff/admin users (charts and averages).
      */
-    protected function getStaffStatistics($last_exam, $exams): array
+    protected function getStaffStatistics(Exam $last_exam, $exams): array
     {
         $exams_records = $this->exam->getExamRecordsByExam($last_exam->id)
             ->get()

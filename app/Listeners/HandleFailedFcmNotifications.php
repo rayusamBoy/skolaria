@@ -74,7 +74,7 @@ class HandleFailedFcmNotifications
     /**
      * Extract the FCM token string from a SendReport.
      */
-    protected function extractToken($report): ?string
+    protected function extractToken(mixed $report): ?string
     {
         $target = method_exists($report, 'target') ? $report->target() : null;
 
@@ -90,7 +90,7 @@ class HandleFailedFcmNotifications
     /**
      * Extract a Throwable from a SendReport (may be null).
      */
-    protected function extractError($report): ?\Throwable
+    protected function extractError(mixed $report): ?\Throwable
     {
         if (method_exists($report, 'error')) {
             $error = $report->error();
@@ -172,7 +172,7 @@ class HandleFailedFcmNotifications
     /**
      * Remove the invalid token from the notifiable.
      */
-    protected function removeToken(?string $token, $notifiable): void
+    protected function removeToken(?string $token, object $notifiable): void
     {
         if (! $token) {
             return;

@@ -15,19 +15,10 @@ use Illuminate\View\View;
 
 class ClassTypeController extends Controller
 {
-    protected MyClassRepo $my_class;
-
-    protected UserRepo $user;
-
-    protected SettingRepo $setting;
-
-    public function __construct(MyClassRepo $my_class, UserRepo $user, SettingRepo $setting)
+    public function __construct(protected MyClassRepo $my_class, protected UserRepo $user, protected SettingRepo $setting)
     {
         $this->permissionMap = config('permissions.names.tenant.class_types');
         parent::__construct();
-        $this->my_class = $my_class;
-        $this->user = $user;
-        $this->setting = $setting;
     }
 
     /**

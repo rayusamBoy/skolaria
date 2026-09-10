@@ -6,6 +6,9 @@ use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Mk;
 use App\Helpers\Usr;
 use App\Http\Requests\Assessment\AssessmentSelector;
+use App\Models\AssessmentRecord;
+use App\Models\ClassType;
+use App\Models\Exam;
 use App\Repositories\AssessmentRepo;
 use App\Repositories\ExamRepo;
 use App\Repositories\MarkRepo;
@@ -14,21 +17,12 @@ use App\Repositories\StudentRepo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Session;
 use Illuminate\View\View;
 
 class AssessmentController extends Controller
 {
-    protected ExamRepo $exam;
-
-    protected AssessmentRepo $assessment;
-
-    protected MyClassRepo $my_class;
-
-    protected StudentRepo $student;
-
-    protected MarkRepo $mark;
-
     protected string $year;
 
     protected const int CW_COUNT = 10;
@@ -38,19 +32,14 @@ class AssessmentController extends Controller
     protected const int TT_COUNT = 3;
 
     public function __construct(
-        ExamRepo $exam,
-        AssessmentRepo $assessment,
-        MyClassRepo $my_class,
-        StudentRepo $student,
-        MarkRepo $mark
+        protected ExamRepo $exam,
+        protected AssessmentRepo $assessment,
+        protected MyClassRepo $my_class,
+        protected StudentRepo $student,
+        protected MarkRepo $mark
     ) {
         $this->permissionMap = config('permissions.names.tenant.assessments');
         parent::__construct();
-        $this->exam = $exam;
-        $this->assessment = $assessment;
-        $this->my_class = $my_class;
-        $this->student = $student;
-        $this->mark = $mark;
         $this->year = Mk::getSetting('current_session');
     }
 
@@ -112,7 +101,7 @@ class AssessmentController extends Controller
     /**
      * Manage assessments for a given exam/class/subject.
      */
-    public function manage($assessment_id, $class_id, $subject_id, $section_id = null): View|RedirectResponse
+    public function manage(int $assessment_id, int $class_id, int $subject_id, ?int $section_id = null): View|RedirectResponse
     {
         $where = $section_id === null
             ? ['assessment_id' => $assessment_id, 'my_class_id' => $class_id, 'subject_id' => $subject_id, 'year' => $this->year]
@@ -240,7 +229,7 @@ class AssessmentController extends Controller
     /**
      * Verify student exam year; show selector or redirect.
      */
-    protected function verifyStudentExamYear($student_id, $year = null): View|RedirectResponse|bool
+    protected function verifyStudentExamYear(int $student_id, ?string $year = null): View|RedirectResponse|bool
     {
         $years = $this->assessment->getExamYears($student_id);
         $student_exists = $this->student->exists($student_id);
@@ -257,7 +246,7 @@ class AssessmentController extends Controller
     /**
      * Show year selector for student assessments.
      */
-    public function year_selector($student_id): View|RedirectResponse
+    public function year_selector(int $student_id): View|RedirectResponse
     {
         return $this->verifyStudentExamYear($student_id);
     }
@@ -266,7 +255,7 @@ class AssessmentController extends Controller
      * Handle year selection and redirect to assessment sheet.
      */
     #[SkipPermission]
-    public function year_selected(Request $req, $student_id): RedirectResponse
+    public function year_selected(Request $req, int $student_id): RedirectResponse
     {
         $year = $req->year;
 
@@ -287,7 +276,7 @@ class AssessmentController extends Controller
     /**
      * Authorize access to a student's assessment; enforce locks and PIN.
      */
-    protected function authorizeAssessmentAccess($student, $year): ?RedirectResponse
+    protected function authorizeAssessmentAccess(int $student, string $year): ?RedirectResponse
     {
         $user = auth()->user();
         $is_staff = $user->hasAnyRole(Usr::getTenancyAwareStaffRoles());
@@ -314,7 +303,7 @@ class AssessmentController extends Controller
     /**
      * Show a student's assessment details.
      */
-    public function show($student_id, $year): View|RedirectResponse
+    public function show(int $student_id, string $year): View|RedirectResponse
     {
         $redirect = $this->authorizeAssessmentAccess($student_id, $year);
         if ($redirect) {
@@ -362,7 +351,7 @@ class AssessmentController extends Controller
     /**
      * Update assessment marks.
      */
-    public function update(Request $req, $assessment_id, $class_id, $subject_id, $section_id = null): JsonResponse
+    public function update(Request $req, int $assessment_id, int $class_id, int $subject_id, ?int $section_id = null): JsonResponse
     {
         $assessment = $this->assessment->getAssessmentsWithValidExam(['id' => $assessment_id])->first();
         if ($assessment->exam->is_locked && ! Mk::userIsHead(auth()->id())) {
@@ -414,7 +403,7 @@ class AssessmentController extends Controller
     /**
      * Build the per-assessment record update array.
      */
-    protected function calculateAssessmentRow($as, array $input, $exam, $class_type, $class_id, $subject_id): array
+    protected function calculateAssessmentRow(AssessmentRecord $as, array $input, Exam $exam, ClassType $class_type, int $class_id, int $subject_id): array
     {
         $d = ['id' => $as->id];
 
@@ -495,7 +484,7 @@ class AssessmentController extends Controller
     /**
      * Print assessment sheet for a specific exam/class/subject.
      */
-    public function print($assessment_id, $class_id, $subject_id, $year, $section_id = null): View|RedirectResponse
+    public function print(int $assessment_id, int $class_id, int $subject_id, string $year, ?int $section_id = null): View|RedirectResponse
     {
         $assessment = $this->assessment->getAssessmentsWithValidExam(['id' => $assessment_id])->first();
         $d = $section_id === null
@@ -537,7 +526,7 @@ class AssessmentController extends Controller
     /**
      * Print detailed assessment for a student.
      */
-    public function print_detailed($student_id, $assessment_id, $year): View|RedirectResponse
+    public function print_detailed(int $student_id, int $assessment_id, string $year): View|RedirectResponse
     {
         $redirect = $this->authorizeAssessmentAccess($student_id, $year);
         if ($redirect) {
@@ -575,7 +564,7 @@ class AssessmentController extends Controller
     /**
      * Print minimal assessment for a student.
      */
-    public function print_minimal($student_id, $assessment_id, $year): View|RedirectResponse
+    public function print_minimal(int $student_id, int $assessment_id, string $year): View|RedirectResponse
     {
         $redirect = $this->authorizeAssessmentAccess($student_id, $year);
         if ($redirect) {
@@ -624,7 +613,7 @@ class AssessmentController extends Controller
     /**
      * Check if PIN verification session exists for a student.
      */
-    protected function checkPinVerified($st_id): bool
+    protected function checkPinVerified(int $st_id): bool
     {
         return Session::has('pin_verified') && Session::get('pin_verified') == $st_id;
     }
@@ -632,7 +621,7 @@ class AssessmentController extends Controller
     /**
      * Print cover page for a student.
      */
-    public function print_cover($student): View
+    public function print_cover(int $student): View
     {
         $data['student'] = $this->student->getActiveStudentsQueryWithRelations(['user_id' => $student], ['user'])->first();
 
@@ -642,7 +631,7 @@ class AssessmentController extends Controller
     /**
      * Update teacher/principal comment on an assessment record.
      */
-    public function comment_update(Request $req, $as_id): JsonResponse
+    public function comment_update(Request $req, int $as_id): JsonResponse
     {
         $d = auth()->user()->hasAnyRole($this->getAdminRoles())
             ? $req->only(['t_comment', 'p_comment'])
@@ -656,7 +645,7 @@ class AssessmentController extends Controller
     /**
      * Update AF/PS skills on an assessment record.
      */
-    public function skills_update(Request $req, $skill, $as_id): JsonResponse
+    public function skills_update(Request $req, string $skill, int $as_id): JsonResponse
     {
         $d = [];
         if ($skill === 'AF' || $skill === 'PS') {
@@ -683,7 +672,7 @@ class AssessmentController extends Controller
      * Build the core data used by both progressive and print_progressive views.
      * Returns null if required data is missing (calling methods then redirect).
      */
-    protected function getProgressiveCoreData(int $class_id, $exam, int $section_id, bool $validateExamClassType = false): ?array
+    protected function getProgressiveCoreData(int $class_id, Exam $exam, int $section_id, bool $validateExamClassType = false): ?array
     {
         if ($validateExamClassType) {
             $class_type = $this->my_class->findClassTypeByClassId($class_id);
@@ -745,7 +734,7 @@ class AssessmentController extends Controller
     /**
      * Pre‑compute per‑student totals, averages, grades, positions, and subject marks.
      */
-    protected function buildProgressiveStudentData($asr, $subjects, $tex, $class_type_id): array
+    protected function buildProgressiveStudentData(Collection $asr, Collection $subjects, string $tex, int $class_type_id): array
     {
         $student_summaries = [];
 

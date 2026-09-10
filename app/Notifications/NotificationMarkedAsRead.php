@@ -11,15 +11,7 @@ class NotificationMarkedAsRead extends Notification
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
-    protected $notification_id;
-
-    public function __construct($notification_id)
-    {
-        $this->notification_id = $notification_id;
-    }
+    public function __construct(protected string $notification_id) {}
 
     /**
      * Get the notification's delivery channels.

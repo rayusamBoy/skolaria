@@ -270,7 +270,7 @@ class ExamRepo
     /**
      * Mass upsert exam records.
      */
-    public function massUpdateExamRecords(array $values, array $unique_by = ['id']): int
+    public function massUpdateExamRecords(array $values, array $unique_by = ['id']): int|Builder|ExamRecord
     {
         return ExamRecord::massUpdate(
             values: $values,
@@ -438,7 +438,7 @@ class ExamRepo
     /**
      * Mass upsert marks.
      */
-    public function massUpdateMark(array $values, array $unique_by = ['id']): int
+    public function massUpdateMark(array $values, array $unique_by = ['id']): int|Builder|Mark
     {
         return Mark::massUpdate(
             values: $values,
@@ -468,7 +468,7 @@ class ExamRepo
     /**
      * Get marks for a set of student IDs.
      */
-    public function getMarksByStudentIds(array $ids): Builder
+    public function getMarksByStudentIds(array $ids): Builder|Mark
     {
         return Mark::whereIn('student_id', $ids);
     }

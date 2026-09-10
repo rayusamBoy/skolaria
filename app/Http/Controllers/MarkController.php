@@ -8,6 +8,9 @@ use App\Helpers\Mk;
 use App\Helpers\Usr;
 use App\Http\Requests\Mark\MarkSelector;
 use App\Imports\MarksImport;
+use App\Models\ClassType;
+use App\Models\Exam;
+use App\Models\MyClass;
 use App\Repositories\AssessmentRepo;
 use App\Repositories\ExamRepo;
 use App\Repositories\MarkRepo;
@@ -25,39 +28,24 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class MarkController extends Controller
 {
-    protected MyClassRepo $my_class;
-
-    protected ExamRepo $exam;
-
-    protected StudentRepo $student;
-
     protected string $year;
 
-    protected MarkRepo $mark;
-
-    protected AssessmentRepo $assessment;
-
     public function __construct(
-        MyClassRepo $my_class,
-        ExamRepo $exam,
-        StudentRepo $student,
-        MarkRepo $mark,
-        AssessmentRepo $assessment
+        protected MyClassRepo $my_class,
+        protected ExamRepo $exam,
+        protected StudentRepo $student,
+        protected MarkRepo $mark,
+        protected AssessmentRepo $assessment
     ) {
         $this->permissionMap = config('permissions.names.tenant.marks');
         parent::__construct();
-        $this->exam = $exam;
-        $this->mark = $mark;
-        $this->student = $student;
-        $this->my_class = $my_class;
-        $this->assessment = $assessment;
         $this->year = Mk::getCurrentSession();
     }
 
     /**
      * Display year selector view.
      */
-    public function year_selector($student): View|RedirectResponse
+    public function year_selector(int $student): View|RedirectResponse
     {
         return $this->verifyStudentExamYear($student);
     }
@@ -66,7 +54,7 @@ class MarkController extends Controller
      * Handle year selection and redirect.
      */
     #[SkipPermission]
-    public function year_selected(Request $req, $student): RedirectResponse
+    public function year_selected(Request $req, int $student): RedirectResponse
     {
         $year = $req->year;
 
@@ -88,7 +76,7 @@ class MarkController extends Controller
     /**
      * Show student's marks for a year.
      */
-    public function show($student, $year): View|RedirectResponse
+    public function show(int $student, string $year): View|RedirectResponse
     {
         $user = auth()->user();
         $is_staff = $user->hasAnyRole(Usr::getTenancyAwareStaffRoles());
@@ -134,7 +122,7 @@ class MarkController extends Controller
     /**
      * Show printable version of student's marks for a specific exam.
      */
-    public function print_view($student, $exam_id, $year): View|RedirectResponse
+    public function print_view(int $student, int $exam_id, string $year): View|RedirectResponse
     {
         $user = auth()->user();
         $is_staff = $user->hasAnyRole(Usr::getTenancyAwareStaffRoles());
@@ -235,7 +223,7 @@ class MarkController extends Controller
     /**
      * Display marks management interface.
      */
-    public function manage($exam_id = null, $class_id = null, $subject_id = null, $section_id = null, $selected = false): View|RedirectResponse
+    public function manage(?int $exam_id = null, ?int $class_id = null, ?int $subject_id = null, ?int $section_id = null, bool $selected = false): View|RedirectResponse
     {
         $data = [
             'selected' => $selected,
@@ -289,7 +277,7 @@ class MarkController extends Controller
     /**
      * Update marks for a subject.
      */
-    public function update(Request $req, $exam_id, $class_id, $subject_id, $section_id = null): JsonResponse
+    public function update(Request $req, int $exam_id, int $class_id, int $subject_id, ?int $section_id = null): JsonResponse
     {
         $exam = $this->exam->find($exam_id);
 
@@ -532,7 +520,7 @@ class MarkController extends Controller
     /**
      * Update teacher/principal comments.
      */
-    public function comment_update(Request $req, $exam_id): JsonResponse
+    public function comment_update(Request $req, int $exam_id): JsonResponse
     {
         $exam = $this->exam->find($exam_id);
         if ($exam->is_locked) {
@@ -551,7 +539,7 @@ class MarkController extends Controller
     /**
      * Update skills assessment.
      */
-    public function skills_update(Request $req, $skill, $exr_id): JsonResponse
+    public function skills_update(Request $req, string $skill, int $exr_id): JsonResponse
     {
         $updates = [];
         if (\in_array($skill, ['AF', 'PS'])) {
@@ -641,7 +629,7 @@ class MarkController extends Controller
         return view('pages.marks.tabulation.index', $data);
     }
 
-    public function print_tabulation($exam_id, $class_id, $section_id, $year)
+    public function print_tabulation(int $exam_id, int $class_id, int $section_id, string $year)
     {
         set_time_limit(300);
         $tab_data = $this->getTabulationData($exam_id, $class_id, $section_id, $year);
@@ -665,7 +653,7 @@ class MarkController extends Controller
     /**
      * Get exams for a year, filtered by publication status for non-admins.
      */
-    protected function getExams($year): Collection
+    protected function getExams(string $year): Collection
     {
         $exams = $this->exam->getExamsByConditions(['year' => $year], false);
 
@@ -677,7 +665,7 @@ class MarkController extends Controller
     /**
      * Verify if a student has exam records for a given year.
      */
-    protected function verifyStudentExamYear($student_id, $year = null): View|RedirectResponse|bool
+    protected function verifyStudentExamYear(int $student_id, $year = null): View|RedirectResponse|bool
     {
         $years = $this->exam->getDistinctMarkYears($student_id);
         $student_exists = $this->student->exists($student_id);
@@ -713,7 +701,7 @@ class MarkController extends Controller
     /**
      * Check if PIN has been verified for a student.
      */
-    protected function checkPinVerified($st_id): bool
+    protected function checkPinVerified(int $st_id): bool
     {
         return session()->has('pin_verified') && session()->get('pin_verified') == $st_id;
     }
@@ -732,7 +720,7 @@ class MarkController extends Controller
     /**
      * Get student record (latest).
      */
-    protected function getStudentRecord($student_id)
+    protected function getStudentRecord(int $student_id)
     {
         return $this->student->getActiveStudentsQueryWithRelations(['user_id' => $student_id])->latest()->first()
             ?? $this->student->getGraduatedStudentsQuery(['user_id' => $student_id])->latest()->first();
@@ -741,13 +729,13 @@ class MarkController extends Controller
     /**
      * Get students eligible for a subject.
      */
-    protected function getStudentsForSubject($class_id, $section_id, $subject_id): Collection
+    protected function getStudentsForSubject(int $class_id, int $section_id, int $subject_id): Collection
     {
         $sub_recs = $this->my_class->getSubjectRecord(['subject_id' => $subject_id])
             ->where('subject.my_class_id', $class_id);
 
         if ($section_id === null && $sub_recs->whereNull('section_id')->whereNotNull('students_ids')->isNotEmpty()) {
-            return $this->student->getActiveStudentsByUserIdsQuery($sub_recs->value('students_ids'))->get();
+            return $this->student->getActiveStudentsByUserIdsQuery($sub_recs->value('students_ids')->toArray())->get();
         }
 
         if (
@@ -766,7 +754,7 @@ class MarkController extends Controller
     /**
      * Create assessment record for terminal/annual exams.
      */
-    protected function createAssessmentRecord($mark_id, $assessment_id, array $data): void
+    protected function createAssessmentRecord(int $mark_id, int $assessment_id, array $data): void
     {
         $data['mark_id'] = $mark_id;
         $data['assessment_id'] = $assessment_id;
@@ -776,7 +764,7 @@ class MarkController extends Controller
     /**
      * Fetch marks for update operation.
      */
-    protected function fetchMarksForUpdate($exam_id, $class_id, $subject_id, $section_id = null): array
+    protected function fetchMarksForUpdate(int $exam_id, int $class_id, int $subject_id, ?int $section_id = null): array
     {
         $base = [
             'exam_id' => $exam_id,
@@ -789,7 +777,7 @@ class MarkController extends Controller
             $students_ids = $this->my_class->getSubjectRecord([
                 'subject_id' => $subject_id,
                 'section_id' => null,
-            ])->value('students_ids');
+            ])->value('students_ids')->toArray();
 
             $marks = $this->exam->getMarksByStudentIds($students_ids)->where($base)->get();
             $where = [
@@ -811,7 +799,7 @@ class MarkController extends Controller
     /**
      * Initialize batch marks for all students in class.
      */
-    protected function initializeBatchMarks($exam, $class, $students, $delete_old_section_record): void
+    protected function initializeBatchMarks(Exam $exam, MyClass $class, \Illuminate\Database\Eloquent\Collection $students, bool $delete_old_section_record): void
     {
         $assessment_id = $this->assessment->getAssessmentByConditions(['exam_id' => $exam->id])->id ?? null;
         $sections = $this->my_class->getSectionsByConditions(['my_class_id' => $class->id]);
@@ -909,7 +897,7 @@ class MarkController extends Controller
     // Batch Processing Helper Methods
     // ----------------------------------------------------------------------
 
-    private function processSectionBatch($exam, $class_id, $section_id, $class_type, $class_subjects): array
+    private function processSectionBatch(Exam $exam, int $class_id, int $section_id, ClassType $class_type, \Illuminate\Database\Eloquent\Collection $class_subjects): array
     {
         $p = ['exam_id' => $exam->id, 'my_class_id' => $class_id, 'section_id' => $section_id, 'year' => $this->year];
         $wh = ['my_class_id' => $class_id, 'section_id' => $section_id, 'exam_id' => $exam->id, 'year' => $this->year];
@@ -964,7 +952,7 @@ class MarkController extends Controller
         ];
     }
 
-    private function buildSubjectMarkUpdates($marks, $form_data, $exam, $class_type_id, $class_id, $subject_id): array
+    private function buildSubjectMarkUpdates(\Illuminate\Database\Eloquent\Collection $marks, array $form_data, Exam $exam, int $class_type_id, int $class_id, int $subject_id): array
     {
         $updates = [];
         foreach ($marks as $mk) {
@@ -983,7 +971,7 @@ class MarkController extends Controller
         return $updates;
     }
 
-    private function buildAssessmentUpdates($marks, $form_data, $exam): array
+    private function buildAssessmentUpdates(\Illuminate\Database\Eloquent\Collection $marks, array $form_data, Exam $exam): array
     {
         $updates = [];
         foreach ($marks as $mk) {
@@ -1002,7 +990,7 @@ class MarkController extends Controller
         return $updates;
     }
 
-    private function buildExamRecordUpdates(array $student_ids, $exam, $class_id, $whereConditions, $class_type, $section_identifier): array
+    private function buildExamRecordUpdates(array $student_ids, Exam $exam, int $class_id, array $whereConditions, ClassType $class_type, int|callable $section_identifier): array
     {
         $sub_ids = $this->mark->getDistinctSubjectIds($whereConditions);
         $subjects = $this->my_class->getSubjectsByIds($sub_ids, []);
@@ -1017,7 +1005,7 @@ class MarkController extends Controller
             $section_id = is_callable($section_identifier) ? $section_identifier($st_id) : $section_identifier;
 
             if ($subjects_count < $minimum_subjects_required && $minimum_subjects_required !== 0) {
-                $average = $points_sum = $total_credits = 0;
+                $average = $points_sum = $total_credits = $total_credits_point = 0;
             } else {
                 $average = $this->mark->getLimitedTermAverage(
                     $exam,
@@ -1070,7 +1058,7 @@ class MarkController extends Controller
     /**
      * Fetch and prepare all data needed for tabulation (display and print).
      */
-    protected function getTabulationData($exam_id, $class_id, $section_id, $year): array
+    protected function getTabulationData(int $exam_id, int $class_id, int $section_id, string $year): array
     {
         $my_class = $this->my_class->findClass($class_id);
         $exam = $this->exam->find($exam_id);
@@ -1158,7 +1146,7 @@ class MarkController extends Controller
         ];
     }
 
-    private function buildClassPositionUpdates($exam, $class_id, array $student_ids): array
+    private function buildClassPositionUpdates(Exam $exam, int $class_id, array $student_ids): array
     {
         $updates = [];
         foreach ($student_ids as $st_id) {

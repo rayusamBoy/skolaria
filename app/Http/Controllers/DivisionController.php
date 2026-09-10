@@ -13,16 +13,10 @@ use Illuminate\View\View;
 
 class DivisionController extends Controller
 {
-    protected ExamRepo $exam;
-
-    protected MyClassRepo $my_class;
-
-    public function __construct(ExamRepo $exam, MyClassRepo $my_class)
+    public function __construct(protected ExamRepo $exam, protected MyClassRepo $my_class)
     {
         $this->permissionMap = config('permissions.names.tenant.divisions');
         parent::__construct();
-        $this->exam = $exam;
-        $this->my_class = $my_class;
     }
 
     /**
@@ -50,7 +44,7 @@ class DivisionController extends Controller
     /**
      * Show the form for editing the specified division.
      */
-    public function edit($id): View
+    public function edit(int $id): View
     {
         $data['dv'] = $this->exam->getDivisionsByConditions(['id' => $id], ['class_type'])->first();
 
@@ -60,7 +54,7 @@ class DivisionController extends Controller
     /**
      * Update the specified division.
      */
-    public function update(DivisionUpdate $req, $id): JsonResponse
+    public function update(DivisionUpdate $req, int $id): JsonResponse
     {
         $data = $req->all();
         $this->exam->updateDivision($id, $data);
@@ -71,7 +65,7 @@ class DivisionController extends Controller
     /**
      * Remove the specified division.
      */
-    public function destroy($id): RedirectResponse
+    public function destroy(int $id): RedirectResponse
     {
         $this->exam->deleteDivision($id);
 

@@ -77,7 +77,7 @@ class MarksImport implements ToCollection, WithHeadingRow, WithValidation
     /**
      * Build update data for a single mark.
      */
-    protected function buildUpdateData(int $student_id, int $section_id, int $subject_id, $mark_value): array
+    protected function buildUpdateData(int $student_id, int $section_id, int $subject_id, int|float $mark_value): array
     {
         return [
             'where' => [
@@ -113,7 +113,7 @@ class MarksImport implements ToCollection, WithHeadingRow, WithValidation
     /**
      * Delete a mark.
      */
-    public function deleteMark($sid, $sec_id, $sub_id)
+    public function deleteMark(int $sid, int $sec_id, int $sub_id)
     {
         $where = [
             'student_id' => $sid,
@@ -130,7 +130,7 @@ class MarksImport implements ToCollection, WithHeadingRow, WithValidation
     /**
      * Replace spaces with underscores for Excel column matching.
      */
-    public function replaceSpaceWithUnderscore($string): string
+    public function replaceSpaceWithUnderscore(string $string): string
     {
         return Str::slug(strtolower($string), '_');
     }

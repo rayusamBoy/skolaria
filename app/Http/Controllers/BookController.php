@@ -13,16 +13,10 @@ use Illuminate\View\View;
 
 class BookController extends Controller
 {
-    protected BookRepo $book;
-
-    protected MyClassRepo $my_class;
-
-    public function __construct(BookRepo $book, MyClassRepo $my_class)
+    public function __construct(protected BookRepo $book, protected MyClassRepo $my_class)
     {
         $this->permissionMap = config('permissions.names.tenant.books');
         parent::__construct();
-        $this->book = $book;
-        $this->my_class = $my_class;
     }
 
     /**
@@ -49,7 +43,7 @@ class BookController extends Controller
     /**
      * Show the form for editing the specified book.
      */
-    public function edit($book): View
+    public function edit(int $book): View
     {
         $data['book'] = $this->book->find($book);
 
@@ -59,7 +53,7 @@ class BookController extends Controller
     /**
      * Update the specified book.
      */
-    public function update(BookUpdate $request, $book): JsonResponse
+    public function update(BookUpdate $request, int $book): JsonResponse
     {
         $data = $request->except(['_method', '_token']);
         $this->book->update($book, $data);
@@ -67,7 +61,7 @@ class BookController extends Controller
         return Qs::jsonUpdateOk();
     }
 
-    public function show($book): View
+    public function show(int $book): View
     {
         $data['book'] = $this->book->find($book);
 
@@ -77,7 +71,7 @@ class BookController extends Controller
     /**
      * Remove the specified book.
      */
-    public function destroy($book): RedirectResponse
+    public function destroy(int $book): RedirectResponse
     {
         $this->book->find($book)->delete();
 

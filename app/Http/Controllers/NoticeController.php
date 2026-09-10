@@ -16,18 +16,12 @@ use Illuminate\View\View;
 
 class NoticeController extends Controller
 {
-    protected NoticeRepo $notice;
-
-    protected UserRepo $user;
-
     protected string $year;
 
-    public function __construct(NoticeRepo $notice, UserRepo $user)
+    public function __construct(protected NoticeRepo $notice, protected UserRepo $user)
     {
         $this->permissionMap = config('permissions.names.tenant.notices');
         parent::__construct();
-        $this->notice = $notice;
-        $this->user = $user;
         $this->year = Qs::getCurrentSession();
     }
 
@@ -69,7 +63,7 @@ class NoticeController extends Controller
     /**
      * Show the form for editing the specified notice.
      */
-    public function edit($notice): View
+    public function edit(int $notice): View
     {
         $data['notice'] = $this->notice->getNoticesById($notice)->first();
         $data['notices'] = $this->notice->getAllOrOwnNotices();

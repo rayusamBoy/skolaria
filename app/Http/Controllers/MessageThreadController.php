@@ -6,7 +6,9 @@ use App\Auth\Attributes\SkipPermission;
 use App\Events\MessageArrived;
 use App\Events\MessageDeleted;
 use App\Helpers\Usr;
+use App\Models\Message;
 use App\Models\StudentRecord;
+use App\Models\Thread;
 use App\Notifications\NewMessageArrived;
 use App\Repositories\MessageRepo;
 use App\Repositories\ThreadRepo;
@@ -28,18 +30,9 @@ class MessageThreadController extends Controller
 {
     protected int $extra_messages_to_count;
 
-    protected UserRepo $user;
-
-    protected ThreadRepo $thread;
-
-    protected MessageRepo $message;
-
-    public function __construct(UserRepo $user, ThreadRepo $thread, MessageRepo $message)
+    public function __construct(protected UserRepo $user, protected ThreadRepo $thread, protected MessageRepo $message)
     {
         $this->extra_messages_to_count = 5;
-        $this->user = $user;
-        $this->thread = $thread;
-        $this->message = $message;
     }
 
     /**
@@ -57,7 +50,7 @@ class MessageThreadController extends Controller
     /**
      * Display a specific message thread.
      */
-    public function show($id): View|RedirectResponse
+    public function show(int $id): View|RedirectResponse
     {
         $id = Usr::decodeHash($id);
 
@@ -138,7 +131,7 @@ class MessageThreadController extends Controller
     /**
      * Add a new message to an existing thread.
      */
-    public function add_message(Request $request, $thread_id): JsonResponse
+    public function add_message(Request $request, int $thread_id): JsonResponse
     {
         $input = $request->all();
 
@@ -195,7 +188,7 @@ class MessageThreadController extends Controller
     /**
      * Delete a message thread.
      */
-    public function destroy($id): RedirectResponse
+    public function destroy(int $id): RedirectResponse
     {
         try {
             $thread = $this->thread->findOrFail($id);
@@ -319,7 +312,7 @@ class MessageThreadController extends Controller
     /**
      * Add participants to thread based on role names.
      */
-    protected function addParticipantsByRole($thread, array $roles): void
+    protected function addParticipantsByRole(Thread $thread, array $roles): void
     {
         foreach ($roles as $role) {
             $user_ids = match ($role) {
@@ -349,7 +342,7 @@ class MessageThreadController extends Controller
     /**
      * Create a new message and update/add participant.
      */
-    protected function createMessageAndUpdateParticipant($thread, array $input)
+    protected function createMessageAndUpdateParticipant(Thread $thread, array $input)
     {
         $message = $this->message->create([
             'thread_id' => $thread->id,
@@ -374,7 +367,7 @@ class MessageThreadController extends Controller
     /**
      * Broadcast new message and send notifications.
      */
-    protected function broadcastNewMessage($message, $thread): void
+    protected function broadcastNewMessage(Message $message, Thread $thread): void
     {
         $message->load(['user', 'deletor', 'deletor.roles', 'user.roles']);
         $message_html = view('messenger.partials.messages', ['message' => $message])->render();

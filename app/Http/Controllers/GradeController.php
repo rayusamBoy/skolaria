@@ -13,16 +13,10 @@ use Illuminate\View\View;
 
 class GradeController extends Controller
 {
-    protected ExamRepo $exam;
-
-    protected MyClassRepo $my_class;
-
-    public function __construct(ExamRepo $exam, MyClassRepo $my_class)
+    public function __construct(protected ExamRepo $exam, protected MyClassRepo $my_class)
     {
         $this->permissionMap = config('permissions.names.tenant.grades');
         parent::__construct();
-        $this->exam = $exam;
-        $this->my_class = $my_class;
     }
 
     /**
@@ -50,7 +44,7 @@ class GradeController extends Controller
     /**
      * Show the form for editing the specified grade.
      */
-    public function edit($id): View
+    public function edit(int $id): View
     {
         $data['gr'] = $this->exam->getGradesByConditions(['id' => $id], ['class_type'])->first();
 
@@ -60,7 +54,7 @@ class GradeController extends Controller
     /**
      * Update the specified grade.
      */
-    public function update(GradeUpdate $req, $id): JsonResponse
+    public function update(GradeUpdate $req, int $id): JsonResponse
     {
         $data = $req->except(['_token', '_method']);
         $this->exam->updateGrade($id, $data);
@@ -71,7 +65,7 @@ class GradeController extends Controller
     /**
      * Remove the specified grade.
      */
-    public function destroy($id): RedirectResponse
+    public function destroy(int $id): RedirectResponse
     {
         $this->exam->deleteGrade($id);
 

@@ -9,15 +9,7 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    protected UserRepo $user;
-
-    protected TenantRepo $tenant;
-
-    public function __construct(UserRepo $user, TenantRepo $tenant)
-    {
-        $this->user = $user;
-        $this->tenant = $tenant;
-    }
+    public function __construct(protected UserRepo $user, protected TenantRepo $tenant) {}
 
     public function index()
     {

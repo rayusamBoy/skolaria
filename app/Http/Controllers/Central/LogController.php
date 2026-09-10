@@ -11,19 +11,10 @@ use Illuminate\View\View;
 
 class LogController extends Controller
 {
-    protected UserRepo $user;
-
-    protected MyClassRepo $my_class;
-
-    protected LogRepo $log;
-
-    public function __construct(UserRepo $user, MyClassRepo $my_class, LogRepo $log)
+    public function __construct(protected UserRepo $user, protected MyClassRepo $my_class, protected LogRepo $log)
     {
         $this->permissionMap = config('permissions.names.central.central_logs');
         parent::__construct();
-        $this->user = $user;
-        $this->my_class = $my_class;
-        $this->log = $log;
     }
 
     /**
@@ -41,7 +32,7 @@ class LogController extends Controller
     /**
      * Delete a specific activity log entry.
      */
-    public function delete_activity($log_id): RedirectResponse
+    public function delete_activity(int $log_id): RedirectResponse
     {
         $this->log->deleteActivityById($log_id);
 

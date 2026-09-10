@@ -15,16 +15,10 @@ use Illuminate\View\View;
 
 class TicketController extends Controller
 {
-    protected TicketRepo $ticket;
-
-    protected UserRepo $user;
-
-    public function __construct(TicketRepo $ticket, UserRepo $user)
+    public function __construct(protected TicketRepo $ticket, protected UserRepo $user)
     {
         $this->permissionMap = config('permissions.names.tenant.tickets');
         parent::__construct();
-        $this->ticket = $ticket;
-        $this->user = $user;
     }
 
     /**
@@ -361,7 +355,7 @@ class TicketController extends Controller
     /**
      * Update a ticket's assignee.
      */
-    public function update_assignee(Request $request, $ticket_id): RedirectResponse
+    public function update_assignee(Request $request, int $ticket_id): RedirectResponse
     {
         $this->ticket->updateTicket($ticket_id, $request->only('assigned_to'));
 

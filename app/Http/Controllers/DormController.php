@@ -12,13 +12,10 @@ use Illuminate\View\View;
 
 class DormController extends Controller
 {
-    protected DormRepo $dorm;
-
-    public function __construct(DormRepo $dorm)
+    public function __construct(protected DormRepo $dorm)
     {
         $this->permissionMap = config('permissions.names.tenant.dorms');
         parent::__construct();
-        $this->dorm = $dorm;
     }
 
     /**

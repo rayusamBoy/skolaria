@@ -10,13 +10,10 @@ use Illuminate\Http\Request;
 
 class MasterDataSyncController extends Controller
 {
-    protected TenantRepo $tenant;
-
-    public function __construct(TenantRepo $tenant)
+    public function __construct(protected TenantRepo $tenant)
     {
         $this->permissionMap = config('permissions.names.central.master_data_syncs');
         parent::__construct();
-        $this->tenant = $tenant;
     }
 
     /**

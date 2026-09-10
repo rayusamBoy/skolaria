@@ -6,7 +6,4 @@ namespace App\Events;
 
 use Stancl\Tenancy\Events\Contracts\TenantEvent;
 
-class TenantIDCardsThemeDirDeleted extends TenantEvent
-{
-    //
-}
+class TenantIDCardsThemeDirDeleted extends TenantEvent {}

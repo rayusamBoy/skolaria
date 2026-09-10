@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Central;
 use App\Helpers\Qs;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TenantRequest;
+use App\Models\Tenant;
 use App\Repositories\SettingRepo;
 use App\Repositories\TenantRepo;
 use App\Repositories\UserRepo;
@@ -14,19 +15,10 @@ use Stancl\Tenancy\Resolvers\DomainTenantResolver;
 
 class TenantController extends Controller
 {
-    protected TenantRepo $tenant;
-
-    protected UserRepo $user;
-
-    protected SettingRepo $setting;
-
-    public function __construct(TenantRepo $tenant, UserRepo $user, SettingRepo $setting)
+    public function __construct(protected TenantRepo $tenant, protected UserRepo $user, protected SettingRepo $setting)
     {
         $this->permissionMap = config('permissions.names.central.tenants');
         parent::__construct();
-        $this->tenant = $tenant;
-        $this->user = $user;
-        $this->setting = $setting;
     }
 
     /**
@@ -40,6 +32,7 @@ class TenantController extends Controller
         $data['active_identification_mode_is_domain'] = config('tenancy.active_identification_mode') === 'domain';
 
         // Check if each tenant is active ie., has data other than the initial ones
+        /** @var Tenant $tenant */
         foreach ($tenants as $tenant) {
             try {
                 tenancy()->run($tenant, function () use ($tenant) {

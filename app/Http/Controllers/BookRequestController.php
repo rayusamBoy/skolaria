@@ -13,16 +13,10 @@ use Illuminate\View\View;
 
 class BookRequestController extends Controller
 {
-    protected BookRepo $book;
-
-    protected UserRepo $user;
-
-    public function __construct(BookRepo $book, UserRepo $user)
+    public function __construct(protected BookRepo $book, protected UserRepo $user)
     {
         $this->permissionMap = config('permissions.names.tenant.book_requests');
         parent::__construct();
-        $this->book = $book;
-        $this->user = $user;
     }
 
     /**
@@ -59,7 +53,7 @@ class BookRequestController extends Controller
     /**
      * Show the form for editing the specified book request.
      */
-    public function edit($book_request): View
+    public function edit(int $book_request): View
     {
         $data['book_request'] = $this->book->findBookRequest($book_request);
         $data['books'] = $this->book->getAllBooks();
@@ -70,7 +64,7 @@ class BookRequestController extends Controller
     /**
      * Update the specified book request.
      */
-    public function update(BookRequestUpdate $request, $book_request): JsonResponse
+    public function update(BookRequestUpdate $request, int $book_request): JsonResponse
     {
         $data = $request->all();
         $book_id = $data['book_id'];
@@ -93,7 +87,7 @@ class BookRequestController extends Controller
     /**
      * Remove the specified book request.
      */
-    public function destroy($book_request): RedirectResponse
+    public function destroy(int $book_request): RedirectResponse
     {
         $book_request = $this->book->findBookRequest($book_request);
         $book_id = $book_request->book_id;

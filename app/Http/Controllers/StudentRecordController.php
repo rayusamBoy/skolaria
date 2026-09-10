@@ -57,7 +57,7 @@ class StudentRecordController extends Controller
     /**
      * Reset a student's password to 'student'.
      */
-    public function reset_password($st_id): RedirectResponse
+    public function reset_password(int $st_id): RedirectResponse
     {
         $this->user->updateUsersByColumn($st_id, ['password' => Hash::make('student')]);
 
@@ -206,7 +206,7 @@ class StudentRecordController extends Controller
     /**
      * List students by class ID.
      */
-    public function list_by_class($class_id): View|RedirectResponse
+    public function list_by_class(int $class_id): View|RedirectResponse
     {
         $validator = Validator::make(['class_id' => $class_id], [
             'class_id' => 'required|exists:my_classes,id',
@@ -236,7 +236,7 @@ class StudentRecordController extends Controller
     /**
      * Mark a student as not graduated and remove promotion record.
      */
-    public function mark_not_graduated($sr_id, $prom_id)
+    public function mark_not_graduated(int $sr_id, int $prom_id)
     {
         $d['is_graduated'] = false;
         $d['graduated_session'] = null;
@@ -252,7 +252,7 @@ class StudentRecordController extends Controller
      * Show own profile.
      */
     #[SkipPermission]
-    public function show_profile($student)
+    public function show_profile(int $student)
     {
         return $this->show($student);
     }
@@ -260,7 +260,7 @@ class StudentRecordController extends Controller
     /**
      * Show student record details.
      */
-    public function show($student): View|RedirectResponse
+    public function show(int $student): View|RedirectResponse
     {
         if (! $student) {
             return Usr::goWithDanger();
@@ -278,7 +278,7 @@ class StudentRecordController extends Controller
     /**
      * Show form to edit a student record.
      */
-    public function edit($student): View|RedirectResponse
+    public function edit(int $student): View|RedirectResponse
     {
         if (! $student) {
             return Usr::goWithDanger();
@@ -297,7 +297,7 @@ class StudentRecordController extends Controller
     /**
      * Update a student record.
      */
-    public function update(StudentRecordUpdate $req, $student): JsonResponse
+    public function update(StudentRecordUpdate $req, int $student): JsonResponse
     {
         if (! $student) {
             return Usr::json(__('msg.srnf'), false);
@@ -378,7 +378,7 @@ class StudentRecordController extends Controller
     /**
      * Generate student username based on app code, class code, admission year, and admission number.
      */
-    protected function generateStudentUsername(string $class_code, string $date_admitted, $admission_number): string
+    protected function generateStudentUsername(string $class_code, string $date_admitted, string $admission_number): string
     {
         $year = date('Y', strtotime($date_admitted));
 
@@ -417,7 +417,7 @@ class StudentRecordController extends Controller
     /**
      * Find a student record by ID (active or graduated).
      */
-    protected function findStudentRecord($id)
+    protected function findStudentRecord(int $id)
     {
         return $this->student->getActiveStudentsQueryWithRelations(['id' => $id])->first()
             ?? $this->student->getGraduatedStudentsQuery(['id' => $id])->first();
@@ -426,7 +426,7 @@ class StudentRecordController extends Controller
     /**
      * Check if current user is restricted from viewing a student profile.
      */
-    protected function isRestrictedStudentView($student): bool
+    protected function isRestrictedStudentView(int $student): bool
     {
         $user = auth()->user();
 

@@ -9,15 +9,7 @@ use NotificationChannels\Fcm\FcmMessage;
 
 class TenantEventCompleted extends Notification
 {
-    /**
-     * Create a new notification instance.
-     */
-    protected $data;
-
-    public function __construct($data)
-    {
-        $this->data = $data;
-    }
+    public function __construct(protected array $data) {}
 
     /**
      * Get the notification's delivery channels.

@@ -15,32 +15,17 @@ use Illuminate\View\View;
 
 class SoftDeleteController extends Controller
 {
-    protected MyClassRepo $my_class;
-
-    protected PaymentRepo $pay;
-
-    protected UserRepo $user;
-
-    protected ExamRepo $exam;
-
-    protected StudentRepo $student;
-
     protected string $year;   // not actively used in this controller
 
     public function __construct(
-        MyClassRepo $my_class,
-        PaymentRepo $pay,
-        UserRepo $user,
-        ExamRepo $exam,
-        StudentRepo $student
+        protected MyClassRepo $my_class,
+        protected PaymentRepo $pay,
+        protected UserRepo $user,
+        protected ExamRepo $exam,
+        protected StudentRepo $student
     ) {
         $this->permissionMap = config('permissions.names.tenant.soft_deletes');
         parent::__construct();
-        $this->my_class = $my_class;
-        $this->pay = $pay;
-        $this->user = $user;
-        $this->exam = $exam;
-        $this->student = $student;
         $this->year = Usr::getCurrentSession();
     }
 
@@ -61,7 +46,7 @@ class SoftDeleteController extends Controller
     /**
      * Permanently delete all soft‑deleted records of a given model.
      */
-    public function empty_soft_deleted_model($model_name): RedirectResponse
+    public function empty_soft_deleted_model(string $model_name): RedirectResponse
     {
         $allowed_models = Usr::getCanSoftDeleteModelNames();
         $model_name = strtolower($model_name);

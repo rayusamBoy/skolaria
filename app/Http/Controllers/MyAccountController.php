@@ -17,12 +17,7 @@ use Illuminate\View\View;
 
 class MyAccountController extends Controller
 {
-    protected UserRepo $user;
-
-    public function __construct(UserRepo $user)
-    {
-        $this->user = $user;
-    }
+    public function __construct(protected UserRepo $user) {}
 
     /**
      * Show the profile edit form.

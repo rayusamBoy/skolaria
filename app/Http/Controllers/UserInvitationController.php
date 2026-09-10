@@ -17,34 +17,16 @@ use Illuminate\Support\Str;
 
 class UserInvitationController extends Controller
 {
-    protected UserRepo $user;
-
-    protected StudentRepo $student;
-
-    protected LocationRepo $loc;
-
-    protected MyClassRepo $my_class;
-
-    protected PermissionRepo $permission;
-
-    protected UserService $userService;
-
     public function __construct(
-        UserRepo $user,
-        StudentRepo $student,
-        LocationRepo $loc,
-        MyClassRepo $my_class,
-        PermissionRepo $permission,
-        UserService $userService
+        protected UserRepo $user,
+        protected StudentRepo $student,
+        protected LocationRepo $loc,
+        protected MyClassRepo $my_class,
+        protected PermissionRepo $permission,
+        protected UserService $userService
     ) {
         $this->permissionMap = config('permissions.names.tenant.users');
         parent::__construct();
-        $this->user = $user;
-        $this->student = $student;
-        $this->loc = $loc;
-        $this->my_class = $my_class;
-        $this->permission = $permission;
-        $this->userService = $userService;
     }
 
     public function index()
@@ -93,7 +75,7 @@ class UserInvitationController extends Controller
     /**
      * Show the public registration form for a token.
      */
-    public function show_registration_form($token)
+    public function show_registration_form(string $token)
     {
         /** @var UserRegistrationInvite $invitation */
         $data['invitation'] = $invitation = $this->user->whereInvitationBuilder(['token' => $token, 'status' => 'pending'])->firstOrFail();
@@ -104,9 +86,7 @@ class UserInvitationController extends Controller
 
         $data['nationals'] = $this->loc->getAllNationalities();
         $data['blood_groups'] = $this->user->getBloodGroups();
-        $data['roles'] = $this->permission->getAllRoles(app(UserController::class)->getExcludedRoles())->filter(function ($role) use ($invitation) {
-            return \in_array($role->name, $invitation->roles);
-        })->values();
+        $data['roles'] = $this->permission->getAllRoles(app(UserController::class)->getExcludedRoles())->filter(fn ($role) => \in_array($role->name, $invitation->roles))->values();
 
         $data['permissions'] = $this->permission->getAllPermissions();
         $data['prefilled'] = $invitation->prefilled_data ?? [];
@@ -117,7 +97,7 @@ class UserInvitationController extends Controller
     /**
      * Submit the registration request.
      */
-    public function submit_registration(Request $request, $token)
+    public function submit_registration(Request $request, string $token)
     {
         $validator = Validator::make($request->all(), (new UserRequest)->rules());
 
@@ -150,7 +130,7 @@ class UserInvitationController extends Controller
     /**
      * Admin – approve a registration request and create the actual user.
      */
-    public function approve($id)
+    public function approve(int $id)
     {
         $invitation = $this->user->findInvitationOrFail($id);
 
@@ -178,7 +158,7 @@ class UserInvitationController extends Controller
     /**
      * Admin – reject a registration request.
      */
-    public function reject($id)
+    public function reject(int $id)
     {
         $invitation = $this->user->findInvitationOrFail($id);
         $invitation->update(['status' => 'rejected']);

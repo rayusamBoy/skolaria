@@ -11,6 +11,7 @@ use App\Repositories\LocationRepo;
 use App\Repositories\MyClassRepo;
 use App\Repositories\PermissionRepo;
 use App\Repositories\UserRepo;
+use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
@@ -19,26 +20,14 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    protected UserRepo $user;
-
-    protected LocationRepo $loc;
-
-    protected MyClassRepo $my_class;
-
-    protected PermissionRepo $permission;
-
     public function __construct(
-        UserRepo $user,
-        LocationRepo $loc,
-        MyClassRepo $my_class,
-        PermissionRepo $permission
+        protected UserRepo $user,
+        protected LocationRepo $loc,
+        protected MyClassRepo $my_class,
+        protected PermissionRepo $permission
     ) {
         $this->permissionMap = config('permissions.names.central.central_users');
         parent::__construct();
-        $this->user = $user;
-        $this->loc = $loc;
-        $this->my_class = $my_class;
-        $this->permission = $permission;
     }
 
     /**
@@ -57,7 +46,7 @@ class UserController extends Controller
     /**
      * Show form to edit a central user.
      */
-    public function edit($central_user): View
+    public function edit(int $central_user): View
     {
         $except_roles = $this->getExcludedRolesForEditing();
 
@@ -75,7 +64,7 @@ class UserController extends Controller
     /**
      * Reset a user's password to default 'user'.
      */
-    public function reset_password($user_id): RedirectResponse
+    public function reset_password(int $user_id): RedirectResponse
     {
         if ($this->cannotModifyHeadUser($user_id)) {
             return back()->with('flash_danger', __('msg.denied'));
@@ -120,7 +109,7 @@ class UserController extends Controller
     /**
      * Update an existing central user.
      */
-    public function update(UserRequest $req, $user_id): JsonResponse
+    public function update(UserRequest $req, int $user_id): JsonResponse
     {
         if ($this->cannotModifyHeadUser($user_id)) {
             return Usr::json(__('msg.denied'), false);
@@ -147,7 +136,7 @@ class UserController extends Controller
      * Show own profile.
      */
     #[SkipPermission]
-    public function show_profile($user_id)
+    public function show_profile(int $user_id)
     {
         return $this->show($user_id);
     }
@@ -155,7 +144,7 @@ class UserController extends Controller
     /**
      * Show details of a specific user.
      */
-    public function show($user_id): View|RedirectResponse
+    public function show(int $user_id): View|RedirectResponse
     {
         if (! $user_id) {
             return back();
@@ -174,7 +163,7 @@ class UserController extends Controller
     /**
      * Permanently delete a user.
      */
-    public function destroy($user_id): RedirectResponse
+    public function destroy(int $user_id): RedirectResponse
     {
         $user = $this->user->findUser($user_id);
         $this->user->forceDeleteUser($user->id);
@@ -216,7 +205,7 @@ class UserController extends Controller
     /**
      * Check if current user is not allowed to modify a head user.
      */
-    protected function cannotModifyHeadUser($user_id): bool
+    protected function cannotModifyHeadUser(int $user_id): bool
     {
         return Usr::userIsHead($user_id) && ! Usr::userIsHead();
     }
@@ -224,7 +213,7 @@ class UserController extends Controller
     /**
      * Check if current user is restricted from viewing a profile.
      */
-    protected function isRestrictedView($user_id): bool
+    protected function isRestrictedView(int $user_id): bool
     {
         $user = auth()->user();
 
@@ -298,7 +287,7 @@ class UserController extends Controller
     /**
      * Sync user permissions if provided in request.
      */
-    protected function syncPermissionsIfProvided($user, UserRequest $req): void
+    protected function syncPermissionsIfProvided(User $user, UserRequest $req): void
     {
         if ($req->filled('permissions')) {
             $user->syncPermissions($req->permissions);

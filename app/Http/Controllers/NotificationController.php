@@ -6,6 +6,7 @@ use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Usr;
 use App\Notifications\NotificationMarkedAsRead;
 use App\Repositories\UserRepo;
+use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,12 +15,7 @@ use NotificationChannels\Fcm\FcmChannel;
 
 class NotificationController extends Controller
 {
-    protected UserRepo $user;
-
-    public function __construct(UserRepo $user)
-    {
-        $this->user = $user;
-    }
+    public function __construct(protected UserRepo $user) {}
 
     /**
      * Display notification preferences and channels.
@@ -122,7 +118,7 @@ class NotificationController extends Controller
      * Delete specific device tokens from the authenticated user.
      */
     #[SkipPermission] // Skip permission generation for this method
-    public function deleteDeviceToken(array $tokens_to_remove, $user): int
+    public function deleteDeviceToken(array $tokens_to_remove, User $user): int
     {
         $current_tokens = $user->firebase_device_tokens ?? [];
         $new_tokens = array_values(array_diff($current_tokens, $tokens_to_remove));

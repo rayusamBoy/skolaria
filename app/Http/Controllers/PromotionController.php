@@ -14,18 +14,12 @@ use Illuminate\View\View;
 
 class PromotionController extends Controller
 {
-    protected MyClassRepo $my_class;
+    protected string $year;
 
-    protected StudentRepo $student;
-
-    protected $year;
-
-    public function __construct(MyClassRepo $my_class, StudentRepo $student)
+    public function __construct(protected MyClassRepo $my_class, protected StudentRepo $student)
     {
         $this->permissionMap = config('permissions.names.tenant.promotions');
         parent::__construct();
-        $this->my_class = $my_class;
-        $this->student = $student;
         $this->year = Qs::getCurrentSession();
     }
 
@@ -95,7 +89,7 @@ class PromotionController extends Controller
     /**
      * Promote, retain or graduate selected students.
      */
-    public function promote(Request $req, $status, $fc, $fs, $tc, $ts): RedirectResponse
+    public function promote(Request $req, int $status, int $fc, int $fs, int $tc, int $ts): RedirectResponse
     {
         $old_year = Qs::getSetting('current_session');
         $old_yr = explode('-', $old_year);
@@ -175,7 +169,7 @@ class PromotionController extends Controller
     /**
      * Update remarks for a promotion record.
      */
-    public function remarks(Request $req, $p_id): JsonResponse
+    public function remarks(Request $req, int $p_id): JsonResponse
     {
         Validator::make($req->toArray(), [
             'remarks' => 'sometimes|nullable|string|max:500',
@@ -201,7 +195,7 @@ class PromotionController extends Controller
     /**
      * Reset a single promotion.
      */
-    public function reset($promotion_id): RedirectResponse
+    public function reset(int $promotion_id): RedirectResponse
     {
         $this->reset_single($promotion_id);
 

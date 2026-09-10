@@ -20,12 +20,7 @@ use PragmaRX\Recovery\Recovery;
 
 class AccountSecurityController extends Controller
 {
-    protected UserRepo $user;
-
-    public function __construct(UserRepo $user)
-    {
-        $this->user = $user;
-    }
+    public function __construct(protected UserRepo $user) {}
 
     /**
      * Display account security settings page.
@@ -209,7 +204,7 @@ class AccountSecurityController extends Controller
     /**
      * Format session data for display.
      */
-    protected function formatSessionData($session): object
+    protected function formatSessionData(\stdClass $session): object
     {
         $agent = $this->createAgent($session);
 
@@ -230,7 +225,7 @@ class AccountSecurityController extends Controller
     /**
      * Create an Agent instance from session user agent.
      */
-    protected function createAgent($session): Agent
+    protected function createAgent(\stdClass $session): Agent
     {
         return tap(new Agent, fn ($agent) => $agent->setUserAgent($session->user_agent));
     }
@@ -272,7 +267,7 @@ class AccountSecurityController extends Controller
     /**
      * Check if current user is allowed to disable 2FA.
      */
-    protected function canNullSecretCode($user_id): bool
+    protected function canNullSecretCode(int $user_id): bool
     {
         return $user_id !== auth()->id() && ! Qs::userIsHead();
     }

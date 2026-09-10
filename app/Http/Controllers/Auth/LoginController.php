@@ -27,17 +27,12 @@ class LoginController extends Controller implements HasMiddleware
 
     use AuthenticatesUsers;
 
-    protected $cookieService;
-
     /**
      * Create a new controller instance.
      *
      * @return void$field
      */
-    public function __construct(CookieService $cookieService)
-    {
-        $this->cookieService = $cookieService;
-    }
+    public function __construct(protected CookieService $cookieService) {}
 
     /**
      * Show the application's login form.

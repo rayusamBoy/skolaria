@@ -15,16 +15,10 @@ use Illuminate\View\View;
 
 class StudentIDCardController extends Controller
 {
-    protected MyClassRepo $my_class;
-
-    protected StudentRepo $student;
-
-    public function __construct(MyClassRepo $my_class, StudentRepo $student)
+    public function __construct(protected MyClassRepo $my_class, protected StudentRepo $student)
     {
         $this->permissionMap = config('permissions.names.tenant.student_id_cards');
         parent::__construct();
-        $this->my_class = $my_class;
-        $this->student = $student;
     }
 
     /**
@@ -76,14 +70,14 @@ class StudentIDCardController extends Controller
      * Print ID cards for an entire class.
      */
     public function print_class(
-        $class_id,
-        $issued,
-        $expire,
-        $theme,
-        $phone,
-        $class_from,
-        $class_to,
-        $motto,
+        int $class_id,
+        string $issued,
+        string $expire,
+        string $theme,
+        string $phone,
+        int $class_from,
+        int $class_to,
+        string $motto,
         $brightness = 1,
         $website_link = null
     ): View {

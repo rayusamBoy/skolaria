@@ -17,15 +17,7 @@ class DeleteIDCardsThemeDir implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /**
-     * Create a new job instance.
-     */
-    protected $tenant;
-
-    public function __construct(TenantWithDatabase $tenant)
-    {
-        $this->tenant = $tenant;
-    }
+    public function __construct(protected TenantWithDatabase $tenant) {}
 
     /**
      * Execute the job.

@@ -17,21 +17,12 @@ use Illuminate\View\View;
 
 class TimeTableController extends Controller
 {
-    protected TimeTableRepo $tt;
-
-    protected MyClassRepo $my_class;
-
-    protected ExamRepo $exam;
-
     protected string $year;
 
-    public function __construct(TimeTableRepo $tt, MyClassRepo $my_class, ExamRepo $exam)
+    public function __construct(protected TimeTableRepo $tt, protected MyClassRepo $my_class, protected ExamRepo $exam)
     {
         $this->permissionMap = config('permissions.names.tenant.time_tables');
         parent::__construct();
-        $this->tt = $tt;
-        $this->my_class = $my_class;
-        $this->exam = $exam;
         $this->year = Qs::getCurrentSession();
     }
 
@@ -49,7 +40,7 @@ class TimeTableController extends Controller
     /**
      * Show the timetable detail for a record.
      */
-    public function manage_record($ttr_id): View
+    public function manage_record(int $ttr_id): View
     {
         $ttr = $this->tt->findTimetableRecord($ttr_id);
 
@@ -89,7 +80,7 @@ class TimeTableController extends Controller
     /**
      * Update the specified timetable entry.
      */
-    public function update(TTRequest $req, $tt_id): RedirectResponse
+    public function update(TTRequest $req, int $tt_id): RedirectResponse
     {
         $data = $req->all();
         $tms = $this->tt->findTimeSlot($req->ts_id);
@@ -105,7 +96,7 @@ class TimeTableController extends Controller
     /**
      * Remove the specified timetable entry.
      */
-    public function delete($tt_id): RedirectResponse
+    public function delete(int $tt_id): RedirectResponse
     {
         $this->tt->delete($tt_id);
 
@@ -140,7 +131,7 @@ class TimeTableController extends Controller
     /**
      * Use time slots from another timetable record.
      */
-    public function use_time_slot(Request $req, $ttr_id): RedirectResponse
+    public function use_time_slot(Request $req, int $ttr_id): RedirectResponse
     {
         Validator::make($req->toArray(), [
             'ttr_id' => 'required',
@@ -160,7 +151,7 @@ class TimeTableController extends Controller
     /**
      * Show the form for editing a time slot.
      */
-    public function edit_time_slot($ts_id): View
+    public function edit_time_slot(int $ts_id): View
     {
         $data['tms'] = $this->tt->findTimeSlot($ts_id);
 
@@ -170,7 +161,7 @@ class TimeTableController extends Controller
     /**
      * Update the specified time slot.
      */
-    public function update_time_slot(TSRequest $req, $ts_id): RedirectResponse
+    public function update_time_slot(TSRequest $req, int $ts_id): RedirectResponse
     {
         $data = $req->all();
         $tf = "{$req->hour_from}:{$req->min_from} {$req->meridian_from}";
@@ -196,7 +187,7 @@ class TimeTableController extends Controller
     /**
      * Remove the specified time slot.
      */
-    public function delete_time_slot($ts_id): RedirectResponse
+    public function delete_time_slot(int $ts_id): RedirectResponse
     {
         $this->tt->deleteTimeSlot($ts_id);
 
@@ -208,7 +199,7 @@ class TimeTableController extends Controller
     /**
      * Show the form for editing a timetable record.
      */
-    public function edit_record($ttr_id): View
+    public function edit_record(int $ttr_id): View
     {
         $ttr = $this->tt->findTimetableRecord($ttr_id);
         $data['ttr'] = $ttr;
@@ -221,7 +212,7 @@ class TimeTableController extends Controller
     /**
      * Display the timetable in a readable layout.
      */
-    public function show_record($ttr_id): View
+    public function show_record(int $ttr_id): View
     {
         $ttr = $this->tt->findTimetableRecord($ttr_id);
         $tms = $this->tt->getTimeSlotsByRecord($ttr_id);
@@ -263,7 +254,7 @@ class TimeTableController extends Controller
     /**
      * Print the timetable.
      */
-    public function print_record($ttr_id): View
+    public function print_record(int $ttr_id): View
     {
         $ttr = $this->tt->findTimetableRecord($ttr_id);
         $tms = $this->tt->getTimeSlotsByRecord($ttr_id);
@@ -324,7 +315,7 @@ class TimeTableController extends Controller
     /**
      * Update the specified timetable record.
      */
-    public function update_record(TTRecordRequest $req, $id): JsonResponse
+    public function update_record(TTRecordRequest $req, int $id): JsonResponse
     {
         $data = $req->only(['name', 'my_class_id']);
         $section_id = $req->section_id;
@@ -338,7 +329,7 @@ class TimeTableController extends Controller
     /**
      * Remove the specified timetable record.
      */
-    public function delete_record($ttr_id): RedirectResponse
+    public function delete_record(int $ttr_id): RedirectResponse
     {
         $this->tt->deleteTimetableRecord($ttr_id);
 

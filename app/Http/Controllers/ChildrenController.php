@@ -7,13 +7,10 @@ use Illuminate\View\View;
 
 class ChildrenController extends Controller
 {
-    protected StudentRepo $student;
-
-    public function __construct(StudentRepo $student)
+    public function __construct(protected StudentRepo $student)
     {
         $this->permissionMap = config('permissions.names.tenant.childrens');
         parent::__construct();
-        $this->student = $student;
     }
 
     /**

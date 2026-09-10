@@ -45,7 +45,7 @@ class StudentsBatchAddExport implements FromView, ShouldAutoSize, WithColumnWidt
 
     protected const string SHEET_PASSWORD = 'AllahKnowsBest';
 
-    public function __construct($data)
+    public function __construct(array $data)
     {
         $this->data = $data;
         $this->location = new LocationRepo;

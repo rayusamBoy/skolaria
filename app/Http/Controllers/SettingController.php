@@ -13,16 +13,10 @@ use Illuminate\View\View;
 
 class SettingController extends Controller
 {
-    protected SettingRepo $setting;
-
-    protected MyClassRepo $my_class;
-
-    public function __construct(SettingRepo $setting, MyClassRepo $my_class)
+    public function __construct(protected SettingRepo $setting, protected MyClassRepo $my_class)
     {
         $this->permissionMap = config('permissions.names.tenant.settings');
         parent::__construct();
-        $this->setting = $setting;
-        $this->my_class = $my_class;
     }
 
     /**

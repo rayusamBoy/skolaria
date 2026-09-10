@@ -10,19 +10,14 @@ use ColorThief\ColorThief;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class SettingController extends Controller
 {
-    protected SettingRepo $setting;
-
-    protected MyClassRepo $my_class;
-
-    public function __construct(SettingRepo $setting, MyClassRepo $my_class)
+    public function __construct(protected SettingRepo $setting, protected MyClassRepo $my_class)
     {
         $this->permissionMap = config('permissions.names.central.settings_non_tenancy');
         parent::__construct();
-        $this->setting = $setting;
-        $this->my_class = $my_class;
     }
 
     /**
@@ -102,7 +97,7 @@ class SettingController extends Controller
     /**
      * Update text and background color settings based on user choice.
      */
-    protected function updateColorSettings(Request $req, $file): void
+    protected function updateColorSettings(Request $req, UploadedFile $file): void
     {
         $color_mode = $req->input('texts_and_bg_colors');
 

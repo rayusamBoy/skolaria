@@ -24,49 +24,18 @@ use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    protected UserRepo $user;
-
-    protected MyClassRepo $class;
-
-    protected MyClassRepo $section;
-
-    protected BookRepo $book;
-
-    protected ExamRepo $exam;
-
-    protected PaymentRepo $payment;
-
-    protected NoticeRepo $notice;
-
-    protected StudentRepo $student;
-
-    protected MarkRepo $mark;
-
-    protected AssessmentRepo $assessment;
-
     public function __construct(
-        UserRepo $user,
-        MyClassRepo $class,
-        MyClassRepo $section,
-        BookRepo $book,
-        ExamRepo $exam,
-        PaymentRepo $payment,
-        NoticeRepo $notice,
-        StudentRepo $student,
-        MarkRepo $mark,
-        AssessmentRepo $assessment
-    ) {
-        $this->user = $user;
-        $this->class = $class;
-        $this->section = $section;
-        $this->book = $book;
-        $this->exam = $exam;
-        $this->payment = $payment;
-        $this->notice = $notice;
-        $this->student = $student;
-        $this->mark = $mark;
-        $this->assessment = $assessment;
-    }
+        protected UserRepo $user,
+        protected MyClassRepo $class,
+        protected MyClassRepo $section,
+        protected BookRepo $book,
+        protected ExamRepo $exam,
+        protected PaymentRepo $payment,
+        protected NoticeRepo $notice,
+        protected StudentRepo $student,
+        protected MarkRepo $mark,
+        protected AssessmentRepo $assessment
+    ) {}
 
     /**
      * Show privacy policy page.

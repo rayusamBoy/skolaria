@@ -13,16 +13,10 @@ use Illuminate\View\View;
 
 class PinController extends Controller
 {
-    protected PinRepo $pin;
-
-    protected UserRepo $user;
-
-    public function __construct(PinRepo $pin, UserRepo $user)
+    public function __construct(protected PinRepo $pin, protected UserRepo $user)
     {
         $this->permissionMap = config('permissions.names.tenant.pins');
         parent::__construct();
-        $this->pin = $pin;
-        $this->user = $user;
     }
 
     /**
@@ -52,7 +46,7 @@ class PinController extends Controller
     /**
      * Show the PIN entry form for a student.
      */
-    public function enter_pin($student_id): View|RedirectResponse
+    public function enter_pin(int $student_id): View|RedirectResponse
     {
         if (
             auth()->user()->hasAnyRole([
@@ -75,7 +69,7 @@ class PinController extends Controller
     /**
      * Verify a PIN entered by a user.
      */
-    public function verify(PinVerify $req, $student_id): RedirectResponse
+    public function verify(PinVerify $req, int $student_id): RedirectResponse
     {
         $user = auth()->user();
         $pin = $this->pin->getValidPinByCode($req->pin_code)->first()
@@ -130,7 +124,7 @@ class PinController extends Controller
     /**
      * Check if the PIN has already been verified for the student.
      */
-    protected function checkPinVerified($st_id): bool
+    protected function checkPinVerified(int $st_id): bool
     {
         return session()->has('pin_verified') && session()->get('pin_verified') == $st_id;
     }

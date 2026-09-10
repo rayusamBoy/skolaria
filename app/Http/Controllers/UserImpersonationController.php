@@ -14,17 +14,10 @@ use Stancl\Tenancy\Features\UserImpersonation;
 
 class UserImpersonationController extends Controller
 {
-    protected UserRepo $user;
-
-    protected TenantRepo $tenant;
-
     public function __construct(
-        UserRepo $user,
-        TenantRepo $tenant
-    ) {
-        $this->user = $user;
-        $this->tenant = $tenant;
-    }
+        protected UserRepo $user,
+        protected TenantRepo $tenant
+    ) {}
 
     /**
      * Show all tenants linked to the current central user.

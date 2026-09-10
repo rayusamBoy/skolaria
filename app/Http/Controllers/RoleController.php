@@ -11,13 +11,10 @@ use Illuminate\View\View;
 
 class RoleController extends Controller
 {
-    protected PermissionRepo $permission;
-
-    public function __construct(PermissionRepo $permission)
+    public function __construct(protected PermissionRepo $permission)
     {
         $this->permissionMap = config('permissions.names.tenant.roles');
         parent::__construct();
-        $this->permission = $permission;
     }
 
     /**
@@ -59,7 +56,7 @@ class RoleController extends Controller
     /**
      * Show the form for editing the specified role.
      */
-    public function edit($id): View|RedirectResponse
+    public function edit(int $id): View|RedirectResponse
     {
         $role = $this->permission->getRoleByConditions(['id' => $id]);
 
@@ -79,7 +76,7 @@ class RoleController extends Controller
     /**
      * Update the specified role.
      */
-    public function update(Request $request, $id): RedirectResponse
+    public function update(Request $request, int $id): RedirectResponse
     {
         $role = $this->permission->getRoleByConditions(['id' => $id]);
 
@@ -106,7 +103,7 @@ class RoleController extends Controller
     /**
      * Remove the specified role.
      */
-    public function destroy($id): RedirectResponse
+    public function destroy(int $id): RedirectResponse
     {
         $role = $this->permission->getRoleByConditions(['id' => $id], ['users']);
 

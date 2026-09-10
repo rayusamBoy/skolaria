@@ -21,34 +21,16 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    protected UserRepo $user;
-
-    protected StudentRepo $student;
-
-    protected LocationRepo $loc;
-
-    protected MyClassRepo $my_class;
-
-    protected PermissionRepo $permission;
-
-    protected UserService $userService;
-
     public function __construct(
-        UserRepo $user,
-        StudentRepo $student,
-        LocationRepo $loc,
-        MyClassRepo $my_class,
-        PermissionRepo $permission,
-        UserService $userService
+        protected UserRepo $user,
+        protected StudentRepo $student,
+        protected LocationRepo $loc,
+        protected MyClassRepo $my_class,
+        protected PermissionRepo $permission,
+        protected UserService $userService
     ) {
         $this->permissionMap = config('permissions.names.tenant.users');
         parent::__construct();
-        $this->user = $user;
-        $this->student = $student;
-        $this->loc = $loc;
-        $this->my_class = $my_class;
-        $this->permission = $permission;
-        $this->userService = $userService;
     }
 
     /**
@@ -67,7 +49,7 @@ class UserController extends Controller
     /**
      * Show form to edit a user.
      */
-    public function edit($user): View
+    public function edit(int $user): View
     {
         $roles = $this->permission->getAllRoles($this->getExcludedRoles());
 
@@ -85,7 +67,7 @@ class UserController extends Controller
     /**
      * Reset a user's password to 'user'.
      */
-    public function reset_password($user): RedirectResponse
+    public function reset_password(int $user): RedirectResponse
     {
         if ($this->cannotModifyHeadUser($user)) {
             return back()->with('flash_danger', __('msg.denied'));
@@ -122,7 +104,7 @@ class UserController extends Controller
     /**
      * Update an existing user.
      */
-    public function update(UserRequest $req, $user_id): JsonResponse
+    public function update(UserRequest $req, int $user_id): JsonResponse
     {
         if ($this->cannotModifyHeadUser($user_id)) {
             return Usr::json(__('msg.denied'), false);
@@ -144,7 +126,7 @@ class UserController extends Controller
      * Show own profile.
      */
     #[SkipPermission]
-    public function show_profile($user_id)
+    public function show_profile(int $user_id)
     {
         return $this->show($user_id);
     }
@@ -152,7 +134,7 @@ class UserController extends Controller
     /**
      * Show user details.
      */
-    public function show($user_id): View|RedirectResponse
+    public function show(int $user_id): View|RedirectResponse
     {
         if (! $user_id) {
             return back();
@@ -185,7 +167,7 @@ class UserController extends Controller
     /**
      * Delete a user.
      */
-    public function destroy($user): RedirectResponse
+    public function destroy(int $user): RedirectResponse
     {
         if (Usr::userIsHead($user)) {
             return back()->with('pop_error', __('msg.denied'));
@@ -248,7 +230,7 @@ class UserController extends Controller
     /**
      * Check if current user is allowed to modify a head user.
      */
-    protected function cannotModifyHeadUser($user_id): bool
+    protected function cannotModifyHeadUser(int $user_id): bool
     {
         return Usr::userIsHead($user_id) && ! Usr::userIsHead();
     }
@@ -256,7 +238,7 @@ class UserController extends Controller
     /**
      * Check if current user is restricted from viewing a profile.
      */
-    protected function isRestrictedView($user_id): bool
+    protected function isRestrictedView(int $user_id): bool
     {
         $user = auth()->user();
 
@@ -407,7 +389,7 @@ class UserController extends Controller
     /**
      * Check if a teacher teaches any subject.
      */
-    protected function userTeachesSubject($user_id): bool
+    protected function userTeachesSubject(int $user_id): bool
     {
         return $this->my_class->findSubjectRecordsByTeacher($user_id)->isNotEmpty();
     }

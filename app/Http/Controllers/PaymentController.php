@@ -19,22 +19,13 @@ use Illuminate\View\View;
 
 class PaymentController extends Controller
 {
-    protected MyClassRepo $my_class;
-
-    protected PaymentRepo $pay;
-
-    protected StudentRepo $student;
-
     protected string $year;
 
-    public function __construct(MyClassRepo $my_class, PaymentRepo $pay, StudentRepo $student)
+    public function __construct(protected MyClassRepo $my_class, protected PaymentRepo $pay, protected StudentRepo $student)
     {
         $this->permissionMap = config('permissions.names.tenant.payments');
         parent::__construct();
-        $this->my_class = $my_class;
-        $this->pay = $pay;
         $this->year = Qs::getCurrentSession();
-        $this->student = $student;
     }
 
     /**
@@ -86,7 +77,7 @@ class PaymentController extends Controller
     /**
      * Show invoice for a student, optionally filtered by year.
      */
-    public function invoice($st_id, $year = null): View|RedirectResponse
+    public function invoice(int $st_id, $year = null): View|RedirectResponse
     {
         if (! $st_id) {
             return Qs::goWithDanger();
@@ -108,7 +99,7 @@ class PaymentController extends Controller
     /**
      * Show payment status for a student (current year enforced).
      */
-    public function status($st_id, $year = null): View|RedirectResponse
+    public function status(int $st_id, $year = null): View|RedirectResponse
     {
         if ($year && $year != $this->year) {
             return back()->with('flash_danger', __('msg.year_invalid'));
@@ -133,7 +124,7 @@ class PaymentController extends Controller
     /**
      * Display receipts for a payment record, optionally mark notification read.
      */
-    public function receipts($pr_id, $notification_id = null): View|RedirectResponse
+    public function receipts(int $pr_id, $notification_id = null): View|RedirectResponse
     {
         if (! $pr_id) {
             return Qs::goWithDanger();
@@ -161,7 +152,7 @@ class PaymentController extends Controller
     /**
      * Process a payment for an outstanding record.
      */
-    public function pay_now(Request $req, $pr_id): JsonResponse
+    public function pay_now(Request $req, int $pr_id): JsonResponse
     {
         Validator::make($req->toArray(), [
             'amount_paid' => 'required|numeric',
@@ -201,7 +192,7 @@ class PaymentController extends Controller
     /**
      * Show student payment management for a class.
      */
-    public function manage($class_id = null): View|RedirectResponse
+    public function manage(?int $class_id = null): View|RedirectResponse
     {
         $data['selected'] = false;
 
