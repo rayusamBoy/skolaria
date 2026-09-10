@@ -27,14 +27,6 @@ class AuthServiceProvider extends ServiceProvider
     {
         if (config('tenancy.active_identification_mode') === 'request_data') {
             Gate::before(function ($user, $ability) {
-                if ($ability === 'deleteLogFolder' || $ability === 'deleteLogFile') {
-                    return false;
-                }
-
-                if ($user?->hasAnyRole(Usr::getTenancyAwareRootRoles())) {
-                    return true;
-                }
-
                 $tenant = tenancy()->tenant;
                 if (! $tenant) {
                     return null; // central side – no lock enforcement
@@ -67,6 +59,16 @@ class AuthServiceProvider extends ServiceProvider
                 return null; // let normal Spatie check proceed
             });
         }
+
+        Gate::before(function ($user, $ability) {
+            if ($ability === 'deleteLogFolder' || $ability === 'deleteLogFile') {
+                return false;
+            }
+
+            if ($user?->hasAnyRole(Usr::getTenancyAwareRootRoles())) {
+                return true;
+            }
+        });
 
         Gate::define('viewLogViewer', fn (?User $user) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()));
         Gate::define('downloadLogFile', fn (?User $user, LogFile $file) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()));
