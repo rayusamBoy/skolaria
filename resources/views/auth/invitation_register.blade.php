@@ -27,7 +27,7 @@
                                 method="post"
                                 enctype="multipart/form-data"
                                 class="wizard-form steps-validation"
-                                action="{{ route('register.submit', $invitation->token) }}"
+                                action="{{ route('users.registrations.submit', $invitation->token) }}"
                                 data-fouc
                             >
                                 @csrf
