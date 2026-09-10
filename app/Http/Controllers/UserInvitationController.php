@@ -142,7 +142,7 @@ class UserInvitationController extends Controller
         $roles = $invitation->roles;
 
         try {
-            $user = $this->userService->storeUser($data, $roles);
+            $this->userService->storeUser($data, $roles);
         } catch (\InvalidArgumentException $e) {
             return back()->with('flash_error', $e->getMessage());
         }
