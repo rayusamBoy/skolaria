@@ -31,6 +31,10 @@ class AuthServiceProvider extends ServiceProvider
                     return false;
                 }
 
+                if ($user?->hasAnyRole(Usr::getTenancyAwareRootRoles())) {
+                    return true;
+                }
+
                 $tenant = tenancy()->tenant;
                 if (! $tenant) {
                     return null; // central side – no lock enforcement
@@ -67,7 +71,5 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('viewLogViewer', fn (?User $user) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()));
         Gate::define('downloadLogFile', fn (?User $user, LogFile $file) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()));
         Gate::define('downloadLogFolder', fn (?User $user, LogFolder $folder) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()));
-
-        Gate::before(static fn ($user, string $ability) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()) ? true : null);
     }
 }
