@@ -4,8 +4,11 @@ namespace App\Providers;
 
 use App\Helpers\Usr;
 use App\Services\SyncMasterDataService;
+use App\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Opcodes\LogViewer\LogFile;
+use Opcodes\LogViewer\LogFolder;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -56,6 +59,12 @@ class AuthServiceProvider extends ServiceProvider
                 return null; // let normal Spatie check proceed
             });
         }
+
+        Gate::define('deleteLogFile', fn () => false);
+        Gate::define('deleteLogFolder', fn () => false);
+        Gate::define('viewLogViewer', fn (?User $user) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()));
+        Gate::define('downloadLogFile', fn (?User $user, LogFile $file) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()));
+        Gate::define('downloadLogFolder', fn (?User $user, LogFolder $folder) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()));
 
         Gate::before(static fn ($user, string $ability) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()) ? true : null);
     }
