@@ -8,7 +8,7 @@ abstract class Controller
 {
     use AuthorizesPermissions;
 
-    protected array $permissionMap;
+    protected array $permissionMap = [];
 
     public function __construct()
     {
