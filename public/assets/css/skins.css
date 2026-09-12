@@ -457,6 +457,23 @@
     --participant-bg: #4a5d6e;
 }
 
+:root[data-skin="warm"][data-theme="dark"] .dropdown-item.active,
+:root[data-skin="warm"][data-theme="dark"]
+    .nav-item.nav-item-submenu.nav-item-expanded
+    > a[href="#"].nav-link:not(.active),
+:root[data-skin="warm"][data-theme="dark"]
+    .sidebar
+    .nav-sidebar
+    .nav-item-open
+    > .nav-link:not(.disabled),
+:root[data-skin="warm"][data-theme="dark"]
+    .sidebar
+    .nav-sidebar
+    > .nav-item
+    > .nav-link.active {
+    color: black !important;
+}
+
 /* ========== SKIN: HIGH CONTRAST ========== */
 :root[data-skin="highcontrast"] {
     color-scheme: light;
