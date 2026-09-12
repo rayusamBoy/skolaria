@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Illuminate\Support\Str;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Throwable;
 
@@ -144,7 +145,7 @@ class ArtisanCommandsController extends Controller
     /**
      * Run a tenant-specific command.
      */
-    public function run_command(string $command_id, $tenant): RedirectResponse
+    public function run_command(string $command_id, string $tenant): RedirectResponse
     {
         $command_name = self::TENANT_COMMANDS[$command_id] ?? null;
 
@@ -176,7 +177,7 @@ class ArtisanCommandsController extends Controller
                 'tenant_id' => $tenant,
             ]);
 
-            return back()->with('pop_error', $e->getMessage())->with('pop_timer', 0);
+            return back()->with('pop_error', Str::headline($e->getMessage()))->with('pop_timer', 0);
         } finally {
             tenancy()->end();
         }
@@ -210,7 +211,7 @@ class ArtisanCommandsController extends Controller
                 'command' => $command,
             ]);
 
-            return Qs::json("The $response_name command threw an exception: ".$e->getMessage(), false);
+            return Qs::json("The $response_name command threw an exception: ".Str::headline($e->getMessage()), false);
         }
     }
 }
