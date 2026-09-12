@@ -16,19 +16,21 @@ $.ajaxSetup({
  * Initialize float thead plugin for tables with class "float-head"
  *-------------------------------------------------------------
  */
-$(() => {
-    const $floatHeads = $("table.float-head");
+if (typeof $.fn.floatThead !== "undefined") {
+    $(() => {
+        const $floatHeads = $("table.float-head");
 
-    $floatHeads.floatThead();
+        $floatHeads.floatThead();
 
-    const observer = new ResizeObserver(() => {
-        $floatHeads.floatThead("reflow");
+        const observer = new ResizeObserver(() => {
+            $floatHeads.floatThead("reflow");
+        });
+
+        $floatHeads.each(function () {
+            observer.observe(this);
+        });
     });
-
-    $floatHeads.each(function () {
-        observer.observe(this);
-    });
-});
+}
 
 /**
  *-------------------------------------------------------------
@@ -191,22 +193,24 @@ $(".full-screen-handle").on("click", function (event) {
  * Dashboard counter up for numbers (counts)
  *-------------------------------------------------------------
  */
-const counterUp = window.counterUp.default;
-const callback = (entries) => {
-    entries.forEach((entry) => {
-        const el = entry.target;
-        if (entry.isIntersecting && !$(el).hasClass("is-visible")) {
-            counterUp(el, {
-                duration: 2000,
-                delay: 16,
-            });
-            $(el).addClass("is-visible");
-        }
-    });
-};
+if (window.counterUp) {
+    const counterUp = window.counterUp.default;
+    const callback = (entries) => {
+        entries.forEach((entry) => {
+            const el = entry.target;
+            if (entry.isIntersecting && !$(el).hasClass("is-visible")) {
+                counterUp(el, {
+                    duration: 2000,
+                    delay: 16,
+                });
+                $(el).addClass("is-visible");
+            }
+        });
+    };
 
-const IO = new IntersectionObserver(callback, { threshold: 1 });
-$(".counter").each((_, el) => IO.observe(el));
+    const IO = new IntersectionObserver(callback, { threshold: 1 });
+    $(".counter").each((_, el) => IO.observe(el));
+}
 
 /**
  *-------------------------------------------------------------
@@ -841,26 +845,28 @@ $(document).on("click", ".refresh", function (e) {
  * Reusable swal2 modal and toast
  *-------------------------------------------------------------
  */
-const Modal = Swal.mixin({
-    focusConfirm: false,
-    returnFocus: false,
-    reverseButtons: true,
-    showCancelButton: true,
-    cancelButtonText: "No, Cancel",
-    customClass: {
-        cancelButton: "bg-secondary",
-    },
-});
+if (typeof Swal !== "undefined") {
+    const Modal = Swal.mixin({
+        focusConfirm: false,
+        returnFocus: false,
+        reverseButtons: true,
+        showCancelButton: true,
+        cancelButtonText: "No, Cancel",
+        customClass: {
+            cancelButton: "bg-secondary",
+        },
+    });
 
-const Toast = Swal.mixin({
-    toast: true,
-    reverseButtons: true,
-    timerProgressBar: true,
-    didOpen: (toast) => {
-        toast.addEventListener("mouseenter", Swal.stopTimer);
-        toast.addEventListener("mouseleave", Swal.resumeTimer);
-    },
-});
+    const Toast = Swal.mixin({
+        toast: true,
+        reverseButtons: true,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+        },
+    });
+}
 
 /**
  *-------------------------------------------------------------
@@ -2434,7 +2440,6 @@ $("select#select").on("change", function () {
     btn.prop("disabled", false);
 });
 
-
 /**
  *-------------------------------------------------------------
  * Prevent Page BF Cache
@@ -2445,3 +2450,48 @@ window.addEventListener("pageshow", function (event) {
         window.location.reload();
     }
 });
+
+$(document).on("click", ".item-copy", function (e) {
+    e.preventDefault();
+    const $outputEls = $(this).siblings(".item-output");
+    let combinedText = "";
+    $outputEls.each((_, el) => {
+        combinedText += $(el).text() + "\n";
+    });
+    const text = combinedText.trim();
+    copyToClipboard(text, this);
+});
+
+// Function to copy text to clipboard using the Clipboard API
+const copyToClipboard = (text, element) => {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(
+            () => showTooltipTitle(element),
+            (err) => {
+                showTooltipTitle(element, "Failed! Try copying manually");
+                console.error("Failed to copy text:", err);
+            },
+        );
+    } else {
+        const $temp = $("<textarea>").val(text).appendTo("body").select();
+        try {
+            document.execCommand("copy");
+            showTooltipTitle(element);
+        } catch (err) {
+            showTooltipTitle(element, "Failed! Try copying manually");
+            console.error("Failed to copy text:", err);
+        }
+        $temp.remove();
+    }
+
+    function showTooltipTitle(el, title = "Copied") {
+        title == "Copied" ? $(el).text("check") : $(el).text("error");
+        $(el).attr("data-original-title", title).tooltip("show");
+    }
+
+    setTimeout(() => {
+        const title = $(element).data("title") ?? "Copy";
+        $(element).text("content_copy");
+        $(element).attr("data-original-title", title).tooltip("hide");
+    }, 3000);
+};
