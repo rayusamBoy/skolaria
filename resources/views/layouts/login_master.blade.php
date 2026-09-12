@@ -43,6 +43,10 @@
 
     <script src="{{ asset('global_assets/js/plugins/uploaders/uploader_bootstrap.js') }}"></script>
     <script src="{{ asset('global_assets/js/plugins/ui/autosize.min.js') }}"></script>
+    <script src="{{ asset('global_assets/js/plugins/loaders/blockui.min.js') }}"></script>
+    <script src="{{ asset('global_assets/js/plugins/ui/moment/moment.min.js') }}"></script>
+    <script src="{{ asset('global_assets/js/plugins/pickers/bootstrap-datepicker.min.js') }}"></script>
+    <script src="{{ asset('global_assets/js/plugins/pickers/pickadate/legacy.js') }}"></script>
     <script src="{{ asset('assets/js/custom-min.js') }}"></script>
     <script>
         const get_state_url = '{{ route("ajax.get_state", [":id"]) }}';
