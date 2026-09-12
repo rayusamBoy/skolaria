@@ -203,9 +203,14 @@
                                                                 @php $inUse = $s->record->isNotEmpty(); @endphp
                                                                 <a
                                                                     id="{{ $s->id }}"
-                                                                    @if ($inUse) class="dropdown-item text-danger disabled" data-toggle="tooltip" title="{{ __('msg.subject_in_use') }}" @else class="dropdown-item text-danger" onclick="
-                                                                        confirmDelete(this.id)
-                                                                    " @endif
+                                                                    @if ($inUse)
+                                                                        class="dropdown-item text-danger disabled"
+                                                                        data-toggle="tooltip"
+                                                                        title="{{ __('msg.subject_in_use') }}"
+                                                                    @else
+                                                                        class="dropdown-item text-danger"
+                                                                        onclick="confirmDelete(this.id)"
+                                                                    @endif
                                                                     href="javascript:;"
                                                                 >
                                                                     <i class="material-symbols-rounded">delete</i>

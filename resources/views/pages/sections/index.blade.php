@@ -70,7 +70,10 @@
                                                 id="my_class_id"
                                             >
                                                 @foreach ($my_classes as $c)
-                                                    <option @selected(old('my_class_id') == $c->id) value="{{ $c->id }}">
+                                                    <option
+                                                        @selected(old('my_class_id') == $c->id)
+                                                        value="{{ $c->id }}"
+                                                    >
                                                         {{ $c->name }}
                                                     </option>
                                                 @endforeach

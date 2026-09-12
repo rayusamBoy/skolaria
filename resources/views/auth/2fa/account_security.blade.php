@@ -16,9 +16,9 @@
                             <span class="badge bg-warning font-size-base">inactive</span>
                         @endif
                         </a>
-                    >
-                    <a class="list-icons-item" data-action="collapse"></a>
-                    <a class="list-icons-item" data-action="remove"></a>
+                        >
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
                 </div>
             </div>
         </div>

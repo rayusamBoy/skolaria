@@ -80,7 +80,9 @@
                     >
                         <option value="">Select Time...</option>
                         @foreach ($time_slots as $tms)
-                            <option @selected(old('ts_id') == $tms->full) value="{{ $tms->id }}">{{ $tms->full }}</option>
+                            <option @selected(old('ts_id') == $tms->full) value="{{ $tms->id }}">
+                                {{ $tms->full }}
+                            </option>
                         @endforeach
                     </select>
                 </div>

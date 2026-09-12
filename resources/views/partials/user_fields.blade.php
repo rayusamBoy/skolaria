@@ -9,6 +9,7 @@
                 <select
                     class="form-control select"
                     @disabled($mode === 'invitation')
+                    name="roles"
                     multiple="multiple"
                     placeholder="Select Role(s)"
                     id="roles"
@@ -26,11 +27,6 @@
                 </select>
             </div>
         </div>
-        <select class="d-none" multiple="multiple">
-            @foreach ($roles as $role)
-                <option @selected($mode === 'invitation') value="{{ $role->name }}"></option>
-            @endforeach
-        </select>
         {{-- FULL NAME --}}
         <div class="col-md-3">
             <div class="form-group">
@@ -170,7 +166,9 @@
                 >
                     <option value=""></option>
                     @foreach ($blood_groups as $bg)
-                        <option @selected(old('blood_group_id') == $bg->id) value="{{ $bg->id }}">{{ $bg->name }}</option>
+                        <option @selected(old('blood_group_id') == $bg->id) value="{{ $bg->id }}">
+                            {{ $bg->name }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -185,6 +183,7 @@
                     autocomplete="current-password"
                     name="password"
                     class="form-control"
+                    @disabled($mode === 'invite')
                 />
             </div>
         </div>
@@ -458,20 +457,22 @@
             </div>
         </div>
         {{-- PASSPORT --}}
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="photo" class="d-block">Upload Passport Photo:</label>
-                <input
-                    value="{{ old('photo') }}"
-                    accept="image/*"
-                    type="file"
-                    id="photo"
-                    name="photo"
-                    class="form-input-styled"
-                />
-                <span class="form-text text-muted">Accepted Images: jpeg, png. Max file size 2Mb</span>
+        @if ($mode !== 'invite')
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="photo" class="d-block">Upload Passport Photo:</label>
+                    <input
+                        value="{{ old('photo') }}"
+                        accept="image/*"
+                        type="file"
+                        id="photo"
+                        name="photo"
+                        class="form-input-styled"
+                    />
+                    <span class="form-text text-muted">Accepted Images: jpeg, png. Max file size 2Mb</span>
+                </div>
             </div>
-        </div>
+        @endif
     </div>
 </fieldset>
 

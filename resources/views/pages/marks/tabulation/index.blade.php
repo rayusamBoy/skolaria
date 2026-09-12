@@ -104,7 +104,9 @@
                                             {{ $s->name }}
                                         </option>
                                     @endforeach
-                                    <option @selected($section_id == 'all') value="all" title="All Sections">All</option>
+                                    <option @selected($section_id == 'all') value="all" title="All Sections">
+                                        All
+                                    </option>
                                 @endif
                             </select>
                         </div>

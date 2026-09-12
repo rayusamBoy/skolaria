@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Qs;
+use App\Http\Requests\UserInviteRequest;
 use App\Http\Requests\UserRequest;
 use App\Models\UserRegistrationInvite;
 use App\Repositories\LocationRepo;
@@ -10,6 +12,9 @@ use App\Repositories\PermissionRepo;
 use App\Repositories\StudentRepo;
 use App\Repositories\UserRepo;
 use App\Services\UserService;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -29,7 +34,7 @@ class UserInvitationController extends Controller
         parent::__construct();
     }
 
-    public function index()
+    public function index(): View
     {
         $roles = $this->permission->getAllRoles(app(UserController::class)->getExcludedRoles());
 
@@ -44,13 +49,14 @@ class UserInvitationController extends Controller
     /**
      * Create a new invitation token with preselected roles/fields.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        $request->validate([
-            'roles' => 'required|array',
-            'roles.*' => 'exists:roles,name',
-            'expires_at' => 'nullable|date|after:now',
-        ]);
+        $user_invite_request = new UserInviteRequest;
+        $rules = $user_invite_request->rules();
+        $rules = [...$rules, 'expires_at' => 'nullable|date|after:now'];
+        $attributes = $user_invite_request->attributes();
+
+        $request->validate($rules, ['attributes' => $attributes]);
 
         $invitation = $this->user->createInvitation([
             'token' => Str::random(64),
@@ -60,22 +66,19 @@ class UserInvitationController extends Controller
                 '_method',
                 'expires_at',
             ]),
-            'expires_at' => $request->expires_at ?? now()->addDays(7),
+            'expires_at' => $request->expires_at ?? now()->addDays(3),
             'created_by' => Auth::id(),
         ]);
 
         $link = url("/register/{$invitation->token}");
 
-        return response()->json([
-            'ok' => true,
-            'link' => $link,
-        ]);
+        return Qs::json(arr: ['ok' => true, 'link' => $link]);
     }
 
     /**
      * Show the public registration form for a token.
      */
-    public function show_registration_form(string $token)
+    public function show_registration_form(string $token): View
     {
         /** @var UserRegistrationInvite $invitation */
         $data['invitation'] = $invitation = $this->user->whereInvitationBuilder(['token' => $token, 'status' => 'pending'])->firstOrFail();
@@ -86,7 +89,8 @@ class UserInvitationController extends Controller
 
         $data['nationals'] = $this->loc->getAllNationalities();
         $data['blood_groups'] = $this->user->getBloodGroups();
-        $data['roles'] = $this->permission->getAllRoles(app(UserController::class)->getExcludedRoles())->filter(fn ($role) => \in_array($role->name, $invitation->roles))->values();
+        $user_invite_roles = \is_array($invitation->roles) ? $invitation->roles : [$invitation->roles];
+        $data['roles'] = $this->permission->getAllRoles(app(UserController::class)->getExcludedRoles())->filter(fn ($role) => \in_array($role->name, $user_invite_roles))->values();
 
         $data['permissions'] = $this->permission->getAllPermissions();
         $data['prefilled'] = $invitation->prefilled_data ?? [];
@@ -97,7 +101,7 @@ class UserInvitationController extends Controller
     /**
      * Submit the registration request.
      */
-    public function submit_registration(Request $request, string $token)
+    public function submit_registration(Request $request, string $token): RedirectResponse
     {
         $validator = Validator::make($request->all(), (new UserRequest)->rules());
 
@@ -130,7 +134,7 @@ class UserInvitationController extends Controller
     /**
      * Admin – approve a registration request and create the actual user.
      */
-    public function approve(int $id)
+    public function approve(int $id): RedirectResponse
     {
         $invitation = $this->user->findInvitationOrFail($id);
 
@@ -158,7 +162,7 @@ class UserInvitationController extends Controller
     /**
      * Admin – reject a registration request.
      */
-    public function reject(int $id)
+    public function reject(int $id): RedirectResponse
     {
         $invitation = $this->user->findInvitationOrFail($id);
         $invitation->update(['status' => 'rejected']);

@@ -20,7 +20,7 @@
         <div class="card-body">
             <ul class="nav nav-tabs nav-tabs-highlight">
                 <li class="nav-item">
-                    <a href="#pending-users" class="nav-link active" data-toggle="tab">Pending Registrations</a>
+                    <a href="#pending-users" class="nav-link active" data-toggle="tab">Registrations</a>
                 </li>
                 @can($tenant_permissions['users']['store']['permission'])
                     <li class="nav-item">
@@ -36,12 +36,13 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Expiry</label>
+                                    <label>Expiry <span class="text-info">(default: 3 days)</label>
                                     <input
                                         type="text"
                                         name="expires_at"
                                         class="form-control date-pick"
                                         placeholder="Select Date..."
+                                        value="{{ now()->addDays(3)->format('Y-m-d') }}"
                                     />
                                 </div>
                             </div>
@@ -54,7 +55,7 @@
                 </div>
 
                 <div class="tab-pane fade active show" id="pending-users">
-                    <table class="datatable-button-html5-columns table">
+                    <table class="datatable-button-html5-columns table-responsive table">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -71,19 +72,31 @@
                                 <tr>
                                     <td>{{ $inv->submitted_data['name'] ?? '—' }}</td>
                                     <td>{{ $inv->submitted_data['email'] ?? '—' }}</td>
-                                    <td>{{ implode(', ', $inv->roles) }}</td>
+                                    <td>{{ \is_array($inv->roles) ? implode(', ', $inv->roles) : $inv->roles }}</td>
                                     <td>{{ $inv->submitted_at?->diffForHumans() ?? '—' }}</td>
                                     <td>
                                         <span class="badge badge-{{ $inv->status === 'approved' ? 'success' : 'danger' }} badge-default">{{ ucfirst($inv->status) }}</span>
                                     </td>
                                     <td>
-                                        <div class="text-truncate" style="max-width: 200px">
+                                        <div>
                                             @if ($inv->isPending() && ! $inv->submitted_data)
                                                 <a
                                                     href="{{ url("/register/{$inv->token}") }}"
                                                     target="_blank"
-                                                    class="btn btn-link btn-sm"
-                                                >{{ url("/register/{$inv->token}") }}</a>
+                                                    class="btn btn-link btn-sm item-output d-flex"
+                                                    ><span
+                                                        class="text-truncate"
+                                                        style="max-width: 300px"
+                                                        >{{ url("/register/{$inv->token}") }}</span>
+                                                    <button
+                                                        data-toggle="tooltip"
+                                                        title="Copy URL"
+                                                        data-title="Copy URL"
+                                                        class="item-copy material-symbols-rounded btn font-size-xl bg-transparent p-0"
+                                                    >
+                                                        content_copy
+                                                    </button>
+                                                </a>
                                             @else
                                                 —
                                             @endif

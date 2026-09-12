@@ -90,7 +90,10 @@
                                             id="account_status"
                                         >
                                             @foreach (Usr::getAccountStatuses() as $status)
-                                                <option @selected(old('account_status') == $status) value="{{ $status }}">
+                                                <option
+                                                    @selected(old('account_status') == $status)
+                                                    value="{{ $status }}"
+                                                >
                                                     {{ $status }}
                                                 </option>
                                             @endforeach

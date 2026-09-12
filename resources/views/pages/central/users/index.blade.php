@@ -617,7 +617,9 @@
                                     {{-- SUBJECTS STUDIED --}}
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="subjects_studied">Subjects Studied <span class="text-info">(comma (,) separated)</span>:</label>
+                                            <label for="subjects_studied"
+                                                >Subjects Studied
+                                                <span class="text-info">(comma (,) separated)</span>:</label>
                                             <div>
                                                 <textarea
                                                     name="subjects_studied"

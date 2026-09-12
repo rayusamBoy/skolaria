@@ -368,7 +368,9 @@
                                 >
                                     <option value=""></option>
                                     @foreach (Usr::getReligions() as $rel)
-                                        <option @selected(old('religion') == $rel) value="{{ $rel }}">{{ $rel }}</option>
+                                        <option @selected(old('religion') == $rel) value="{{ $rel }}">
+                                            {{ $rel }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
