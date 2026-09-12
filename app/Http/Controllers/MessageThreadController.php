@@ -50,7 +50,7 @@ class MessageThreadController extends Controller
     /**
      * Display a specific message thread.
      */
-    public function show(int $id): View|RedirectResponse
+    public function show(string $id): View|RedirectResponse
     {
         $id = Usr::decodeHash($id);
 
