@@ -85,14 +85,14 @@ class SoftDeleteController extends Controller
 
     /********** Tenants **********/
 
-    public function tenant_restore(int $id): RedirectResponse
+    public function tenant_restore(string $id): RedirectResponse
     {
         $this->tenant->restoreTenant($id);
 
         return redirect()->route('central_bin')->with('flash_success', 'Tenant '.__('msg.restore_ok'));
     }
 
-    public function tenant_force_delete(int $id): RedirectResponse
+    public function tenant_force_delete(string $id): RedirectResponse
     {
         $this->tenant->forceDeleteTenant($id);
 
