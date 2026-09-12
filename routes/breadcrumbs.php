@@ -161,7 +161,7 @@ Breadcrumbs::for('central_users_profile.show', function (BreadcrumbTrail $trail,
 // Invitations
 Breadcrumbs::for('users.invitations.index', function (BreadcrumbTrail $trail): void {
     $trail->parent('dashboard');
-    $trail->push('Manage Invitations', route('users.invitations.index'));
+    $trail->push('Manage User Invitations', route('users.invitations.index'));
 });
 
 // ----------------------------------------------------------------------
