@@ -85,7 +85,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate'], 'prefix' => 'centr
 
         /*************** Tenants ***************/
         Route::prefix('tenants')->group(function () {
-            Route::post('run-command/{command}/{tenant}', [CentralArtisanCommandsController::class, 'run_command'])->name('tenants.run_command')->middleware('decodeRouteParams');
+            Route::post('run-command/{command}/{tenant}', [CentralArtisanCommandsController::class, 'run_command'])->name('tenants.run_command');
         });
 
         /*************** Controller's resources **************/
