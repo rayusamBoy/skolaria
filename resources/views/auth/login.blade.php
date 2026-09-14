@@ -77,6 +77,16 @@
                                         </div>
                                     @endif
 
+                                    {{-- Invitation registration submitted --}}
+                                    @if (session()->has('invitation_registration_submitted'))
+                                        <div class="alert alert-success alert-styled-left alert-dismissible">
+                                            <button type="button" class="close" data-dismiss="alert">
+                                                <span>&times;</span>
+                                            </button>
+                                            <i>{{ session("invitation_registration_submitted") }}</i>
+                                        </div>
+                                    @endif
+
                                     <div class="form-group">
                                         <input
                                             type="text"
