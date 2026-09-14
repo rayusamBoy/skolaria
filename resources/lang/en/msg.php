@@ -63,4 +63,5 @@ return
         'file_required' => 'File is required.',
         'invitation_approved' => 'The registration request has been approved successfully.',
         'invitation_rejected' => 'The registration request has been rejected successfully.',
+        'invitation_cancelled' => 'The registration request has been cancelled successfully.',
     ];
