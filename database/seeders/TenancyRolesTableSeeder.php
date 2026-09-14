@@ -51,6 +51,7 @@ class TenancyRolesTableSeeder extends Seeder
                     '/^messages\.(delete)/',
                     '/^roles\.(store|update|delete)/',
                     '/^bin\.(empty_soft_deleted_model|user_force_delete)/',
+                    '/^childrens?\./',
                 ],
             ],
 
