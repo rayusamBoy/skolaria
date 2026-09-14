@@ -7,11 +7,7 @@ use Illuminate\View\View;
 
 class ChildrenController extends Controller
 {
-    public function __construct(protected StudentRepo $student)
-    {
-        $this->permissionMap = config('permissions.names.tenant.childrens');
-        parent::__construct();
-    }
+    public function __construct(protected StudentRepo $student) {}
 
     /**
      * Display a listing of the authenticated parent's children.
@@ -19,8 +15,7 @@ class ChildrenController extends Controller
     public function children(): View
     {
         $data['students'] = $this->student
-            ->getActiveStudentsQueryWithRelations(['my_parent_id' => auth()->id()])
-            ->with(['my_class', 'section'])
+            ->getActiveStudentsQueryWithRelations(['my_parent_id' => auth()->id()], ['my_class', 'section', 'user', 'my_parent'])
             ->get();
 
         return view('pages.children', $data);

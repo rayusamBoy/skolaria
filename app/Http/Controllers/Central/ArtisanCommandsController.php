@@ -8,8 +8,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
-use Illuminate\View\View;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Throwable;
 

@@ -4,11 +4,10 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($tenant_permissions['users']['edit']['permission']);
-        $canView = auth()->user()->can($tenant_permissions['users']['show']['permission']);
-        $canResetPassword = auth()->user()->can($tenant_permissions['users']['reset_password']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['users']['destroy']['permission']);
-        $hasActions = $canEdit || $canView || $canResetPassword || $canDelete;
+        $canApprove = auth()->user()->can($tenant_permissions['users']['approve']['permission']);
+        $canReject = auth()->user()->can($tenant_permissions['users']['reject']['permission']);
+        $canCancel = auth()->user()->can($tenant_permissions['users']['cancel']['permission']);
+        $hasActions = $canApprove || $canReject || $canCancel;
     @endphp
 
     <div class="card">
@@ -22,7 +21,7 @@
                 <li class="nav-item">
                     <a href="#pending-users" class="nav-link active" data-toggle="tab">Registrations</a>
                 </li>
-                @can($tenant_permissions['users']['store']['permission'])
+                @can($tenant_permissions['users']['invite_user']['permission'])
                     <li class="nav-item">
                         <a href="#invite-user" class="nav-link" data-toggle="tab">Invite User</a>
                     </li>
@@ -30,64 +29,83 @@
             </ul>
 
             <div class="tab-content">
-                <div class="tab-pane fade" id="invite-user">
-                    <form id="invite-user-form" class="mb-3" class="wizard-form steps-validation">
-                        @include('partials.user_fields', ['mode' => 'invite'])
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Expiry <span class="text-info">(default: 3 days)</label>
-                                    <input
-                                        type="text"
-                                        name="expires_at"
-                                        class="form-control date-pick"
-                                        placeholder="Select Date..."
-                                        value="{{ now()->addDays(3)->format('Y-m-d') }}"
-                                    />
+                @can($tenant_permissions['users']['invite_user']['permission'])
+                    <div class="tab-pane fade" id="invite-user">
+                        <form id="invite-user-form" class="mb-3">
+                            <strong>Prefill User Details. If filled the invitee will not be able to change them.</strong>
+                            @include('partials.user_fields', ['mode' => 'invite'])
+                            <hr />
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Expiry <span class="text-info">(default: 3 days)</span></label>
+                                        <input
+                                            type="text"
+                                            name="expires_at"
+                                            class="form-control date-pick"
+                                            placeholder="Select Date..."
+                                            value="{{ now()->addDays(3)->format('Y-m-d') }}"
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="text-right">
-                            <button type="submit" class="btn btn-primary">Generate Link</button>
-                        </div>
-                    </form>
-                    <div id="invite-link-result" class="mt-2"></div>
-                </div>
+                            <div class="text-right">
+                                <button type="submit" class="btn btn-primary">Generate Link</button>
+                            </div>
+                        </form>
+                        <div id="invite-link-result" class="mt-2"></div>
+                    </div>
+                @endcan
 
                 <div class="tab-pane fade active show" id="pending-users">
-                    <table class="datatable-button-html5-columns table-responsive table">
+                    <table class="datatable-button-html5-columns table">
                         <thead>
                             <tr>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Roles</th>
                                 <th>Submitted</th>
+                                <th>Approved</th>
+                                <th>Expires</th>
                                 <th>Status</th>
                                 <th>URL</th>
-                                <th>Actions</th>
+                                @if ($hasActions)
+                                    <th>Actions</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($invitations as $inv)
+                                @php
+                                    $rowCanApprove = $canApprove && $inv->canBeApproved();
+                                    $rowCanReject = $canReject && $inv->canBeRejected();
+                                    $rowCanCancel = $canCancel && $inv->canBeCancelled();
+                                    $hasRowActions = $rowCanApprove || $rowCanReject || $rowCanCancel;
+                                @endphp
+
                                 <tr>
                                     <td>{{ $inv->submitted_data['name'] ?? '—' }}</td>
                                     <td>{{ $inv->submitted_data['email'] ?? '—' }}</td>
                                     <td>{{ \is_array($inv->roles) ? implode(', ', $inv->roles) : $inv->roles }}</td>
                                     <td>{{ $inv->submitted_at?->diffForHumans() ?? '—' }}</td>
+                                    <td>{{ $inv->approved_at?->diffForHumans() ?? '—' }}</td>
+                                    <td>{{ $inv->expires_at ?? '—' }}</td>
                                     <td>
-                                        <span class="badge badge-{{ $inv->status === 'approved' ? 'success' : 'danger' }} badge-default">{{ ucfirst($inv->status) }}</span>
+                                        <span class="badge badge-{{ $inv->status_color }} badge-default">
+                                            {{ $inv->status_label }}
+                                        </span>
                                     </td>
                                     <td>
                                         <div>
-                                            @if ($inv->isPending() && ! $inv->submitted_data)
+                                            @if ($inv->hasUsableUrl())
                                                 <a
                                                     href="{{ url("/register/{$inv->token}") }}"
                                                     target="_blank"
                                                     class="btn btn-link btn-sm item-output d-flex"
-                                                    ><span
-                                                        class="text-truncate"
-                                                        style="max-width: 300px"
-                                                        >{{ url("/register/{$inv->token}") }}</span>
+                                                >
+                                                    <span class="text-truncate" style="max-width: 300px">
+                                                        {{ url("/register/{$inv->token}") }}
+                                                    </span>
                                                     <button
                                                         data-toggle="tooltip"
                                                         title="Copy URL"
@@ -102,50 +120,84 @@
                                             @endif
                                         </div>
                                     </td>
-                                    @if ($inv->isPending() && $inv->submitted_data)
+
+                                    @if ($hasActions)
                                         <td class="text-center">
-                                            <div class="list-icons">
-                                                <div class="dropdown">
-                                                    <a
-                                                        href="javascript:;"
-                                                        class="material-symbols-rounded"
-                                                        data-toggle="dropdown"
-                                                    >lists</a>
-                                                    <div class="dropdown-menu dropdown-menu-left">
+                                            @if ($hasRowActions)
+                                                <div class="list-icons">
+                                                    <div class="dropdown">
                                                         <a
                                                             href="javascript:;"
-                                                            id="{{ $inv->id }}"
-                                                            onclick="confirmOperation(this.id)"
-                                                            class="dropdown-item text-success"
-                                                        ><i class="material-symbols-rounded">check</i> Approve</a>
-                                                        <form
-                                                            id="item-confirm-operation-{{ $inv->id }}"
-                                                            action="{{ route('users.registrations.approve', $inv->id) }}"
-                                                            method="post"
-                                                            class="hidden"
-                                                        >
-                                                            @csrf
-                                                        </form>
-                                                        <a
-                                                            href="javascript:;"
-                                                            id="{{ $inv->id }}"
-                                                            onclick="confirmOperation(this.id)"
-                                                            class="dropdown-item text-danger"
-                                                        ><i class="material-symbols-rounded">cancel</i> Reject</a>
-                                                        <form
-                                                            id="item-confirm-operation-{{ $inv->id }}"
-                                                            action="{{ route('users.registrations.reject', $inv->id) }}"
-                                                            method="post"
-                                                            class="hidden"
-                                                        >
-                                                            @csrf
-                                                        </form>
+                                                            class="material-symbols-rounded"
+                                                            data-toggle="dropdown"
+                                                        >lists</a>
+                                                        <div class="dropdown-menu dropdown-menu-left">
+                                                            @if ($rowCanApprove)
+                                                                <a
+                                                                    href="javascript:;"
+                                                                    id="approve-{{ $inv->id }}"
+                                                                    onclick="confirmOperation(this.id)"
+                                                                    class="dropdown-item text-success"
+                                                                >
+                                                                    <i class="material-symbols-rounded">check</i>
+                                                                    Approve
+                                                                </a>
+                                                                <form
+                                                                    id="item-confirm-operation-approve-{{ $inv->id }}"
+                                                                    action="{{ route('users.registrations.approve', $inv->id) }}"
+                                                                    method="post"
+                                                                    class="hidden"
+                                                                >
+                                                                    @csrf
+                                                                </form>
+                                                            @endif
+
+                                                            @if ($rowCanReject)
+                                                                <a
+                                                                    href="javascript:;"
+                                                                    id="reject-{{ $inv->id }}"
+                                                                    onclick="confirmOperation(this.id)"
+                                                                    class="dropdown-item text-danger"
+                                                                >
+                                                                    <i class="material-symbols-rounded">close</i>
+                                                                    Reject
+                                                                </a>
+                                                                <form
+                                                                    id="item-confirm-operation-reject-{{ $inv->id }}"
+                                                                    action="{{ route('users.registrations.reject', $inv->id) }}"
+                                                                    method="post"
+                                                                    class="hidden"
+                                                                >
+                                                                    @csrf
+                                                                </form>
+                                                            @endif
+
+                                                            @if ($rowCanCancel)
+                                                                <a
+                                                                    href="javascript:;"
+                                                                    id="cancel-{{ $inv->id }}"
+                                                                    onclick="confirmOperation(this.id)"
+                                                                    class="dropdown-item text-warning"
+                                                                >
+                                                                    <i class="material-symbols-rounded">cancel</i>
+                                                                    Cancel
+                                                                </a>
+                                                                <form
+                                                                    id="item-confirm-operation-cancel-{{ $inv->id }}"
+                                                                    action="{{ route('users.registrations.cancel', $inv->id) }}"
+                                                                    method="post"
+                                                                    class="hidden"
+                                                                >
+                                                                    @csrf
+                                                                </form>
+                                                            @endif
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            @else
+                                                —
+                                            @endif
                                         </td>
-                                    @else
-                                        <td class="text-center">—</td>
                                     @endif
                                 </tr>
                             @endforeach
@@ -155,7 +207,6 @@
             </div>
         </div>
     </div>
-
 @endsection
 
 @push('scripts')
@@ -178,7 +229,6 @@
                     }
                 },
                 error: function (res) {
-                    // Validation errors
                     if (res.status === 422) {
                         let errors = res.responseJSON.errors;
                         for (let field in errors) {
@@ -189,9 +239,7 @@
                                 });
                             });
                         }
-                    }
-                    // Other errors
-                    else {
+                    } else {
                         flash({
                             msg: 'An error occurred. Please try again.',
                             type: 'error',

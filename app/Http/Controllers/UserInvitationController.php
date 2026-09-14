@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Qs;
 use App\Http\Requests\UserInviteRequest;
 use App\Http\Requests\UserRequest;
@@ -34,7 +35,7 @@ class UserInvitationController extends Controller
         parent::__construct();
     }
 
-    public function index(): View
+    public function view_registrations(): View
     {
         $roles = $this->permission->getAllRoles(app(UserController::class)->getExcludedRoles());
 
@@ -42,6 +43,7 @@ class UserInvitationController extends Controller
         $data['blood_groups'] = $this->user->getBloodGroups();
         $data['nationals'] = $this->loc->getAllNationalities();
         $data['invitations'] = $this->user->getInvitations();
+        $data['user_invite_status_approved'] = UserRegistrationInvite::STATUS_APPROVED;
 
         return view('pages.users.invitations.index', $data);
     }
@@ -49,7 +51,7 @@ class UserInvitationController extends Controller
     /**
      * Create a new invitation token with preselected roles/fields.
      */
-    public function store(Request $request): JsonResponse
+    public function invite_user(Request $request): JsonResponse
     {
         $user_invite_request = new UserInviteRequest;
         $rules = $user_invite_request->rules();
@@ -78,22 +80,21 @@ class UserInvitationController extends Controller
     /**
      * Show the public registration form for a token.
      */
+    #[SkipPermission]
     public function show_registration_form(string $token): View
     {
-        /** @var UserRegistrationInvite $invitation */
-        $data['invitation'] = $invitation = $this->user->whereInvitationBuilder(['token' => $token, 'status' => 'pending'])->firstOrFail();
-
-        if ($invitation->isExpired()) {
-            abort(404, 'This invitation has expired.');
-        }
+        $invitation = $this->verifyInvitationToken($token);
 
         $data['nationals'] = $this->loc->getAllNationalities();
         $data['blood_groups'] = $this->user->getBloodGroups();
         $user_invite_roles = \is_array($invitation->roles) ? $invitation->roles : [$invitation->roles];
-        $data['roles'] = $this->permission->getAllRoles(app(UserController::class)->getExcludedRoles())->filter(fn ($role) => \in_array($role->name, $user_invite_roles))->values();
+        $data['roles'] = $this->permission->getAllRoles(app(UserController::class)->getExcludedRoles())
+            ->filter(fn ($role) => \in_array($role->name, $user_invite_roles))
+            ->values();
 
         $data['permissions'] = $this->permission->getAllPermissions();
-        $data['prefilled'] = $invitation->prefilled_data ?? [];
+        $data['prefilled'] = array_filter($invitation->prefilled_data) ?? [];
+        $data['user_is_parent'] = \in_array(config('roles.default_roles.tenant.parent'), $user_invite_roles);
 
         return view('auth.invitation_register', $data);
     }
@@ -101,44 +102,38 @@ class UserInvitationController extends Controller
     /**
      * Submit the registration request.
      */
+    #[SkipPermission]
     public function submit_registration(Request $request, string $token): RedirectResponse
     {
+        $invitation = $this->verifyInvitationToken($token);
+
+        $request->merge(['roles' => $invitation->roles]);
         $validator = Validator::make($request->all(), (new UserRequest)->rules());
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
-        /** @var UserRegistrationInvite $invitation */
-        $invitation = $this->user->whereInvitationBuilder(['token' => $token, 'status' => 'pending'])->firstOrFail();
-
-        if ($invitation->isExpired()) {
-            abort(404, 'This invitation has expired.');
-        }
-
         $data = $validator->validated();
-
-        // Merge the submitted data with prefilled data, but allow override only where needed.
-        // For security, only store what is submitted + prefilled.
-        $submittedData = [...$invitation->prefilled_data ?? [], ...$data];
+        $submitted_data = [...$data, ...array_filter($invitation->prefilled_data)];
 
         $invitation->update([
-            'status' => 'submitted',
-            'submitted_data' => $submittedData,
+            'status' => UserRegistrationInvite::STATUS_SUBMITTED,
+            'submitted_data' => $submitted_data,
             'submitted_at' => now(),
         ]);
 
-        return redirect()->route('login')->with('flash_info', 'Your registration request has been submitted for review.');
+        return redirect()->route('login')->with('invitation_registration_submitted', 'Your registration request has been submitted for review.');
     }
 
     /**
-     * Admin – approve a registration request and create the actual user.
+     * Approve a registration request and create the actual user.
      */
     public function approve(int $id): RedirectResponse
     {
         $invitation = $this->user->findInvitationOrFail($id);
 
-        if ($invitation->status !== 'pending' || ! $invitation->submitted_data) {
+        if (! $invitation->canBeApproved()) {
             return back()->with('flash_error', 'This request cannot be approved.');
         }
 
@@ -146,13 +141,13 @@ class UserInvitationController extends Controller
         $roles = $invitation->roles;
 
         try {
-            $this->userService->storeUser($data, $roles);
+            $this->userService->storeUser($data, \is_array($roles) ? $roles : [$roles]);
         } catch (\InvalidArgumentException $e) {
             return back()->with('flash_error', $e->getMessage());
         }
 
         $invitation->update([
-            'status' => 'approved',
+            'status' => UserRegistrationInvite::STATUS_APPROVED,
             'approved_at' => now(),
         ]);
 
@@ -160,13 +155,57 @@ class UserInvitationController extends Controller
     }
 
     /**
-     * Admin – reject a registration request.
+     * Reject a registration request.
      */
     public function reject(int $id): RedirectResponse
     {
         $invitation = $this->user->findInvitationOrFail($id);
-        $invitation->update(['status' => 'rejected']);
+
+        if (! $invitation->canBeRejected()) {
+            return back()->with('flash_error', 'This request cannot be rejected.');
+        }
+
+        $invitation->update(['status' => UserRegistrationInvite::STATUS_REJECTED]);
 
         return back()->with('flash_success', __('msg.invitation_rejected'));
+    }
+
+    /**
+     * Cancel a registration request.
+     */
+    public function cancel(int $id): RedirectResponse
+    {
+        $invitation = $this->user->findInvitationOrFail($id);
+
+        if (! $invitation->canBeCancelled()) {
+            return back()->with('flash_error', 'This request cannot be cancelled.');
+        }
+
+        $invitation->update(['status' => UserRegistrationInvite::STATUS_CANCELLED]);
+
+        return back()->with('flash_success', __('msg.invitation_cancelled'));
+    }
+
+    /**
+     * Verify the invitation token and return the invitation instance.
+     */
+    private function verifyInvitationToken(string $token): UserRegistrationInvite
+    {
+        /** @var UserRegistrationInvite $invitation */
+        $invitation = $this->user->whereInvitationBuilder(['token' => $token])->firstOrFail();
+
+        if ($invitation->isExpired()) {
+            abort(404, 'This invitation has expired.');
+        }
+
+        if ($invitation->isCancelled()) {
+            abort(404, 'This invitation has been cancelled.');
+        }
+
+        if (! $invitation->isPending()) {
+            abort(404, 'This invitation is no longer valid. It has already been submitted, approved, rejected, or cancelled.');
+        }
+
+        return $invitation;
     }
 }

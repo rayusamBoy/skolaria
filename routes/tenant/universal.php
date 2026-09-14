@@ -81,12 +81,6 @@ Route::group(['middleware' => ['universal']], function () {
 
             Route::resource('notifications', NotificationController::class);
 
-            /************************ AJAX helper endpoints ****************************/
-            Route::prefix('ajax')->group(function () {
-                Route::get('state/{state}', [AjaxController::class, 'get_state'])->name('ajax.get_state');
-                Route::get('lga/{state}', [AjaxController::class, 'get_lga'])->name('ajax.get_lga');
-            });
-
             /*************** Notifications (user-specific settings) **************/
             Route::group(['prefix' => 'notifications'], function () {
                 Route::post('mark/as-read/{notification}', [NotificationController::class, 'mark_as_read'])->name('notifications.mark_as_read');
@@ -95,5 +89,11 @@ Route::group(['middleware' => ['universal']], function () {
                 Route::match(['post', 'put', 'delete'], 'update/firebase/device-token', [NotificationController::class, 'update_firebase_device_token'])->name('notifications.firebase.update_device_token');
             });
         });
+    });
+
+    /************************ AJAX helper endpoints ****************************/
+    Route::prefix('ajax')->group(function () {
+        Route::get('state/{state}', [AjaxController::class, 'get_state'])->name('ajax.get_state');
+        Route::get('lga/{state}', [AjaxController::class, 'get_lga'])->name('ajax.get_lga');
     });
 });

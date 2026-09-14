@@ -37,7 +37,8 @@
                     @endif
                 </label>
                 <input
-                    value="{{ old('name') }}"
+                    value="{{ $mode === 'invitation' && array_key_exists('name', $prefilled ?? []) ? $prefilled['name'] : old('name') }}"
+                    @readonly(array_key_exists('name', $prefilled ?? []))
                     @required($mode !== 'invite')
                     type="text"
                     name="name"
@@ -101,7 +102,8 @@
             <div class="form-group">
                 <label for="email">Email address: </label>
                 <input
-                    value="{{ old('email') }}"
+                    value="{{ $mode === 'invitation' && array_key_exists('email', $prefilled ?? []) ? $prefilled['email'] : old('email') }}"
+                    @readonly(array_key_exists('email', $prefilled ?? []))
                     type="email"
                     id="email"
                     name="email"
@@ -115,7 +117,8 @@
             <div class="form-group">
                 <label for="username">Username: </label>
                 <input
-                    value="{{ old('username') }}"
+                    value="{{ $mode === 'invitation' && array_key_exists('username', $prefilled ?? []) ? $prefilled['username'] : old('username') }}"
+                    @readonly(array_key_exists('username', $prefilled ?? []))
                     type="text"
                     id="username"
                     name="username"
@@ -124,193 +127,196 @@
                 />
             </div>
         </div>
-        {{-- MOBILES --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label id="primary_mobile">Primary Mobile:</label>
-                <input
-                    value="{{ old('primary_mobile') }}"
-                    type="text"
-                    name="primary_mobile"
-                    id="primary_mobile"
-                    class="form-control"
-                    placeholder="+255123456789"
-                />
+        @if ($mode !== 'invite')
+            {{-- MOBILES --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label id="primary_mobile">Primary Mobile:</label>
+                    <input
+                        value="{{ old('primary_mobile') }}"
+                        type="text"
+                        name="primary_mobile"
+                        id="primary_mobile"
+                        class="form-control"
+                        placeholder="+255123456789"
+                    />
+                </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="secondary_mobile">Secondary Mobile:</label>
-                <input
-                    value="{{ old('secondary_mobile') }}"
-                    type="text"
-                    id="secondary_mobile"
-                    name="secondary_mobile"
-                    class="form-control"
-                    placeholder="+255123456789"
-                />
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="secondary_mobile">Secondary Mobile:</label>
+                    <input
+                        value="{{ old('secondary_mobile') }}"
+                        type="text"
+                        id="secondary_mobile"
+                        name="secondary_mobile"
+                        class="form-control"
+                        placeholder="+255123456789"
+                    />
+                </div>
             </div>
-        </div>
+        @endif
     </div>
 
-    <div class="row">
-        {{-- BLOOD GROUP --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="blood_group_id">Blood Group: </label>
-                <select
-                    class="select form-control"
-                    id="blood_group_id"
-                    name="blood_group_id"
-                    data-placeholder="Choose.."
-                >
-                    <option value=""></option>
-                    @foreach ($blood_groups as $bg)
-                        <option @selected(old('blood_group_id') == $bg->id) value="{{ $bg->id }}">
-                            {{ $bg->name }}
-                        </option>
-                    @endforeach
-                </select>
+    @if ($mode !== 'invite')
+        <div class="row">
+            {{-- BLOOD GROUP --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="blood_group_id">Blood Group: </label>
+                    <select
+                        class="select form-control"
+                        id="blood_group_id"
+                        name="blood_group_id"
+                        data-placeholder="Choose.."
+                    >
+                        <option value=""></option>
+                        @foreach ($blood_groups as $bg)
+                            <option @selected(old('blood_group_id') == $bg->id) value="{{ $bg->id }}">
+                                {{ $bg->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            {{-- PASSWORD --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="password">Password: </label>
+                    <input
+                        id="password"
+                        type="password"
+                        autocomplete="current-password"
+                        name="password"
+                        class="form-control"
+                    />
+                </div>
+            </div>
+            {{-- GENDER --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="gender"
+                        >Gender:
+                        @if ($mode !== 'invite')
+                            <span class="text-danger">*</span>
+                        @endif
+                    </label>
+                    <select
+                        class="select form-control"
+                        id="gender"
+                        name="gender"
+                        @required($mode !== 'invite')
+                        data-placeholder="Choose.."
+                    >
+                        <option value=""></option>
+                        @foreach (Usr::getGenders() as $gender)
+                            <option @selected(old('gender') == $gender) value="{{ $gender }}">{{ $gender }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            {{-- NATIONALITY --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="nationality_id"
+                        >Nationality:
+                        @if ($mode !== 'invite')
+                            <span class="text-danger">*</span>
+                        @endif
+                    </label>
+                    <select
+                        onchange="getState(this.value)"
+                        data-placeholder="Choose..."
+                        @required($mode !== 'invite')
+                        name="nationality_id"
+                        id="nationality_id"
+                        class="select-search form-control"
+                    >
+                        <option value=""></option>
+                        @foreach ($nationals as $nal)
+                            <option @selected(old('nationality_id') == $nal->id) value="{{ $nal->id }}">
+                                {{ $nal->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
         </div>
-        {{-- PASSWORD --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="password">Password: </label>
-                <input
-                    id="password"
-                    type="password"
-                    autocomplete="current-password"
-                    name="password"
-                    class="form-control"
-                    @disabled($mode === 'invite')
-                />
-            </div>
-        </div>
-        {{-- GENDER --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="gender"
-                    >Gender:
-                    @if ($mode !== 'invite')
-                        <span class="text-danger">*</span>
-                    @endif
-                </label>
-                <select
-                    class="select form-control"
-                    id="gender"
-                    name="gender"
-                    @required($mode !== 'invite')
-                    data-placeholder="Choose.."
-                >
-                    <option value=""></option>
-                    @foreach (Usr::getGenders() as $gender)
-                        <option @selected(old('gender') == $gender) value="{{ $gender }}">{{ $gender }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
-        {{-- NATIONALITY --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="nationality_id"
-                    >Nationality:
-                    @if ($mode !== 'invite')
-                        <span class="text-danger">*</span>
-                    @endif
-                </label>
-                <select
-                    onchange="getState(this.value)"
-                    data-placeholder="Choose..."
-                    @required($mode !== 'invite')
-                    name="nationality_id"
-                    id="nationality_id"
-                    class="select-search form-control"
-                >
-                    <option value=""></option>
-                    @foreach ($nationals as $nal)
-                        <option @if (old('nationality_id') == $nal->id) selected @endif value="{{ $nal->id }}">
-                            {{ $nal->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
-    </div>
 
-    <div class="row">
-        {{-- STATE --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="state_id"
-                    >State/Region:
-                    @if ($mode !== 'invite')
-                        <span class="text-danger">*</span>
-                    @endif
-                </label>
-                <select
-                    onchange="getLGA(this.value)"
-                    @required($mode !== 'invite')
-                    data-placeholder="Select Nationality First"
-                    class="select-search form-control"
-                    name="state_id"
-                    id="state_id"
-                >
-                    <option value=""></option>
-                </select>
+        <div class="row">
+            {{-- STATE --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="state_id"
+                        >State/Region:
+                        @if ($mode !== 'invite')
+                            <span class="text-danger">*</span>
+                        @endif
+                    </label>
+                    <select
+                        onchange="getLGA(this.value)"
+                        @required($mode !== 'invite')
+                        data-placeholder="Select Nationality First"
+                        class="select-search form-control"
+                        name="state_id"
+                        id="state_id"
+                    >
+                        <option value=""></option>
+                    </select>
+                </div>
+            </div>
+            {{-- LGA --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="lga_id"
+                        >LGA:
+                        @if ($mode !== 'invite')
+                            <span class="text-danger">*</span>
+                        @endif
+                    </label>
+                    <select
+                        @required($mode !== 'invite')
+                        data-placeholder="Select State First"
+                        class="select-search form-control"
+                        name="lga_id"
+                        id="lga_id"
+                    >
+                        <option value=""></option>
+                    </select>
+                </div>
+            </div>
+            {{-- PRIMARY ID --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="primary_identification_number" class="d-block">Primary ID number:</label>
+                    <input
+                        value="{{ old('primary_identification_number') }}"
+                        type="text"
+                        id="primary_identification_number"
+                        name="primary_identification_number"
+                        class="form-control"
+                        placeholder="123456789"
+                    />
+                </div>
+            </div>
+            {{-- SECONDARY ID --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="secondary_identification_number" class="d-block">Secondary ID number:</label>
+                    <input
+                        value="{{ old('secondary_identification_number') }}"
+                        type="text"
+                        id="secondary_identification_number"
+                        name="secondary_identification_number"
+                        class="form-control"
+                        placeholder="12345678123451234512"
+                    />
+                </div>
             </div>
         </div>
-        {{-- LGA --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="lga_id"
-                    >LGA:
-                    @if ($mode !== 'invite')
-                        <span class="text-danger">*</span>
-                    @endif
-                </label>
-                <select
-                    @required($mode !== 'invite')
-                    data-placeholder="Select State First"
-                    class="select-search form-control"
-                    name="lga_id"
-                    id="lga_id"
-                >
-                    <option value=""></option>
-                </select>
-            </div>
-        </div>
-        {{-- PRIMARY ID --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="primary_identification_number" class="d-block">Primary ID number:</label>
-                <input
-                    value="{{ old('primary_identification_number') }}"
-                    type="text"
-                    id="primary_identification_number"
-                    name="primary_identification_number"
-                    class="form-control"
-                    placeholder="123456789"
-                />
-            </div>
-        </div>
-        {{-- SECONDARY ID --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="secondary_identification_number" class="d-block">Secondary ID number:</label>
-                <input
-                    value="{{ old('secondary_identification_number') }}"
-                    type="text"
-                    id="secondary_identification_number"
-                    name="secondary_identification_number"
-                    class="form-control"
-                    placeholder="12345678123451234512"
-                />
-            </div>
-        </div>
-    </div>
+    @endif
 
-    <div class="display-none" id="parent-data">
+    <div @class(isset($user_is_parent) && $user_is_parent === true ? [] : ['display-none']) id="parent-data">
         <div class="row">
             {{-- CLOSE RELATIVE NAME --}}
             <div class="col-md-6">
@@ -322,11 +328,11 @@
                         @endif
                     </label>
                     <input
-                        disabled
                         autocomplete="off"
                         id="relative_name"
                         name="relative_name"
                         @required($mode !== 'invite')
+                        @disabled(! (isset($user_is_parent) && $user_is_parent === true))
                         value="{{ old('relative_name') }}"
                         type="text"
                         class="form-control text-capitalize"
@@ -344,11 +350,11 @@
                         @endif
                     </label>
                     <input
-                        disabled
                         value="{{ old('relation') }}"
                         id="relation"
                         type="text"
                         @required($mode !== 'invite')
+                        @disabled(! (isset($user_is_parent) && $user_is_parent === true))
                         name="relation"
                         class="form-control"
                         placeholder=""
@@ -368,10 +374,10 @@
                         @endif
                     </label>
                     <input
-                        disabled
                         autocomplete="off"
                         id="occupation"
                         @required($mode !== 'invite')
+                        @disabled(! (isset($user_is_parent) && $user_is_parent === true))
                         name="occupation"
                         value="{{ old('occupation') }}"
                         type="text"
@@ -390,9 +396,9 @@
                         @endif
                     </label>
                     <input
-                        disabled
                         value="{{ old('relative_primary_mobile') }}"
                         @required($mode !== 'invite')
+                        @disabled(! (isset($user_is_parent) && $user_is_parent === true))
                         type="text"
                         id="relative_primary_mobile"
                         name="relative_primary_mobile"
@@ -405,59 +411,59 @@
                 <div class="form-group">
                     <label for="relative_secondary_mobile">Close Relative Secondary Mobile: </label>
                     <input
-                        disabled
                         value="{{ old('relative_secondary_mobile') }}"
                         type="text"
                         id="relative_secondary_mobile"
                         name="relative_secondary_mobile"
                         class="form-control"
                         placeholder="+255123456789"
+                        @disabled(! (isset($user_is_parent) && $user_is_parent === true))
                     />
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        {{-- RELIGION --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="religion"
-                    >Religion:
-                    @if ($mode !== 'invite')
-                        <span class="text-danger">*</span>
-                    @endif
-                </label>
-                <select
-                    @required($mode !== 'invite')
-                    data-placeholder="Choose..."
-                    name="religion"
-                    id="religion"
-                    class="select-search form-control"
-                >
-                    <option value=""></option>
-                    @foreach (Usr::getReligions() as $rel)
-                        <option @selected(old('religion') == $rel) value="{{ $rel }}">{{ $rel }}</option>
-                    @endforeach
-                </select>
+    @if ($mode !== 'invite')
+        <div class="row">
+            {{-- RELIGION --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="religion"
+                        >Religion:
+                        @if ($mode !== 'invite')
+                            <span class="text-danger">*</span>
+                        @endif
+                    </label>
+                    <select
+                        @required($mode !== 'invite')
+                        data-placeholder="Choose..."
+                        name="religion"
+                        id="religion"
+                        class="select-search form-control"
+                    >
+                        <option value=""></option>
+                        @foreach (Usr::getReligions() as $rel)
+                            <option @selected(old('religion') == $rel) value="{{ $rel }}">{{ $rel }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
-        </div>
-        {{-- DOB --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="date_of_birth">Date of Birth:</label>
-                <input
-                    name="date_of_birth"
-                    value="{{ old('date_of_birth') }}"
-                    type="text"
-                    id="date_of_birth"
-                    class="form-control date-pick"
-                    placeholder="Select Date..."
-                />
+            {{-- DOB --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="date_of_birth">Date of Birth:</label>
+                    <input
+                        name="date_of_birth"
+                        value="{{ old('date_of_birth') }}"
+                        type="text"
+                        id="date_of_birth"
+                        class="form-control date-pick"
+                        placeholder="Select Date..."
+                    />
+                </div>
             </div>
-        </div>
-        {{-- PASSPORT --}}
-        @if ($mode !== 'invite')
+            {{-- PASSPORT --}}
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="photo" class="d-block">Upload Passport Photo:</label>
@@ -472,8 +478,8 @@
                     <span class="form-text text-muted">Accepted Images: jpeg, png. Max file size 2Mb</span>
                 </div>
             </div>
-        @endif
-    </div>
+        </div>
+    @endif
 </fieldset>
 
 {{-- STAFF DATA --}}
@@ -488,9 +494,10 @@
                     type="text"
                     name="employment_date"
                     id="employment_date"
-                    class="form-control date-pick"
                     placeholder="Select Date..."
-                    value="{{ old('employment_date') }}"
+                    value="{{ $mode === 'invitation' && array_key_exists('employment_date', $prefilled ?? []) ? $prefilled['employment_date'] : old('employment_date') }}"
+                    @readonly(array_key_exists('employment_date', $prefilled ?? []))
+                    @class(array_key_exists('employment_date', $prefilled ?? []) ? ['form-control'] : ['form-control', 'date-pick'])
                 />
             </div>
         </div>
@@ -502,9 +509,10 @@
                     type="text"
                     name="confirmation_date"
                     id="confirmation_date"
-                    class="form-control date-pick"
                     placeholder="Select Date..."
-                    value="{{ old('confirmation_date') }}"
+                    value="{{ $mode === 'invitation' && array_key_exists('confirmation_date', $prefilled ?? []) ? $prefilled['confirmation_date'] : old('confirmation_date') }}"
+                    @readonly(array_key_exists('confirmation_date', $prefilled ?? []))
+                    @class(array_key_exists('confirmation_date', $prefilled ?? []) ? ['form-control'] : ['form-control', 'date-pick'])
                 />
             </div>
         </div>
@@ -518,7 +526,8 @@
                     id="licence_number"
                     class="form-control"
                     placeholder="Ie., LTT 12345"
-                    value="{{ old('licence_number') }}"
+                    value="{{ $mode === 'invitation' && array_key_exists('licence_number', $prefilled ?? []) ? $prefilled['licence_number'] : old('licence_number') }}"
+                    @readonly(array_key_exists('licence_number', $prefilled ?? []))
                 />
             </div>
         </div>
@@ -532,7 +541,8 @@
                     id="file_number"
                     class="form-control"
                     placeholder="EFP/123/12/1"
-                    value="{{ old('file_number') }}"
+                    value="{{ $mode === 'invitation' && array_key_exists('file_number', $prefilled ?? []) ? $prefilled['file_number'] : old('file_number') }}"
+                    @readonly(array_key_exists('file_number', $prefilled ?? []))
                 />
             </div>
         </div>
@@ -548,7 +558,8 @@
                     id="social_security_number"
                     class="form-control"
                     min="1"
-                    value="{{ old('social_security_number') }}"
+                    value="{{ $mode === 'invitation' && array_key_exists('social_security_number', $prefilled ?? []) ? $prefilled['social_security_number'] : old('social_security_number') }}"
+                    @readonly(array_key_exists('social_security_number', $prefilled ?? []))
                 />
             </div>
         </div>
@@ -562,7 +573,8 @@
                     id="employment_number"
                     class="form-control"
                     min="1"
-                    value="{{ old('employment_number') }}"
+                    value="{{ $mode === 'invitation' && array_key_exists('employment_number', $prefilled ?? []) ? $prefilled['employment_number'] : old('employment_number') }}"
+                    @readonly(array_key_exists('employment_number', $prefilled ?? []))
                 />
             </div>
         </div>
@@ -575,87 +587,94 @@
                     name="tin_number"
                     id="tin_number"
                     class="form-control"
-                    value="{{ old('tin_number') }}"
+                    value="{{ $mode === 'invitation' && array_key_exists('tin_number', $prefilled ?? []) ? $prefilled['tin_number'] : old('tin_number') }}"
+                    @readonly(array_key_exists('tin_number', $prefilled ?? []))
                 />
             </div>
         </div>
-        {{-- BANK ACCOUNT NUMBER --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="bank_account_number">Bank Account Number:</label>
-                <input
-                    type="number"
-                    name="bank_account_number"
-                    id="bank_account_number"
-                    class="form-control"
-                    value="{{ old('bank_account_number') }}"
-                />
+        @if ($mode !== 'invite')
+            {{-- BANK ACCOUNT NUMBER --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="bank_account_number">Bank Account Number:</label>
+                    <input
+                        type="number"
+                        name="bank_account_number"
+                        id="bank_account_number"
+                        class="form-control"
+                        value="{{ old('bank_account_number') }}"
+                    />
+                </div>
             </div>
-        </div>
+        @endif
     </div>
+    @if ($mode !== 'invite')
+        <div class="row">
+            {{-- BANK NAME --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="bank_name">Bank Name:</label>
+                    <input
+                        type="text"
+                        name="bank_name"
+                        id="bank_name"
+                        class="form-control"
+                        value="{{ old('bank_name') }}"
+                    />
+                </div>
+            </div>
+            {{-- EDUCATION LEVEL --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="education_level">Education Level:</label>
+                    <select
+                        name="education_level"
+                        id="education_level"
+                        class="form-control select-search"
+                        data-placeholder="Choose.."
+                    >
+                        <option value=""></option>
+                        @foreach (Usr::getEducationLevels() as $lv)
+                            <option value="{{ $lv }}" @selected(old('education_level') == $lv)>{{ $lv }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            {{-- COLLEDGE --}}
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="college_attended">College Attended:</label>
+                    <input
+                        type="text"
+                        name="college_attended"
+                        id="college_attended"
+                        class="form-control"
+                        value="{{ old('college_attended') }}"
+                    />
+                </div>
+            </div>
+        </div>
+    @endif
     <div class="row">
-        {{-- BANK NAME --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="bank_name">Bank Name:</label>
-                <input
-                    type="text"
-                    name="bank_name"
-                    id="bank_name"
-                    class="form-control"
-                    value="{{ old('bank_name') }}"
-                />
+        @if ($mode !== 'invite')
+            {{-- GRADUATION YEAR --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="year_graduated">Graduation Year:</label>
+                    <select
+                        name="year_graduated"
+                        id="year_graduated"
+                        class="form-control select-search"
+                        data-placeholder="Choose.."
+                    >
+                        <option value=""></option>
+                        @for ($y = date('Y', strtotime('-30 years')); $y <= date('Y'); $y++)
+                            <option value="{{ $y }}" @selected(old('year_graduated') == $y)>{{ $y }}</option>
+                        @endfor
+                    </select>
+                </div>
             </div>
-        </div>
-        {{-- EDUCATION LEVEL --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="education_level">Education Level:</label>
-                <select
-                    name="education_level"
-                    id="education_level"
-                    class="form-control select-search"
-                    data-placeholder="Choose.."
-                >
-                    <option value=""></option>
-                    @foreach (Usr::getEducationLevels() as $lv)
-                        <option value="{{ $lv }}" @selected(old('education_level') == $lv)>{{ $lv }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
-        {{-- COLLEDGE --}}
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="college_attended">College Attended:</label>
-                <input
-                    type="text"
-                    name="college_attended"
-                    id="college_attended"
-                    class="form-control"
-                    value="{{ old('college_attended') }}"
-                />
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        {{-- GRADUATION YEAR --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="year_graduated">Graduation Year:</label>
-                <select
-                    name="year_graduated"
-                    id="year_graduated"
-                    class="form-control select-search"
-                    data-placeholder="Choose.."
-                >
-                    <option value=""></option>
-                    @for ($y = date('Y', strtotime('-30 years')); $y <= date('Y'); $y++)
-                        <option value="{{ $y }}" @selected(old('year_graduated') == $y)>{{ $y }}</option>
-                    @endfor
-                </select>
-            </div>
-        </div>
+        @endif
         {{-- DESIGNATION --}}
         <div class="col-md-3">
             <div class="form-group">
@@ -663,7 +682,14 @@
                 <select name="designation" id="designation" class="form-control select" data-placeholder="Choose..">
                     <option value=""></option>
                     @foreach (Usr::getStaffDesignations() as $designation)
-                        <option value="{{ $designation }}" @selected(old('designation') == $designation)>
+                        @php
+                            $current_designation = $mode === 'invitation' && array_key_exists('designation', $prefilled ?? []) ? $prefilled['designation'] : old('designation')
+                        @endphp
+                        <option
+                            value="{{ $designation }}"
+                            @disabled(array_key_exists('designation', $prefilled ?? []) && $current_designation != $designation)
+                            @selected($current_designation == $designation)
+                        >
                             {{ $designation }}
                         </option>
                     @endforeach
@@ -682,38 +708,51 @@
                 >
                     <option value=""></option>
                     @for ($i = 1; $i <= 30; $i++)
-                        <option value="{{ $i }}" @selected(old('number_of_periods') == $i)>{{ $i }}</option>
+                        @php
+                            $current_no_of_periods = $mode === 'invitation' && array_key_exists('number_of_periods', $prefilled ?? []) ? $prefilled['number_of_periods'] : old('number_of_periods')
+                        @endphp
+                        <option
+                            value="{{ $i }}"
+                            @disabled(array_key_exists('number_of_periods', $prefilled ?? []) && $current_no_of_periods != $i)
+                            @selected($current_no_of_periods == $i)
+                        >
+                            {{ $i }}
+                        </option>
                     @endfor
                 </select>
             </div>
         </div>
-        {{-- PLACE OF LIVING --}}
-        <div class="col-md-3">
-            <div class="form-group">
-                <label for="place_of_living">Place of Living:</label>
-                <input
-                    type="text"
-                    name="place_of_living"
-                    id="place_of_living"
-                    class="form-control"
-                    placeholder="Where you live?"
-                    value="{{ old('place_of_living') }}"
-                />
+        @if ($mode !== 'invite')
+            {{-- PLACE OF LIVING --}}
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="place_of_living">Place of Living:</label>
+                    <input
+                        type="text"
+                        name="place_of_living"
+                        id="place_of_living"
+                        class="form-control"
+                        placeholder="Where you live?"
+                        value="{{ old('place_of_living') }}"
+                    />
+                </div>
+            </div>
+        @endif
+    </div>
+    @if ($mode !== 'invite')
+        <div class="row">
+            {{-- SUBJECTS STUDIED --}}
+            <div class="col-12">
+                <div class="form-group">
+                    <label for="subjects_studied">Subjects Studied <span class="text-info">(comma separated)</span></label>
+                    <textarea
+                        name="subjects_studied"
+                        id="subjects_studied"
+                        class="form-control"
+                        placeholder="ie., Math, Science"
+                    >{{ old('subjects_studied') }}</textarea>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="row">
-        {{-- SUBJECTS STUDIED --}}
-        <div class="col-12">
-            <div class="form-group">
-                <label for="subjects_studied">Subjects Studied <span class="text-info">(comma separated)</span></label>
-                <textarea
-                    name="subjects_studied"
-                    id="subjects_studied"
-                    class="form-control"
-                    placeholder="ie., Math, Science"
-                >{{ old('subjects_studied') }}</textarea>
-            </div>
-        </div>
-    </div>
+    @endif
 </fieldset>

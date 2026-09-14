@@ -124,10 +124,11 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             Route::post('toggle/staff-data-editing', [UserController::class, 'toggle_staff_data_editing'])->name('users.toggle_staff_data_editing');
             Route::post('update/blocked-state', [UserController::class, 'toggle_user_block'])->name('users.toggle_user_block');
             Route::get('my-profile/{user}', [UserController::class, 'show_profile'])->name('users_profile.show')->middleware('decodeRouteParams');
-            Route::get('invitations', [UserInvitationController::class, 'index'])->name('users.invitations.index');
-            Route::post('invite', [UserInvitationController::class, 'store'])->name('users.invitations.store');
+            Route::get('invitations', [UserInvitationController::class, 'view_registrations'])->name('users.invitations.index');
+            Route::post('invite', [UserInvitationController::class, 'invite_user'])->name('users.invitations.store');
             Route::post('registrations/{id}/approve', [UserInvitationController::class, 'approve'])->name('users.registrations.approve');
             Route::post('registrations/{id}/reject', [UserInvitationController::class, 'reject'])->name('users.registrations.reject');
+            Route::post('registrations/{id}/cancel', [UserInvitationController::class, 'cancel'])->name('users.registrations.cancel');
         });
 
         /*************** Query Builder (reports / printing) *****************/
@@ -357,7 +358,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         });
 
         /************************ PARENT ****************************/
-        Route::prefix('parent')->group(function () {
+        Route::prefix('parent')->middleware('role:parent')->group(function () {
             Route::get('my-children', [ChildrenController::class, 'children'])->name('parent.my_children');
         });
 
@@ -379,9 +380,11 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
 
         // Resourceful controller for tickets
         Route::resource('tickets', TicketController::class);
-
-        // Public registration routes (no auth)
-        Route::get('/register/{token}', [UserInvitationController::class, 'show_registration_form'])->name('users.registrations.show');
-        Route::post('/register/{token}', [UserInvitationController::class, 'submit_registration'])->name('users.registrations.submit');
     });
+});
+
+// Public registration routes (no auth)
+Route::middleware('guest')->group(function () {
+    Route::get('/register/{token}', [UserInvitationController::class, 'show_registration_form'])->name('users.registrations.show');
+    Route::post('/register/{token}', [UserInvitationController::class, 'submit_registration'])->name('users.registrations.submit');
 });

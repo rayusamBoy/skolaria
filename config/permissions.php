@@ -142,7 +142,22 @@ return [
                 'view_registrations' => [
                     'permission' => 'users.registrations',
                     'label' => 'View Registration Requests',
-                    'description' => 'Review and approve pending user registrations.',
+                    'description' => 'Review user registrations.',
+                ],
+                'approve' => [
+                    'permission' => 'users.approve',
+                    'label' => 'Approve User Registration Request',
+                    'description' => 'Store the user with pending registration request.',
+                ],
+                'reject' => [
+                    'permission' => 'users.reject',
+                    'label' => 'Reject User Registration Request',
+                    'description' => 'Reject the user with pending registration request.',
+                ],
+                'cancel' => [
+                    'permission' => 'users.cancel',
+                    'label' => 'Cancel User Registration Request',
+                    'description' => 'Cancel the user with pending registration request.',
                 ],
             ],
 
@@ -601,14 +616,6 @@ return [
                     'permission' => 'message_threads.add_message',
                     'label' => 'Add New Message',
                     'description' => 'Add a new message to an existing thread.',
-                ],
-            ],
-
-            'childrens' => [
-                'children' => [
-                    'permission' => 'childrens.children',
-                    'label' => 'View Children',
-                    'description' => 'Access children information.',
                 ],
             ],
 
