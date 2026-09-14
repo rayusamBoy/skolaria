@@ -866,6 +866,9 @@ if (typeof Swal !== "undefined") {
             toast.addEventListener("mouseleave", Swal.resumeTimer);
         },
     });
+
+    window.Modal = Modal;
+    window.Toast = Toast;
 }
 
 /**
