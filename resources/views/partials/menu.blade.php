@@ -589,7 +589,7 @@
                                             Users
                                         </a>
                                         <ul class="nav nav-group-sub">
-                                            @can($tenant_permissions['books']['index']['permission'])
+                                            @can($tenant_permissions['users']['index']['permission'])
                                                 <li class="nav-item">
                                                     <a
                                                         href="{{ route('users.index') }}"
@@ -599,14 +599,16 @@
                                                     </a>
                                                 </li>
                                             @endcan
-                                            <li class="nav-item">
-                                                <a
-                                                    href="{{ route('users.invitations.index') }}"
-                                                    class="nav-link {{ request()->routeIs('users.invitations.*') ? 'active' : '' }}"
-                                                >
-                                                    Invitations
-                                                </a>
-                                            </li>
+                                            @can($tenant_permissions['users']['view_registrations']['permission'])
+                                                <li class="nav-item">
+                                                    <a
+                                                        href="{{ route('users.invitations.index') }}"
+                                                        class="nav-link {{ request()->routeIs('users.invitations.*') ? 'active' : '' }}"
+                                                    >
+                                                        Invitations
+                                                    </a>
+                                                </li>
+                                            @endif
                                         </ul>
                                     </li>
                                 @endcanany
