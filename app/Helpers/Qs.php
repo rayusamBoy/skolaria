@@ -155,8 +155,8 @@ class Qs
         $data = [
             'User' => 'user_id',
             'Relative Full name' => 'relative_name',
-            'Relative secondary mobile' => 'secondary_mobile',
-            'Relative primary mobile' => 'primary_mobile',
+            'Relative secondary mobile' => 'relative_secondary_mobile',
+            'Relative primary mobile' => 'relative_primary_mobile',
             'Relation with relative' => 'relation',
         ];
 
