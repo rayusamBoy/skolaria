@@ -1,6 +1,6 @@
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.1/workbox-sw.js');
 
-workbox.recipes.pageCache();
+// workbox.recipes.pageCache();
 
 workbox.recipes.googleFontsCache();
 
