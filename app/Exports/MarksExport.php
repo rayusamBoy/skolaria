@@ -19,8 +19,6 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class MarksExport implements FromView, ShouldAutoSize, WithEvents, WithProperties, WithStyles
 {
-    protected array $data;
-
     // S/N, ADMISSION NUMBER, FULL NAME, GENDER, SECTION
     protected const int INITIAL_COLS = 5;
 
@@ -29,10 +27,7 @@ class MarksExport implements FromView, ShouldAutoSize, WithEvents, WithPropertie
 
     protected const string SHEET_PASSWORD = 'AllahKnowsBest';
 
-    public function __construct(array $data)
-    {
-        $this->data = $data;
-    }
+    public function __construct(protected array $data) {}
 
     public function properties(): array
     {
