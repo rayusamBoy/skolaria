@@ -44,14 +44,14 @@
                                     {{-- Class --}}
                                     <div class="form-group row">
                                         <label for="my_class_id" class="col-lg-3 col-form-label font-weight-semibold"
-                                            >Select Class <span class="text-danger">*</span></label>
+                                            >Select Class(es) <span class="text-danger">*</span></label>
                                         <div class="col-lg-9">
                                             <select
                                                 required
                                                 data-placeholder="Select Class"
-                                                onchange="getPreDefinedSubjects()"
                                                 class="form-control select"
-                                                name="my_class_id"
+                                                multiple="multiple"
+                                                name="my_class_ids[]"
                                                 id="my_class_id"
                                             >
                                                 <option value=""></option>
@@ -85,7 +85,9 @@
                                                 name="name"
                                                 id="name"
                                             >
-                                                <option disabled value="">Select class first</option>
+                                                @foreach (Usr::getPredefinedSubjects() as $subject)
+                                                    <option value="{{ $subject }}">{{ $subject }}</option>
+                                                @endforeach
                                             </select>
                                         </div>
                                     </div>

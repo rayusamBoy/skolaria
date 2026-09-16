@@ -55,8 +55,13 @@ class SubjectController extends Controller
      */
     public function store(SubjectCreate $req): JsonResponse
     {
-        $data = $req->only($this->my_class->getSubjectData());
-        $this->my_class->createSubject($data);
+        $data = $req->only($this->my_class->getSubjectData(['my_class_id']));
+        $class_ids = $req->validated('my_class_ids');
+
+        foreach ($class_ids as $class_id) {
+            $data['my_class_id'] = $class_id;
+            $this->my_class->createSubject($data);
+        }
 
         return Mk::jsonStoreOk();
     }
@@ -83,11 +88,26 @@ class SubjectController extends Controller
      */
     public function edit(int $id): View|RedirectResponse
     {
-        $subject = $this->my_class->findSubject($id);
+        $subject = $this->my_class
+            ->whereSubject(['id' => $id])
+            ->first();
 
-        return $subject !== null
-            ? view('pages.subjects.edit', ['sub' => $subject])
-            : Mk::goWithDanger('subjects.index');
+        if (! $subject) {
+            return Mk::goWithDanger('subjects.index');
+        }
+
+        $subjects = $this->my_class->querySubject()->where([
+            'name' => $subject->name,
+            'is_core' => $subject->is_core,
+            'slug' => $subject->slug,
+            'credits' => $subject->credits,
+        ])->where('id', '<>', $subject->id)->with('my_class')
+            ->get()->pluck('my_class', 'id');
+
+        return view('pages.subjects.edit', [
+            'sub' => $subject,
+            'my_classes' => $subjects,
+        ]);
     }
 
     /**
@@ -116,7 +136,13 @@ class SubjectController extends Controller
     public function update(SubjectUpdate $req, int $id): JsonResponse
     {
         $data = $req->only($this->my_class->getSubjectData(['my_class_id']));
-        $this->my_class->updateSubject($id, $data);
+        $ids[] = $id;
+
+        if($req->boolean('update_for_other_classes') === true){
+            $ids = [...$ids, ...$req->validated('subject_ids')];
+        }
+        
+        $this->my_class->updateSubject($ids, $data);
 
         return Mk::jsonUpdateOk();
     }

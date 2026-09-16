@@ -287,9 +287,9 @@ class MyClassRepo
     /**
      * Update a subject by ID.
      */
-    public function updateSubject(int $id, array $data): int
+    public function updateSubject(array $ids, array $data): int
     {
-        return Subject::where('id', $id)->update($data);
+        return Subject::whereIn('id', $ids)->update($data);
     }
 
     /**
@@ -338,6 +338,14 @@ class MyClassRepo
         $data = ['subject_id', 'section_id', 'teacher_id', 'students_ids'];
 
         return $remove ? array_values(array_diff($data, $remove)) : $data;
+    }
+
+    /**
+     * Begin query for subjects.
+     */
+    public function querySubject(): Builder|Subject
+    {
+        return Subject::query();
     }
 
     /************* Subject records *******************/

@@ -30,6 +30,8 @@ class SubjectUpdate extends FormRequest
             'slug' => 'nullable|string|min:2|max:7',
             'is_core' => 'required|in:0,1',
             'credits' => 'required|numeric|max:50|min:0',
+            'update_for_other_classes' => 'sometimes',
+            'subject_ids' => 'nullable|array'
         ];
     }
 

@@ -22,7 +22,9 @@
                         @method('PUT')
                         {{-- Class --}}
                         <div class="form-group row">
-                            <label for="my_class_id" class="col-lg-3 col-form-label font-weight-semibold">Class</label>
+                            <label for="my_class_id" class="col-lg-3 col-form-label font-weight-semibold">
+                                Class
+                            </label>
                             <div class="col-lg-9">
                                 <input
                                     type="text"
@@ -33,6 +35,41 @@
                                 <input type="hidden" name="my_class_id" value="{{ $sub->my_class_id }}" />
                             </div>
                         </div>
+                        {{-- Other Classes --}}
+                        @if ($my_classes->isNotEmpty())
+                        <div class="form-group row">
+                            <label for="subject_ids" class="col-lg-3 col-form-label font-weight-semibold">
+                                Other Classes
+                                <i
+                                    class="material-symbols-rounded text-warning float-right"
+                                    data-toggle="tooltip"
+                                    title="These classes share the same exact subject details as the main class. Turn on the switch to update the subject for these classes as well."
+                                >info</i>
+                            </label>
+
+                            <div class="col-lg-7">
+                                <select
+                                    required
+                                    class="form-control select"
+                                    multiple="multiple"
+                                    name="subject_ids[]"
+                                    id="subject_ids"
+                                >
+                                    <option value=""></option>
+                                    @foreach ($my_classes as $subject_id => $my_class)
+                                        <option selected value="{{ $subject_id }}">{{ $my_class->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-lg-2">
+                                <label class="form-switch m-0">
+                                    <input name="update_for_other_classes" type="checkbox" />
+                                    <i></i>
+                                </label>
+                            </div>
+                        </div>
+                        @endif
                         {{-- Name --}}
                         <div class="form-group row">
                             <label class="col-lg-3 col-form-label font-weight-semibold">Name</label>
