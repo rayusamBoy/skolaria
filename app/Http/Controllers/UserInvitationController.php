@@ -95,6 +95,7 @@ class UserInvitationController extends Controller
         $data['permissions'] = $this->permission->getAllPermissions();
         $data['prefilled'] = array_filter($invitation->prefilled_data) ?? [];
         $data['user_is_parent'] = \in_array(config('roles.default_roles.tenant.parent'), $user_invite_roles);
+        $data['invitation'] = $invitation;
 
         return view('auth.invitation_register', $data);
     }
