@@ -51,25 +51,25 @@
         </div>
         {{-- ADDRESS --}}
         @if ($mode !== 'invite')
-        <div class="col-md-4">
-            <div class="form-group">
-                <label for="address"
-                    >Address:
-                    @if ($mode !== 'invite')
-                        <span class="text-danger">*</span>
-                    @endif
-                </label>
-                <input
-                    value="{{ old('address') }}"
-                    class="form-control"
-                    id="address"
-                    placeholder="Address"
-                    name="address"
-                    type="text"
-                    @required($mode !== 'invite')
-                />
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="address"
+                        >Address:
+                        @if ($mode !== 'invite')
+                            <span class="text-danger">*</span>
+                        @endif
+                    </label>
+                    <input
+                        value="{{ old('address') }}"
+                        class="form-control"
+                        id="address"
+                        placeholder="Address"
+                        name="address"
+                        type="text"
+                        @required($mode !== 'invite')
+                    />
+                </div>
             </div>
-        </div>
         @endif
     </div>
 
