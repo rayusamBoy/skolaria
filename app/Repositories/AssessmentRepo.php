@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Assessment;
 use App\Models\AssessmentRecord;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -113,7 +114,7 @@ class AssessmentRepo
      * @param  array  $unique_by  Columns that identify each record
      * @return int Number of affected rows
      */
-    public function massUpdateRecords(array $values, array $unique_by = ['id']): int
+    public function massUpdateRecords(array $values, array $unique_by = ['id']): int|Builder
     {
         return AssessmentRecord::massUpdate(
             values: $values,

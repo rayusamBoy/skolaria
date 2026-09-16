@@ -68,7 +68,7 @@ class PinRepo
     /**
      * Raw query builder for pins matching conditions.
      */
-    public function getPinBuilder(array $where): Builder
+    public function getPinBuilder(array $where): Builder|Pin
     {
         return Pin::where($where);
     }

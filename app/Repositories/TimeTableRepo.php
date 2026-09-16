@@ -53,7 +53,7 @@ class TimeTableRepo
     /**
      * Get a query builder for time slots matching conditions, ordered by start time.
      */
-    public function getTimeSlotsQuery(array $where): Builder
+    public function getTimeSlotsQuery(array $where): Builder|TimeSlot
     {
         return TimeSlot::orderBy('timestamp_from')->where($where);
     }

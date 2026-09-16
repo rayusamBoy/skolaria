@@ -45,7 +45,7 @@ class StudentRepo
     /**
      * Query builder for active (not graduated) student records.
      */
-    public function getActiveStudentsQuery(): Builder
+    public function getActiveStudentsQuery(): Builder|StudentRecord
     {
         return StudentRecord::where('is_graduated', false);
     }
@@ -54,7 +54,7 @@ class StudentRepo
      * Query builder for promotions where the student graduated.
      * (The method name is historical; it returns the Promotion model, not StudentRecord.)
      */
-    public function getGraduatedPromotionsQuery(): Builder
+    public function getGraduatedPromotionsQuery(): Builder|Promotion
     {
         return Promotion::where('is_graduated', true);
     }

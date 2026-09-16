@@ -4,7 +4,8 @@ namespace App\Repositories;
 
 use App\Models\Grade;
 use App\Models\Mark;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Support\Collection;
 
 class MarkRepo
@@ -14,7 +15,7 @@ class MarkRepo
     /**
      * Get marks for a set of student IDs, with eager loaded relations.
      */
-    public function getMarksForStudents(array $ids, array $with = ['subject', 'user']): Builder
+    public function getMarksForStudents(array $ids, array $with = ['subject', 'user']): Builder|Mark
     {
         return Mark::with($with)->whereIn('student_id', $ids);
     }
@@ -22,7 +23,7 @@ class MarkRepo
     /**
      * Get marks for a specific student, with subject and user relations.
      */
-    public function getMarksByStudentId(int $student_id): Builder
+    public function getMarksByStudentId(int $student_id): EloquentBuilder|Mark
     {
         return Mark::with(['subject', 'user'])->where('student_id', $student_id);
     }
