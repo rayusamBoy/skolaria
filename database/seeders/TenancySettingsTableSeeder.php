@@ -19,7 +19,7 @@ class TenancySettingsTableSeeder extends Seeder
         \DB::table('settings')->insert([
             0 => [
                 'key' => 'current_session',
-                'value' => date('Y') - 1 .'-'.date('Y'),
+                'value' => date('Y') .'-'.date('Y') - 1,
                 'created_at' => null,
                 'updated_at' => null,
             ],
