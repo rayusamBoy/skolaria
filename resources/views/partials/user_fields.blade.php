@@ -8,7 +8,8 @@
                 <label for="roles">Select Role(s): <span class="text-danger">*</span></label>
                 <select
                     class="form-control select"
-                    @disabled($mode === 'invitation')
+                    {{-- PREVIEW: also disable for preview mode --}}
+                    @disabled(in_array($mode, ['invitation', 'preview'], true))
                     name="roles"
                     multiple="multiple"
                     placeholder="Select Role(s)"
@@ -37,8 +38,8 @@
                     @endif
                 </label>
                 <input
-                    value="{{ $mode === 'invitation' && array_key_exists('name', $prefilled ?? []) ? $prefilled['name'] : old('name') }}"
-                    @readonly(array_key_exists('name', $prefilled ?? []))
+                    value="{{ $mode === 'invitation' && array_key_exists('name', $prefilled) ? $prefilled['name'] : old('name') }}"
+                    @readonly(array_key_exists('name', $prefilled))
                     @required($mode !== 'invite')
                     type="text"
                     name="name"
@@ -69,6 +70,7 @@
             </div>
         </div>
     </div>
+
     @if ($mode === 'create')
         <div class="row">
             <div class="col-12">
@@ -102,8 +104,8 @@
             <div class="form-group">
                 <label for="email">Email address: </label>
                 <input
-                    value="{{ $mode === 'invitation' && array_key_exists('email', $prefilled ?? []) ? $prefilled['email'] : old('email') }}"
-                    @readonly(array_key_exists('email', $prefilled ?? []))
+                    value="{{ $mode === 'invitation' && array_key_exists('email', $prefilled) ? $prefilled['email'] : old('email') }}"
+                    @readonly(array_key_exists('email', $prefilled))
                     type="email"
                     id="email"
                     name="email"
@@ -117,8 +119,8 @@
             <div class="form-group">
                 <label for="username">Username: </label>
                 <input
-                    value="{{ $mode === 'invitation' && array_key_exists('username', $prefilled ?? []) ? $prefilled['username'] : old('username') }}"
-                    @readonly(array_key_exists('username', $prefilled ?? []))
+                    value="{{ $mode === 'invitation' && array_key_exists('username', $prefilled) ? $prefilled['username'] : old('username') }}"
+                    @readonly(array_key_exists('username', $prefilled))
                     type="text"
                     id="username"
                     name="username"
@@ -179,19 +181,24 @@
                     </select>
                 </div>
             </div>
-            {{-- PASSWORD --}}
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="password">Password: </label>
-                    <input
-                        id="password"
-                        type="password"
-                        autocomplete="current-password"
-                        name="password"
-                        class="form-control"
-                    />
+
+            {{-- PREVIEW: hide password in preview mode --}}
+            @unless ($mode === 'preview')
+                {{-- PASSWORD --}}
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="password">Password: </label>
+                        <input
+                            id="password"
+                            type="password"
+                            autocomplete="current-password"
+                            name="password"
+                            class="form-control"
+                        />
+                    </div>
                 </div>
-            </div>
+            @endunless
+
             {{-- GENDER --}}
             <div class="col-md-3">
                 <div class="form-group">
@@ -463,21 +470,24 @@
                     />
                 </div>
             </div>
-            {{-- PASSPORT --}}
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="photo" class="d-block">Upload Passport Photo:</label>
-                    <input
-                        value="{{ old('photo') }}"
-                        accept="image/*"
-                        type="file"
-                        id="photo"
-                        name="photo"
-                        class="form-input-styled"
-                    />
-                    <span class="form-text text-muted">Accepted Images: jpeg, png. Max file size 2Mb</span>
+
+            @unless ($mode === 'preview')
+                {{-- PASSPORT --}}
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="photo" class="d-block">Upload Passport Photo:</label>
+                        <input
+                            value="{{ old('photo') }}"
+                            accept="image/*"
+                            type="file"
+                            id="photo"
+                            name="photo"
+                            class="form-input-styled"
+                        />
+                        <span class="form-text text-muted">Accepted Images: jpeg, png. Max file size 2Mb</span>
+                    </div>
                 </div>
-            </div>
+            @endunless
         </div>
     @endif
 </fieldset>
@@ -495,9 +505,9 @@
                     name="employment_date"
                     id="employment_date"
                     placeholder="Select Date..."
-                    value="{{ $mode === 'invitation' && array_key_exists('employment_date', $prefilled ?? []) ? $prefilled['employment_date'] : old('employment_date') }}"
-                    @readonly(array_key_exists('employment_date', $prefilled ?? []))
-                    @class(array_key_exists('employment_date', $prefilled ?? []) ? ['form-control'] : ['form-control', 'date-pick'])
+                    value="{{ $mode === 'invitation' && array_key_exists('employment_date', $prefilled) ? $prefilled['employment_date'] : old('employment_date') }}"
+                    @readonly(array_key_exists('employment_date', $prefilled))
+                    @class(array_key_exists('employment_date', $prefilled) ? ['form-control'] : ['form-control', 'date-pick'])
                 />
             </div>
         </div>
@@ -510,9 +520,9 @@
                     name="confirmation_date"
                     id="confirmation_date"
                     placeholder="Select Date..."
-                    value="{{ $mode === 'invitation' && array_key_exists('confirmation_date', $prefilled ?? []) ? $prefilled['confirmation_date'] : old('confirmation_date') }}"
-                    @readonly(array_key_exists('confirmation_date', $prefilled ?? []))
-                    @class(array_key_exists('confirmation_date', $prefilled ?? []) ? ['form-control'] : ['form-control', 'date-pick'])
+                    value="{{ $mode === 'invitation' && array_key_exists('confirmation_date', $prefilled) ? $prefilled['confirmation_date'] : old('confirmation_date') }}"
+                    @readonly(array_key_exists('confirmation_date', $prefilled))
+                    @class(array_key_exists('confirmation_date', $prefilled) ? ['form-control'] : ['form-control', 'date-pick'])
                 />
             </div>
         </div>
@@ -526,8 +536,8 @@
                     id="licence_number"
                     class="form-control"
                     placeholder="Ie., LTT 12345"
-                    value="{{ $mode === 'invitation' && array_key_exists('licence_number', $prefilled ?? []) ? $prefilled['licence_number'] : old('licence_number') }}"
-                    @readonly(array_key_exists('licence_number', $prefilled ?? []))
+                    value="{{ $mode === 'invitation' && array_key_exists('licence_number', $prefilled) ? $prefilled['licence_number'] : old('licence_number') }}"
+                    @readonly(array_key_exists('licence_number', $prefilled))
                 />
             </div>
         </div>
@@ -541,8 +551,8 @@
                     id="file_number"
                     class="form-control"
                     placeholder="EFP/123/12/1"
-                    value="{{ $mode === 'invitation' && array_key_exists('file_number', $prefilled ?? []) ? $prefilled['file_number'] : old('file_number') }}"
-                    @readonly(array_key_exists('file_number', $prefilled ?? []))
+                    value="{{ $mode === 'invitation' && array_key_exists('file_number', $prefilled) ? $prefilled['file_number'] : old('file_number') }}"
+                    @readonly(array_key_exists('file_number', $prefilled))
                 />
             </div>
         </div>
@@ -558,8 +568,8 @@
                     id="social_security_number"
                     class="form-control"
                     min="1"
-                    value="{{ $mode === 'invitation' && array_key_exists('social_security_number', $prefilled ?? []) ? $prefilled['social_security_number'] : old('social_security_number') }}"
-                    @readonly(array_key_exists('social_security_number', $prefilled ?? []))
+                    value="{{ $mode === 'invitation' && array_key_exists('social_security_number', $prefilled) ? $prefilled['social_security_number'] : old('social_security_number') }}"
+                    @readonly(array_key_exists('social_security_number', $prefilled))
                 />
             </div>
         </div>
@@ -573,8 +583,8 @@
                     id="employment_number"
                     class="form-control"
                     min="1"
-                    value="{{ $mode === 'invitation' && array_key_exists('employment_number', $prefilled ?? []) ? $prefilled['employment_number'] : old('employment_number') }}"
-                    @readonly(array_key_exists('employment_number', $prefilled ?? []))
+                    value="{{ $mode === 'invitation' && array_key_exists('employment_number', $prefilled) ? $prefilled['employment_number'] : old('employment_number') }}"
+                    @readonly(array_key_exists('employment_number', $prefilled))
                 />
             </div>
         </div>
@@ -587,8 +597,8 @@
                     name="tin_number"
                     id="tin_number"
                     class="form-control"
-                    value="{{ $mode === 'invitation' && array_key_exists('tin_number', $prefilled ?? []) ? $prefilled['tin_number'] : old('tin_number') }}"
-                    @readonly(array_key_exists('tin_number', $prefilled ?? []))
+                    value="{{ $mode === 'invitation' && array_key_exists('tin_number', $prefilled) ? $prefilled['tin_number'] : old('tin_number') }}"
+                    @readonly(array_key_exists('tin_number', $prefilled))
                 />
             </div>
         </div>
@@ -683,11 +693,11 @@
                     <option value=""></option>
                     @foreach (Usr::getStaffDesignations() as $designation)
                         @php
-                            $current_designation = $mode === 'invitation' && array_key_exists('designation', $prefilled ?? []) ? $prefilled['designation'] : old('designation')
+                            $current_designation = $mode === 'invitation' && array_key_exists('designation', $prefilled) ? $prefilled['designation'] : old('designation')
                         @endphp
                         <option
                             value="{{ $designation }}"
-                            @disabled(array_key_exists('designation', $prefilled ?? []) && $current_designation != $designation)
+                            @disabled(array_key_exists('designation', $prefilled) && $current_designation != $designation)
                             @selected($current_designation == $designation)
                         >
                             {{ $designation }}
@@ -709,11 +719,11 @@
                     <option value=""></option>
                     @for ($i = 1; $i <= 30; $i++)
                         @php
-                            $current_no_of_periods = $mode === 'invitation' && array_key_exists('number_of_periods', $prefilled ?? []) ? $prefilled['number_of_periods'] : old('number_of_periods')
+                            $current_no_of_periods = $mode === 'invitation' && array_key_exists('number_of_periods', $prefilled) ? $prefilled['number_of_periods'] : old('number_of_periods')
                         @endphp
                         <option
                             value="{{ $i }}"
-                            @disabled(array_key_exists('number_of_periods', $prefilled ?? []) && $current_no_of_periods != $i)
+                            @disabled(array_key_exists('number_of_periods', $prefilled) && $current_no_of_periods != $i)
                             @selected($current_no_of_periods == $i)
                         >
                             {{ $i }}
