@@ -5,9 +5,8 @@ namespace App\Http\Controllers;
 use App\Helpers\Qs;
 use App\Repositories\MyClassRepo;
 use App\Repositories\StudentRepo;
-use App\Rules\StartsWithProperPhoneCode;
 use App\Rules\Uppercase;
-use File;
+use Illuminate\Support\Facades\File;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -40,7 +39,7 @@ class StudentIDCardController extends Controller
         Validator::make($req->toArray(), [
             'my_class_id' => 'required|exists:my_classes,id',
             'expire_date' => 'required|string',
-            'phone' => ['required', 'string', 'min:10', 'max:16', new StartsWithProperPhoneCode],
+            'phone' => ['required', 'string', 'min:10', 'max:16'],
             'class_from' => 'sometimes|nullable|exists:my_classes,name',
             'class_to' => 'sometimes|nullable|exists:my_classes,name',
             'motto' => ['required', 'string', new Uppercase],
