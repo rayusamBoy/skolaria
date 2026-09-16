@@ -729,7 +729,7 @@ class MarkController extends Controller
     /**
      * Get students eligible for a subject.
      */
-    protected function getStudentsForSubject(int $class_id, int $section_id, int $subject_id): Collection
+    protected function getStudentsForSubject(int $class_id, ?int $section_id, int $subject_id): Collection
     {
         $sub_recs = $this->my_class->getSubjectRecord(['subject_id' => $subject_id])
             ->where('subject.my_class_id', $class_id);
