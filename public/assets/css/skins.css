@@ -632,7 +632,12 @@
     .nav-item-open
     > .nav-link:not(.disabled),
 :root[data-skin="highcontrast"] .navbar-nav-link:hover,
-:root[data-skin="highcontrast"] .navbar-nav-link:focus {
+:root[data-skin="highcontrast"] .navbar-nav-link:focus,
+:root[data-skin="highcontrast"]
+    .sidebar
+    .nav-sidebar
+    > .nav-item-expanded:not(.nav-item-open)
+    > .nav-link {
     color: black !important;
 }
 
