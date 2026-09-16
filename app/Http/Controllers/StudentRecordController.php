@@ -205,7 +205,7 @@ class StudentRecordController extends Controller
         }
 
         $data['class_id'] = $class_id;
-        $data['students'] = $this->student->getActiveStudentsByClass($class_id, ['section', 'user', 'my_parent']);
+        $data['students'] = $this->student->getActiveStudentsByClass($class_id, ['section', 'user', 'my_parent', 'user.exam_records']);
         $data['sections'] = $this->my_class->getClassSections($class_id);
 
         return view('pages.students.list', $data);
