@@ -203,7 +203,7 @@
                     <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
                     <span
                         >Make sure all required students' data are filled in the data table below. Otherwise, consider
-                        <a target="_self" href="{{ route('students.list', $my_class_id) }}">updating</a> the data before
+                        <a target="_self" href="{{ route('students.list_by_class', $my_class_id) }}">updating</a> the data before
                         proceeding.</span>
                 </div>
             </div>
@@ -213,12 +213,12 @@
                 <div class="mt-1 text-right">
                     <a
                         target="_blank"
-                        href="{{ route('students.print_class_id_cards', [$my_class_id, $issued_date, $expire_date, $id_theme, $phone, $class_from == '' ? 'NULL' : $class_from, $class_to == '' ? 'NULL' : $class_to, $motto, $brightness ?? 1, $web_link == '' ? 'NULL' : $web_link]) }}"
+                        href="{{ route('students.id_cards.print_class', [$my_class_id, $issued_date, $expire_date, $id_theme, $phone, $class_from == '' ? 'NULL' : $class_from, $class_to == '' ? 'NULL' : $class_to, $motto, $brightness ?? 1, $web_link == '' ? 'NULL' : $web_link]) }}"
                         class="btn btn-secondary btn-sm"
                     >Print ID Cards For All Students <i class="material-symbols-rounded ml-2">print</i></a>
                 </div>
             </div>
-            <form method="post" class="print-selected" action="{{ route('students.print_selected_id_cards') }}">
+            <form method="post" class="print-selected" action="{{ route('students.id_cards.print_selected') }}">
                 @csrf
 
                 <input type="hidden" name="issued" value="{{ $issued_date }}" />
