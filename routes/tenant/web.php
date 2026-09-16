@@ -281,7 +281,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         });
 
         /*************** Subject Record operations **********************/
-        Route::prefix('subjects')->group(function () {
+        Route::prefix('subject-records')->group(function () {
             Route::get('index', [SubjectController::class, 'index_record'])->name('subject_records.index');
             Route::post('store', [SubjectController::class, 'store_record'])->name('subject_records.store');
             Route::get('{record}/edit', [SubjectController::class, 'edit_record'])->name('subject_records.edit');
