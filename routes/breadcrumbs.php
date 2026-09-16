@@ -213,12 +213,12 @@ Breadcrumbs::for('class_types.edit', function (BreadcrumbTrail $trail, $class_ty
 // ----------------------------------------------------------------------
 
 Breadcrumbs::for('subjects.index', function (BreadcrumbTrail $trail): void {
-    $trail->parent(Usr::tenancyInitialized() ? 'dashboard' : 'central_dashboard');
+    $trail->parent('dashboard');
     $trail->push('Manage Subjects', route('subjects.index'));
 });
 
 Breadcrumbs::for('subject_records.index', function (BreadcrumbTrail $trail): void {
-    $trail->parent(Usr::tenancyInitialized() ? 'dashboard' : 'central_dashboard');
+    $trail->parent('dashboard');
     $trail->push('Manage Subject Records', route('subject_records.index'));
 });
 
@@ -230,6 +230,11 @@ Breadcrumbs::for('subjects.edit', function (BreadcrumbTrail $trail, $subject): v
 Breadcrumbs::for('subject_records.edit', function (BreadcrumbTrail $trail, $subject): void {
     $trail->parent('subject_records.index');
     $trail->push('Edit Subject Record', route('subject_records.edit', $subject));
+});
+
+Breadcrumbs::for('exams.exam_numbers.assign', function (BreadcrumbTrail $trail): void {
+    $trail->parent('dashboard');
+    $trail->push('Assign Subjects', route('exams.exam_numbers.assign'));
 });
 
 // ----------------------------------------------------------------------
