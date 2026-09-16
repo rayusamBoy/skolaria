@@ -37,13 +37,13 @@ class TenancySettingsTableSeeder extends Seeder
             ],
             3 => [
                 'key' => 'term_ends',
-                'value' => '01/07'.date('Y'),
+                'value' => date('Y').'-07-01',
                 'created_at' => null,
                 'updated_at' => null,
             ],
             4 => [
                 'key' => 'term_begins',
-                'value' => '01/01/'.date('Y'),
+                'value' => date('Y').'-01-01',
                 'created_at' => null,
                 'updated_at' => null,
             ],
