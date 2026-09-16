@@ -16,6 +16,14 @@ class MyClassRepo
     /*********** My class ***************/
 
     /**
+     * Get all classes.
+     */
+    public function getAllClasses()
+    {
+        return MyClass::all();
+    }
+
+    /**
      * Get classes matching the given conditions.
      */
     public function getClassesByConditions(array $where): EloquentCollection
@@ -248,7 +256,7 @@ class MyClassRepo
     /**
      * Get a query builder for subjects matching conditions.
      */
-    public function whereSubject(array $where): Builder
+    public function whereSubject(array $where): Builder|Subject
     {
         return Subject::where($where);
     }
@@ -353,7 +361,7 @@ class MyClassRepo
     /**
      * Get a query builder for subject records matching conditions.
      */
-    public function whereSubjectRecord(array $where): Builder
+    public function whereSubjectRecord(array $where): Builder|SubjectRecord
     {
         return SubjectRecord::where($where);
     }
