@@ -26,30 +26,18 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class StudentRecordController extends Controller
 {
-    protected LocationRepo $loc;
-
-    protected MyClassRepo $my_class;
-
-    protected UserRepo $user;
-
-    protected StudentRepo $student;
-
     protected string $students_batch_file_name_description;
 
     protected string $session;
 
     public function __construct(
-        LocationRepo $loc,
-        MyClassRepo $my_class,
-        UserRepo $user,
-        StudentRepo $student,
+        protected LocationRepo $loc,
+        protected MyClassRepo $my_class,
+        protected UserRepo $user,
+        protected StudentRepo $student,
     ) {
         $this->permissionMap = config('permissions.names.tenant.student_records');
         parent::__construct();
-        $this->loc = $loc;
-        $this->my_class = $my_class;
-        $this->user = $user;
-        $this->student = $student;
         $this->students_batch_file_name_description = 'students batch add template';
         $this->session = Usr::getCurrentSession();
     }
