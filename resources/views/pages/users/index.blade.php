@@ -49,7 +49,7 @@
                             action="{{ route('users.store') }}"
                             data-fouc
                         >
-                            @include('partials.user_fields', ['mode' => 'create'])
+                            @include('partials.user_fields', ['mode' => 'create', 'prefilled' => []])
                         </form>
                     </div>
                 @endcan

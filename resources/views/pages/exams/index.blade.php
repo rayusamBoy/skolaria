@@ -38,12 +38,6 @@
                         >Add Exam</a>
                     </li>
                 @endcan
-                {{-- Generate Exam Numbers tab --}}
-                @can($tenant_permissions['exams']['store']['permission'])
-                    <li class="nav-item">
-                        <a href="#generate-numbers" class="nav-link" data-toggle="tab">Generate Numbers</a>
-                    </li>
-                @endcan
                 {{-- Announce exam item --}}
                 @if (session('announce_exam') && $canAnnounce)
                     <li class="nav-item">
@@ -531,67 +525,6 @@
                             <div class="text-right">
                                 <button type="submit" class="btn btn-primary">
                                     Submit form <i class="material-symbols-rounded ml-2">send</i>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                @endcan
-
-                {{-- Generate Exam Numbers tab --}}
-                @can($tenant_permissions['exams']['store']['permission'])
-                    <div class="tab-pane fade" id="generate-numbers">
-                        <form
-                            id="generate-numbers-form"
-                            class="ajax-update mb-3"
-                            action="{{ route('exams.generate_numbers') }}"
-                        >
-                            @csrf
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label for="gen_exam_id">Exam <span class="text-danger">*</span></label>
-                                        <select required class="form-control select" id="gen_exam_id" name="exam_id">
-                                            <option value="">Select</option>
-                                            @foreach ($exams as $ex)
-                                                <option value="{{ $ex->id }}">{{ $ex->name }} ({{ $ex->year }})</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label for="gen_class_id">Class <span class="text-danger">*</span></label>
-                                        <select
-                                            required
-                                            class="form-control select"
-                                            id="gen_class_id"
-                                            name="my_class_id"
-                                            onchange="
-                                                getClassSections(this.value, '#gen_section_id_add_not_applicable')
-                                            "
-                                        >
-                                            <option value="">Select</option>
-                                            @foreach ($my_classes as $class)
-                                                <option value="{{ $class->id }}">{{ $class->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label for="gen_section_id_add_not_applicable">Section (optional)</label>
-                                        <select
-                                            class="form-control select"
-                                            id="gen_section_id_add_not_applicable"
-                                            name="section_id"
-                                            data-placeholder="All Sections"
-                                        ></select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="material-symbols-rounded mr-2">autorenew</i> Generate Numbers
                                 </button>
                             </div>
                         </form>

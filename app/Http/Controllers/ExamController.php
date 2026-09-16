@@ -20,6 +20,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
@@ -118,6 +119,72 @@ class ExamController extends Controller
         $this->exam->delete($id);
 
         return back()->with('flash_success', __('msg.del_ok'));
+    }
+
+    /**
+     * Show the Exam Numbers page.
+     */
+    public function assign_view(): View
+    {
+        $data['my_classes'] = $this->my_class->getAllClasses();
+        $data['exams'] = $this->exam->getExamsByConditions(['year' => $this->year]);
+        $data['year'] = $this->year;
+
+        return view('pages.exams.assign', $data);
+    }
+
+    /**
+     * AJAX: render the exam numbers table.
+     */
+    public function exam_numbers_load(Request $request): View
+    {
+        $request->validate([
+            'exam_id' => 'required|exists:exams,id',
+            'class_id' => 'required|exists:my_classes,id',
+        ]);
+
+        $exam_id = $request->input('exam_id');
+        $class_id = $request->input('class_id');
+        $section_id = $request->input('section_id') ?: null;
+
+        $students = $this->student->getActiveStudentsByClass($class_id, ['user', 'section'])
+            ->when($section_id, fn ($q) => $q->where('section_id', $section_id))
+            ->sortBy('user.name');
+
+        $numbers = $this->exam->getExamRecords(['exam_id' => $exam_id, 'my_class_id' => $class_id])
+            ->pluck('exam_number', 'student_id');
+
+        return view('pages.exams.partials.exam_numbers', compact('students', 'numbers'));
+    }
+
+    /**
+     * AJAX: save manually edited exam numbers.
+     */
+    public function exam_numbers_save(Request $request): JsonResponse
+    {
+        $request->validate([
+            'exam_id' => 'required|exists:exams,id',
+            'class_id' => 'required|exists:my_classes,id',
+            'numbers' => 'required|array',
+        ]);
+
+        $exam_id = $request->input('exam_id');
+        $class_id = $request->input('class_id');
+
+        DB::transaction(function () use ($request, $exam_id, $class_id) {
+            foreach ($request->input('numbers', []) as $student_id => $number) {
+                $this->exam->updateOrCreateExamRecord(
+                    [
+                        'exam_id' => $exam_id,
+                        'student_id' => $student_id,
+                        'my_class_id' => $class_id,
+                    ],
+                    ['exam_number' => $number ?: null]
+                );
+            }
+        });
+
+        return Mk::jsonUpdateOk();
     }
 
     /**

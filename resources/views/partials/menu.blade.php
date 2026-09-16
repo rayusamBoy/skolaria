@@ -377,6 +377,17 @@
                                     </li>
                                 @endcanany
 
+                                @can($tenant_permissions['subjects']['index_record']['permission'])
+                                    <li class="nav-item">
+                                        <a
+                                            href="{{ route('exams.exam_numbers.assign') }}"
+                                            class="nav-link {{ request()->routeIs('exams.exam_numbers.assign') ? 'active' : '' }}"
+                                        >
+                                            Assign Numbers
+                                        </a>
+                                    </li>
+                                @endcan
+
                                 {{-- Assessments (sub‑group) --}}
                                 @canany([$tenant_permissions['assessments']['list']['permission'], $tenant_permissions['assessments']['index']['permission'], $tenant_permissions['assessments']['progressive']['permission'], $tenant_permissions['assessments']['sheets']['permission']])
                                     <li class="nav-item nav-item-submenu {{ request()->routeIs('assessments.*') ? 'nav-item-expanded' : '' }}">
