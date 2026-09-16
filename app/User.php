@@ -94,7 +94,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(StudentRecord::class);
     }
 
-    public function exam_record()
+    public function exam_records()
     {
         return $this->hasMany(ExamRecord::class, 'student_id');
     }

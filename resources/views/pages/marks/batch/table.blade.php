@@ -37,7 +37,7 @@
         @foreach ($marks->unique('user.id')->whereNotNull('user')->sortBy('user.name')->sortBy('user.gender') as $mk)
             <tr>
                 <td style="text-align: center">{{ sprintf("%03d", $loop->iteration) }}</td>
-                <td>{{ $mk->user->exam_record->first()->exam_number }}</td>
+                <td>{{ $mk->user->exam_records->first()->exam_number }}</td>
                 <td>{{ $mk->user->username }}</td>
                 {{-- <td>{{ $mk->user->name }}</td> --}}
                 <td>{{ $mk->user->gender }}</td>
