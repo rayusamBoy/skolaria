@@ -11,7 +11,7 @@
                 <th>S/N</th>
                 <th>NAME</th>
                 <th>GENDER</th>
-                <th>EXAM NO.</th>
+                <th>EXAM NO</th>
                 <th>EXAM ({{ $exam->exam_denominator }})</th>
             </tr>
         </thead>
@@ -21,7 +21,7 @@
                     <td class="text-center">{{ $loop->iteration }}</td>
                     <td>{{ $mk->user->name }}</td>
                     <td class="text-center">{{ substr($mk->user->gender, 0, 1) }}</td>
-                    <td class="text-center">{{ $mk->user->exam_record->exam_number }}</td>
+                    <td class="text-center">{{ $mk->user->exam_record?->exam_number ?? '—' }}</td>
                     <td class="text-center">
                         <input
                             @readonly($is_restricted)
