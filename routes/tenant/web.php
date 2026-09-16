@@ -309,7 +309,6 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         Route::prefix('ajax')->group(function () {
             Route::get('class-sections/{class}', [AjaxController::class, 'get_class_sections'])->name('ajax.get_class_sections');
             Route::get('class-students/{class}', [AjaxController::class, 'get_class_students'])->name('ajax.get_class_students');
-            Route::get('pre-defined-subjects', [AjaxController::class, 'get_pre_defined_subjects'])->name('ajax.get_pre_defined_subjects');
             Route::get('teacher-class-sections/{class}', [AjaxController::class, 'get_teacher_class_sections'])->name('ajax.get_teacher_class_sections');
             Route::get('subject-section-teacher/{subject}/{section}', [AjaxController::class, 'get_subject_section_teacher'])->name('ajax.get_subject_section_teacher');
             Route::get('class-subjects/{class}', [AjaxController::class, 'get_class_subjects'])->name('ajax.get_class_subjects');

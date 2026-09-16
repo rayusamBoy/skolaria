@@ -59,7 +59,6 @@
     const get_table_cols_url = '{{ route("ajax.get_table_columns", [":name"]) }}';
     const get_state_url = '{{ route("ajax.get_state", [":id"]) }}';
     const get_lga_url = '{{ route("ajax.get_lga", [":id"]) }}';
-    const get_pre_defined_subjects_url = "{{ route('ajax.get_pre_defined_subjects') }}";
     const get_class_students_url = '{{ route("ajax.get_class_students", [":id"]) }}';
     const get_class_sections_url = "{{ route('ajax.get_class_sections', [':id']) }}";
     const get_teacher_class_sections_url = "{{ route('ajax.get_teacher_class_sections', [':id']) }}";

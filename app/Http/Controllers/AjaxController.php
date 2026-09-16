@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Helpers\Usr;
 use App\Repositories\ExamRepo;
 use App\Repositories\LocationRepo;
 use App\Repositories\MyClassRepo;
@@ -64,14 +63,6 @@ class AjaxController extends Controller
         $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class_id])->get()->whereNotNull('user');
 
         return $students->map(fn ($q) => ['id' => $q->user->id, 'name' => $q->user->name])->values()->all();
-    }
-
-    /**
-     * Get predefined subjects list.
-     */
-    public function get_pre_defined_subjects(): array
-    {
-        return Usr::getPredefinedSubjects();
     }
 
     /**

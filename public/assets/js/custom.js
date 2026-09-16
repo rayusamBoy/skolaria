@@ -1169,26 +1169,6 @@ function getLGA(stateId, destination) {
 
 /**
  *-------------------------------------------------------------
- * Get subjects by class type id
- *-------------------------------------------------------------
- */
-function getPreDefinedSubjects(destination) {
-    const url = get_pre_defined_subjects_url;
-    const $section = destination ? $(destination) : $("#name");
-    $.ajax({
-        dataType: "json",
-        url,
-        success: (resp) => {
-            $section.empty();
-            $.each(resp, (i, data) => {
-                $section.append($("<option>", { value: data, text: data }));
-            });
-        },
-    });
-}
-
-/**
- *-------------------------------------------------------------
  * Get students of a class by class id
  *-------------------------------------------------------------
  */
