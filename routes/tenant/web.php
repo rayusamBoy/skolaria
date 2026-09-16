@@ -263,6 +263,9 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             Route::post('{exam}/publish', [ExamController::class, 'publish'])->name('exams.publish');
             Route::post('announce', [ExamController::class, 'announce'])->name('exams.announce');
             Route::post('generate-numbers', [ExamController::class, 'generate_exam_numbers'])->name('exams.generate_numbers');
+            Route::get('assign', [ExamController::class, 'assign_view'])->name('exams.exam_numbers.assign');
+            Route::get('exam-numbers/load', [ExamController::class, 'exam_numbers_load'])->name('exams.exam_numbers.load');
+            Route::post('exam-numbers/save', [ExamController::class, 'exam_numbers_save'])->name('exams.exam_numbers.save');
         });
 
         /*************** Messages (threads & participants) **************/
@@ -278,7 +281,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         });
 
         /*************** Subject Record operations **********************/
-        Route::prefix('subject-record')->group(function () {
+        Route::prefix('subjects')->group(function () {
             Route::get('index', [SubjectController::class, 'index_record'])->name('subject_records.index');
             Route::post('store', [SubjectController::class, 'store_record'])->name('subject_records.store');
             Route::get('{record}/edit', [SubjectController::class, 'edit_record'])->name('subject_records.edit');
