@@ -138,10 +138,10 @@ class SubjectController extends Controller
         $data = $req->only($this->my_class->getSubjectData(['my_class_id']));
         $ids[] = $id;
 
-        if($req->boolean('update_for_other_classes') === true){
+        if ($req->boolean('update_for_other_classes') === true) {
             $ids = [...$ids, ...$req->validated('subject_ids')];
         }
-        
+
         $this->my_class->updateSubject($ids, $data);
 
         return Mk::jsonUpdateOk();
