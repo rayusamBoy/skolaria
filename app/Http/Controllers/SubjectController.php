@@ -15,8 +15,10 @@ use Illuminate\View\View;
 
 class SubjectController extends Controller
 {
-    public function __construct(protected MyClassRepo $my_class, protected UserRepo $user)
-    {
+    public function __construct(
+        protected MyClassRepo $my_class,
+        protected UserRepo $user,
+    ) {
         $this->permissionMap = config('permissions.names.tenant.subjects');
         parent::__construct();
     }
