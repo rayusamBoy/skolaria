@@ -13,7 +13,6 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 
 class MarksImport implements ToCollection, WithHeadingRow, WithValidation
 {
-    protected array $data;
 
     protected string $marks_table;
 
@@ -23,9 +22,8 @@ class MarksImport implements ToCollection, WithHeadingRow, WithValidation
 
     protected array $existing_marks = [];
 
-    public function __construct(array $data)
+    public function __construct(protected array $data)
     {
-        $this->data = $data;
         $this->marks_table = 'marks';
         $this->subjects = Mk::getSubjects($this->data['my_class_id']);
     }
