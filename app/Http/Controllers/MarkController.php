@@ -1103,7 +1103,7 @@ class MarkController extends Controller
         // One upsert — uniqueBy matches the real unique index.
         $this->exam->massUpdateExamRecords(
             $updates,
-            ['student_id', 'my_class_id', 'exam_id', 'year'] // TODO; add section_id?
+            ['student_id', 'my_class_id', 'exam_id', 'year']
         );
     }
 
