@@ -493,7 +493,11 @@ class MarkController extends Controller
 
             foreach ($class_sections as $section) {
                 $r = $this->processSectionBatch(
-                    $exam, $req->my_class_id, $section->id, $class_type, $class_subjects
+                    $exam,
+                    $req->my_class_id,
+                    $section->id,
+                    $class_type,
+                    $class_subjects
                 );
                 $all_mark_updates = [...$all_mark_updates, ...$r['marks']];
                 $all_assessment_updates = [...$all_assessment_updates, ...$r['assessments']];
@@ -511,19 +515,26 @@ class MarkController extends Controller
 
             // Positions via window functions
             $this->mark->refreshSubjectPositions(
-                $exam->id, $req->my_class_id, $this->year, $exam->term
+                $exam->id,
+                $req->my_class_id,
+                $this->year,
+                $exam->term
             );
 
             $this->refreshAssessmentPositions($exam, $req->my_class_id, null);
 
             $this->exam->refreshStudentPositions(
-                $exam->id, $req->my_class_id, $this->year,
+                $exam->id,
+                $req->my_class_id,
+                $this->year,
                 $exam->exam_student_position_by_value,
                 $exam->exam_student_position_sort_order,
                 bySection: true
             );
             $this->exam->refreshStudentPositions(
-                $exam->id, $req->my_class_id, $this->year,
+                $exam->id,
+                $req->my_class_id,
+                $this->year,
                 $exam->exam_student_position_by_value,
                 $exam->exam_student_position_sort_order,
                 bySection: false
@@ -779,15 +790,18 @@ class MarkController extends Controller
         $sub_recs = $this->my_class->getSubjectRecord(['subject_id' => $subject_id])
             ->where('subject.my_class_id', $class_id);
 
+        if ($section_id !== null && $sub_recs->whereNotNull('students_ids')->isNotEmpty()) {
+            return collect(); // Will trigger error upstream
+        }
+
         if ($section_id === null && $sub_recs->whereNull('section_id')->whereNotNull('students_ids')->isNotEmpty()) {
             return $this->student->getActiveStudentsByUserIdsQuery($sub_recs->value('students_ids')->toArray())->get();
         }
 
-        if (
-            $section_id === null && $sub_recs->whereNull('section_id')->whereNull('students_ids')->isNotEmpty()
-            || $section_id !== null && $sub_recs->whereNotNull('students_ids')->isNotEmpty()
-        ) {
-            return collect(); // Will trigger error upstream
+        if ($section_id === null && $sub_recs->whereNull('section_id')->whereNull('students_ids')->isNotEmpty()) {
+            return $this->student->getActiveStudentsQueryWithRelations([
+                'my_class_id' => $class_id,
+            ])->get();
         }
 
         return $this->student->getActiveStudentsQueryWithRelations([
@@ -1232,7 +1246,7 @@ class MarkController extends Controller
             $students_data[] = $row;
         }
 
-        usort($students_data, fn($a, $b) => strcmp($a['exam_number'] ?? '', $b['exam_number'] ?? ''));
+        usort($students_data, fn ($a, $b) => strcmp($a['exam_number'] ?? '', $b['exam_number'] ?? ''));
 
         return [
             'my_class' => $my_class,
