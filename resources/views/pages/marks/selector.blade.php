@@ -110,7 +110,11 @@
         <div class="col-md-2 mt-4">
             <div class="mt-1 text-right">
                 <button type="submit" class="btn btn-primary">
+                    @if($selected)
+                    Reload <i class="material-symbols-rounded ml-2">refresh</i>
+                    @else
                     Manage <i class="material-symbols-rounded ml-2">send</i>
+                    @endif
                 </button>
             </div>
         </div>
