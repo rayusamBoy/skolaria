@@ -9,11 +9,9 @@
             <div class="alert alert-info alert-dismissible has-do-not-show-again-button border-0" id="attention-info">
                 <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
                 <span>
-                    This automatic batch marks update (recommended) may take a little longer (approximately 2 to 15
-                    minutes). Alternatively, you can update class sections manually in the
-                    <a href="{{ route('marks.manage') }}"><strong>Manage Exam Marks</strong></a> section, where you will
-                    need to update each subject for the particular class or section. The manual update may take some
-                    time and could be tedious. In the end, the choice is yours.
+                    This automatic batch marks update (recommended) recalculates the entire class in one pass and
+                    typically completes within seconds. If you prefer to update only a single subject or section, use
+                    the <a href="{{ route('marks.manage') }}"><strong>Manage Exam Marks</strong></a> page instead.
                 </span>
             </div>
         </div>
