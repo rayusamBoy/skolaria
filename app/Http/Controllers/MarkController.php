@@ -21,6 +21,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -277,44 +278,74 @@ class MarkController extends Controller
     /**
      * Update marks for a subject.
      */
-    public function update(Request $req, int $exam_id, int $class_id, int $subject_id, ?int $section_id = null): JsonResponse
-    {
+    public function update(
+        Request $req,
+        int $exam_id,
+        int $class_id,
+        int $subject_id,
+        ?int $section_id = null
+    ): JsonResponse {
         $exam = $this->exam->find($exam_id);
-
         if ($exam->is_locked) {
             return Mk::jsonUpdateDenied();
         }
 
         $class_type = $this->my_class->findClassTypeByClassId($class_id);
-        [$marks, $where] = $this->fetchMarksForUpdate($exam_id, $class_id, $subject_id, $section_id);
-
+        $marks = $this->fetchMarksForUpdate($exam_id, $class_id, $subject_id, $section_id);
         $form_data = $req->all();
 
-        // Update subject marks
-        $mark_updates = $this->buildSubjectMarkUpdates($marks, $form_data, $exam, $class_type->id, $class_id, $subject_id);
-        $this->exam->massUpdateMark($mark_updates);
+        DB::transaction(function () use ($exam, $class_type, $marks, $form_data, $class_id, $section_id) {
+            // Raw marks
+            $this->exam->massUpdateMark(
+                $this->buildSubjectMarkUpdates($marks, $form_data, $exam, $class_type->id)
+            );
 
-        // Update assessments
-        if ($exam->hasAssessment()) {
-            $assessment_updates = $this->buildAssessmentUpdates($marks, $form_data, $exam);
-            $this->assessment->massUpdateRecords($assessment_updates, ['mark_id']);
-        }
+            // Assessment detail rows
+            if ($exam->hasAssessment()) {
+                $assessment = $this->assessment->getAssessmentByConditions(['exam_id' => $exam->id]);
+                if ($assessment) {
+                    $this->assessment->massUpdateRecords(
+                        $this->buildAssessmentUpdates($marks, $form_data, $exam),
+                        ['mark_id']
+                    );
+                }
+            }
 
-        // Recalculate student exam records
-        $student_ids = $marks->pluck('student_id')->unique()->toArray();
-        $exam_record_updates = $this->buildExamRecordUpdates(
-            $student_ids,
-            $exam,
-            $class_id,
-            $where,
-            $class_type,
-            $section_id ?: fn ($st_id) => $marks->firstWhere('student_id', $st_id)->section_id ?? null
-        );
-        $this->exam->massUpdateExamRecords($exam_record_updates, ['student_id', 'exam_id']);
+            // Exam_records aggregates via CTE
+            $this->recomputeExamRecords($exam, $class_id, $class_type, $section_id);
 
-        // Update class positions
-        $position_updates = $this->buildClassPositionUpdates($exam, $class_id, $student_ids);
-        $this->exam->massUpdateExamRecords($position_updates, ['student_id', 'exam_id', 'my_class_id']);
+            // Positions via window functions
+            $this->mark->refreshSubjectPositions(
+                $exam->id,
+                $class_id,
+                $this->year,
+                $exam->term,
+                $section_id
+            );
+
+            $this->refreshAssessmentPositions($exam, $class_id, $section_id);
+
+            $this->exam->refreshStudentPositions(
+                $exam->id,
+                $class_id,
+                $this->year,
+                $exam->exam_student_position_by_value,
+                $exam->exam_student_position_sort_order,
+                bySection: true,
+                section_id: $section_id
+            );
+
+            if ($section_id === null) {
+                $this->exam->refreshStudentPositions(
+                    $exam->id,
+                    $class_id,
+                    $this->year,
+                    $exam->exam_student_position_by_value,
+                    $exam->exam_student_position_sort_order,
+                    bySection: false
+                );
+            }
+        });
 
         return Mk::jsonUpdateOk();
     }
@@ -362,7 +393,7 @@ class MarkController extends Controller
         $data = [
             'marks' => $this->exam->getMarksByConditions(
                 ['exam_id' => $exam->id, 'my_class_id' => $class->id, 'year' => $this->year],
-                ['user', 'my_class', 'section', 'exam']
+                ['user', 'my_class', 'section', 'exam', 'user.exam_records']
             ),
             'my_class_id' => $req->my_class_id,
             'year' => $this->year,
@@ -454,36 +485,50 @@ class MarkController extends Controller
             return Mk::json(__('msg.rnf'), false);
         }
 
-        $class_subjects = $this->my_class->whereSubject(['my_class_id' => $req->my_class_id])->get();
-        $class_sections = $this->my_class->getSectionsByConditions(['my_class_id' => $req->my_class_id]);
+        DB::transaction(function () use ($exam, $req, $class_type) {
+            $class_subjects = $this->my_class->whereSubject(['my_class_id' => $req->my_class_id])->get();
+            $class_sections = $this->my_class->getSectionsByConditions(['my_class_id' => $req->my_class_id]);
 
-        $all_mark_updates = $all_assessment_updates = $all_exam_record_updates = [];
-        $all_student_ids = [];
+            $all_mark_updates = $all_assessment_updates = [];
 
-        foreach ($class_sections as $section) {
-            $section_result = $this->processSectionBatch(
-                $exam,
-                $req->my_class_id,
-                $section->id,
-                $class_type,
-                $class_subjects
+            foreach ($class_sections as $section) {
+                $r = $this->processSectionBatch(
+                    $exam, $req->my_class_id, $section->id, $class_type, $class_subjects
+                );
+                $all_mark_updates = [...$all_mark_updates, ...$r['marks']];
+                $all_assessment_updates = [...$all_assessment_updates, ...$r['assessments']];
+            }
+
+            // Raw marks
+            $this->exam->massUpdateMark($all_mark_updates);
+
+            if ($exam->hasAssessment()) {
+                $this->assessment->massUpdateRecords($all_assessment_updates, ['mark_id']);
+            }
+
+            // Exam_records via CTE — whole class in one pass ─
+            $this->recomputeExamRecords($exam, $req->my_class_id, $class_type, null);
+
+            // Positions via window functions
+            $this->mark->refreshSubjectPositions(
+                $exam->id, $req->my_class_id, $this->year, $exam->term
             );
 
-            $all_mark_updates = [...$all_mark_updates, ...$section_result['marks']];
-            $all_assessment_updates = [...$all_assessment_updates, ...$section_result['assessments']];
-            $all_exam_record_updates = [...$all_exam_record_updates, ...$section_result['exam_records']];
-            $all_student_ids = [...$all_student_ids, ...$section_result['student_ids']];
-        }
+            $this->refreshAssessmentPositions($exam, $req->my_class_id, null);
 
-        $this->exam->massUpdateMark($all_mark_updates);
-        $this->exam->massUpdateExamRecords($all_exam_record_updates, ['student_id', 'exam_id']);
-
-        if ($exam->hasAssessment()) {
-            $this->assessment->massUpdateRecords($all_assessment_updates, ['mark_id']);
-        }
-
-        $position_updates = $this->buildClassPositionUpdates($exam, $req->my_class_id, array_unique($all_student_ids));
-        $this->exam->massUpdateExamRecords($position_updates, ['student_id', 'exam_id', 'my_class_id']);
+            $this->exam->refreshStudentPositions(
+                $exam->id, $req->my_class_id, $this->year,
+                $exam->exam_student_position_by_value,
+                $exam->exam_student_position_sort_order,
+                bySection: true
+            );
+            $this->exam->refreshStudentPositions(
+                $exam->id, $req->my_class_id, $this->year,
+                $exam->exam_student_position_by_value,
+                $exam->exam_student_position_sort_order,
+                bySection: false
+            );
+        });
 
         return Mk::jsonUpdateOk();
     }
@@ -764,7 +809,7 @@ class MarkController extends Controller
     /**
      * Fetch marks for update operation.
      */
-    protected function fetchMarksForUpdate(int $exam_id, int $class_id, int $subject_id, ?int $section_id = null): array
+    protected function fetchMarksForUpdate(int $exam_id, int $class_id, int $subject_id, ?int $section_id = null): Collection
     {
         $base = [
             'exam_id' => $exam_id,
@@ -793,7 +838,7 @@ class MarkController extends Controller
 
         unset($where['subject_id']);
 
-        return [$marks, $where];
+        return $marks;
     }
 
     /**
@@ -900,19 +945,15 @@ class MarkController extends Controller
     private function processSectionBatch(Exam $exam, int $class_id, int $section_id, ClassType $class_type, \Illuminate\Database\Eloquent\Collection $class_subjects): array
     {
         $p = ['exam_id' => $exam->id, 'my_class_id' => $class_id, 'section_id' => $section_id, 'year' => $this->year];
-        $wh = ['my_class_id' => $class_id, 'section_id' => $section_id, 'exam_id' => $exam->id, 'year' => $this->year];
 
         $marks_p = $this->exam->getMarksByConditions($p, ['user'])->whereNotNull('user');
 
         $mark_updates = $assessment_updates = [];
-        $student_ids = [];
 
         foreach ($class_subjects as $sub) {
             $marks = $marks_p->where('subject_id', $sub->id);
 
             foreach ($marks as $mk) {
-                $student_ids[] = $mk->student_id;
-
                 $total = $mk->exam_mark;
                 $grade = is_numeric($total) ? $this->mark->getGradeByTotal($total, $class_type->id) : null;
 
@@ -935,40 +976,168 @@ class MarkController extends Controller
             }
         }
 
-        $exam_record_updates = $this->buildExamRecordUpdates(
-            array_unique($student_ids),
-            $exam,
-            $class_id,
-            $wh,
-            $class_type,
-            $section_id
-        );
-
         return [
             'marks' => $mark_updates,
             'assessments' => $assessment_updates,
-            'exam_records' => $exam_record_updates,
-            'student_ids' => $student_ids,
         ];
     }
 
-    private function buildSubjectMarkUpdates(\Illuminate\Database\Eloquent\Collection $marks, array $form_data, Exam $exam, int $class_type_id, int $class_id, int $subject_id): array
-    {
+    private function buildSubjectMarkUpdates(
+        \Illuminate\Database\Eloquent\Collection $marks,
+        array $form_data,
+        Exam $exam,
+        int $class_type_id
+    ): array {
         $updates = [];
         foreach ($marks as $mk) {
-            $exam_mark = $form_data["exm_{$mk->id}"];
-            $grade = is_numeric($exam_mark) ? $this->mark->getGradeByTotal($exam_mark, $class_type_id) : null;
+            $raw = $form_data["exm_{$mk->id}"] ?? null;
+            $in_range = is_numeric($raw) && $raw >= 0 && $raw <= 100;
+            $grade = $in_range ? $this->mark->getGradeByTotal((float) $raw, $class_type_id) : null;
 
             $updates[] = [
                 'id' => $mk->id,
-                'exam_mark' => is_numeric($exam_mark) && $exam_mark <= 100 ? $exam_mark : null,
-                "tex{$exam->term}" => is_numeric($exam_mark) && $exam_mark <= 100 ? $exam_mark : null,
+                'exam_mark' => $in_range ? $raw : null,
+                "tex{$exam->term}" => $in_range ? $raw : null,
                 'grade_id' => $grade?->id,
-                'subject_position' => $this->mark->getSubjectPosition($mk->student_id, $exam, $class_id, $subject_id, $this->year),
             ];
         }
 
         return $updates;
+    }
+
+    /**
+     * Recompute all exam_record aggregates (total, average, class_average,
+     * grade_id, points, gpa, division_id) for the given scope.
+     *
+     * One CTE returns per-student aggregates.
+     * One preload of grades + divisions + class-average gives us the lookups.
+     * One massUpdate writes everything.
+     *
+     * No position columns here — window functions handle those afterwards.
+     */
+    private function recomputeExamRecords(
+        Exam $exam,
+        int $class_id,
+        ClassType $class_type,
+        ?int $section_id
+    ): void {
+        $min_subjects = (int) ($this->my_class->findClassType($class_type->id)->minimum_subjects_required ?? 0);
+
+        // Single CTE — the actual maths.
+        $aggregates = $this->exam->fetchExamRecordAggregates(
+            $exam->id,
+            $class_id,
+            $this->year,
+            $exam->term,
+            $min_subjects
+        );
+
+        if ($aggregates->isEmpty()) {
+            return;
+        }
+
+        // Preloaded lookups — tiny tables.
+        $grades = $this->exam->getGradesByConditions(['class_type_id' => $class_type->id])
+            ->sortByDesc('mark_from');
+
+        $divisions = $this->exam->getAllDivisions()
+            ->where('class_type_id', $class_type->id)
+            ->sortBy('min_points');
+
+        $classAvg = $this->exam
+            ->getMarksByConditions([
+                'exam_id' => $exam->id,
+                'my_class_id' => $class_id,
+                'year' => $this->year,
+            ], [])
+            ->avg("tex{$exam->term}");
+        $classAvg = round((float) $classAvg, 1);
+
+        // Build the upsert payload.
+        $updates = [];
+        foreach ($aggregates as $agg) {
+            $avg = (float) $agg->average;
+            $points = (int) $agg->points;
+
+            $grade = $grades->first(
+                fn ($g) => (int) round($avg) >= (int) $g->mark_from &&
+                    (int) round($avg) <= (int) $g->mark_to
+            );
+
+            $division = $divisions->first(
+                fn ($d) => $points >= (int) $d->min_points && $points <= (int) $d->max_points
+            );
+
+            $updates[] = [
+                'student_id' => $agg->student_id,
+                'my_class_id' => $agg->my_class_id,
+                'section_id' => $section_id ?? $agg->section_id,
+                'exam_id' => $agg->exam_id,
+                'year' => $agg->year,
+                'total' => $agg->total,
+                'average' => $avg,
+                'class_average' => $classAvg,
+                'grade_id' => $grade?->id,
+                'points' => $points,
+                'gpa' => ($agg->total_credits > 0)
+                    ? round($agg->total_credits_point / $agg->total_credits, 2)
+                    : 0,
+                'division_id' => $division?->id,
+            ];
+        }
+
+        // One upsert — uniqueBy matches the real unique index.
+        $this->exam->massUpdateExamRecords(
+            $updates,
+            ['student_id', 'my_class_id', 'exam_id', 'year'] // TODO; add section_id?
+        );
+    }
+
+    private function refreshAssessmentPositions(
+        Exam $exam,
+        int $class_id,
+        ?int $section_id
+    ): void {
+        if (! $exam->hasAssessment()) {
+            return;
+        }
+
+        $assessment = $this->assessment->getAssessmentByConditions(['exam_id' => $exam->id]);
+        if (! $assessment) {
+            return;
+        }
+
+        $this->assessment->refreshSubjectPositions(
+            $assessment->id,
+            $exam->id,
+            $class_id,
+            $this->year,
+            $exam->term,
+            $section_id
+        );
+
+        $this->assessment->refreshSummaryPositions(
+            $assessment->id,
+            $exam->id,
+            $class_id,
+            $this->year,
+            $exam->ca_student_position_by_value,
+            $exam->ca_student_position_sort_order,
+            bySection: true,
+            section_id: $section_id
+        );
+
+        if ($section_id === null) {
+            $this->assessment->refreshSummaryPositions(
+                $assessment->id,
+                $exam->id,
+                $class_id,
+                $this->year,
+                $exam->ca_student_position_by_value,
+                $exam->ca_student_position_sort_order,
+                bySection: false
+            );
+        }
     }
 
     private function buildAssessmentUpdates(\Illuminate\Database\Eloquent\Collection $marks, array $form_data, Exam $exam): array
@@ -990,75 +1159,10 @@ class MarkController extends Controller
         return $updates;
     }
 
-    private function buildExamRecordUpdates(array $student_ids, Exam $exam, int $class_id, array $whereConditions, ClassType $class_type, int|callable $section_identifier): array
-    {
-        $sub_ids = $this->mark->getDistinctSubjectIds($whereConditions);
-        $subjects = $this->my_class->getSubjectsByIds($sub_ids, []);
-        $subjects_count = $subjects->count();
-        $marks = $this->exam->getMarksByConditions($whereConditions, ['subject', 'grade']);
-
-        $class_type_id = $class_type->id;
-        $minimum_subjects_required = (int) $this->my_class->findClassType($class_type_id)->minimum_subjects_required;
-
-        $updates = [];
-        foreach ($student_ids as $st_id) {
-            $section_id = is_callable($section_identifier) ? $section_identifier($st_id) : $section_identifier;
-
-            if ($subjects_count < $minimum_subjects_required && $minimum_subjects_required !== 0) {
-                $average = $points_sum = $total_credits = $total_credits_point = 0;
-            } else {
-                $average = $this->mark->getLimitedTermAverage(
-                    $exam,
-                    $st_id,
-                    $class_id,
-                    $section_id,
-                    $this->year,
-                    $minimum_subjects_required
-                );
-                $grade = $this->mark->getGradeByTotal($average, $class_type_id);
-
-                $credits_point = $credits = [];
-                foreach ($subjects as $sub) {
-                    $mark = $marks->where('student_id', $st_id)
-                        ->where('subject_id', $sub->id)
-                        ->where('subject.is_core', true)
-                        ->first();
-                    if ($mark?->grade) {
-                        $credits_point[] = $mark->grade->point * $mark->subject->credits;
-                    }
-                    $credits[] = $sub->credits;
-                }
-
-                $total_credits = $this->mark->sumSmallestValues($credits, $minimum_subjects_required);
-                $total_credits_point = $this->mark->sumSmallestValues($credits_point, $minimum_subjects_required);
-
-                $points_sum = $this->mark->sumSmallestValues(
-                    $marks->where('student_id', $st_id)->pluck('grade')->pluck('point')->toArray(),
-                    $minimum_subjects_required
-                );
-            }
-
-            $updates[] = [
-                'student_id' => $st_id,
-                'exam_id' => $exam->id,
-                'total' => $this->mark->getTermTotalForExam($exam, $st_id, $class_id, $this->year),
-                'average' => $average,
-                'grade_id' => $grade->id ?? null,
-                'class_average' => $this->mark->getClassAverage($exam, $class_id, $this->year) ?? null,
-                'section_position' => $this->exam->getStudentPositionByColumn($st_id, $exam->id, $class_id, $this->year, $exam->exam_student_position_by_value, $exam->exam_student_position_sort_order, $section_id),
-                'points' => $points_sum,
-                'gpa' => ($total_credits > 0) ? round($total_credits_point / $total_credits, 2) : 0,
-                'division_id' => $points_sum !== null ? Mk::getDivisionByPoints($points_sum, $class_type_id)?->id : null,
-            ];
-        }
-
-        return $updates;
-    }
-
     /**
      * Fetch and prepare all data needed for tabulation (display and print).
      */
-    protected function getTabulationData(int $exam_id, int $class_id, int $section_id, string $year): array
+    protected function getTabulationData(int $exam_id, int $class_id, int|string $section_id, string $year): array
     {
         $my_class = $this->my_class->findClass($class_id);
         $exam = $this->exam->find($exam_id);
@@ -1144,20 +1248,5 @@ class MarkController extends Controller
             'exam_id' => $exam_id,
             'section_id' => $section_id,
         ];
-    }
-
-    private function buildClassPositionUpdates(Exam $exam, int $class_id, array $student_ids): array
-    {
-        $updates = [];
-        foreach ($student_ids as $st_id) {
-            $updates[] = [
-                'student_id' => $st_id,
-                'exam_id' => $exam->id,
-                'my_class_id' => $class_id,
-                'class_position' => $this->exam->getStudentPositionByColumn($st_id, $exam->id, $class_id, $this->year, $exam->exam_student_position_by_value, $exam->exam_student_position_sort_order),
-            ];
-        }
-
-        return $updates;
     }
 }

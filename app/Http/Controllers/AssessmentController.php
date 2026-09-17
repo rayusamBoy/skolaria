@@ -18,6 +18,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\View\View;
 
@@ -351,15 +352,21 @@ class AssessmentController extends Controller
     /**
      * Update assessment marks.
      */
-    public function update(Request $req, int $assessment_id, int $class_id, int $subject_id, ?int $section_id = null): JsonResponse
-    {
+    public function update(
+        Request $req,
+        int $assessment_id,
+        int $class_id,
+        int $subject_id,
+        ?int $section_id = null
+    ): JsonResponse {
         $assessment = $this->assessment->getAssessmentsWithValidExam(['id' => $assessment_id])->first();
+        if (! $assessment) {
+            return Mk::json(__('msg.arnf'), false);
+        }
         if ($assessment->exam->is_locked && ! Mk::userIsHead(auth()->id())) {
             return Mk::jsonUpdateDenied();
         }
-
         $exam = $this->exam->find($assessment->exam->id);
-
         if ($exam->is_locked && ! auth()->user()->hasAnyRole($this->getAdminRoles())) {
             return Mk::jsonUpdateDenied();
         }
@@ -372,30 +379,78 @@ class AssessmentController extends Controller
         $class_type = $this->my_class->findClassTypeByClassId($class_id);
         $input = $req->all();
 
-        $record_updates = [];
-        $student_ids = [];
+        DB::transaction(function () use ($asmnt_records, $assessment_id, $input, $assessment, $class_type, $class_id, $subject_id, $section_id) {
+            // Detail rows (per subject) written by PK
+            $record_updates = [];
+            foreach ($asmnt_records as $as) {
+                $record_updates[] = $this->calculateAssessmentRow(
+                    $as,
+                    $input,
+                    $assessment->exam,
+                    $class_type,
+                    $class_id,
+                    $subject_id
+                );
+            }
+            if ($record_updates) {
+                $this->assessment->massUpdateRecords($record_updates, ['id']);
+            }
 
-        foreach ($asmnt_records as $as) {
-            $student_ids[] = $as->student_id;
-            $d = $this->calculateAssessmentRow($as, $input, $assessment->exam, $class_type, $class_id, $subject_id);
-            $record_updates[] = $d;
-        }
+            // Summary: ONE update per student, no upsert
+            // Summary values live on every subject row of the
+            // student. Use updateRecord (a real SQL UPDATE) so
+            // we don't accidentally insert duplicate rows.
+            $student_ids = $asmnt_records->pluck('student_id')->unique()->values()->all();
 
-        $this->assessment->massUpdateRecords($record_updates);
+            $classAvg = $this->assessment->getClassAverageTermMark($assessment->exam, $class_id, $this->year);
 
-        // Update summary/position records
-        $summary_updates = [];
-        unset($where['subject_id']);
-        foreach (array_unique($student_ids) as $st_id) {
-            $summary_updates[] = [
-                'student_id' => $st_id,
-                'average' => $this->assessment->getAverageTermMark($assessment->exam, $st_id, $class_id, $section_id, $this->year),
-                'class_average' => $this->assessment->getClassAverageTermMark($assessment->exam, $class_id, $this->year),
-                'total' => $this->assessment->getTotalTermMark($assessment->exam, $st_id, $class_id, $this->year),
-                'section_position' => $this->assessment->getStudentPositionByColumn($st_id, $assessment->exam->id, $class_id, $this->year, $assessment->exam->ca_student_position_by_value, $assessment->exam->ca_student_position_sort_order, $section_id),
-            ];
-        }
-        $this->assessment->massUpdateRecords($summary_updates, ['student_id']);
+            foreach ($student_ids as $st_id) {
+                $this->assessment->updateRecord(
+                    [
+                        'assessment_id' => $assessment_id,
+                        'student_id' => $st_id,
+                        'my_class_id' => $class_id,
+                        'year' => $this->year,
+                    ],
+                    [
+                        'average' => $this->assessment->getAverageTermMark($assessment->exam, $st_id, $class_id, $section_id, $this->year),
+                        'class_average' => $classAvg,
+                        'total' => $this->assessment->getTotalTermMark($assessment->exam, $st_id, $class_id, $this->year),
+                    ]
+                );
+            }
+
+            // Window-function positions
+            $this->assessment->refreshSubjectPositions(
+                $assessment_id,
+                $assessment->exam->id,
+                $class_id,
+                $this->year,
+                $assessment->exam->term,
+                $section_id
+            );
+            $this->assessment->refreshSummaryPositions(
+                $assessment_id,
+                $assessment->exam->id,
+                $class_id,
+                $this->year,
+                $assessment->exam->ca_student_position_by_value,
+                $assessment->exam->ca_student_position_sort_order,
+                bySection: true,
+                section_id: $section_id
+            );
+            if ($section_id === null) {
+                $this->assessment->refreshSummaryPositions(
+                    $assessment_id,
+                    $assessment->exam->id,
+                    $class_id,
+                    $this->year,
+                    $assessment->exam->ca_student_position_by_value,
+                    $assessment->exam->ca_student_position_sort_order,
+                    bySection: false
+                );
+            }
+        });
 
         return Mk::jsonUpdateOk();
     }
@@ -403,25 +458,28 @@ class AssessmentController extends Controller
     /**
      * Build the per-assessment record update array.
      */
-    protected function calculateAssessmentRow(AssessmentRecord $as, array $input, Exam $exam, ClassType $class_type, int $class_id, int $subject_id): array
-    {
+    protected function calculateAssessmentRow(
+        AssessmentRecord $as,
+        array $input,
+        Exam $exam,
+        ClassType $class_type,
+        int $class_id,
+        int $subject_id
+    ): array {
         $d = ['id' => $as->id];
 
-        // Coursework
         $cw = $this->extractScores($input['cw_'][$as->id] ?? [], self::CW_COUNT);
         for ($i = 1; $i <= self::CW_COUNT; $i++) {
             $d["cw$i"] = $cw['values'][$i] ?? null;
         }
         $cw_avg = $this->avgOrNull($cw['values'], self::CW_COUNT);
 
-        // Homework
         $hw = $this->extractScores($input['hw_'][$as->id] ?? [], self::HW_COUNT);
         for ($i = 1; $i <= self::HW_COUNT; $i++) {
             $d["hw$i"] = $hw['values'][$i] ?? null;
         }
         $hw_avg = $this->avgOrNull($hw['values'], self::HW_COUNT);
 
-        // Topic tests
         $tt = $this->extractScores($input['tt_'][$as->id] ?? [], self::TT_COUNT);
         for ($i = 1; $i <= self::TT_COUNT; $i++) {
             $d["tt$i"] = $tt['values'][$i] ?? null;
@@ -430,25 +488,28 @@ class AssessmentController extends Controller
 
         $tca = ($cw_avg === null && $hw_avg === null && $tt_avg === null)
             ? null
-            : round($cw_avg + $hw_avg + $tt_avg, 1);
+            : round(($cw_avg ?? 0) + ($hw_avg ?? 0) + ($tt_avg ?? 0), 1);
 
-        $exam = $input["exm_{$as->id}"] ?? null;
+        $exm_mark = $input["exm_{$as->id}"] ?? null;
+
         $d['tca'] = $tca;
-        $d['evaluated_exam_mark'] = $exam;
+        $d['evaluated_exam_mark'] = $exm_mark;
 
-        $total = ($tca === null && $exam === null) ? null : $tca + $exam;
+        $total = ($tca === null && $exm_mark === null) ? null : ($tca ?? 0) + ($exm_mark ?? 0);
         $term = $exam->term;
-        $d["tex$term"] = ($total > 100) ? (function () use (&$d) {
-            $d['t1'] = $d['t2'] = $d['t3'] = $d['t4'] = $d['tca'] = $d['evaluated_exam_mark'] = null;
 
-            return null;
-        })() : $total;
+        if ($total !== null && $total > 100) {
+            $d['t1'] = $d['t2'] = $d['t3'] = $d['t4'] = null;
+            $d['tca'] = $d['evaluated_exam_mark'] = null;
+            $d["tex{$term}"] = null;
+        } else {
+            $d["tex{$term}"] = $total;
+        }
 
-        $grade = $this->mark->getGradeByTotal($total, $class_type->id);
+        $grade = $total !== null ? $this->mark->getGradeByTotal($total, $class_type->id) : null;
         $d['grade_id'] = $grade->id ?? null;
-        $d['subject_position'] = $this->assessment->getSubjectPosition($as->student_id, $exam, $class_id, $subject_id, $this->year);
 
-        return $d;
+        return $d; // subject_position filled later by window function
     }
 
     /**

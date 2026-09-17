@@ -19,8 +19,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class MarksExport implements FromView, ShouldAutoSize, WithEvents, WithProperties, WithStyles
 {
-    // S/N, ADMISSION NUMBER, FULL NAME, GENDER, SECTION
-    protected const int INITIAL_COLS = 5;
+    protected const int INITIAL_COLS = 4;
 
     // Title and subject name rows
     protected const int HEADER_ROWS = 4;

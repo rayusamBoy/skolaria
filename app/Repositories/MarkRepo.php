@@ -4,9 +4,10 @@ namespace App\Repositories;
 
 use App\Models\Grade;
 use App\Models\Mark;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class MarkRepo
 {
@@ -292,6 +293,36 @@ class MarkRepo
             'year' => $year,
             'subject_id' => $sub_id,
         ]);
+    }
+
+    public function refreshSubjectPositions(
+        int $exam_id,
+        int $class_id,
+        string $year,
+        int $term,
+        ?int $section_id = null
+    ): int {
+        $tex = "tex{$term}";
+
+        $query = DB::table('marks')
+            ->select('id')
+            ->selectRaw(
+                "DENSE_RANK() OVER (PARTITION BY subject_id ORDER BY {$tex} DESC) AS pos"
+            )
+            ->where('exam_id', $exam_id)
+            ->where('my_class_id', $class_id)
+            ->where('year', $year)
+            ->whereNotNull($tex);
+
+        if ($section_id !== null) {
+            $query->where('section_id', $section_id);
+        }
+
+        $rows = $query->get()
+            ->map(fn ($r) => ['id' => $r->id, 'subject_position' => $r->pos])
+            ->all();
+
+        return empty($rows) ? 0 : Mark::massUpdate(values: $rows, uniqueBy: ['id']);
     }
 
     /*********** Grade ***************/

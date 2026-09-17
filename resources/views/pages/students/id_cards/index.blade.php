@@ -203,8 +203,8 @@
                     <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
                     <span
                         >Make sure all required students' data are filled in the data table below. Otherwise, consider
-                        <a target="_self" href="{{ route('students.list_by_class', $my_class_id) }}">updating</a> the data before
-                        proceeding.</span>
+                        <a target="_self" href="{{ route('students.list_by_class', $my_class_id) }}">updating</a> the
+                        data before proceeding.</span>
                 </div>
             </div>
         </div>

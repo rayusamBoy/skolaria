@@ -16,6 +16,7 @@ use App\Models\Section;
 use App\Models\Skill;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class ExamRepo
 {
@@ -357,6 +358,158 @@ class ExamRepo
             ->count($value);
 
         return $better_count + 1;
+    }
+
+    /**
+     * Recompute section_position OR class_position on exam_records
+     * in one DENSE_RANK() window query.
+     *
+     * DENSE_RANK gives tied students the same position and no gaps,
+     * which is exactly what the old COUNT(DISTINCT better) + 1 logic did.
+     */
+    public function refreshStudentPositions(
+        int $exam_id,
+        int $class_id,
+        string $year,
+        string $orderByColumn,
+        string $sortOrder = 'desc',
+        bool $bySection = true,
+        ?int $section_id = null
+    ): int {
+        $partition = $bySection ? 'section_id' : 'my_class_id';
+        $positionColumn = $bySection ? 'section_position' : 'class_position';
+        $direction = strtolower($sortOrder) === 'asc' ? 'ASC' : 'DESC';
+
+        $query = DB::table($this->exam_records_table)
+            ->select('id')
+            ->selectRaw(
+                "DENSE_RANK() OVER (PARTITION BY {$partition} ORDER BY {$orderByColumn} {$direction}) AS pos"
+            )
+            ->where('exam_id', $exam_id)
+            ->where('my_class_id', $class_id)
+            ->where('year', $year)
+            ->whereNotNull($orderByColumn);
+
+        if ($section_id !== null) {
+            $query->where('section_id', $section_id);
+        }
+
+        $rows = $query->get()
+            ->map(fn ($r) => ['id' => $r->id, $positionColumn => $r->pos])
+            ->all();
+
+        return empty($rows)
+            ? 0
+            : ExamRecord::massUpdate(values: $rows, uniqueBy: ['id']);
+    }
+
+    /**
+     * Compute every per-student aggregate needed for exam_records
+     * in a single CTE using window functions.
+     *
+     * Returns a Collection of stdClass with columns:
+     *   student_id, my_class_id, section_id, exam_id, year,
+     *   total, average, points, total_credits, total_credits_point
+     *
+     * The caller fills in grade_id, division_id and class_average
+     * from already-loaded lookups — no extra round-trips.
+     */
+    public function fetchExamRecordAggregates(
+        int $exam_id,
+        int $class_id,
+        string $year,
+        int $term,
+        int $min_subjects
+    ): \Illuminate\Support\Collection {
+        $tex = "tex{$term}";
+
+        // MySQL: ORDER BY x ASC puts NULL first. PG/SQLite: NULLS LAST.
+        // Using a boolean lead-sort key keeps the syntax identical on all three.
+        $nullsFirst = DB::connection()->getDriverName() === 'mysql';
+
+        $nullKeyPoint = $nullsFirst
+            ? 'CASE WHEN grade_point IS NULL THEN 0 ELSE 1 END ASC, grade_point ASC'
+            : 'grade_point ASC NULLS LAST';
+        $nullKeyCredit = 'credits ASC';
+
+        $sql = <<<SQL
+        WITH marks_enriched AS (
+            SELECT
+                m.student_id,
+                m.my_class_id,
+                m.section_id,
+                m.exam_id,
+                m.year,
+                m.{$tex} AS mark_value,
+                s.is_core,
+                s.credits,
+                g.point AS grade_point
+            FROM marks m
+            LEFT JOIN subjects s ON s.id = m.subject_id
+            LEFT JOIN grades g ON g.id = m.grade_id
+            WHERE m.exam_id     = ?
+              AND m.my_class_id = ?
+              AND m.year        = ?
+              AND m.{$tex}      IS NOT NULL
+        ),
+        ranked AS (
+            SELECT *,
+                ROW_NUMBER() OVER (
+                    PARTITION BY student_id
+                    ORDER BY CASE WHEN is_core THEN mark_value END DESC
+                ) AS core_rank,
+                ROW_NUMBER() OVER (
+                    PARTITION BY student_id
+                    ORDER BY {$nullKeyPoint}
+                ) AS point_rank,
+                ROW_NUMBER() OVER (
+                    PARTITION BY student_id
+                    ORDER BY {$nullKeyCredit}
+                ) AS credit_rank
+            FROM marks_enriched
+        ),
+        core_ranked AS (
+            SELECT *,
+                ROW_NUMBER() OVER (
+                    PARTITION BY student_id
+                    ORDER BY grade_point * credits ASC
+                ) AS cp_rank
+            FROM marks_enriched
+            WHERE is_core = 1
+        ),
+        core_credits AS (
+            SELECT student_id,
+                   SUM(grade_point * credits) AS total_credits_point
+            FROM core_ranked
+            WHERE cp_rank <= {$min_subjects}
+            GROUP BY student_id
+        )
+        SELECT
+            r.student_id,
+            r.my_class_id,
+            r.section_id,
+            r.exam_id,
+            r.year,
+            SUM(r.mark_value) AS total,
+            CASE
+                WHEN COUNT(*) < {$min_subjects} THEN 0
+                ELSE COALESCE(
+                    AVG(CASE WHEN r.is_core = 1 AND r.core_rank <= {$min_subjects}
+                             THEN r.mark_value END),
+                    0
+                )
+            END AS average,
+            SUM(CASE WHEN r.point_rank <= {$min_subjects}
+                     THEN r.grade_point ELSE 0 END) AS points,
+            SUM(CASE WHEN r.credit_rank <= {$min_subjects}
+                     THEN r.credits ELSE 0 END) AS total_credits,
+            COALESCE(cc.total_credits_point, 0) AS total_credits_point
+        FROM ranked r
+        LEFT JOIN core_credits cc ON cc.student_id = r.student_id
+        GROUP BY r.student_id, r.my_class_id, r.section_id, r.exam_id, r.year
+        SQL;
+
+        return collect(DB::select($sql, [$exam_id, $class_id, $year]));
     }
 
     /*********** Grades ***************/

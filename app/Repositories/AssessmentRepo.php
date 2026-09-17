@@ -341,4 +341,104 @@ class AssessmentRepo
             'assessment_id' => $assessment_id,
         ]);
     }
+
+    public function refreshSubjectPositions(
+        int $assessment_id,
+        int $exam_id,
+        int $class_id,
+        string $year,
+        int $term,
+        ?int $section_id = null
+    ): int {
+        $tex = "tex{$term}";
+
+        $query = DB::table($this->assessments_records_table)
+            ->select('id')
+            ->selectRaw(
+                "DENSE_RANK() OVER (PARTITION BY subject_id ORDER BY {$tex} DESC) AS pos"
+            )
+            ->where('assessment_id', $assessment_id)
+            ->where('exam_id', $exam_id)
+            ->where('my_class_id', $class_id)
+            ->where('year', $year)
+            ->whereNotNull('subject_id')
+            ->whereNotNull($tex);
+
+        if ($section_id !== null) {
+            $query->where('section_id', $section_id);
+        }
+
+        $rows = $query->get()
+            ->map(fn ($r) => ['id' => $r->id, 'subject_position' => $r->pos])
+            ->all();
+
+        return empty($rows) ? 0 : AssessmentRecord::massUpdate(values: $rows, uniqueBy: ['id']);
+    }
+
+    /**
+     * Recompute summary positions. Summary values are duplicated on every
+     * subject row of a student, so we rank one representative row per student
+     * and broadcast the position back to all their rows.
+     */
+    public function refreshSummaryPositions(
+        int $assessment_id,
+        int $exam_id,
+        int $class_id,
+        string $year,
+        string $orderByColumn,
+        string $sortOrder = 'desc',
+        bool $bySection = true,
+        ?int $section_id = null
+    ): int {
+        $partition = $bySection ? 'section_id' : 'my_class_id';
+        $positionColumn = $bySection ? 'section_position' : 'class_position';
+        $direction = strtolower($sortOrder) === 'asc' ? 'ASC' : 'DESC';
+
+        // 1. Rank ONE row per student in scope.
+        $repRows = DB::table($this->assessments_records_table)
+            ->select('student_id')
+            ->selectRaw(
+                "DENSE_RANK() OVER (PARTITION BY {$partition} ORDER BY {$orderByColumn} {$direction}) AS pos"
+            )
+            ->where('assessment_id', $assessment_id)
+            ->where('exam_id', $exam_id)
+            ->where('my_class_id', $class_id)
+            ->where('year', $year)
+            ->whereNotNull($orderByColumn)
+            ->whereIn('id', function ($sub) use ($assessment_id, $exam_id, $class_id, $year, $section_id) {
+                $sub->from($this->assessments_records_table)
+                    ->selectRaw('MIN(id)')
+                    ->where('assessment_id', $assessment_id)
+                    ->where('exam_id', $exam_id)
+                    ->where('my_class_id', $class_id)
+                    ->where('year', $year)
+                    ->when($section_id !== null, fn ($q) => $q->where('section_id', $section_id))
+                    ->groupBy('student_id');
+            })
+            ->get()
+            ->keyBy('student_id');
+
+        if ($repRows->isEmpty()) {
+            return 0;
+        }
+
+        // 2. Broadcast to every row of those students.
+        $studentIds = $repRows->keys()->all();
+
+        $rows = AssessmentRecord::where('assessment_id', $assessment_id)
+            ->where('exam_id', $exam_id)
+            ->where('my_class_id', $class_id)
+            ->where('year', $year)
+            ->whereIn('student_id', $studentIds)
+            ->when($section_id !== null, fn ($q) => $q->where('section_id', $section_id))
+            ->select('id', 'student_id')
+            ->get()
+            ->map(fn ($r) => [
+                'id' => $r->id,
+                $positionColumn => $repRows[$r->student_id]->pos,
+            ])
+            ->all();
+
+        return empty($rows) ? 0 : AssessmentRecord::massUpdate(values: $rows, uniqueBy: ['id']);
+    }
 }
