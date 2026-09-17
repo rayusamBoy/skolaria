@@ -1232,9 +1232,7 @@ class MarkController extends Controller
             $students_data[] = $row;
         }
 
-        usort($students_data, function ($a, $b) {
-            return strcmp($a['exam_number'] ?? '', $b['exam_number'] ?? '');
-        });
+        usort($students_data, fn($a, $b) => strcmp($a['exam_number'] ?? '', $b['exam_number'] ?? ''));
 
         return [
             'my_class' => $my_class,
