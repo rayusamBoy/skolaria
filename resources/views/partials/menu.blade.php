@@ -377,7 +377,7 @@
                                     </li>
                                 @endcanany
 
-                                @can($tenant_permissions['subjects']['index_record']['permission'])
+                                @can($tenant_permissions['exams']['assign_view']['permission'])
                                     <li class="nav-item">
                                         <a
                                             href="{{ route('exams.exam_numbers.assign') }}"
