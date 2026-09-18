@@ -390,7 +390,7 @@ Breadcrumbs::for('ttr.manage', function (BreadcrumbTrail $trail, $ttr): void {
     $trail->push('Manage Timetable Record', route('ttr.manage', $ttr));
 });
 
-Breadcrumbs::for('ts.edit', function (BreadcrumbTrail $trail, $ts_id): void {
+Breadcrumbs::for('ts.edit', function (BreadcrumbTrail $trail, int $ts_id): void {
     $timeTableRepo = new TimeTableRepo;
     $ttr_id = $timeTableRepo->findTimeSlot($ts_id)->ttr_id;
     $trail->parent('ttr.manage', $ttr_id);
