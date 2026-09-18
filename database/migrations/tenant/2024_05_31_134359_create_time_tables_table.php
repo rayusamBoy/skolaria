@@ -17,8 +17,6 @@ return new class extends Migration
             $table->unsignedInteger('ts_id')->index();
             $table->unsignedInteger('subject_id')->nullable()->index();
             $table->string('exam_date', 50)->nullable();
-            $table->time('timestamp_from');
-            $table->time('timestamp_to');
             $table->string('day', 50)->nullable();
             $table->tinyInteger('day_num')->nullable();
             $table->timestamps();

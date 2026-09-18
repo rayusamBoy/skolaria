@@ -67,10 +67,6 @@ class TimeTableController extends Controller
     public function store(TTRequest $req): JsonResponse
     {
         $data = $req->all();
-        $tms = $this->tt->findTimeSlot($req->ts_id);
-        $d_date = $req->exam_date ?? $req->day;
-        $data['timestamp_from'] = strtotime("$d_date {$tms->time_from}");
-        $data['timestamp_to'] = strtotime("$d_date {$tms->time_to}");
 
         $this->tt->create($data);
 
@@ -82,11 +78,7 @@ class TimeTableController extends Controller
      */
     public function update(TTRequest $req, int $tt_id): RedirectResponse
     {
-        $data = $req->all();
-        $tms = $this->tt->findTimeSlot($req->ts_id);
-        $d_date = $req->exam_date ?? $req->day;
-        $data['timestamp_from'] = strtotime("$d_date {$tms->time_from}");
-        $data['timestamp_to'] = strtotime("$d_date {$tms->time_to}");
+        $data = $req->except(['_method', '_token']);
 
         $this->tt->update($tt_id, $data);
 
@@ -115,8 +107,6 @@ class TimeTableController extends Controller
         $tt = "{$req->hour_to}:{$req->min_to} {$req->meridian_to}";
         $data['time_from'] = $tf;
         $data['time_to'] = $tt;
-        $data['timestamp_from'] = strtotime($tf);
-        $data['timestamp_to'] = strtotime($tt);
         $data['full'] = "$tf - $tt";
 
         if ($tf == $tt) {
@@ -163,20 +153,17 @@ class TimeTableController extends Controller
      */
     public function update_time_slot(TSRequest $req, int $ts_id): RedirectResponse
     {
-        $data = $req->all();
+        $data = $req->except(['_token', '_method']);
         $tf = "{$req->hour_from}:{$req->min_from} {$req->meridian_from}";
         $tt = "{$req->hour_to}:{$req->min_to} {$req->meridian_to}";
         $data['time_from'] = $tf;
         $data['time_to'] = $tt;
-        $data['timestamp_from'] = $timestamp_from = strtotime($tf);
-        $data['timestamp_to'] = $timestamp_to = strtotime($tt);
         $data['full'] = "$tf - $tt";
 
+        $timestamp_from = strtotime($tf);
+        $timestamp_to = strtotime($tt);
         if ($timestamp_from > $timestamp_to) {
             return back()->with('flash_danger', __('msg.invalid_time_flow'));
-        }
-        if ($tf == $tt) {
-            return back()->with('flash_danger', __('msg.invalid_time_slot'));
         }
 
         $this->tt->updateTimeSlot($ts_id, $data);

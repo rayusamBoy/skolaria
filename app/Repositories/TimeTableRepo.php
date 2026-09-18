@@ -19,7 +19,7 @@ class TimeTableRepo
     public function getTimeTableEntries(array $where): Collection
     {
         return TimeTable::with(['subject', 'time_slot'])
-            ->orderBy('timestamp_from')
+            ->orderBy('id')
             ->where($where)
             ->get();
     }
@@ -55,7 +55,7 @@ class TimeTableRepo
      */
     public function getTimeSlotsQuery(array $where): Builder|TimeSlot
     {
-        return TimeSlot::orderBy('timestamp_from')->where($where);
+        return TimeSlot::orderBy('time_from')->where($where);
     }
 
     /**

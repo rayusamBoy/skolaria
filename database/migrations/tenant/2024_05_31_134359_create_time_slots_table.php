@@ -22,12 +22,10 @@ return new class extends Migration
             $table->enum('meridian_to', ['AM', 'PM']);
             $table->string('time_from', 100);
             $table->string('time_to', 100);
-            $table->time('timestamp_from');
-            $table->time('timestamp_to');
             $table->string('full', 100);
             $table->timestamps();
 
-            $table->unique(['timestamp_from', 'timestamp_to', 'ttr_id']);
+            $table->unique(['time_from', 'time_to', 'ttr_id']);
         });
     }
 
