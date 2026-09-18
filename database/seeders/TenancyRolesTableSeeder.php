@@ -85,7 +85,7 @@ class TenancyRolesTableSeeder extends Seeder
                 ],
                 'exclude' => [
                     '/^messages\.(delete|update|user_delete|remove_participant)/',
-                    '/^marks\.(batch_delete)/',
+                    '/^marks\.(batch_delete|batch_update)/',
                     '/^assessments\.(print_progressive|progressive_select)/',
                 ],
             ],
