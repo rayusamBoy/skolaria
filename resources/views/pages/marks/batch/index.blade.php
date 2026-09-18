@@ -19,23 +19,7 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div
-                class="alert alert-warning alert-dismissible has-do-not-show-again-button border-0"
-                id="advance-level-info"
-            >
-                <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
-                <span>
-                    If you changed the section for a particular student; you can download the template again for the
-                    particular exam and update the template as well as upload it (if applicable), regardless you must
-                    update the exam marks. Select <strong>Yes</strong> if you want to delete exam records and marks of
-                    the old sections for any student whose section has changed.
-                </span>
-            </div>
-        </div>
-    </div>
-
+    @includeWhen(auth()->user()->can($tenant_permissions['marks']['initialize_marks']['permission']), 'pages/marks/batch/initialize')
     @includeWhen(auth()->user()->can($tenant_permissions['marks']['batch_template']['permission']), 'pages/marks/batch/template')
     @includeWhen(auth()->user()->can($tenant_permissions['marks']['batch_upload']['permission']), 'pages/marks/batch/upload')
     @includeWhen(auth()->user()->can($tenant_permissions['marks']['batch_update']['permission']), 'pages/marks/batch/update')

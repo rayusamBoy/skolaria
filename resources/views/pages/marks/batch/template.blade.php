@@ -10,7 +10,7 @@
                 <div class="col-md-9">
                     <fieldset>
                         <div class="row">
-                            <div class="col-md-5">
+                            <div class="col-md-8">
                                 <div class="form-group">
                                     <label for="exam_id" class="col-form-label font-weight-bold"
                                         >Exam: <span class="text-danger">*</span></label>
@@ -44,21 +44,6 @@
                                         @foreach ($my_classes as $c)
                                             <option value="{{ $c->id }}">{{ $c->name }}</option>
                                         @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-md-3">
-                                <label for="delete-old-section-exam-recs" class="col-form-label font-weight-semibold"
-                                    >Delete old student section record</label>
-                                <div class="form-group text-center">
-                                    <select
-                                        class="form-control select"
-                                        name="delete_old_section_record"
-                                        id="delete-old-section-exam-recs"
-                                    >
-                                        <option value="1">Yes</option>
-                                        <option selected value="0">No</option>
                                     </select>
                                 </div>
                             </div>

@@ -207,6 +207,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         Route::prefix('marks')->group(function () {
             Route::get('batch', [MarkController::class, 'batch'])->name('marks.batch');
             Route::put('batch', [MarkController::class, 'batch_update'])->name('marks.batch_update');
+            Route::put('batch/initialize', [MarkController::class, 'initialize_marks'])->name('marks.batch_initialize');
             Route::get('batch/template', [MarkController::class, 'batch_template'])->name('marks.batch_template');
             Route::post('batch/delete', [MarkController::class, 'batch_delete'])->name('marks.batch_delete');
             Route::put('batch/upload', [MarkController::class, 'batch_upload'])->name('marks.batch_upload');

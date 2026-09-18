@@ -499,6 +499,11 @@ return [
                     'label' => 'Batch Template for Marks',
                     'description' => 'Download or upload batch templates for marks.',
                 ],
+                'initialize_marks' => [
+                    'permission' => 'marks.initialize_marks',
+                    'label' => 'Initialize Marks',
+                    'description' => 'Initialize marks for students.',
+                ],
                 'batch_update' => [
                     'permission' => 'marks.batch_update',
                     'label' => 'Batch Update Marks',

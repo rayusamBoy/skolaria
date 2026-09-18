@@ -388,8 +388,6 @@ class MarkController extends Controller
             return redirect()->back()->with('flash_danger', __('msg.srnf'));
         }
 
-        $this->initializeBatchMarks($exam, $class, $students, (bool) $req->delete_old_section_record);
-
         $data = [
             'marks' => $this->exam->getMarksByConditions(
                 ['exam_id' => $exam->id, 'my_class_id' => $class->id, 'year' => $this->year],
@@ -415,6 +413,46 @@ class MarkController extends Controller
                 'Expires' => '0',
             ]
         );
+    }
+
+    /**
+     * Initialize mark, exam-record, and (where applicable) assessment rows
+     * for every student in a class against a given exam.
+     *
+     * The operation is idempotent: existing marks are never overwritten,
+     * only missing rows are created. When $delete_old_section_record is true,
+     * stale rows belonging to a student's previous section are removed first.
+     */
+    public function initialize_marks(Request $req): JsonResponse|RedirectResponse
+    {
+        $class = $this->my_class->findClass($req->my_class_id);
+        $exam = $this->exam->find($req->exam_id);
+
+        if ($exam->class_type_id != $class->class_type_id) {
+            return back()->with('flash_error', __('msg.invalid_exam_and_class'));
+        }
+
+        if (! $this->my_class->whereSubject(['my_class_id' => $class->id])->exists()) {
+            return back()->with('flash_error', __('msg.assign_subjects_to_class'));
+        }
+
+        $students = $this->student->getActiveStudentsQueryWithRelations([
+            'my_class_id' => $req->my_class_id,
+            'session' => $this->year,
+        ])->get();
+
+        if ($students->isEmpty()) {
+            return back()->with('flash_danger', __('msg.srnf'));
+        }
+
+        $delete_old_section_record = $req->boolean('delete_old_section_record');
+
+        $this->initializeBatchMarks($exam, $class, $students, $delete_old_section_record);
+
+        $message = 'Marks initialized. Missing rows were created; existing marks were left untouched.'
+            .($delete_old_section_record ? ' Stale section records were removed.' : '');
+
+        return Mk::json(arr: ['ok' => true, 'pop' => true, 'msg' => $message]);
     }
 
     /**
@@ -1056,7 +1094,7 @@ class MarkController extends Controller
 
         $divisions = $this->exam->getAllDivisions()
             ->where('class_type_id', $class_type->id)
-            ->sortBy('min_points');
+            ->sortBy('points_from');
 
         $classAvg = $this->exam
             ->getMarksByConditions([
@@ -1079,7 +1117,7 @@ class MarkController extends Controller
             );
 
             $division = $divisions->first(
-                fn ($d) => $points >= (int) $d->min_points && $points <= (int) $d->max_points
+                fn ($d) => $points >= (int) $d->points_from && $points <= (int) $d->points_to
             );
 
             $updates[] = [
@@ -1209,6 +1247,7 @@ class MarkController extends Controller
         );
 
         $students = $this->student->getStudentsByUserIdsQuery($st_ids->toArray())
+            ->where('session', $year)
             ->get()
             ->whereNotNull('user');
 

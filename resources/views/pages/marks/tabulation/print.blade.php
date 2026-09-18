@@ -29,10 +29,10 @@
         @include('pages.marks.tabulation.partials.header')
         @include('pages.marks.tabulation.partials.summaries')
         @include('pages.marks.tabulation.partials.table')
-        <div style="page-break-after: always"></div>
+        <div style="page-break-after: auto"></div>
         @include('pages.marks.tabulation.partials.performance_summary')
         <p class="copyright mt-4 text-center">
-            {{ date('Y') }}. {{ ucwords(strtolower($settings->firstWhere('key', 'system_name')->value)) }}. All rights
+            &copy; {{ date('Y') }}. {{ ucwords(strtolower($settings->firstWhere('key', 'system_name')->value)) }}. All rights
             reserved.
         </p>
     </div>
@@ -54,7 +54,7 @@
                 const selector = el.dataset.toggleTarget;
                 if (!selector) return;
 
-                let label = el.getAttribute('id');
+                let label = el.getAttribute('id') ?? el.dataset.label;
                 label = label.replace('-', ' ', label);
                 label = capitalize(label);
 

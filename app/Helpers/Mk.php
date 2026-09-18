@@ -260,14 +260,20 @@ class Mk extends Qs
                 $totalCounts .= '<td class="text-center">'.($mc + $fc).'</td>';
             }
 
-            $html .= "<table class='table-styled styled float-head'>
-                <thead><tr><th class='text-center'>Average Grade</th>{$gradeNames}</tr></thead>
-                <tbody>
-                    <tr><td class='text-center'>Male</td>{$maleCounts}</tr>
-                    <tr><td class='text-center'>Female</td>{$femaleCounts}</tr>
-                    <tr><td class='text-center'>Total</td>{$totalCounts}</tr>
-                </tbody>
-            </table>";
+            $html .= 
+            "
+            <div id='averageGrade-summary' data-toggle-target='#averageGrade-summary' class='toggleable mw-fit col-3 w-60'>
+                <strong style='font-size: 15px'>Average Grade Summary</strong>
+                <table class='table-styled styled float-head'>
+                    <thead><tr><th class='text-center'>Average Grade</th>{$gradeNames}</tr></thead>
+                    <tbody>
+                        <tr><td class='text-center'>Male</td>{$maleCounts}</tr>
+                        <tr><td class='text-center'>Female</td>{$femaleCounts}</tr>
+                        <tr><td class='text-center'>Total</td>{$totalCounts}</tr>
+                    </tbody>
+                </table>
+            </div>
+            ";
         }
 
         // ------- Divisions section -------
@@ -288,14 +294,19 @@ class Mk extends Qs
                 $totalCounts .= '<td class="text-center">'.($mc + $fc).'</td>';
             }
 
-            $html .= "<table class='table-styled styled float-head' style='margin-top:1em;'>
-                <thead><tr><th class='text-center'>Division</th>{$divNames}</tr></thead>
-                <tbody>
-                    <tr><td class='text-center'>Male</td>{$maleCounts}</tr>
-                    <tr><td class='text-center'>Female</td>{$femaleCounts}</tr>
-                    <tr><td class='text-center'>Total</td>{$totalCounts}</tr>
-                </tbody>
-            </table>";
+            $html .= "
+            <div id='division-summary' data-toggle-target='#division-summary' class='toggleable mw-fit col-3 w-60'>
+                <strong style='font-size: 15px'>Division Summary</strong>
+                <table class='table-styled styled float-head' style='margin-top:1em;'>
+                    <thead><tr><th class='text-center'>Division</th>{$divNames}</tr></thead>
+                    <tbody>
+                        <tr><td class='text-center'>Male</td>{$maleCounts}</tr>
+                        <tr><td class='text-center'>Female</td>{$femaleCounts}</tr>
+                        <tr><td class='text-center'>Total</td>{$totalCounts}</tr>
+                    </tbody>
+                </table>
+            </div>
+            ";
         }
 
         return $html;
