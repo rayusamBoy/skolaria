@@ -260,7 +260,7 @@ class Mk extends Qs
                 $totalCounts .= '<td class="text-center">'.($mc + $fc).'</td>';
             }
 
-            $html .= 
+            $html .=
             "
             <div id='averageGrade-summary' data-toggle-target='#averageGrade-summary' class='toggleable mw-fit col-3 w-60'>
                 <strong style='font-size: 15px'>Average Grade Summary</strong>
