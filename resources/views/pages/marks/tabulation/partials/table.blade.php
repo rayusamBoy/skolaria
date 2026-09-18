@@ -6,13 +6,25 @@
             <th class="text-center">Gender</th>
             @foreach ($subjects as $sub)
                 <th class="text-center" title="{{ $sub->name }}">{{ $sub->slug ?? $sub->name }}</th>
-                <th class="text-center subject-mark">Grd</th>
+                <th class="subject-mark text-center">Grd</th>
             @endforeach
             <th id="header-total" class="col-total toggleable text-center" data-toggle-target=".col-total">Total</th>
-            <th id="header-average-grade" class="col-average-grade toggleable text-center" title="Average" data-toggle-target=".col-average-grade">
+            <th
+                id="header-average-grade"
+                class="col-average-grade toggleable text-center"
+                title="Average"
+                data-toggle-target=".col-average-grade"
+            >
                 Avg Grade
             </th>
-            <th id="header-grade" class="text-center col-grade toggleable" title="Grade" data-toggle-target=".col-grade">Grd</th>
+            <th
+                id="header-grade"
+                class="col-grade toggleable text-center"
+                title="Grade"
+                data-toggle-target=".col-grade"
+            >
+                Grd
+            </th>
             <th
                 id="header-points"
                 class="col-points toggleable text-center"
@@ -56,12 +68,14 @@
 
                 @foreach ($subjects as $sub)
                     @php $sub_mark = $row['sub_marks'][$sub->id]; @endphp
-                    <td class="text-center subject-mark" data-toggle-target='.subject-mark' data-label="Subject marks">{{ $sub_mark['mark'] ?? '—' }}</td>
-                    <td class="text-center text-green">{{ $sub_mark['grade'] ?? '—' }}</td>
+                    <td class="subject-mark text-center" data-toggle-target=".subject-mark" data-label="Subject marks">
+                        {{ $sub_mark['mark'] ?? '—' }}
+                    </td>
+                    <td class="text-green text-center">{{ $sub_mark['grade'] ?? '—' }}</td>
                 @endforeach
                 <td class="text-danger col-total text-center">{{ $row['total'] ?? '—' }}</td>
                 <td class="text-secondary col-avgerage-grade text-center">{{ $row['grade'] ?? '—' }}</td>
-                <td class="text-center text-info col-grade">{{ $row['grade'] ?? '—' }}</td>
+                <td class="text-info col-grade text-center">{{ $row['grade'] ?? '—' }}</td>
                 <td class="text-pink col-points text-center">{{ $row['points'] ?? '—' }}</td>
                 <td class="text-orange col-division text-center">{{ $row['division'] ?? '—' }}</td>
                 <td class="text-violet col-gpa text-center">{{ $row['gpa'] ?? '—' }}</td>

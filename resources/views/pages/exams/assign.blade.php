@@ -63,15 +63,15 @@
                 <button type="button" id="load-exam-numbers-btn" class="btn btn-primary">
                     <i class="material-symbols-rounded mr-1">refresh</i> Load Students
                 </button>
-                @if($tenant_permissions['exams']['generate_exam_numbers']['permission'])
-                <button type="button" id="generate-exam-numbers-btn" class="btn btn-success" disabled>
-                    <i class="material-symbols-rounded mr-1">autorenew</i> Generate Numbers
-                </button>
+                @if ($tenant_permissions['exams']['generate_exam_numbers']['permission'])
+                    <button type="button" id="generate-exam-numbers-btn" class="btn btn-success" disabled>
+                        <i class="material-symbols-rounded mr-1">autorenew</i> Generate Numbers
+                    </button>
                 @endif
-                @if($tenant_permissions['exams']['exam_numbers_save']['permission'])
-                <button type="button" id="save-exam-numbers-btn" class="btn btn-info" disabled>
-                    <i class="material-symbols-rounded mr-1">save</i> Save Changes
-                </button>
+                @if ($tenant_permissions['exams']['exam_numbers_save']['permission'])
+                    <button type="button" id="save-exam-numbers-btn" class="btn btn-info" disabled>
+                        <i class="material-symbols-rounded mr-1">save</i> Save Changes
+                    </button>
                 @endif
             </div>
 

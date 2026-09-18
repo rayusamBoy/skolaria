@@ -32,81 +32,80 @@
         <div style="page-break-after: auto"></div>
         @include('pages.marks.tabulation.partials.performance_summary')
         <p class="copyright mt-4 text-center">
-            &copy; {{ date('Y') }}. {{ ucwords(strtolower($settings->firstWhere('key', 'system_name')->value)) }}. All rights
-            reserved.
+            &copy; {{ date('Y') }}. {{ ucwords(strtolower($settings->firstWhere('key', 'system_name')->value)) }}. All rights reserved.
         </p>
     </div>
 
     {{-- JavaScript --}}
     <script>
-    (function () {
-        const toggleables  = document.querySelectorAll('[data-toggle-target]');
-        const hideSelect   = document.getElementById('hide-select');
-        const unhideSelect = document.getElementById('unhide-select');
+        (function () {
+            const toggleables = document.querySelectorAll('[data-toggle-target]');
+            const hideSelect = document.getElementById('hide-select');
+            const unhideSelect = document.getElementById('unhide-select');
 
-        // Build the unique selector → label map
-        const items = new Map();
-        toggleables.forEach((el) => {
-            const selector = el.dataset.toggleTarget;
-            if (!selector || items.has(selector)) return;
+            // Build the unique selector → label map
+            const items = new Map();
+            toggleables.forEach((el) => {
+                const selector = el.dataset.toggleTarget;
+                if (!selector || items.has(selector)) return;
 
-            let label = el.getAttribute('id') ?? el.dataset.label ?? selector;
-            label = label.replace(/-/g, ' ');               // fixed: was .replace('-', ' ', label)
-            label = label.charAt(0).toUpperCase() + label.slice(1);
+                let label = el.getAttribute('id') ?? el.dataset.label ?? selector;
+                label = label.replace(/-/g, ' '); // fixed: was .replace('-', ' ', label)
+                label = label.charAt(0).toUpperCase() + label.slice(1);
 
-            items.set(selector, label);
-        });
+                items.set(selector, label);
+            });
 
-        const sorted = Array.from(items.entries())
-            .sort((a, b) => a[1].localeCompare(b[1]));
+            const sorted = Array.from(items.entries()).sort((a, b) => a[1].localeCompare(b[1]));
 
-        // Seed hide-select with every toggleable
-        sorted.forEach(([selector, label]) => hideSelect.add(new Option(label, selector)));
+            // Seed hide-select with every toggleable
+            sorted.forEach(([selector, label]) => hideSelect.add(new Option(label, selector)));
 
-        // Helpers
-        const moveOption = (fromSelect, toSelect, selector) => {
-            const option = Array.from(fromSelect.options)
-                .find((o) => o.value === selector);
-            if (!option) return;
+            // Helpers
+            const moveOption = (fromSelect, toSelect, selector) => {
+                const option = Array.from(fromSelect.options).find((o) => o.value === selector);
+                if (!option) return;
 
-            const label = option.text;
-            option.remove();
+                const label = option.text;
+                option.remove();
 
-            // Insert alphabetically after the placeholder (index 0).
-            const insertBefore = Array.from(toSelect.options)
-                .slice(1)
-                .find((o) => o.text.localeCompare(label) > 0);
+                // Insert alphabetically after the placeholder (index 0).
+                const insertBefore = Array.from(toSelect.options)
+                    .slice(1)
+                    .find((o) => o.text.localeCompare(label) > 0);
 
-            toSelect.add(new Option(label, selector), insertBefore ?? null);
-        };
+                toSelect.add(new Option(label, selector), insertBefore ?? null);
+            };
 
-        const resetSelect = (select) => { select.selectedIndex = 0; };
+            const resetSelect = (select) => {
+                select.selectedIndex = 0;
+            };
 
-        // Disable a select if only the placeholder remains.
-        const syncEmptyState = () => {
-            hideSelect.disabled   = hideSelect.options.length   <= 1;
-            unhideSelect.disabled = unhideSelect.options.length <= 1;
-        };
+            // Disable a select if only the placeholder remains.
+            const syncEmptyState = () => {
+                hideSelect.disabled = hideSelect.options.length <= 1;
+                unhideSelect.disabled = unhideSelect.options.length <= 1;
+            };
 
-        // Public handlers
-        window.hideSelected = (selector) => {
-            if (!selector) return;
-            document.querySelectorAll(selector).forEach((el) => (el.style.display = 'none'));
-            moveOption(hideSelect, unhideSelect, selector);
-            resetSelect(hideSelect);
+            // Public handlers
+            window.hideSelected = (selector) => {
+                if (!selector) return;
+                document.querySelectorAll(selector).forEach((el) => (el.style.display = 'none'));
+                moveOption(hideSelect, unhideSelect, selector);
+                resetSelect(hideSelect);
+                syncEmptyState();
+            };
+
+            window.unhideSelected = (selector) => {
+                if (!selector) return;
+                document.querySelectorAll(selector).forEach((el) => (el.style.display = ''));
+                moveOption(unhideSelect, hideSelect, selector);
+                resetSelect(unhideSelect);
+                syncEmptyState();
+            };
+
             syncEmptyState();
-        };
-
-        window.unhideSelected = (selector) => {
-            if (!selector) return;
-            document.querySelectorAll(selector).forEach((el) => (el.style.display = ''));
-            moveOption(unhideSelect, hideSelect, selector);
-            resetSelect(unhideSelect);
-            syncEmptyState();
-        };
-
-        syncEmptyState();
-    })();
-</script>
+        })();
+    </script>
 </body>
 </html>
