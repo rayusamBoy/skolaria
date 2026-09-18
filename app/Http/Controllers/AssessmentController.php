@@ -351,6 +351,16 @@ class AssessmentController extends Controller
 
     /**
      * Update assessment marks.
+     *
+     * Positions are always recomputed class-wide. The window functions in
+     * AssessmentRepo do section-level partitioning internally, so a WHERE
+     * section filter here would produce section-wide ranks and diverge
+     * from the batch path.
+     *
+     * The summary average uses the student's own section (derived from the
+     * already-loaded records) rather than the request's section, so the
+     * value broadcast to all of the student's rows is consistent regardless
+     * of whether the caller edited one section or the whole class.
      */
     public function update(
         Request $req,
@@ -380,7 +390,7 @@ class AssessmentController extends Controller
         $input = $req->all();
 
         DB::transaction(function () use ($asmnt_records, $assessment_id, $input, $assessment, $class_type, $class_id, $subject_id, $section_id) {
-            // Detail rows (per subject) written by PK
+            // ── 1. Detail rows (per subject) written by PK ─────────────
             $record_updates = [];
             foreach ($asmnt_records as $as) {
                 $record_updates[] = $this->calculateAssessmentRow(
@@ -396,14 +406,22 @@ class AssessmentController extends Controller
                 $this->assessment->massUpdateRecords($record_updates, ['id']);
             }
 
-            // Summary: ONE update per student, no upsert
-            // Summary values live on every subject row of the student.
-            // Use updateRecord (a real SQL UPDATE) so we don't accidentally insert duplicate rows.
+            // ── 2. Summary: ONE update per student, no upsert ─────────
+            // Summary values are duplicated on every subject row of a
+            // student, so we broadcast a single consistent value to all
+            // of them. Use updateRecord (a real SQL UPDATE) so we never
+            // insert duplicate rows.
             $student_ids = $asmnt_records->pluck('student_id')->unique()->values()->all();
 
             $classAvg = $this->assessment->getClassAverageTermMark($assessment->exam, $class_id, $this->year);
 
             foreach ($student_ids as $st_id) {
+                // Prefer the request's section when it was provided;
+                // otherwise derive the student's own section from the
+                // loaded records so the average isn't filtered to NULL.
+                $studentSection = $section_id
+                    ?? $asmnt_records->firstWhere('student_id', $st_id)?->section_id;
+
                 $this->assessment->updateRecord(
                     [
                         'assessment_id' => $assessment_id,
@@ -412,22 +430,22 @@ class AssessmentController extends Controller
                         'year' => $this->year,
                     ],
                     [
-                        'average' => $this->assessment->getAverageTermMark($assessment->exam, $st_id, $class_id, $section_id, $this->year),
+                        'average' => $this->assessment->getAverageTermMark($assessment->exam, $st_id, $class_id, $studentSection, $this->year),
                         'class_average' => $classAvg,
                         'total' => $this->assessment->getTotalTermMark($assessment->exam, $st_id, $class_id, $this->year),
                     ]
                 );
             }
 
-            // Window-function positions
+            // ── 3. Window-function positions — always class-wide ──────
             $this->assessment->refreshSubjectPositions(
                 $assessment_id,
                 $assessment->exam->id,
                 $class_id,
                 $this->year,
-                $assessment->exam->term,
-                $section_id
+                $assessment->exam->term
             );
+
             $this->assessment->refreshSummaryPositions(
                 $assessment_id,
                 $assessment->exam->id,
@@ -435,20 +453,18 @@ class AssessmentController extends Controller
                 $this->year,
                 $assessment->exam->ca_student_position_by_value,
                 $assessment->exam->ca_student_position_sort_order,
-                bySection: true,
-                section_id: $section_id
+                bySection: true
             );
-            if ($section_id === null) {
-                $this->assessment->refreshSummaryPositions(
-                    $assessment_id,
-                    $assessment->exam->id,
-                    $class_id,
-                    $this->year,
-                    $assessment->exam->ca_student_position_by_value,
-                    $assessment->exam->ca_student_position_sort_order,
-                    bySection: false
-                );
-            }
+
+            $this->assessment->refreshSummaryPositions(
+                $assessment_id,
+                $assessment->exam->id,
+                $class_id,
+                $this->year,
+                $assessment->exam->ca_student_position_by_value,
+                $assessment->exam->ca_student_position_sort_order,
+                bySection: false
+            );
         });
 
         return Mk::jsonUpdateOk();
@@ -761,7 +777,7 @@ class AssessmentController extends Controller
             return null;
         }
 
-        $class_type_id = $this->my_class->findClass($class_id)->class_type_id; // get from previous
+        $class_type_id = $this->my_class->findClass($class_id)->class_type_id;
         $subjects = $this->my_class->getSubjectsByIds($sub_ids);
 
         $sections = Mk::userIsClassSectionTeacher()
@@ -801,7 +817,7 @@ class AssessmentController extends Controller
         $asr_grouped = $asr->groupBy('student_id');
 
         foreach ($asr_grouped as $student_id => $records) {
-            $summary = $records->first(); // Contains total, average, section_position, etc.
+            $summary = $records->first();
 
             $sub_marks = [];
             foreach ($subjects as $sub) {

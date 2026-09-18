@@ -277,6 +277,12 @@ class MarkController extends Controller
 
     /**
      * Update marks for a subject.
+     *
+     * Positions are always recomputed over the whole class, regardless of
+     * whether the user edited one section or the whole class. The window
+     * functions in the repositories do the section-level partitioning
+     * internally, so passing a section filter would produce section-wide
+     * ranks and diverge from the batch-update path.
      */
     public function update(
         Request $req,
@@ -294,8 +300,8 @@ class MarkController extends Controller
         $marks = $this->fetchMarksForUpdate($exam_id, $class_id, $subject_id, $section_id);
         $form_data = $req->all();
 
-        DB::transaction(function () use ($exam, $class_type, $marks, $form_data, $class_id, $section_id) {
-            // Raw marks
+        DB::transaction(function () use ($exam, $class_type, $marks, $form_data, $class_id) {
+            // Raw marks — position column intentionally omitted; filled in below.
             $this->exam->massUpdateMark(
                 $this->buildSubjectMarkUpdates($marks, $form_data, $exam, $class_type->id)
             );
@@ -312,18 +318,20 @@ class MarkController extends Controller
             }
 
             // Exam_records aggregates via CTE
-            $this->recomputeExamRecords($exam, $class_id, $class_type, $section_id);
+            $this->recomputeExamRecords($exam, $class_id, $class_type);
 
-            // Positions via window functions
+            // Positions — always class-wide. The PARTITION BY clause
+            // performs section scoping where needed; a WHERE filter on
+            // section_id would produce section-wide ranks and diverge
+            // from batch_update.
             $this->mark->refreshSubjectPositions(
                 $exam->id,
                 $class_id,
                 $this->year,
-                $exam->term,
-                $section_id
+                $exam->term
             );
 
-            $this->refreshAssessmentPositions($exam, $class_id, $section_id);
+            $this->refreshAssessmentPositions($exam, $class_id);
 
             $this->exam->refreshStudentPositions(
                 $exam->id,
@@ -331,20 +339,17 @@ class MarkController extends Controller
                 $this->year,
                 $exam->exam_student_position_by_value,
                 $exam->exam_student_position_sort_order,
-                bySection: true,
-                section_id: $section_id
+                bySection: true
             );
 
-            if ($section_id === null) {
-                $this->exam->refreshStudentPositions(
-                    $exam->id,
-                    $class_id,
-                    $this->year,
-                    $exam->exam_student_position_by_value,
-                    $exam->exam_student_position_sort_order,
-                    bySection: false
-                );
-            }
+            $this->exam->refreshStudentPositions(
+                $exam->id,
+                $class_id,
+                $this->year,
+                $exam->exam_student_position_by_value,
+                $exam->exam_student_position_sort_order,
+                bySection: false
+            );
         });
 
         return Mk::jsonUpdateOk();
@@ -548,10 +553,10 @@ class MarkController extends Controller
                 $this->assessment->massUpdateRecords($all_assessment_updates, ['mark_id']);
             }
 
-            // Exam_records via CTE — whole class in one pass ─
-            $this->recomputeExamRecords($exam, $req->my_class_id, $class_type, null);
+            // Exam_records via CTE — whole class in one pass
+            $this->recomputeExamRecords($exam, $req->my_class_id, $class_type);
 
-            // Positions via window functions
+            // Positions — always class-wide
             $this->mark->refreshSubjectPositions(
                 $exam->id,
                 $req->my_class_id,
@@ -559,7 +564,7 @@ class MarkController extends Controller
                 $exam->term
             );
 
-            $this->refreshAssessmentPositions($exam, $req->my_class_id, null);
+            $this->refreshAssessmentPositions($exam, $req->my_class_id);
 
             $this->exam->refreshStudentPositions(
                 $exam->id,
@@ -877,24 +882,20 @@ class MarkController extends Controller
             ])->value('students_ids')->toArray();
 
             $marks = $this->exam->getMarksByStudentIds($students_ids)->where($base)->get();
-            $where = [
-                'my_class_id' => $class_id,
-                'exam_id' => $exam_id,
-                'year' => $this->year,
-            ];
         } else {
             $base['section_id'] = $section_id;
             $marks = $this->exam->getMarksByConditions($base, ['user'])->whereNotNull('user');
-            $where = $base;
         }
-
-        unset($where['subject_id']);
 
         return $marks;
     }
 
     /**
      * Initialize batch marks for all students in class.
+     *
+     * When $delete_old_section_record is true, stale rows belonging to a
+     * student's previous section are removed from exam_records, marks,
+     * AND assessment_records so rank queries don't double-count the student.
      */
     protected function initializeBatchMarks(Exam $exam, MyClass $class, \Illuminate\Database\Eloquent\Collection $students, bool $delete_old_section_record): void
     {
@@ -961,6 +962,7 @@ class MarkController extends Controller
                         ];
                         $this->exam->deleteExamRecords($where);
                         $this->exam->deleteMarksByConditions($where);
+                        $this->assessment->delete($where); // NEW — avoid orphan assessment rows
                     }
                 }
             }
@@ -1009,12 +1011,13 @@ class MarkController extends Controller
                 $total = $mk->exam_mark;
                 $grade = is_numeric($total) ? $this->mark->getGradeByTotal($total, $class_type->id) : null;
 
+                // subject_position deliberately omitted — the window function
+                // pass in batch_update() writes it class-wide.
                 $mark_updates[] = [
                     'id' => $mk->id,
                     "tex{$exam->term}" => $total > 100 ? null : $total,
                     'exam_mark' => $total > 100 ? null : $total,
                     'grade_id' => $grade?->id ?? null,
-                    'subject_position' => $this->mark->getSubjectPosition($mk->student_id, $exam, $class_id, $sub->id, $this->year),
                 ];
 
                 if ($exam->hasAssessment()) {
@@ -1066,12 +1069,15 @@ class MarkController extends Controller
      * One massUpdate writes everything.
      *
      * No position columns here — window functions handle those afterwards.
+     *
+     * Section_id is derived from the aggregate itself (the student's actual
+     * section, as recorded on their marks); the caller's request scope has
+     * no bearing on which section a student belongs to.
      */
     private function recomputeExamRecords(
         Exam $exam,
         int $class_id,
-        ClassType $class_type,
-        ?int $section_id
+        ClassType $class_type
     ): void {
         $min_subjects = (int) ($this->my_class->findClassType($class_type->id)->minimum_subjects_required ?? 0);
 
@@ -1123,7 +1129,7 @@ class MarkController extends Controller
             $updates[] = [
                 'student_id' => $agg->student_id,
                 'my_class_id' => $agg->my_class_id,
-                'section_id' => $section_id ?? $agg->section_id,
+                'section_id' => $agg->section_id, // <- always from the data, never the request
                 'exam_id' => $agg->exam_id,
                 'year' => $agg->year,
                 'total' => $agg->total,
@@ -1145,10 +1151,17 @@ class MarkController extends Controller
         );
     }
 
+    /**
+     * Refresh assessment positions.
+     *
+     * All positions are computed class-wide. Section scoping is done inside
+     * the window function via PARTITION BY section_id — passing a section
+     * filter here would produce section-wide ranks and diverge from
+     * batch_update(), which always runs class-wide.
+     */
     private function refreshAssessmentPositions(
         Exam $exam,
-        int $class_id,
-        ?int $section_id
+        int $class_id
     ): void {
         if (! $exam->hasAssessment()) {
             return;
@@ -1159,15 +1172,16 @@ class MarkController extends Controller
             return;
         }
 
+        // Subject position — class-wide
         $this->assessment->refreshSubjectPositions(
             $assessment->id,
             $exam->id,
             $class_id,
             $this->year,
-            $exam->term,
-            $section_id
+            $exam->term
         );
 
+        // Section position — PARTITION BY section_id handles scoping
         $this->assessment->refreshSummaryPositions(
             $assessment->id,
             $exam->id,
@@ -1175,21 +1189,19 @@ class MarkController extends Controller
             $this->year,
             $exam->ca_student_position_by_value,
             $exam->ca_student_position_sort_order,
-            bySection: true,
-            section_id: $section_id
+            bySection: true
         );
 
-        if ($section_id === null) {
-            $this->assessment->refreshSummaryPositions(
-                $assessment->id,
-                $exam->id,
-                $class_id,
-                $this->year,
-                $exam->ca_student_position_by_value,
-                $exam->ca_student_position_sort_order,
-                bySection: false
-            );
-        }
+        // Class position — always recomputed
+        $this->assessment->refreshSummaryPositions(
+            $assessment->id,
+            $exam->id,
+            $class_id,
+            $this->year,
+            $exam->ca_student_position_by_value,
+            $exam->ca_student_position_sort_order,
+            bySection: false
+        );
     }
 
     private function buildAssessmentUpdates(\Illuminate\Database\Eloquent\Collection $marks, array $form_data, Exam $exam): array
