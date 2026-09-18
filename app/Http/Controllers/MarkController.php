@@ -728,7 +728,7 @@ class MarkController extends Controller
         return view('pages.marks.tabulation.index', $data);
     }
 
-    public function print_tabulation(int $exam_id, int $class_id, int $section_id, string $year)
+    public function print_tabulation(int $exam_id, int $class_id, int|string $section_id, string $year)
     {
         set_time_limit(300);
         $tab_data = $this->getTabulationData($exam_id, $class_id, $section_id, $year);
