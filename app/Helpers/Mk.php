@@ -262,7 +262,7 @@ class Mk extends Qs
 
             $html .=
             "
-            <div id='averageGrade-summary' data-toggle-target='#averageGrade-summary' class='toggleable mw-fit col-3 w-60'>
+            <div id='average-grade-summary' data-toggle-target='#averageGrade-summary' class='toggleable mw-fit col-3 w-60'>
                 <strong style='font-size: 15px'>Average Grade Summary</strong>
                 <table class='table-styled styled float-head'>
                     <thead><tr><th class='text-center'>Average Grade</th>{$gradeNames}</tr></thead>
