@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Mk;
 use App\Helpers\Usr;
 use App\Http\Requests\Exam\ExamAnnounce;
@@ -136,6 +137,7 @@ class ExamController extends Controller
     /**
      * AJAX: render the exam numbers table.
      */
+    #[SkipPermission]
     public function exam_numbers_load(Request $request): View
     {
         $request->validate([
