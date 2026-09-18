@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-md-12">
             <div
-                class="alert alert-info alert-dismissible has-do-not-show-again-button border-0"
+                class="alert alert-warning alert-dismissible has-do-not-show-again-button border-0"
                 id="batch-delete-info"
             >
                 <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
