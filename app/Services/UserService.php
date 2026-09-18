@@ -14,29 +14,13 @@ use Illuminate\Support\Str;
 
 class UserService
 {
-    protected UserRepo $user;
-
-    protected StudentRepo $student;
-
-    protected LocationRepo $loc;
-
-    protected MyClassRepo $my_class;
-
-    protected PermissionRepo $permission;
-
     public function __construct(
-        UserRepo $user,
-        StudentRepo $student,
-        LocationRepo $loc,
-        MyClassRepo $my_class,
-        PermissionRepo $permission
-    ) {
-        $this->user = $user;
-        $this->student = $student;
-        $this->loc = $loc;
-        $this->my_class = $my_class;
-        $this->permission = $permission;
-    }
+        protected UserRepo $user,
+        protected StudentRepo $student,
+        protected LocationRepo $loc,
+        protected MyClassRepo $my_class,
+        protected PermissionRepo $permission
+    ) {}
 
     /**
      * Create a new user with roles, staff record, and parent record if applicable.
