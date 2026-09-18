@@ -453,6 +453,21 @@ return [
                     'label' => 'Lock/Unlock Exams',
                     'description' => 'Lock or unlock exams for changes.',
                 ],
+                'assign_view' => [
+                    'permission' => 'exams.assign_view',
+                    'label' => 'View Exam Numbers Assignment View',
+                    'description' => 'View the assignment of exam numbers to students.',
+                ],
+                'generate_exam_numbers' => [
+                    'permission' => 'exams.generate_exam_numbers',
+                    'label' => 'Generate Exam Numbers',
+                    'description' => 'Generate unique exam numbers for students.',
+                ],
+                'exam_numbers_save' => [
+                    'permission' => 'exams.exam_numbers_save',
+                    'label' => 'Update Exam Numbers',
+                    'description' => 'Save changes to exam numbers.',
+                ],
             ],
 
             'grades' => [
