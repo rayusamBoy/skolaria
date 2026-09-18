@@ -13,7 +13,6 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 
 class MarksImport implements ToCollection, WithHeadingRow, WithValidation
 {
-
     protected string $marks_table;
 
     protected Collection $subjects;
