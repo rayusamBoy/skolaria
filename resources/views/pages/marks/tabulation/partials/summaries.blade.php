@@ -2,7 +2,7 @@
     {{--Metric Summary--}}
     {!! Mk::renderGenderWiseSummary($exam_id, $my_class->id, $my_class->class_type_id, $section_id, 'both') !!}
     {{--Grades Criteria--}}
-    <div id="grades-criteria" data-toggle-target="#grades-criteria" class="toggleable mw-fit col-3 w-60">
+    <div id="grade-criteria" data-toggle-target="#grade-criteria" class="toggleable mw-fit col-3 w-60">
         <strong style="font-size: 15px">Grade Criteria</strong>
         {!! Mk::renderGradeTable($class_type_id) !!}
     </div>

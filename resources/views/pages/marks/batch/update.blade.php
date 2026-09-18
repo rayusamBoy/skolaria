@@ -1,4 +1,4 @@
-<div class="card">
+<div class="card card-collapsed">
     <div class="card-header header-elements-inline">
         <h6 class="card-title"><i class="material-symbols-rounded mr-2">deployed_code_history</i> Batch Update</h6>
         {!! Qs::getPanelOptionsHtml() !!}
@@ -71,7 +71,7 @@
                 <div class="col-md-4 mt-4">
                     <div class="mt-1 text-right">
                         <button type="submit" data-text="Updating..." class="btn btn-sm btn-success">
-                            Update Batch Marks <i class="material-symbols-rounded ml-2">send</i>
+                            Update Batch Marks <i class="material-symbols-rounded ml-2">edit_note</i>
                         </button>
                     </div>
                 </div>

@@ -9,7 +9,7 @@
                 <th class="text-center subject-mark">Grd</th>
             @endforeach
             <th id="header-total" class="col-total toggleable text-center" data-toggle-target=".col-total">Total</th>
-            <th id="header-avg" class="col-avg toggleable text-center" title="Average" data-toggle-target=".col-avg">
+            <th id="header-average-grade" class="col-average-grade toggleable text-center" title="Average" data-toggle-target=".col-average-grade">
                 Avg Grade
             </th>
             <th id="header-grade" class="text-center col-grade toggleable" title="Grade" data-toggle-target=".col-grade">Grd</th>
@@ -60,7 +60,7 @@
                     <td class="text-center text-green">{{ $sub_mark['grade'] ?? '—' }}</td>
                 @endforeach
                 <td class="text-danger col-total text-center">{{ $row['total'] ?? '—' }}</td>
-                <td class="text-secondary col-average text-center">{{ $row['grade'] ?? '—' }}</td>
+                <td class="text-secondary col-avgerage-grade text-center">{{ $row['grade'] ?? '—' }}</td>
                 <td class="text-center text-info col-grade">{{ $row['grade'] ?? '—' }}</td>
                 <td class="text-pink col-points text-center">{{ $row['points'] ?? '—' }}</td>
                 <td class="text-orange col-division text-center">{{ $row['division'] ?? '—' }}</td>

@@ -17,10 +17,10 @@
         <button class="btn" onclick="window.print()">Print</button>
         <div class="float-right">
             <select id="hide-select" onchange="hideSelected(this.value)">
-                <option disabled selected>Hide...</option>
+                <option value="" disabled selected>Hide...</option>
             </select>
             <select id="unhide-select" onchange="unhideSelected(this.value)">
-                <option disabled selected>Unhide...</option>
+                <option value="" disabled selected>Unhide...</option>
             </select>
         </div>
     </div>
@@ -39,40 +39,74 @@
 
     {{-- JavaScript --}}
     <script>
-        function capitalize(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
+    (function () {
+        const toggleables  = document.querySelectorAll('[data-toggle-target]');
+        const hideSelect   = document.getElementById('hide-select');
+        const unhideSelect = document.getElementById('unhide-select');
 
-        (function () {
-            const toggleables = document.querySelectorAll('[data-toggle-target]');
-            const hideSelect = document.getElementById('hide-select');
-            const unhideSelect = document.getElementById('unhide-select');
+        // Build the unique selector → label map
+        const items = new Map();
+        toggleables.forEach((el) => {
+            const selector = el.dataset.toggleTarget;
+            if (!selector || items.has(selector)) return;
 
-            const items = new Map();
+            let label = el.getAttribute('id') ?? el.dataset.label ?? selector;
+            label = label.replace(/-/g, ' ');               // fixed: was .replace('-', ' ', label)
+            label = label.charAt(0).toUpperCase() + label.slice(1);
 
-            toggleables.forEach((el) => {
-                const selector = el.dataset.toggleTarget;
-                if (!selector) return;
+            items.set(selector, label);
+        });
 
-                let label = el.getAttribute('id') ?? el.dataset.label;
-                label = label.replace('-', ' ', label);
-                label = capitalize(label);
+        const sorted = Array.from(items.entries())
+            .sort((a, b) => a[1].localeCompare(b[1]));
 
-                items.set(selector, label);
-            });
+        // Seed hide-select with every toggleable
+        sorted.forEach(([selector, label]) => hideSelect.add(new Option(label, selector)));
 
-            const sorted = Array.from(items.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+        // Helpers
+        const moveOption = (fromSelect, toSelect, selector) => {
+            const option = Array.from(fromSelect.options)
+                .find((o) => o.value === selector);
+            if (!option) return;
 
-            sorted.forEach(([selector, label]) => {
-                hideSelect.add(new Option(label, selector));
-                unhideSelect.add(new Option(label, selector));
-            });
+            const label = option.text;
+            option.remove();
 
-            window.hideSelected = (selector) =>
-                document.querySelectorAll(selector).forEach((el) => (el.style.display = 'none'));
-            window.unhideSelected = (selector) =>
-                document.querySelectorAll(selector).forEach((el) => (el.style.display = ''));
-        })();
-    </script>
+            // Insert alphabetically after the placeholder (index 0).
+            const insertBefore = Array.from(toSelect.options)
+                .slice(1)
+                .find((o) => o.text.localeCompare(label) > 0);
+
+            toSelect.add(new Option(label, selector), insertBefore ?? null);
+        };
+
+        const resetSelect = (select) => { select.selectedIndex = 0; };
+
+        // Disable a select if only the placeholder remains.
+        const syncEmptyState = () => {
+            hideSelect.disabled   = hideSelect.options.length   <= 1;
+            unhideSelect.disabled = unhideSelect.options.length <= 1;
+        };
+
+        // Public handlers
+        window.hideSelected = (selector) => {
+            if (!selector) return;
+            document.querySelectorAll(selector).forEach((el) => (el.style.display = 'none'));
+            moveOption(hideSelect, unhideSelect, selector);
+            resetSelect(hideSelect);
+            syncEmptyState();
+        };
+
+        window.unhideSelected = (selector) => {
+            if (!selector) return;
+            document.querySelectorAll(selector).forEach((el) => (el.style.display = ''));
+            moveOption(unhideSelect, hideSelect, selector);
+            resetSelect(unhideSelect);
+            syncEmptyState();
+        };
+
+        syncEmptyState();
+    })();
+</script>
 </body>
 </html>
