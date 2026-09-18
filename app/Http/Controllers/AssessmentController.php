@@ -397,9 +397,8 @@ class AssessmentController extends Controller
             }
 
             // Summary: ONE update per student, no upsert
-            // Summary values live on every subject row of the
-            // student. Use updateRecord (a real SQL UPDATE) so
-            // we don't accidentally insert duplicate rows.
+            // Summary values live on every subject row of the student.
+            // Use updateRecord (a real SQL UPDATE) so we don't accidentally insert duplicate rows.
             $student_ids = $asmnt_records->pluck('student_id')->unique()->values()->all();
 
             $classAvg = $this->assessment->getClassAverageTermMark($assessment->exam, $class_id, $this->year);
