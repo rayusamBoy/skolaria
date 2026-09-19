@@ -116,7 +116,7 @@
                                         />
                                     </td>
                                     <td>{{ $s->user->name }}</td>
-                                    <td>{{ $s->user->exam_records->first()->exam_number ?? "not set" }}</td>
+                                    <td>{{ $s->user->exam_records->first()->exam_number ?? "N/A" }}</td>
                                     <td>{{ $s->admission_number }}</td>
                                     <td>{{ $s->section->name }}</td>
                                     <td>
