@@ -455,7 +455,7 @@
                                                             href="{{ route('marks.year_selector', Qs::hash(Auth::user()->id)) }}"
                                                             class="nav-link {{ request()->routeIs('marks.year_selector') ? 'active' : '' }}"
                                                         >
-                                                            My Marksheet
+                                                            Marksheet
                                                         </a>
                                                     </li>
                                                 @endcan
@@ -465,7 +465,7 @@
                                                             href="{{ route('assessments.year_selector', Qs::hash(Auth::user()->id)) }}"
                                                             class="nav-link {{ request()->routeIs('assessments.year_selector') ? 'active' : '' }}"
                                                         >
-                                                            My Assessment Sheet
+                                                            Assessment Sheet
                                                         </a>
                                                     </li>
                                                 @endcan
@@ -638,17 +638,17 @@
                     @endcanany
 
                     {{-- Tools --}}
-                    @canany([
+                    @canany(array_diff([
                         ...array_column($tenant_permissions['pins'], 'permission'),
                         ...array_column($tenant_permissions['query_builders'], 'permission'),
-                    ])
+                    ], [$tenant_permissions['pins']['enter_pin']['permission']]))
                         <li class="nav-item nav-item-submenu {{ request()->routeIs('pins.*','query_builder.*') ? 'nav-item-expanded nav-item-open' : '' }}">
                             <a href="#" class="nav-link">
                                 <i class="material-symbols-rounded">construction</i>
                                 <span>Tools</span>
                             </a>
                             <ul class="nav nav-group-sub" data-submenu-title="Tools">
-                                @canany(array_column($tenant_permissions['pins'], 'permission'))
+                                @canany(array_diff(array_column($tenant_permissions['pins'], 'permission'), [$tenant_permissions['pins']['enter_pin']['permission']]))
                                     <li class="nav-item nav-item-submenu {{ request()->routeIs('pins.*') ? 'nav-item-expanded' : '' }}">
                                         <a href="#" class="nav-link {{ request()->routeIs('pins.*') ? 'active' : '' }}">
                                             Pins
@@ -707,17 +707,15 @@
 
                     {{-- My Children --}}
                     @if (auth()->user()->hasRole(config('roles.default_roles.tenant.parent')))
-                        @canany(array_column($tenant_permissions['childrens'], 'permission'))
-                            <li class="nav-item">
-                                <a
-                                    href="{{ route('parent.my_children') }}"
-                                    class="nav-link {{ request()->routeIs('parent.my_children', 'marks.year_selector', 'assessments.year_selector', 'payments.status', 'students.show', 'marks.show', 'assessments.show') ? 'active' : '' }}"
-                                >
-                                    <i class="material-symbols-rounded">account_child_invert</i>
-                                    <span>My Children</span>
-                                </a>
-                            </li>
-                        @endcanany
+                        <li class="nav-item">
+                            <a
+                                href="{{ route('parent.my_children') }}"
+                                class="nav-link {{ request()->routeIs('parent.my_children', 'marks.year_selector', 'assessments.year_selector', 'payments.status', 'students.show', 'marks.show', 'assessments.show') ? 'active' : '' }}"
+                            >
+                                <i class="material-symbols-rounded">account_child_invert</i>
+                                <span>My Children</span>
+                            </a>
+                        </li>
                     @endif
 
                 @else
