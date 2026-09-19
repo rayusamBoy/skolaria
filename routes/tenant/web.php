@@ -361,7 +361,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         });
 
         /************************ PARENT ****************************/
-        Route::prefix('parent')->middleware('role:parent')->group(function () {
+        Route::prefix('parent')->middleware('role:'.config('roles.default_roles.tenant.parent'))->group(function () {
             Route::get('my-children', [ChildrenController::class, 'children'])->name('parent.my_children');
         });
 
