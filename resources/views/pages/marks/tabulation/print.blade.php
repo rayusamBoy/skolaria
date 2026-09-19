@@ -32,7 +32,8 @@
         <div style="page-break-after: auto"></div>
         @include('pages.marks.tabulation.partials.performance_summary')
         <p class="copyright mt-4 text-center">
-            &copy; {{ date('Y') }}. {{ ucwords(strtolower($settings->firstWhere('key', 'system_name')->value)) }}. All rights reserved.
+            &copy; {{ date('Y') }}. {{ ucwords(strtolower($settings->firstWhere('key', 'system_name')->value)) }}. All
+            rights reserved.
         </p>
     </div>
 
