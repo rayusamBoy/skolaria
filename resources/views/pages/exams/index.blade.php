@@ -82,7 +82,7 @@
                                             <span class="badge bg-info">has assessment</span>
                                         @endif
                                     </td>
-                                    <td>{{ Number::spellOrdinal($ex->term) . " term" }}</td>
+                                    <td>{{ ucfirst(Number::spellOrdinal($ex->term)) . " term" }}</td>
                                     <td>{{ $ex->year }}</td>
                                     <td>{{ $ex->category->name }}</td>
                                     <td>{{ $class_types->where('id', $ex->class_type_id)->first()->name }}</td>
