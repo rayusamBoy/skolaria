@@ -27,6 +27,18 @@
 
             <div class="tab-content">
                 <div class="tab-pane fade show active" id="all-grades">
+                    <div class="d-flex justify-content-end align-items-center mb-2">
+                        <label class="form-switch m-0">
+                            <input
+                                type="checkbox"
+                                onchange="window.location.href = '?include_historic=' + (this.checked ? 1 : 0)"
+                                @checked($include_historic)
+                            />
+                            <i></i>
+                        </label>
+                        <span class="small ml-2">Show historic versions</span>
+                    </div>
+
                     <table class="datatable-button-html5-columns table" id="manage-grades-table">
                         <thead>
                             <tr>
@@ -45,7 +57,15 @@
                             @foreach ($grades as $gr)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $gr->name }}</td>
+                                    <td>
+                                        {{ $gr->name }}
+                                        @unless ($gr->is_active)
+                                            <span class="badge bg-secondary">historic</span>
+                                        @endunless
+                                        @if ($gr->is_locked)
+                                            <span class="badge bg-warning text-dark">locked</span>
+                                        @endif
+                                    </td>
                                     <td>
                                         {{ $gr->class_type_id ? $class_types->where('id', $gr->class_type_id)->first()->name : 'Not Applicable' }}
                                     </td>
@@ -62,13 +82,13 @@
                                                         data-toggle="dropdown"
                                                     >lists</a>
                                                     <div class="dropdown-menu dropdown-menu-left">
-                                                        @if ($canEdit)
+                                                        @if ($canEdit && $gr->is_active)
                                                             <a
                                                                 href="{{ route('grades.edit', $gr->id) }}"
                                                                 class="dropdown-item"
                                                             ><i class="material-symbols-rounded">edit</i> Edit</a>
                                                         @endif
-                                                        @if ($canDelete)
+                                                        @if ($canDelete && ! $gr->is_locked)
                                                             <a
                                                                 id="{{ $gr->id }}"
                                                                 onclick="confirmDelete(this.id)"

@@ -42,8 +42,9 @@
                                 >Class Type</label>
                             <div class="col-lg-9">
                                 <select class="form-control select" disabled id="class_type_id">
-                                    <option selected>{{ $gr->class_type->name }}</option>
+                                    <option selected>{{ $gr->class_type?->name ?? 'Not Applicable' }}</option>
                                 </select>
+                                <input type="hidden" value="{{ $gr->class_type?->id }}" name="class_type_id">
                             </div>
                         </div>
                         {{-- Mark From --}}
