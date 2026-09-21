@@ -541,10 +541,10 @@ class Mk extends Qs
     {
         if (auth()->user()->hasRole(config('roles.default_roles.tenant.teacher'))) {
             return SubjectRecord::where('teacher_id', auth()->id())
-                ->rightJoin(Subject::getTable(), function ($join) {
-                    $join->on(SubjectRecord::getTable().'.subject_id', '=', Subject::getTable().'.id');
+                ->rightJoin('subjects', function ($join) {
+                    $join->on('subject_records.subject_id', '=', 'subjects.id');
                 })
-                ->where(Subject::getTable().'.my_class_id', $class_id)
+                ->where('subjects.my_class_id', $class_id)
                 ->distinct()
                 ->get();
         }
