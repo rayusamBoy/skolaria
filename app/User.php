@@ -180,7 +180,7 @@ class User extends Authenticatable implements MustVerifyEmail
             return false;
         }
 
-        return $this->passwordHistories()
+        return $this->password_histories()
             ->latest('created_at')
             ->take($count)
             ->get()
