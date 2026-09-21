@@ -10,15 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class AssessmentRepo
 {
-    protected string $assessments_table;
-
-    protected string $assessments_records_table;
-
-    public function __construct()
-    {
-        $this->assessments_table = 'assessments';
-        $this->assessments_records_table = 'assessments_records';
-    }
+    public function __construct(protected string $assessments_table = 'assessments', protected string $assessments_records_table = 'assessments_records') {}
 
     /*********** Assessments ***************/
 
