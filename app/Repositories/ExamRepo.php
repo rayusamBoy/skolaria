@@ -443,7 +443,7 @@ class ExamRepo
               AND m.my_class_id = ?
               AND m.year        = ?
               AND m.{$tex}      IS NOT NULL
-              AND g.is_active   = true
+              AND g.is_active   = 1
         ),
         ranked AS (
             SELECT *,
