@@ -16,7 +16,7 @@ class MarkRepo
     /**
      * Get marks for a set of student IDs, with eager loaded relations.
      */
-    public function getMarksForStudents(array $ids, array $with = ['subject', 'user']): Builder|Mark
+    public function getMarksForStudents(array $ids, array $with = ['subject', 'user']): EloquentBuilder|Mark|Builder
     {
         return Mark::with($with)->whereIn('student_id', $ids);
     }
