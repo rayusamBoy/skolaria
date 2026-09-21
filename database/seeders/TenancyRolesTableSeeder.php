@@ -18,7 +18,7 @@ class TenancyRolesTableSeeder extends Seeder
 
         // Load roles from config
         $rootRoles = (array) array_values(config('roles.root_roles.tenant', []));
-        $defaultRoles = (array) array_values(config('roles.default_roles.tenant', []));
+        $defaultRoles = (array) array_values(config('roles.default_roles.ttenant', []));
 
         // Clean existing roles
         Role::query()->delete();
@@ -95,10 +95,8 @@ class TenancyRolesTableSeeder extends Seeder
                 'patterns' => [
                     '/^my_accounts?\./',
                     '/^marks?\.year_selector/',
-                    '/^marks?\.year_selected/',
                     '/^marks?\.show/',
                     '/^assessments?\.year_selector/',
-                    '/^assessments?\.year_selected/',
                     '/^assessments?\.show/',
                     '/^subjects?\.view/',
                     '/^books?\.view/',
@@ -116,10 +114,8 @@ class TenancyRolesTableSeeder extends Seeder
                 'patterns' => [
                     '/^my_accounts?\./',
                     '/^marks?\.year_selector/',
-                    '/^marks?\.year_selected/',
                     '/^marks?\.show/',
                     '/^assessments?\.year_selector/',
-                    '/^assessments?\.year_selected/',
                     '/^assessments?\.show/',
                     '/^time_tables?\.view/',
                     '/^time_tables?\.print_record/',
