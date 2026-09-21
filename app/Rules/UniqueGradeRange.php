@@ -28,7 +28,7 @@ class UniqueGradeRange implements ValidationRule
             ->where('class_type_id', $this->classTypeId)
             ->active()
             ->when($this->ignoreId, fn ($q) => $q->whereKeyNot($this->ignoreId));
-\Log::debug($this->ignoreId);
+
         if ((clone $base)->where('name', $this->name)->exists()) {
             $fail(__('validation.grade.name_taken', ['name' => $this->name]));
 
