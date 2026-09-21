@@ -274,13 +274,37 @@
                     @endcanany
 
                     {{-- Examinations --}}
-                    @canany([
-                        ...array_column($tenant_permissions['exams'], 'permission'),
-                        ...array_column($tenant_permissions['grades'], 'permission'),
-                        ...array_column($tenant_permissions['divisions'], 'permission'),
-                        ...array_column($tenant_permissions['marks'], 'permission'),
-                        ...array_column($tenant_permissions['assessments'], 'permission'),
-                    ])
+                    @php
+                        // Permissions that only allow a user to view their own (or their child's)
+                        // results. Stripping these only matters for users who have a dedicated
+                        // view to fall back on — currently just parents ("My Children").
+                        $readOnlyResultPermissions = array_values(array_filter([
+                            $tenant_permissions['marks']['year_selector']['permission'] ?? null,
+                            $tenant_permissions['marks']['year_selected']['permission'] ?? null,
+                            $tenant_permissions['marks']['show']['permission'] ?? null,
+                            $tenant_permissions['assessments']['year_selector']['permission'] ?? null,
+                            $tenant_permissions['assessments']['year_selected']['permission'] ?? null,
+                            $tenant_permissions['assessments']['show']['permission'] ?? null,
+                        ]));
+
+                        // Only parents need the read-only result permissions excluded — they
+                        // reach results through "My Children". Students need the menu visible
+                        // for its Results submenu; staff/teachers/admins hold manage
+                        // permissions so the menu renders regardless.
+                        $isParent = auth()->user()->hasRole(config('roles.default_roles.tenant.parent'));
+
+                        $excludeFromExaminationsMenu = $isParent ? $readOnlyResultPermissions : [];
+
+                        $examinationsManagePermissions = array_values(array_unique(array_diff([
+                            ...array_column($tenant_permissions['exams'], 'permission'),
+                            ...array_column($tenant_permissions['grades'], 'permission'),
+                            ...array_column($tenant_permissions['divisions'], 'permission'),
+                            ...array_column($tenant_permissions['marks'], 'permission'),
+                            ...array_column($tenant_permissions['assessments'], 'permission'),
+                        ], $excludeFromExaminationsMenu)));
+                    @endphp
+
+                    @canany($examinationsManagePermissions)
                         <li class="nav-item nav-item-submenu {{ request()->routeIs('exams.*','grades.*','divisions.*','marks.*','assessments.*') ? 'nav-item-expanded nav-item-open' : '' }}">
                             <a href="#" class="nav-link">
                                 <i class="material-symbols-rounded">article</i>
@@ -414,7 +438,7 @@
                                                     >Manage</a>
                                                 </li>
                                             @endcan
-                                            @can([$tenant_permissions['assessments']['progressive']['permission'], $tenant_permissions['assessments']['progressive_select']['permission']])
+                                            @canany([$tenant_permissions['assessments']['progressive']['permission'], $tenant_permissions['assessments']['progressive_select']['permission']])
                                                 <li class="nav-item">
                                                     <a
                                                         href="{{ route('assessments.progressive') }}"
@@ -423,8 +447,8 @@
                                                         Progressive Sheet
                                                     </a>
                                                 </li>
-                                            @endcan
-                                            @can([$tenant_permissions['assessments']['sheets']['permission'], $tenant_permissions['assessments']['sheets_select']['permission']])
+                                            @endcanany
+                                            @canany([$tenant_permissions['assessments']['sheets']['permission'], $tenant_permissions['assessments']['sheets_select']['permission']])
                                                 <li class="nav-item">
                                                     <a
                                                         href="{{ route('assessments.sheets') }}"
@@ -433,7 +457,7 @@
                                                         Sheets
                                                     </a>
                                                 </li>
-                                            @endcan
+                                            @endcanany
                                         </ul>
                                     </li>
                                 @endcanany
@@ -619,7 +643,7 @@
                                                         Invitations
                                                     </a>
                                                 </li>
-                                            @endif
+                                            @endcan
                                         </ul>
                                     </li>
                                 @endcanany
