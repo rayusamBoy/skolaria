@@ -93,7 +93,7 @@ class UserController extends Controller
         $permissions = $req->filled('permissions') ? $req->permissions : null;
 
         try {
-            $user = $this->userService->storeUser($data, $role_names, $permissions);
+            $this->userService->storeUser($data, $role_names, $permissions);
         } catch (\InvalidArgumentException $e) {
             return Usr::json($e->getMessage(), false);
         }
