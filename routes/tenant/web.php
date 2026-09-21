@@ -225,7 +225,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             Route::post('sheets/select', [MarkController::class, 'sheets_select'])->name('marks.sheets_select');
 
             Route::group(['middleware' => 'decodeRouteParams'], function () {
-                Route::get('year-selector/{student}', [MarkController::class, 'year_selector'])->name('marks.year_selector');
+                Route::get('selector/year/{student}', [MarkController::class, 'year_selector'])->name('marks.year_selector');
                 Route::post('selected/year/{student}', [MarkController::class, 'year_selected'])->name('marks.year_selected');
                 Route::get('show/{student}/{year}', [MarkController::class, 'show'])->name('marks.show');
                 Route::get('print/{student}/{exam_id}/{year}', [MarkController::class, 'print_view'])->name('marks.print');
