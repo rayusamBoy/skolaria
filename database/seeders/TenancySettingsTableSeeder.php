@@ -215,7 +215,54 @@ class TenancySettingsTableSeeder extends Seeder
                 'created_at' => null,
                 'updated_at' => null,
             ],
-
+            33 => [
+                'key' => 'password_min_length',
+                'value' => 8,
+                'created_at' => null,
+                'updated' => null,
+            ],
+            34 => [
+                'key' => 'password_require_confirmation',
+                'value' => 1,
+                'created_at' => null,
+                'updated' => null,
+            ],
+            35 => [
+                'key' => 'password_require_mixed_case',
+                'value' => 1,
+                'created_at' => null,
+                'updated' => null,
+            ],
+            36 => [
+                'key' => 'password_require_letters',
+                'value' => 1,
+                'created_at' => null,
+                'updated' => null,
+            ],
+            37 => [
+                'key' => 'password_require_numbers',
+                'value' => 1,
+                'created_at' => null,
+                'updated' => null,
+            ],
+            38 => [
+                'key' => 'password_require_symbols',
+                'value' => 0,
+                'created_at' => null,
+                'updated' => null,
+            ],
+            39 => [
+                'key' => 'password_require_uncompromised',
+                'value' => 0,
+                'created_at' => null,
+                'updated' => null,
+            ],
+            40 => [
+                'key' => 'password_history_count',
+                'value' => 0,
+                'created_at' => null,
+                'updated' => null,
+            ],
         ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\PasswordPolicyService;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UserChangePass extends FormRequest
@@ -20,7 +21,7 @@ class UserChangePass extends FormRequest
     {
         return [
             'current_password' => 'required',
-            'new_password' => 'required|min:8|alpha_num|confirmed|different:current_password',
+            'password' => app(PasswordPolicyService::class)->rules(),
         ];
     }
 }

@@ -89,10 +89,10 @@ class MyAccountController extends Controller
     {
         $current_user = auth()->user();
         $current_password = $current_user->password;
-        $old_password = $req->current_password;
-        $new_password = $req->new_password;
+        $current_password_input = $req->current_password;
+        $new_password = $req->password;
 
-        if (password_verify($old_password, $current_password)) {
+        if (password_verify($current_password_input, $current_password)) {
             $current_user->update([
                 'password' => Hash::make($new_password),
                 'password_updated_at' => Carbon::now(),

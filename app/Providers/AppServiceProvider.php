@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Listeners\HandleFailedFcmNotifications;
 use App\Listeners\RecordLoginHistory;
 use App\Listeners\TenantEventSubscriber;
+use App\Observers\UserPasswordObserver;
+use App\User;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
@@ -43,6 +45,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         require_once base_path('routes/tenant/channels.php');
+
+        User::observe(UserPasswordObserver::class);
 
         RateLimiter::for('api', static fn (Request $request) => Limit::perMinute(60)->by($request->user()?->id ?: $request->ip()));
         Event::subscribe(TenantEventSubscriber::class);

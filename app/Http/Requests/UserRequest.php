@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Helpers\Usr;
 use App\Models\ParentRelative;
 use App\Rules\StartsWithProperPhoneCode;
+use App\Services\PasswordPolicyService;
 use App\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -38,7 +39,7 @@ class UserRequest extends FormRequest
     {
         $store = [
             'name' => 'required|string|unique:users|min:6|max:150',
-            'password' => 'nullable|string|min:3|max:50',
+            'password' => app(PasswordPolicyService::class)->rules(true),
             'roles' => 'required',
             'gender' => 'required|string',
             'primary_mobile' => [

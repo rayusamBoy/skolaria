@@ -87,35 +87,37 @@
                                     </div>
                                 </div>
                                 <div class="form-group row">
-                                    <label for="new_password" class="col-lg-3 col-form-label font-weight-semibold"
+                                    <label for="password" class="col-lg-3 col-form-label font-weight-semibold"
                                         >New Password <span class="text-danger">*</span></label>
                                     <div class="col-lg-9">
                                         <input
-                                            id="new_password"
-                                            name="new_password"
+                                            id="password"
+                                            name="password"
                                             required
                                             type="password"
                                             class="form-control"
-                                            autocomplete="new-password"
+                                            autocomplete="password"
                                         />
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <label
-                                        for="new_password_confirmation"
-                                        class="col-lg-3 col-form-label font-weight-semibold"
-                                    >Confirm Password <span class="text-danger">*</span></label>
-                                    <div class="col-lg-9">
-                                        <input
-                                            id="new_password_confirmation"
-                                            name="new_password_confirmation"
-                                            required
-                                            type="password"
-                                            class="form-control"
-                                            autocomplete="new-password"
-                                        />
+                                @if ($settings->firstWhere('key', 'password_require_confirmation')->value == 1)
+                                    <div class="form-group row">
+                                        <label
+                                            for="password_confirmation"
+                                            class="col-lg-3 col-form-label font-weight-semibold"
+                                        >Confirm Password <span class="text-danger">*</span></label>
+                                        <div class="col-lg-9">
+                                            <input
+                                                id="password_confirmation"
+                                                name="password_confirmation"
+                                                required
+                                                type="password"
+                                                class="form-control"
+                                                autocomplete="password"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
                                 <div class="float-right">
                                     <button type="submit" class="btn btn-danger">
                                         Submit form <i class="material-symbols-rounded ml-2">send</i>

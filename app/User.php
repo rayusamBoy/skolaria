@@ -2,11 +2,13 @@
 
 namespace App;
 
+use App\Helpers\Qs;
 use App\Models\BloodGroup;
 use App\Models\ExamRecord;
 use App\Models\Lga;
 use App\Models\LoginHistory;
 use App\Models\Nationality;
+use App\Models\PasswordHistory;
 use App\Models\StaffRecord;
 use App\Models\State;
 use App\Models\StudentRecord;
@@ -17,6 +19,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
@@ -124,6 +127,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(StaffRecord::class);
     }
 
+    public function password_histories()
+    {
+        return $this->hasMany(PasswordHistory::class);
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -159,5 +167,23 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getByLatestLoginHistories()
     {
         return LoginHistory::where('user_id', auth()->id())->latest('logged_in_at')->get();
+    }
+
+    /**
+     * Check whether the given plain password matches one of the user's last N passwords.
+     */
+    public function passwordUsedBefore(string $plain, ?int $count = null): bool
+    {
+        $count = $count ?? (int) Qs::getSetting('password_history_count', true) ?? 0;
+
+        if ($count <= 0) {
+            return false;
+        }
+
+        return $this->passwordHistories()
+            ->latest('created_at')
+            ->take($count)
+            ->get()
+            ->contains(fn (PasswordHistory $h) => Hash::check($plain, $h->password));
     }
 }

@@ -332,6 +332,170 @@
                 <hr />
 
                 <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="font-weight-bold">Password Policy</h6>
+
+                        <div class="form-group row">
+                            <label class="col-lg-6 col-form-label font-weight-semibold">Minimum length</label>
+                            <div class="col-lg-6">
+                                <input
+                                    type="number"
+                                    min="6"
+                                    max="64"
+                                    name="password_min_length"
+                                    value="{{ old('password_min_length', $settings->firstWhere('key', 'password_min_length')->value ?? 8) }}"
+                                    class="form-control"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-lg-6 col-form-label font-weight-semibold">Require confirmation</label>
+                            <div class="col-lg-6">
+                                <select class="form-control select" name="password_require_confirmation">
+                                    <option
+                                        value="1"
+                                        @selected($settings->firstWhere('key', 'password_require_confirmation')->value == 1)
+                                    >
+                                        Yes
+                                    </option>
+                                    <option
+                                        value="0"
+                                        @selected($settings->firstWhere('key', 'password_require_confirmation')->value == 0)
+                                    >
+                                        No
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-lg-6 col-form-label font-weight-semibold">Require mixed case</label>
+                            <div class="col-lg-6">
+                                <select class="form-control select" name="password_require_mixed_case">
+                                    <option
+                                        value="1"
+                                        @selected($settings->firstWhere('key', 'password_require_mixed_case')->value == 1)
+                                    >
+                                        Yes
+                                    </option>
+                                    <option
+                                        value="0"
+                                        @selected($settings->firstWhere('key', 'password_require_mixed_case')->value == 0)
+                                    >
+                                        No
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-lg-6 col-form-label font-weight-semibold">Require letters</label>
+                            <div class="col-lg-6">
+                                <select class="form-control select" name="password_require_letters">
+                                    <option
+                                        value="1"
+                                        @selected($settings->firstWhere('key', 'password_require_letters')->value == 1)
+                                    >
+                                        Yes
+                                    </option>
+                                    <option
+                                        value="0"
+                                        @selected($settings->firstWhere('key', 'password_require_letters')->value == 0)
+                                    >
+                                        No
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group row">
+                            <label class="col-lg-6 col-form-label font-weight-semibold">Require numbers</label>
+                            <div class="col-lg-6">
+                                <select class="form-control select" name="password_require_numbers">
+                                    <option
+                                        value="1"
+                                        @selected($settings->firstWhere('key', 'password_require_numbers')->value == 1)
+                                    >
+                                        Yes
+                                    </option>
+                                    <option
+                                        value="0"
+                                        @selected($settings->firstWhere('key', 'password_require_numbers')->value == 0)
+                                    >
+                                        No
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-lg-6 col-form-label font-weight-semibold">Require symbols</label>
+                            <div class="col-lg-6">
+                                <select class="form-control select" name="password_require_symbols">
+                                    <option
+                                        value="1"
+                                        @selected($settings->firstWhere('key', 'password_require_symbols')->value == 1)
+                                    >
+                                        Yes
+                                    </option>
+                                    <option
+                                        value="0"
+                                        @selected($settings->firstWhere('key', 'password_require_symbols')->value == 0)
+                                    >
+                                        No
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-lg-6 col-form-label font-weight-semibold">Reject compromised passwords</label>
+                            <div class="col-lg-6">
+                                <select class="form-control select" name="password_require_uncompromised">
+                                    <option
+                                        value="1"
+                                        @selected($settings->firstWhere('key', 'password_require_uncompromised')->value == 1)
+                                    >
+                                        Yes
+                                    </option>
+                                    <option
+                                        value="0"
+                                        @selected($settings->firstWhere('key', 'password_require_uncompromised')->value == 0)
+                                    >
+                                        No
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-lg-6 col-form-label font-weight-semibold">
+                                Remember last N passwords
+                                <i
+                                    class="material-symbols-rounded text-info float-right"
+                                    data-toggle="tooltip"
+                                    title="Set to 0 to disable password history checking."
+                                >info</i>
+                            </label>
+                            <div class="col-lg-6">
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="20"
+                                    name="password_history_count"
+                                    value="{{ old('password_history_count', $settings->firstWhere('key', 'password_history_count')->value ?? 0) }}"
+                                    class="form-control"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="row">
                     {{-- Admin Contacts --}}
                     <div class="col-md-6">
                         <h6 class="font-weight-semibold">Admin Contacts</h6>
