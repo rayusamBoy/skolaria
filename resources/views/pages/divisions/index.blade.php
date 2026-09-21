@@ -31,6 +31,18 @@
             <div class="tab-content">
                 {{-- Manage Divisions tab --}}
                 <div class="tab-pane fade show active" id="all-divisions">
+                    <div class="d-flex justify-content-end align-items-center mb-2">
+                        <label class="form-switch m-0">
+                            <input
+                                type="checkbox"
+                                onchange="window.location.href = '?include_historic=' + (this.checked ? 1 : 0)"
+                                @checked($include_historic)
+                            />
+                            <i></i>
+                        </label>
+                        <span class="small ml-2">Show historic versions</span>
+                    </div>
+
                     <table class="datatable-button-html5-columns table" id="manage-divisions-table">
                         <thead>
                             <tr>
@@ -48,7 +60,15 @@
                             @foreach ($divisions as $dv)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $dv->name }}</td>
+                                    <td>
+                                        {{ $dv->name }}
+                                        @unless ($dv->is_active)
+                                            <span class="badge bg-secondary">historic</span>
+                                        @endunless
+                                        @if ($dv->is_locked)
+                                            <span class="badge bg-warning text-dark">locked</span>
+                                        @endif
+                                    </td>
                                     <td>
                                         {{
                                             $dv->class_type_id
@@ -68,7 +88,7 @@
                                                         data-toggle="dropdown"
                                                     >lists</a>
                                                     <div class="dropdown-menu dropdown-menu-left">
-                                                        @if ($canEdit)
+                                                        @if ($canEdit && $dv->is_active)
                                                             <a
                                                                 href="{{ route('divisions.edit', $dv->id) }}"
                                                                 class="dropdown-item"
@@ -76,7 +96,7 @@
                                                                 <i class="material-symbols-rounded">edit</i> Edit
                                                             </a>
                                                         @endif
-                                                        @if ($canDelete)
+                                                        @if ($canDelete && ! $dv->is_locked)
                                                             <a
                                                                 id="division-delete-{{ $dv->id }}"
                                                                 onclick="confirmDelete(this.id)"

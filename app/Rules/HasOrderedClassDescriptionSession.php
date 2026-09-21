@@ -6,12 +6,7 @@ use Closure;
 
 class HasOrderedClassDescriptionSession extends HasOrderedClassSession
 {
-    protected string $description;
-
-    public function __construct(string $description)
-    {
-        $this->description = $description;
-    }
+    public function __construct(protected string $description) {}
 
     /**
      * {@inheritdoc}

@@ -64,4 +64,8 @@ return
         'invitation_approved' => 'The registration request has been approved successfully.',
         'invitation_rejected' => 'The registration request has been rejected successfully.',
         'invitation_cancelled' => 'The registration request has been cancelled successfully.',
+        'grade_locked_by_in_progress_exam' => 'This grade is still used by an in-progress exam. Finish and Publish or permanently delete that exam before editing.',
+        'cannot_delete_locked_grade' => 'This grade has already been awarded in a published exam and cannot be deleted.',
+        'division_locked_by_in_progress_exam' => 'This division is still used by an in-progress exam. Finish and Publish or permanently delete that exam before editing.',
+        'cannot_delete_locked_division' => 'This division has already been awarded in a published exam and cannot be deleted.',
     ];

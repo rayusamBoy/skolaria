@@ -68,7 +68,7 @@ class MarkController extends Controller
         if ($this->getExams($year)->isEmpty()) {
             return redirect()
                 ->route('marks.year_selector', $hashed_student)
-                ->with('flash_info', "No exams yet for the year $year.");
+                ->with('flash_info', "No published exams yet for the year $year.");
         }
 
         return redirect()->route('marks.show', [$hashed_student, $year]);
@@ -1095,7 +1095,7 @@ class MarkController extends Controller
         }
 
         // Preloaded lookups — tiny tables.
-        $grades = $this->exam->getGradesByConditions(['class_type_id' => $class_type->id])
+        $grades = $this->exam->getGradesByConditions(['class_type_id' => $class_type->id, 'is_active' => true])
             ->sortByDesc('mark_from');
 
         $divisions = $this->exam->getAllDivisions()

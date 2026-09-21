@@ -42,6 +42,7 @@
                                 <select class="form-control select" disabled id="class_type_id">
                                     <option selected>{{ $dv->class_type?->name ?? 'Not Applicable' }}</option>
                                 </select>
+                                <input type="hidden" name="class_type_id" value="{{ $dv->class_type?->id }}">
                             </div>
                         </div>
                         {{-- Points From --}}

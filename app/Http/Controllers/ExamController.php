@@ -212,6 +212,9 @@ class ExamController extends Controller
         $this->exam->update($exam_id, ['is_published' => true, 'is_locked' => true]);
         $exam = $this->exam->findExam($exam_id);
 
+        // Freeze every grade and division used by this exam
+        $this->exam->lockGradesAndDivisionsForExam($exam_id);
+
         return back()
             ->with('flash_success', __('msg.exam_published'))
             ->with('announce_exam', true)

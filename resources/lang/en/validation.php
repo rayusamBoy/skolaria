@@ -113,6 +113,14 @@ return [
     'unique' => 'The :attribute has already been taken.',
     'uploaded' => 'The :attribute failed to upload.',
     'url' => 'The :attribute format is invalid.',
+    'division' => [
+        'name_taken' => 'A division named ":name" already exists for this class type.',
+        'range_overlap' => 'The points range :from–:to overlaps an existing division.',
+    ],
+    'grade' => [
+        'name_taken' => 'A grade named ":name" already exists for this class type.',
+        'range_overlap' => 'The mark range :from–:to overlaps an existing grade.',
+    ],
 
     /*
     |--------------------------------------------------------------------------

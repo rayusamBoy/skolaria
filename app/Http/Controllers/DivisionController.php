@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Http\Requests\Division\DivisionCreate;
-use App\Http\Requests\Division\DivisionUpdate;
+use App\Http\Requests\DivisionRequest;
 use App\Repositories\ExamRepo;
 use App\Repositories\MyClassRepo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DivisionController extends Controller
@@ -22,10 +22,13 @@ class DivisionController extends Controller
     /**
      * Display a listing of divisions.
      */
-    public function index(): View
+    public function index(Request $req): View
     {
+        $include_historic = $req->boolean('include_historic');
+
         $data['divisions'] = $this->exam->getAllDivisions();
         $data['class_types'] = $this->my_class->getAllClassTypes();
+        $data['include_historic'] = $include_historic;
 
         return view('pages.divisions.index', $data);
     }
@@ -33,7 +36,7 @@ class DivisionController extends Controller
     /**
      * Store a newly created division.
      */
-    public function store(DivisionCreate $req): JsonResponse
+    public function store(DivisionRequest $req): JsonResponse
     {
         $data = $req->all();
         $this->exam->createDivision($data);
@@ -54,12 +57,16 @@ class DivisionController extends Controller
     /**
      * Update the specified division.
      */
-    public function update(DivisionUpdate $req, int $id): JsonResponse
+    public function update(DivisionRequest $req, int $id): JsonResponse
     {
-        $data = $req->all();
-        $this->exam->updateDivision($id, $data);
+        try {
+            $data = $req->all();
+            $this->exam->updateDivision($id, $data);
 
-        return Qs::jsonUpdateOk();
+            return Qs::jsonUpdateOk();
+        } catch (\DomainException $e) {
+            return Qs::json($e->getMessage(), false);
+        }
     }
 
     /**
@@ -67,8 +74,12 @@ class DivisionController extends Controller
      */
     public function destroy(int $id): RedirectResponse
     {
-        $this->exam->deleteDivision($id);
+        try {
+            $this->exam->deleteDivision($id);
 
-        return back()->with('flash_success', __('msg.del_ok'));
+            return back()->with('flash_success', __('msg.del_ok'));
+        } catch (\DomainException $e) {
+            return back()->with('flash_success', $e->getMessage());
+        }
     }
 }

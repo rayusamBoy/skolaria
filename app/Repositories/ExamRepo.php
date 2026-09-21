@@ -20,15 +20,7 @@ use Illuminate\Support\Facades\DB;
 
 class ExamRepo
 {
-    protected string $marks_table;
-
-    protected string $exam_records_table;
-
-    public function __construct()
-    {
-        $this->marks_table = 'marks';
-        $this->exam_records_table = 'exam_records';
-    }
+    public function __construct(protected string $marks_table = 'marks', protected string $exam_records_table = 'exam_records') {}
 
     /*********** Exam category ***************/
 
@@ -451,6 +443,7 @@ class ExamRepo
               AND m.my_class_id = ?
               AND m.year        = ?
               AND m.{$tex}      IS NOT NULL
+              AND g.is_active   = true
         ),
         ranked AS (
             SELECT *,
@@ -517,9 +510,15 @@ class ExamRepo
     /**
      * Get all grades ordered by class type and name.
      */
-    public function getAllGrades(): Collection
+    public function getAllGrades(bool $include_historic = false): Collection
     {
-        return Grade::orderBy('class_type_id')->orderBy('name')->get();
+        $query = Grade::query()->orderBy('class_type_id')->orderBy('name');
+
+        if (! $include_historic) {
+            $query->active();
+        }
+
+        return $query->get();
     }
 
     /**
@@ -546,12 +545,57 @@ class ExamRepo
         return Grade::create($data);
     }
 
-    /**
-     * Update a grade by ID.
-     */
-    public function updateGrade(int $id, array $data): int
+    public function updateGrade(int $id, array $data): Grade
     {
-        return Grade::where('id', $id)->update($data);
+        $grade = Grade::findOrFail($id);
+
+        if (! $this->gradeHasChanged($grade, $data)) {
+            return $grade;
+        }
+
+        if (! $grade->is_locked) {
+            $grade->update($data);
+
+            return $grade;
+        }
+
+        if ($this->gradeIsUsedByInProgressExam($grade)) {
+            throw new \DomainException(__('msg.grade_locked_by_in_progress_exam'));
+        }
+
+        $new = Grade::create([
+            'class_type_id' => $grade->class_type_id,
+            'name' => $data['name'] ?? $grade->name,
+            'mark_from' => $data['mark_from'] ?? $grade->mark_from,
+            'mark_to' => $data['mark_to'] ?? $grade->mark_to,
+            'point' => $data['point'] ?? $grade->point,
+            'remarks' => $data['remarks'] ?? $grade->remarks,
+            'is_locked' => false,
+            'is_active' => true,
+        ]);
+
+        $grade->update(['is_active' => false]);
+
+        return $new;
+    }
+
+    protected function gradeHasChanged(Grade $grade, array $data): bool
+    {
+        return ($data['name'] ?? $grade->name) !== $grade->name
+            || ($data['mark_from'] ?? $grade->mark_from) != $grade->mark_from
+            || ($data['mark_to'] ?? $grade->mark_to) != $grade->mark_to
+            || ($data['point'] ?? $grade->point) != $grade->point
+            || ($data['remarks'] ?? $grade->remarks) !== $grade->remarks;
+    }
+
+    protected function gradeIsUsedByInProgressExam(Grade $grade): bool
+    {
+        return Mark::where('grade_id', $grade->id)
+            ->whereHas('exam', fn ($q) => $q->where('is_published', false))
+            ->exists()
+            || ExamRecord::where('grade_id', $grade->id)
+                ->whereHas('exam', fn ($q) => $q->where('is_published', false))
+                ->exists();
     }
 
     /**
@@ -559,7 +603,13 @@ class ExamRepo
      */
     public function deleteGrade(int $id): int
     {
-        return Grade::destroy($id);
+        $grade = Grade::findOrFail($id);
+
+        if ($grade->is_locked) {
+            throw new \DomainException(__('msg.cannot_delete_locked_grade'));
+        }
+
+        return $grade->delete();
     }
 
     /*********** Marks ***************/
@@ -627,11 +677,65 @@ class ExamRepo
     }
 
     /**
+     * Lock every grade and division used by the given exam.
+     * Called after an exam is published.
+     */
+    public function lockGradesAndDivisionsForExam(int $exam_id): void
+    {
+        $grade_ids = Mark::where('exam_id', $exam_id)
+            ->whereNotNull('grade_id')
+            ->distinct()
+            ->pluck('grade_id')
+            ->merge(
+                ExamRecord::where('exam_id', $exam_id)
+                    ->whereNotNull('grade_id')
+                    ->distinct()
+                    ->pluck('grade_id')
+            )
+            ->unique();
+
+        if ($grade_ids->isNotEmpty()) {
+            Grade::whereIn('id', $grade_ids)->update(['is_locked' => true]);
+        }
+
+        $division_ids = ExamRecord::where('exam_id', $exam_id)
+            ->whereNotNull('division_id')
+            ->distinct()
+            ->pluck('division_id');
+
+        if ($division_ids->isNotEmpty()) {
+            Division::whereIn('id', $division_ids)->update(['is_locked' => true]);
+        }
+    }
+
+    /**
+     * Get all active grades for a class type.
+     */
+    public function getActiveGrades(int $class_type_id): Collection
+    {
+        return Grade::where('class_type_id', $class_type_id)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Get all active divisions for a class type.
+     */
+    public function getActiveDivisions(int $class_type_id): Collection
+    {
+        return Division::where('class_type_id', $class_type_id)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
      * Get all grades (used for marks context).
      */
     public function getGrades(): Collection
     {
-        return Grade::get();
+        return Grade::active()->get();
     }
 
     /*********** Skills ***************/
@@ -672,9 +776,15 @@ class ExamRepo
     /**
      * Get all divisions ordered by class type and name.
      */
-    public function getAllDivisions(): Collection
+    public function getAllDivisions(bool $include_historic = false): Collection
     {
-        return Division::orderBy('class_type_id')->orderBy('name')->get();
+        $query = Division::orderBy('class_type_id')->orderBy('name');
+
+        if (! $include_historic) {
+            $query->active();
+        }
+
+        return $query->get();
     }
 
     /**
@@ -696,9 +806,57 @@ class ExamRepo
     /**
      * Update a division by ID.
      */
-    public function updateDivision(int $id, array $data): int
+    public function updateDivision(int $id, array $data): Division
     {
-        return Division::where('id', $id)->update($data);
+        $division = Division::findOrFail($id);
+
+        if (! $this->divisionHasChanged($division, $data)) {
+            return $division;
+        }
+
+        if (! $division->is_locked) {
+            $division->update($data);
+
+            return $division;
+        }
+
+        if ($this->divisionIsUsedByInProgressExam($division)) {
+            throw new \DomainException(__('msg.grade_locked_by_in_progress_exam'));
+        }
+
+        $new = Division::create([
+            'class_type_id' => $division->class_type_id,
+            'name' => $data['name'] ?? $division->name,
+            'mark_from' => $data['mark_from'] ?? $division->mark_from,
+            'mark_to' => $data['mark_to'] ?? $division->mark_to,
+            'point' => $data['point'] ?? $division->point,
+            'remarks' => $data['remarks'] ?? $division->remarks,
+            'is_locked' => false,
+            'is_active' => true,
+        ]);
+
+        $division->update(['is_active' => false]);
+
+        return $new;
+    }
+
+    protected function divisionHasChanged(Division $division, array $data): bool
+    {
+        return ($data['name'] ?? $division->name) !== $division->name
+            || ($data['mark_from'] ?? $division->mark_from) != $division->mark_from
+            || ($data['mark_to'] ?? $division->mark_to) != $division->mark_to
+            || ($data['point'] ?? $division->point) != $division->point
+            || ($data['remarks'] ?? $division->remarks) !== $division->remarks;
+    }
+
+    protected function divisionIsUsedByInProgressExam(Division $division): bool
+    {
+        return Mark::where('grade_id', $division->id)
+            ->whereHas('exam', fn ($q) => $q->where('is_published', false))
+            ->exists()
+            || ExamRecord::where('grade_id', $division->id)
+                ->whereHas('exam', fn ($q) => $q->where('is_published', false))
+                ->exists();
     }
 
     /**
@@ -706,7 +864,13 @@ class ExamRepo
      */
     public function deleteDivision(int $id): int
     {
-        return Division::destroy($id);
+        $division = Division::findOrFail($id);
+
+        if ($division->is_locked) {
+            throw new \DomainException(__('msg.cannot_delete_locked_division'));
+        }
+
+        return $division->delete();
     }
 
     /*********** Class types ***************/

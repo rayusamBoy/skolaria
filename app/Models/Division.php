@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 
 class Division extends Eloquent
@@ -11,5 +12,25 @@ class Division extends Eloquent
     public function class_type()
     {
         return $this->belongsTo(ClassType::class);
+    }
+
+    public function exam_records()
+    {
+        return $this->hasMany(ExamRecord::class);
+    }
+
+    protected $casts = [
+        'is_locked' => 'boolean',
+        'is_active' => 'boolean',
+    ];
+
+    public function scopeActive(Builder $query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeLocked(Builder $query)
+    {
+        return $query->where('is_locked', true);
     }
 }

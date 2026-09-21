@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Qs;
-use App\Http\Requests\Grade\GradeCreate;
-use App\Http\Requests\Grade\GradeUpdate;
+use App\Http\Requests\GradeRequest;
 use App\Repositories\ExamRepo;
 use App\Repositories\MyClassRepo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class GradeController extends Controller
@@ -22,10 +22,13 @@ class GradeController extends Controller
     /**
      * Display a listing of grades.
      */
-    public function index(): View
+    public function index(Request $req): View
     {
+        $include_historic = $req->boolean('include_historic');
+
         $data['grades'] = $this->exam->getAllGrades();
         $data['class_types'] = $this->my_class->getAllClassTypes();
+        $data['include_historic'] = $include_historic;
 
         return view('pages.grades.index', $data);
     }
@@ -33,7 +36,7 @@ class GradeController extends Controller
     /**
      * Store a newly created grade.
      */
-    public function store(GradeCreate $req): JsonResponse
+    public function store(GradeRequest $req): JsonResponse
     {
         $data = $req->all();
         $this->exam->createGrade($data);
@@ -54,12 +57,16 @@ class GradeController extends Controller
     /**
      * Update the specified grade.
      */
-    public function update(GradeUpdate $req, int $id): JsonResponse
+    public function update(GradeRequest $req, int $id): JsonResponse
     {
-        $data = $req->except(['_token', '_method']);
-        $this->exam->updateGrade($id, $data);
+        try {
+            $data = $req->except(['_token', '_method']);
+            $this->exam->updateGrade($id, $data);
 
-        return Qs::jsonUpdateOk();
+            return Qs::jsonUpdateOk();
+        } catch (\DomainException $e) {
+            return Qs::json($e->getMessage(), false);
+        }
     }
 
     /**
@@ -67,8 +74,14 @@ class GradeController extends Controller
      */
     public function destroy(int $id): RedirectResponse
     {
-        $this->exam->deleteGrade($id);
+        try {
+            $this->exam->deleteGrade($id);
 
-        return back()->with('flash_success', __('msg.del_ok'));
+            return back()->with('flash_success', __('msg.del_ok'));
+        } catch (\DomainException $e) {
+
+            return back()->with('flash_success', $e->getMessage());
+
+        }
     }
 }

@@ -127,7 +127,7 @@
                                                                 id="{{ $ex->id }}"
                                                                 onclick="confirmPublish(this.id)"
                                                                 href="javascript:;"
-                                                                class="dropdown-item"
+                                                                class="dropdown-item text-warning" title="Publish this exam to make results visible to students, parents, teachers etc,. Once published, grades, divisions, marks, and all related records are frozen — no further edits can be made." data-toggle="tooltip"
                                                                 ><i class="material-symbols-rounded">visibility</i>
                                                                 Publish</a>
                                                             <form
