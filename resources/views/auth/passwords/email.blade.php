@@ -12,10 +12,10 @@
                     <div class="card mb-0">
                         <div class="card-body">
                             @if (session('status'))
-                                <div class="alert alert-success" role="alert">{{ session('status') }}</div>
+                                <div class="alert alert-success alert-styled-left" role="alert">{{ session('status') }}</div>
                             @endif
                             @if ($errors->has('email'))
-                                <div class="alert alert-danger" role="alert">
+                                <div class="alert alert-danger alert-styled-left" role="alert">
                                     <i>{{ $errors->first('email') }}</i>
                                 </div>
                             @endif

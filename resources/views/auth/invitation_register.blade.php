@@ -12,7 +12,7 @@
                             <h5 class="text-info mb-3 text-center">Complete Your Registration</h5>
                             {{-- Error Alert Area --}}
                             @if ($errors->any())
-                                <div class="alert alert-danger alert-dismissible border">
+                                <div class="alert alert-danger alert-dismissible alert-styled-left">
                                     <button type="button" class="close" data-dismiss="alert">
                                         <span>&times;</span>
                                     </button>
