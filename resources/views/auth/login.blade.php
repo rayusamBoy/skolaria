@@ -57,16 +57,6 @@
                                         </div>
                                     @endif
 
-                                    {{-- Look in login controller for more --}}
-                                    @if (session('session_expired') && $errors->isEmpty())
-                                        <div class="alert alert-danger alert-styled-left alert-dismissible">
-                                            <button type="button" class="close" data-dismiss="alert">
-                                                <span>&times;</span>
-                                            </button>
-                                            <i>{{ session("session_expired") }}</i>
-                                        </div>
-                                    @endif
-
                                     {{-- Error message for a blocked user --}}
                                     @if (session()->has('access_denied'))
                                         <div class="alert alert-warning alert-styled-left alert-dismissible">
@@ -140,3 +130,111 @@
     </div>
 
 @endsection
+
+@push('scripts')
+    <script>
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('reason') !== 'timeout') return;
+
+            // Read the identity the session manager stored for this tab
+            let identity = null;
+            try {
+                identity = JSON.parse(sessionStorage.getItem('session_reauth_identity') || 'null');
+            } catch (_) {}
+
+            const form = document.querySelector('form.login-form');
+            if (!form) return;
+
+            const cardBody = form.querySelector('.card-body');
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            // If we have no identity, fall back to normal login (but show the timeout hint)
+            if (!identity?.user_id || !identity?.token) {
+                if (cardBody) {
+                    const note = document.createElement('div');
+                    note.className = 'alert alert-info alert-styled-left';
+                    note.innerHTML = 'Your session expired. Please sign in again to continue.';
+                    cardBody.insertBefore(note, cardBody.firstChild);
+                }
+                return;
+            }
+
+            // Hide the identity field — the user is already known
+            const identityEl = form.querySelector('input[name="identity"]');
+            if (identityEl) identityEl.closest('.form-group').style.display = 'none';
+
+            // Info banner with a "start fresh" link
+            if (cardBody) {
+                const banner = document.createElement('div');
+                banner.className = 'alert alert-info alert-styled-left';
+                banner.innerHTML =
+                    'Your session expired. Enter your password to continue, ' +
+                    'or <a href="#" id="start-fresh-login">start a fresh login</a>.';
+                cardBody.insertBefore(banner, cardBody.firstChild);
+
+                banner.querySelector('#start-fresh-login')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    sessionStorage.removeItem('session_reauth_identity');
+                    window.location.href = "{{ route('login') }}";
+                });
+            }
+
+            // Intercept submission
+            form.addEventListener(
+                'submit',
+                async (e) => {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+
+                    const password = form.querySelector('input[name="password"]').value;
+                    if (!password) return;
+
+                    submitBtn.disabled = true;
+                    cardBody.querySelector('.alert-danger')?.remove();
+
+                    try {
+                        const res = await fetch("{{ route('session.reauth') }}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Accept: 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                            },
+                            credentials: 'same-origin',
+                            body: JSON.stringify({
+                                user_id: identity.user_id,
+                                password: password,
+                                token: identity.token,
+                            }),
+                        });
+
+                        const data = await res.json().catch(() => ({}));
+
+                        if (res.ok && data.ok) {
+                            // Wipe the tab-scoped identity — a fresh one will be seeded on the next page
+                            try {
+                                sessionStorage.removeItem('session_reauth_identity');
+                            } catch (_) {}
+                            window.location.href = data.redirect || "{{ route('dashboard') }}";
+                            return;
+                        }
+
+                        const err = document.createElement('div');
+                        err.className = 'alert alert-danger alert-styled-left';
+                        err.textContent = data.msg || 'Authentication failed.';
+                        cardBody.insertBefore(err, cardBody.firstChild);
+                    } catch (_) {
+                        const err = document.createElement('div');
+                        err.className = 'alert alert-danger alert-styled-left';
+                        err.textContent = 'Network error. Please try again.';
+                        cardBody.insertBefore(err, cardBody.firstChild);
+                    } finally {
+                        submitBtn.disabled = false;
+                    }
+                },
+                true,
+            );
+        })();
+    </script>
+@endpush

@@ -398,6 +398,39 @@
                         </div>
                         <div class="row">
                             <div class="col-12">
+                                <div class="alert alert-warning alert-styled-left mb-3">
+                                    <strong>Offline access</strong> — when enabled, pages you visit are stored on this
+                                    device so you can keep working without internet. Anyone with physical access to this
+                                    device may be able to view the cached pages. Enable it only if you trust everyone
+                                    using this device.
+                                </div>
+                                <div class="form-group">
+                                    <label for="allow_offline_access" class="col-form-label font-weight-semibold">
+                                        Allow offline access <span class="text-danger">*</span>
+                                    </label>
+                                    <select
+                                        id="allow_offline_access"
+                                        name="allow_offline_access"
+                                        class="form-control select"
+                                    >
+                                        <option
+                                            value="1"
+                                            @selected(($user_preferences['allow_offline_access'] ?? 0) == 1)
+                                        >
+                                            Yes
+                                        </option>
+                                        <option
+                                            value="0"
+                                            @selected(($user_preferences['allow_offline_access'] ?? 0) == 0)
+                                        >
+                                            No
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
                                 <div class="float-right text-right">
                                     <button type="submit" class="btn btn-danger">
                                         Submit form <i class="material-symbols-rounded ml-2">send</i>

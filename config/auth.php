@@ -118,4 +118,11 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Local Auth Token Lifetime (minutes)
+    |--------------------------------------------------------------------------
+    | Used for the "remember me" flow of the PWA session manager.
+    */
+    'remember_ttl' => env('AUTH_REMEMBER_TTL', 60 * 24 * 30), // 30 days
 ];

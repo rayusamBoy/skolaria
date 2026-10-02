@@ -109,13 +109,22 @@ class MyAccountController extends Controller
      */
     public function update_preferences(Request $request): RedirectResponse
     {
+        $allow_offline = $request->boolean('allow_offline_access');
+        $previous = auth()->user()->preferences['allow_offline_access'] ?? 0;
+
         auth()->user()->update([
             'preferences' => [
                 'always_minimize_sidebar' => $request->boolean('always_minimize_sidebar'),
                 'allow_system_sounds' => $request->boolean('allow_system_sounds'),
                 'active_system_skin' => $request->active_system_skin,
+                'allow_offline_access' => $allow_offline ? 1 : 0,
             ],
         ]);
+
+        // If the user just turned it off, signal the client to purge caches.
+        if (! $allow_offline && $previous) {
+            session()->flash('purge_offline_caches', true);
+        }
 
         return back()->with('flash_success', __('msg.update_ok'));
     }

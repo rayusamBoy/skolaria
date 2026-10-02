@@ -611,6 +611,7 @@ class Usr extends Qs
         return [
             'always_minimize_sidebar' => 0,
             'allow_system_sounds' => 1,
+            'allow_offline_access' => 0,
             'active_system_skin' => array_key_first(self::getAvailableAppSkins()),
         ];
     }

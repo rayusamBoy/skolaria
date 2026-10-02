@@ -1,9 +1,11 @@
 <?php
 
-use App\Http\Middleware\Custom\CheckForPasswordUpdate;
-use App\Http\Middleware\Custom\DecodeRouteParams;
-use App\Http\Middleware\Custom\HandleCookie;
-use App\Http\Middleware\Custom\LoadCommonContext;
+use App\Http\Middleware\CheckForPasswordUpdate;
+use App\Http\Middleware\DecodeRouteParams;
+use App\Http\Middleware\HandleCookie;
+use App\Http\Middleware\LoadCommonContext;
+use App\Http\Middleware\OfflinePreference;
+use App\Http\Middleware\SessionTimeout;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -58,6 +60,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web([
             LoadCommonContext::class,
             HandleCookie::class,
+            SessionTimeout::class,
+            OfflinePreference::class,
         ]);
         $middleware->alias([
             'checkForPassUpdate' => CheckForPasswordUpdate::class,

@@ -48,6 +48,7 @@
     <script src="{{ asset('global_assets/js/plugins/pickers/bootstrap-datepicker.min.js') }}"></script>
     <script src="{{ asset('global_assets/js/plugins/pickers/pickadate/legacy.js') }}"></script>
     <script src="{{ asset('assets/js/custom-min.js') }}"></script>
+    @stack('scripts')
     <script>
         const get_state_url = '{{ route("ajax.get_state", [":id"]) }}';
         const get_lga_url = '{{ route("ajax.get_lga", [":id"]) }}';

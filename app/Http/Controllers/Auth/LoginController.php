@@ -50,13 +50,6 @@ class LoginController extends Controller implements HasMiddleware
             abort(403, $message);
         }
 
-        // If the user was logged out due to session expire
-        if (! $this->cookieService->has('has_logged_out')) {
-            if ($this->cookieService->has('was_logged_in') && $this->cookieService->get('was_logged_in') == true) {
-                session()->flash('session_expired', __('msg.session_expired'));
-            }
-        }
-
         return view('auth.login');
     }
 
@@ -109,14 +102,13 @@ class LoginController extends Controller implements HasMiddleware
     protected function authenticated(Request $request, $user)
     {
         $user ??= auth()->user();
+
         if ($user->is_blocked) {
             Auth::logout();
 
-            return redirect()->route('login')->with('access_denied', __('msg.restricted').' ACCOUNT BLOCKED.');
+            return redirect()->route('login')
+                ->with('access_denied', __('msg.restricted').' ACCOUNT BLOCKED.');
         }
-
-        $this->cookieService->delete('has_logged_out');
-        $this->cookieService->setForever('was_logged_in', true);
 
         return redirect()->route(Usr::tenancyInitialized() ? 'dashboard' : 'central_dashboard');
     }

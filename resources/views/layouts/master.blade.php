@@ -7,17 +7,35 @@
     <meta id="csrf-token" name="csrf-token" content="{{ csrf_token() }}" />
     <meta name="author" content="Rashidi Said (rayusam)" />
 
-    @includeUnless(! Qs::googleAnalyticsSetUpOkAndEnabled(), 'partials.js.google_tag')
+    <meta name="session-lifetime" content="{{ ((int) config('session.lifetime')) * 60 }}" />
+    <meta name="session-expires-at" content="{{ $session_expires_at ?? '' }}" />
+    <meta name="session-remember" content="{{ ($session_remember ?? false) ? '1' : '0' }}" />
+    <meta name="session-ping-url" content="{{ route('session.heartbeat') }}" />
+    <meta name="session-status-url" content="{{ route('session.status') }}" />
+    <meta name="session-expired-url" content="{{ route('session.expired') }}" />
+    <meta name="auth-user-id" content="{{ auth()->id() }}" />
+    <meta name="login-url" content="{{ route('login') }}" />
+    <meta name="logout-url" content="{{ route('logout') }}" />
+    <meta name="auth-token" content="{{ hash_hmac('sha256', (string) auth()->id(), config('app.key')) }}" />
+    <meta name="allow-offline" content="{{ (int) (auth()->user()->preferences['allow_offline_access'] ?? 0) }}" />
+    <meta name="purge-offline-caches" content="{{ session('purge_offline_caches') ? '1' : '0' }}" />
 
+    {{-- BF cache prevention — only when offline access is disabled --}}
+    @if (($user_preferences['allow_offline_access'] ?? 0) == 0)
+        <script>
+            window.addEventListener('pageshow', function (event) {
+                if (event.persisted) window.location.reload();
+            });
+        </script>
+    @endif
+
+    @includeUnless(! Qs::googleAnalyticsSetUpOkAndEnabled(), 'partials.js.google_tag')
     <title>
         @yield('page_title')
         &bull; {{ Qs::getStringAbbreviation(config('app.name')) }}
     </title>
-
     @laravelPWA
-
     @include('partials.inc_top')
-
     @stack('css')
 </head>
 
@@ -71,6 +89,7 @@
     {{-- Offline Indicator --}}
     <div id="offline-alert">Application Offline</div>
 
+    @include('pages.modals.session_expiry_modal')
     @include('partials.inc_bottom')
 
     @stack('scripts')

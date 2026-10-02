@@ -35,7 +35,6 @@ return
         'edit_disabled_ok' => 'Exam editing has been disabled successfully.',
         'exam_cat_exists' => 'Sorry, the selected exam category for the selected class type exists in the current session.',
         'update_assessments' => 'Please update the assessments first. Click the update button below, then proceed.',
-        'session_expired' => 'Your session has expired. Please sign in again.',
         'exam_published' => 'Exam has been published successfully.',
         'section_exists' => 'The section of the selected class has already been taken.',
         'sections_max' => 'You have reached the maximum number (2) of teachers allowed to teach the same subject in different sections of the same class.',

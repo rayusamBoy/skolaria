@@ -2423,17 +2423,6 @@ $("select#select").on("change", function () {
     btn.prop("disabled", false);
 });
 
-/**
- *-------------------------------------------------------------
- * Prevent Page BF Cache
- *-------------------------------------------------------------
- */
-window.addEventListener("pageshow", function (event) {
-    if (event.persisted) {
-        window.location.reload();
-    }
-});
-
 $(document).on("click", ".item-copy", function (e) {
     e.preventDefault();
     const $outputEls = $(this).siblings(".item-output");

@@ -40,6 +40,11 @@
 {{-- Theme JS files --}}
 <script src="{{ asset('assets/js/custom-min.js') }}"></script>
 
+@auth
+    <script src="{{ asset('assets/js/session-manager-min.js') }}" defer></script>
+    <script src="{{ asset('assets/js/offline-preference-min.js') }}" defer></script>
+@endauth
+
 @vite('resources/js/app.js')
 
 @include('partials.js.custom')

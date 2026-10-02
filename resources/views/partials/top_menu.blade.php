@@ -159,19 +159,9 @@
                     {{-- Accessibilty --}}
                     {{-- <a href="javascript:;" class="dropdown-item"><i class="material-symbols-rounded">accessibility_new</i> Accessibility</a> --}}
                     {{-- Logout --}}
-                    <a
-                        href="{{ route('logout') }}"
-                        onclick="
-                            event.preventDefault();
-                            document.getElementById('logout-form').submit();
-                        "
-                        class="dropdown-item text-warning"
-                    >
+                    <a href="javascript:;" onclick="handleLogout()" class="dropdown-item text-warning">
                         <i class="material-symbols-rounded">logout</i>Logout
                     </a>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                        @csrf
-                    </form>
                 </div>
             </li>
         </ul>

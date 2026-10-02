@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Middleware\Custom;
+namespace App\Http\Middleware;
 
 use App\Helpers\Usr;
 use App\Services\CookieService;

@@ -25,6 +25,7 @@ use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\QueryBuilderController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SectionController;
+use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SoftDeleteController;
 use App\Http\Controllers\StatisticsController;
@@ -384,6 +385,11 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         // Resourceful controller for tickets
         Route::resource('tickets', TicketController::class);
     });
+
+    Route::prefix('session')->group(function () {
+        Route::get('status', [SessionController::class, 'status'])->name('session.status');
+        Route::post('heartbeat', [SessionController::class, 'heartbeat'])->name('session.heartbeat');
+    });
 });
 
 // Public registration routes (no auth)
@@ -391,3 +397,6 @@ Route::middleware('guest')->group(function () {
     Route::get('/register/{token}', [UserInvitationController::class, 'show_registration_form'])->name('users.registrations.show');
     Route::post('/register/{token}', [UserInvitationController::class, 'submit_registration'])->name('users.registrations.submit');
 });
+
+Route::get('/session/expired', [SessionController::class, 'expired'])->name('session.expired');
+Route::post('/session/reauth', [SessionController::class, 'reauth'])->name('session.reauth');

@@ -4242,22 +4242,22 @@ a.badge[class*="bg-"]:not(.bg-transparent):not(.bg-white):not(.bg-light):focus,
 
 .alert[class*="alert-styled-"].alert-danger:after,
 .alert[class*="alert-styled-"][class*="bg-danger"]:after {
-    content: "\e645";
+    content: "\e000"; /* error */
 }
 
 .alert[class*="alert-styled-"].alert-success:after,
 .alert[class*="alert-styled-"][class*="bg-success"]:after {
-    content: "\e877";
+    content: "\e86c"; /* check_circle */
 }
 
 .alert[class*="alert-styled-"].alert-warning:after,
 .alert[class*="alert-styled-"][class*="bg-warning"]:after {
-    content: "\e002";
+    content: "\e002"; /* warning */
 }
 
 .alert[class*="alert-styled-"].alert-info:after,
 .alert[class*="alert-styled-"][class*="bg-info"]:after {
-    content: "\f59b";
+    content: "\e88e"; /* info */
 }
 
 .alert.alert-styled-left {
