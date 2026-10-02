@@ -41,6 +41,9 @@
                                 <i class="material-symbols-rounded mr-1 ml-auto">lock_reset</i>
                                 <span class="mr-auto">Reset password</span>
                             </button>
+                            <div class="text-center mt-3">
+                                <a href="{{ route('login') }}">Login</a>
+                            </div>
                         </div>
                     </div>
                 </form>
