@@ -12,7 +12,9 @@
                     <div class="card mb-0">
                         <div class="card-body">
                             @if (session('status'))
-                                <div class="alert alert-success alert-styled-left" role="alert">{{ session('status') }}</div>
+                                <div class="alert alert-success alert-styled-left" role="alert">
+                                    {{ session('status') }}
+                                </div>
                             @endif
                             @if ($errors->has('email'))
                                 <div class="alert alert-danger alert-styled-left" role="alert">
@@ -41,7 +43,7 @@
                                 <i class="material-symbols-rounded mr-1 ml-auto">lock_reset</i>
                                 <span class="mr-auto">Reset password</span>
                             </button>
-                            <div class="text-center mt-3">
+                            <div class="mt-3 text-center">
                                 <a href="{{ route('login') }}">Login</a>
                             </div>
                         </div>
