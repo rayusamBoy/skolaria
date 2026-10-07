@@ -1,9 +1,9 @@
 {
-    "name": "laravel/laravel",
+    "name": "rayusamboy/skolaris",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
-    "license": "MIT",
+    "description": "Multi-tenant, offline-ready school management platform",
+    "keywords": ["skolaris", "multi-tenant", "school-management", "progressive-web-app", "offline-ready"],
+    "license": "AGPL-3.0",
     "require": {
         "php": "^8.4",
         "bacon/bacon-qr-code": "^2.0",
