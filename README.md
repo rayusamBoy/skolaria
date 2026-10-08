@@ -1,4 +1,4 @@
-<p align="center"><a href="https://github.com/rayusamBoy/skolaria" target="_blank"><img src="public/images/icons/skolaria-og.svg" height="120" alt="SMS Logo"></a></p>
+<p align="center"><a href="https://github.com/rayusamBoy/skolaria" target="_blank"><img src="public/images/icons/skolaria-wordmark-horizontal.svg" height="120" alt="SMS Logo"></a></p>
 
 <div align="center">
 
