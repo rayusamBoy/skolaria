@@ -1,0 +1,12 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Skolaria">
+  <rect width="512" height="512" fill="#1B1F3B"/>
+  <g transform="translate(256, 256) scale(0.72)">
+    <polygon points="
+      0,-208 48,-64 208,0 48,64
+      0,208 -48,64 -208,0 -48,-64"
+      fill="#F5A623"/>
+    <path d="M 88,-80 Q 88,-104 64,-104 L -48,-104 Q -80,-104 -80,-72 L -80,-32 Q -80,0 -48,0 L 48,0 Q 80,0 80,32 L 80,72 Q 80,104 48,104 L -64,104 Q -88,104 -88,80"
+          fill="none" stroke="#1B1F3B" stroke-width="36"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

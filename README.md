@@ -1,8 +1,8 @@
-<p align="center"><a href="https://github.com/rayusamBoy/Laravel_tenancy_sms" target="_blank"><img src="public/images/icons/icon-rounded.png" width="100" alt="SMS Logo"></a></p>
+<p align="center"><a href="https://github.com/rayusamBoy/skolaria" target="_blank"><img src="public/images/icons/skolaria-og.svg" height="120" alt="SMS Logo"></a></p>
 
 <div align="center">
 
-[![License](https://img.shields.io/github/license/rayusamBoy/Laravel_tenancy_sms?label=license&style=flat-square)](https://github.com/rayusamBoy/Laravel_tenancy_sms/blob/main/LICENSE) [![GitHub issues](https://img.shields.io/github/issues/rayusamBoy/Laravel_tenancy_sms?label=issues&style=flat-square)](https://github.com/rayusamBoy/Laravel_tenancy_sms/issues) [![Contributors](https://img.shields.io/github/contributors/rayusamBoy/Laravel_tenancy_sms?label=contributors&style=flat-square)](https://github.com/rayusamBoy/Laravel_tenancy_sms/graphs/contributors) [![Last Commit](https://img.shields.io/github/last-commit/rayusamBoy/Laravel_tenancy_sms?label=last%20commit&style=flat-square)](https://github.com/rayusamBoy/Laravel_tenancy_sms/commits) [![Languages](https://img.shields.io/github/languages/count/rayusamBoy/Laravel_tenancy_sms?label=languages&style=flat-square)](https://github.com/rayusamBoy/Laravel_tenancy_sms)
+[![License](https://img.shields.io/github/license/rayusamBoy/skolaria?label=license&style=flat-square)](https://github.com/rayusamBoy/skolaria/blob/main/LICENSE) [![GitHub issues](https://img.shields.io/github/issues/rayusamBoy/skolaria?label=issues&style=flat-square)](https://github.com/rayusamBoy/skolaria/issues) [![Contributors](https://img.shields.io/github/contributors/rayusamBoy/skolaria?label=contributors&style=flat-square)](https://github.com/rayusamBoy/skolaria/graphs/contributors) [![Last Commit](https://img.shields.io/github/last-commit/rayusamBoy/skolaria?label=last%20commit&style=flat-square)](https://github.com/rayusamBoy/skolaria/commits) [![Languages](https://img.shields.io/github/languages/count/rayusamBoy/skolaria?label=languages&style=flat-square)](https://github.com/rayusamBoy/skolaria)
 
 </div>
 
@@ -26,10 +26,10 @@ fix issues, and enhance overall code quality.
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/rayusamBoy/Laravel_tenancy_sms.git
+git clone https://github.com/rayusamBoy/skolaria.git
 
 # 2. Navigate into project
-cd Laravel_tenancy_sms
+cd skolaria
 
 # 3. Install PHP dependencies
 composer install
@@ -51,7 +51,7 @@ php artisan migrate --seed --seeder=DatabaseSeederNonTenancy
 php artisan serve
 ```
 
-> For full setup instructions, see [Installation](https://github.com/rayusamBoy/Laravel_tenancy_sms?tab=readme-ov-file#installation).
+> For full setup instructions, see [Installation](https://github.com/rayusamBoy/skolaria?tab=readme-ov-file#installation).
 
 ## Getting Started
 
@@ -98,16 +98,16 @@ php artisan serve
 
 #### Installation
 
-1. Clone this repository, or you can download the [**zip**](https://github.com/rayusamBoy/Laravel_tenancy_sms/archive/refs/heads/main.zip) folder instead.
+1. Clone this repository, or you can download the [**zip**](https://github.com/rayusamBoy/skolaria/archive/refs/heads/main.zip) folder instead.
 
     ```bash
-    git clone https://github.com/rayusamBoy/Laravel_tenancy_sms.git
+    git clone https://github.com/rayusamBoy/skolaria.git
     ```
 
 2. Change to the app installation directory.
 
     ```bash
-    cd Laravel_tenancy_sms
+    cd skolaria
     ```
 
 3. Install the Composer dependencies.
@@ -300,7 +300,7 @@ Please review the official [Laravel deployment guide](https://laravel.com/docs/1
 
 ## Contributing
 
-Please see [contributing](https://github.com/rayusamBoy/Laravel_tenancy_sms/blob/main/CONTRIBUTING.md) for details. If you find this project useful, consider starring it on GitHub!
+Please see [contributing](https://github.com/rayusamBoy/skolaria/blob/main/CONTRIBUTING.md) for details. If you find this project useful, consider starring it on GitHub!
 
 ## Acknowledgement
 
@@ -308,4 +308,4 @@ This project is based on the [lav_sms](https://github.com/4jean/lav_sms) project
 
 ## License
 
-The School Management System is open-sourced software licensed under the [MIT License](https://github.com/rayusamBoy/Laravel_tenancy_sms/blob/main/LICENSE).
+The School Management System is open-sourced software licensed under the [MIT License](https://github.com/rayusamBoy/skolaria/blob/main/LICENSE).

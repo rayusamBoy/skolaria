@@ -1,0 +1,15 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fill="currentColor" role="img" aria-label="Skolaria">
+  <defs>
+    <mask id="sk-mono-cut">
+      <rect width="512" height="512" fill="white"/>
+      <path d="M 88,-80 Q 88,-104 64,-104 L -48,-104 Q -80,-104 -80,-72 L -80,-32 Q -80,0 -48,0 L 48,0 Q 80,0 80,32 L 80,72 Q 80,104 48,104 L -64,104 Q -88,104 -88,80"
+            transform="translate(256,256)"
+            fill="none" stroke="black" stroke-width="36"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </mask>
+  </defs>
+  <polygon points="
+    256,48 304,192 464,256 304,320
+    256,464 208,320 48,256 208,192"
+    fill="currentColor" mask="url(#sk-mono-cut)"/>
+</svg>

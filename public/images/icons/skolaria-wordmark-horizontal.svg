@@ -1,0 +1,33 @@
+<svg width="480" height="96" viewBox="0 0 480 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icon: 64x64 rounded mark at (39, 16) -->
+  <g transform="translate(39 16)">
+    <rect width="64" height="64" rx="14" fill="#1B1F3B"/>
+    <g transform="translate(32, 32)">
+      <polygon points="
+        0,-26 6,-8 26,0 6,8
+        0,26 -6,8 -26,0 -6,-8"
+        fill="#F5A623"/>
+      <path d="M 11,-10 Q 11,-13 8,-13 L -6,-13 Q -10,-13 -10,-9 L -10,-4 Q -10,0 -6,0 L 6,0 Q 10,0 10,4 L 10,9 Q 10,13 6,13 L -8,13 Q -11,13 -11,10"
+            fill="none" stroke="#1B1F3B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+
+  <!-- Wordmark: S K O L A R I A -->
+  <!-- S -->
+  <path d="M149 41H125V48H149V55H125" stroke="#F5A623" stroke-width="1" stroke-linecap="round"/>
+  <!-- K -->
+  <path d="M155 41V48M155 55V48M178 41L155 48M155 48L178 55" stroke="#F5A623" stroke-width="1" stroke-linecap="round"/>
+  <!-- O -->
+  <path d="M184 41H208V55H184V41Z" stroke="#F5A623" stroke-width="1" stroke-linecap="round"/>
+  <!-- L -->
+  <path d="M214 41V55H237" stroke="#F5A623" stroke-width="1" stroke-linecap="round"/>
+  <!-- A -->
+  <path d="M243 55V41H267V55M243 48H267" stroke="#F5A623" stroke-width="1" stroke-linecap="round"/>
+  <!-- R (body + leg) -->
+  <path d="M273 55V41H290V47.93L273 48" stroke="#F5A623" stroke-width="1" stroke-linecap="round"/>
+  <path d="M284 48L296 55" stroke="#F5A623" stroke-width="1" stroke-linecap="round"/>
+  <!-- I -->
+  <path d="M302 41H326M314 41V55M302 55H326" stroke="#F5A623" stroke-width="1" stroke-linecap="round"/>
+  <!-- A (replaces the final S) -->
+  <path d="M332 55V41H355V55M332 48H355" stroke="#F5A623" stroke-width="1" stroke-linecap="round"/>
+</svg>

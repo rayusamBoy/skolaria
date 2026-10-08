@@ -8,7 +8,7 @@
     <meta name="author" content="Rashidi Said (rayusam)" />
 
     <title>
-        {{ Qs::getStringAbbreviation(config('app.name')) }} &#183;
+        {{ config('app.name') }} &#183;
         @yield('page_title')
     </title>
 

@@ -13,7 +13,7 @@
                         <div class="introductory-section">
                             <div class="card intro border-0 bg-transparent">
                                 <div class="card-body">
-                                    <h4 class="card-title"><strong>Welcome to the School Management System</strong></h4>
+                                    <h4 class="card-title"><strong>Welcome to the {{ config('app.name') }}</strong></h4>
                                     <div class="card-text">
                                         <p>
                                             A multi‑tenant platform that centralises student records, academic

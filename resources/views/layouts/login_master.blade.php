@@ -14,7 +14,7 @@
 
     <title>
         @yield('page_title')
-        &bull; {{ Qs::getStringAbbreviation(config('app.name')) }}
+        &bull; {{ config('app.name') }}
     </title>
 
     @laravelPWA

@@ -1,0 +1,49 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Skolaria — Run your entire school. Even offline.">
+  <defs>
+    <linearGradient id="sk-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#1B1F3B"/>
+      <stop offset="60%"  stop-color="#161a35"/>
+      <stop offset="100%" stop-color="#0f1329"/>
+    </linearGradient>
+    <radialGradient id="sk-glow" cx="0.85" cy="0.15" r="0.7">
+      <stop offset="0%"   stop-color="#F5A623" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#F5A623" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sk-glow2" cx="0.1" cy="0.9" r="0.6">
+      <stop offset="0%"   stop-color="#6366F1" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#sk-bg)"/>
+  <rect width="1200" height="630" fill="url(#sk-glow)"/>
+  <rect width="1200" height="630" fill="url(#sk-glow2)"/>
+
+  <!-- Icon -->
+  <g transform="translate(120, 195)">
+    <rect width="240" height="240" rx="54" fill="#1B1F3B"/>
+    <g transform="translate(120, 120)">
+      <polygon points="0,-96 22,-30 96,0 22,30 0,96 -22,30 -96,0 -22,-30" fill="#F5A623"/>
+      <path d="M 41,-37 Q 41,-48 30,-48 L -22,-48 Q -37,-48 -37,-33 L -37,-15 Q -37,0 -22,0 L 22,0 Q 37,0 37,15 L 37,33 Q 37,48 22,48 L -30,48 Q -41,48 -41,37"
+            fill="none" stroke="#1B1F3B" stroke-width="17"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="420" y="290"
+        font-family="'Space Grotesk', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif"
+        font-size="96" font-weight="700" fill="#FFFFFF" letter-spacing="-2">
+    Skolaria
+  </text>
+
+  <!-- Tagline -->
+  <text x="420" y="360"
+        font-family="'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif"
+        font-size="34" font-weight="500" fill="#F5A623">
+    Where schools live online.
+  </text>
+
+  <!-- Bottom accent line -->
+  <rect x="420" y="400" width="88" height="4" rx="2" fill="#F5A623"/>
+</svg>

@@ -22,7 +22,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'School Management System'),
+    'name' => env('APP_NAME', 'Skolaria'),
 
     /*
     |--------------------------------------------------------------------------

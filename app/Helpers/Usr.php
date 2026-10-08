@@ -634,7 +634,7 @@ class Usr extends Qs
      */
     public static function getLoginAndRelatedPagesBgValue(): string
     {
-        return 'storage/uploads/login_and_related_pages_bg.png';
+        return 'storage/uploads/login_and_related_pages_bg.svg';
     }
 
     /**

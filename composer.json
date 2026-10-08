@@ -1,8 +1,8 @@
 {
-    "name": "rayusamboy/skolaris",
+    "name": "rayusamboy/skolaria",
     "type": "project",
     "description": "Multi-tenant, offline-ready school management platform",
-    "keywords": ["skolaris", "multi-tenant", "school-management", "progressive-web-app", "offline-ready"],
+    "keywords": ["skolaria", "multi-tenant", "school-management", "progressive-web-app", "offline-ready"],
     "license": "AGPL-3.0",
     "require": {
         "php": "^8.4",

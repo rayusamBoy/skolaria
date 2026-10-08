@@ -1,0 +1,63 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- ============ WORDMARK: SKOLARIA ============ -->
+
+  <!-- S -->
+  <path d="M70.1633 247H37V275.409H70.1633V303.818H37"
+        stroke="#F5A623" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- K -->
+  <path d="M78.6909 247V275.409M78.6909 303.818V275.409M111.854 247L78.6909 275.409M78.6909 275.409L111.854 303.818"
+        stroke="#F5A623" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- O -->
+  <path d="M120.382 247H153.545V303.818H120.382V247Z"
+        stroke="#F5A623" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- L -->
+  <path d="M162.073 247V303.818H195.236"
+        stroke="#F5A623" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- A (first) -->
+  <path d="M203.764 303.818V247H236.927V303.818M203.764 275.409H236.927"
+        stroke="#F5A623" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- R (body + leg) -->
+  <path d="M245.455 303.818V247H270.327V275.125L245.455 275.409"
+        stroke="#F5A623" stroke-width="5" stroke-linecap="round"/>
+  <path d="M261.958 275.409L278.539 303.818"
+        stroke="#F5A623" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- I -->
+  <path d="M287.146 247H320.309M303.727 247V303.818M287.146 303.818H320.309"
+        stroke="#F5A623" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- A (final — replaces the previous S) -->
+  <path d="M328.837 303.818V247H362V303.818M328.837 275.409H362"
+        stroke="#F5A623" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- ============ ICON (star + S) ============ -->
+
+  <!-- Rounded rectangle base -->
+  <path d="M241.312 92H154.688C136.082 92 121 105.222 121 121.531V197.469C121 213.778 136.082 227 154.688 227H241.312C259.918 227 275 213.778 275 197.469V121.531C275 105.222 259.918 92 241.312 92Z"
+        fill="#1B1F3B"/>
+
+  <!-- Star (fat inner points: ±16.2 / ±14.7 from centre 198,161.5) -->
+  <path d="M198 105.031L214.2 146.8L260.562 161.5L214.2 176.2L198 217.969L181.8 176.2L135.438 161.5L181.8 146.8L198 105.031Z"
+        fill="#F5A623"/>
+
+  <!-- S cutout (thicker stroke, round caps) -->
+  <path d="M222.062 144.125
+           C222.062 141.229 220.458 139.781 217.25 139.781
+           H183.562
+           C180.354 139.781 178.75 142.677 178.75 148.469
+           V154.984
+           C178.75 157.88 180.354 159.328 183.562 159.328
+           H212.438
+           C215.646 159.328 217.25 160.776 217.25 163.672
+           V174.531
+           C217.25 180.323 215.646 183.219 212.438 183.219
+           H178.75
+           C175.542 183.219 173.938 181.771 173.938 178.875"
+        stroke="#1B1F3B" stroke-width="4.5"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

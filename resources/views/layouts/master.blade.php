@@ -32,7 +32,7 @@
     @includeUnless(! Qs::googleAnalyticsSetUpOkAndEnabled(), 'partials.js.google_tag')
     <title>
         @yield('page_title')
-        &bull; {{ Qs::getStringAbbreviation(config('app.name')) }}
+        &bull; {{ config('app.name') }}
     </title>
     @laravelPWA
     @include('partials.inc_top')
