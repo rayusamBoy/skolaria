@@ -187,6 +187,9 @@
                 })
                     .done(function (resp) {
                         flash({ msg: resp.msg, type: 'success' });
+                        if (resp.ok) {
+                            $('#load-exam-numbers-btn').click();
+                        }
                     })
                     .fail(function () {
                         flash({ msg: 'Failed to save numbers.', type: 'error' });
