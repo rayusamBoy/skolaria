@@ -32,7 +32,11 @@
                 @can($tenant_permissions['users']['invite_user']['permission'])
                     <div class="tab-pane fade" id="invite-user">
                         <form id="invite-user-form" class="mb-3">
-                            <strong>Prefill User Details. If filled the invitee will not be able to change them.</strong>
+                            <div class="alert alert-warning alert-styled-left">
+                                <span
+                                    >Pre-fill user details. Any details entered here cannot be changed by the
+                                    invitee.</span>
+                            </div>
                             @include('partials.user_fields', ['mode' => 'invite', 'prefilled' => []])
                             <hr />
                             <div class="row">

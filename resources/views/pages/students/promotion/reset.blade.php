@@ -16,7 +16,7 @@
             class="page-block"
             id="promotion-reset-all"
             method="post"
-            action="{{ route('students.promotion_reset_all') }}"
+            action="{{ route('students.promotion.reset_all') }}"
         >
             @csrf
             @method('DELETE')
@@ -77,7 +77,7 @@
                                     id="{{ Qs::hash($p->id) }}"
                                     method="post"
                                     class="ajax-update"
-                                    action="{{ route('students.promotion_remarks', Qs::hash($p->id)) }}"
+                                    action="{{ route('students.promotion.remarks', $p->id) }}"
                                 >
                                     @csrf
                                     <div class="row">
@@ -89,7 +89,7 @@
                                                 placeholder="Add remarks"
                                             >{{ $p->remarks }}</textarea>
                                             <button
-                                                data-text="Updating..."
+                                                data-text=" "
                                                 class="btn input-group-text"
                                                 type="submit"
                                                 data-toggle=""
@@ -107,7 +107,7 @@
                                     class="page-block"
                                     id="promotion-reset-{{ $p->id }}"
                                     method="post"
-                                    action="{{ route('students.promotion_reset', $p->id) }}"
+                                    action="{{ route('students.promotion.reset', $p->id) }}"
                                 >
                                     @csrf
                                     @method('DELETE')

@@ -209,7 +209,7 @@ class PromotionController extends Controller
     public function reset_all(): RedirectResponse
     {
         $where = ['from_session' => Qs::getCurrentSession(), 'to_session' => Qs::getNextSession()];
-        $promotions = $this->student->getPromotionsByConditions($where);
+        $promotions = $this->student->wherePromotionQuery($where)->get();
 
         if ($promotions->isNotEmpty()) {
             foreach ($promotions as $prom) {

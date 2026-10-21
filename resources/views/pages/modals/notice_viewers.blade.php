@@ -25,7 +25,7 @@
                                 @foreach ($ntc->viewers_ids as $vid)
                                     <li class="nav-item mr-2 mb-2">
                                         <a target="_blank" href="{{ route('users.show', Qs::hash($vid)) }}"
-                                            >{{ $loop->iteration }} - {{ $notice_users->where('id', $vid)->first()->name }}</a>
+                                            >{{ $loop->iteration }} &middot; {{ $notice_users->where('id', $vid)->first()->name }}</a>
                                     </li>
                                 @endforeach
                             </ul>

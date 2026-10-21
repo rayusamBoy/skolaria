@@ -199,7 +199,7 @@
                                             @if ($user->hasRole(config('roles.default_roles.tenant.student')))
                                                 @php $s_recs = Usr::getStudentRecordByUserId($user->id,['my_class','section']) @endphp
                                                 <td class="text-center">
-                                                    {{ $s_recs->first()->my_class->name }} - {{ $s_recs->first()->section->name }}
+                                                    {{ $s_recs->first()->my_class->name }} &middot; {{ $s_recs->first()->section->name }}
                                                 </td>
                                             @else
                                                 <td>

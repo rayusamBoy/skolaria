@@ -258,7 +258,10 @@ class StudentRecordController extends Controller
             return redirect()->route('dashboard')->with('pop_error', __('msg.denied'));
         }
 
-        $data['sr'] = $this->findStudentRecord($student);
+        $data['sr'] = $sr = $this->findStudentRecord($student);
+        $data['promotions'] = $this->student->wherePromotionQuery(['student_id' => $sr->id])->with(['fc', 'fs', 'tc', 'ts'])
+            ->orderByDesc('from_session')
+            ->get();
 
         return view('pages.students.show', $data);
     }

@@ -191,17 +191,17 @@ class StudentRepo
      */
     public function getAllPromotions(): Collection
     {
-        return Promotion::with(['student', 'fc', 'tc', 'fs', 'ts'])
+        return Promotion::with(['student', 'user', 'fc', 'tc', 'fs', 'ts'])
             ->where('from_session', Qs::getCurrentSession())
             ->where('to_session', Qs::getNextSession())
             ->get();
     }
 
     /**
-     * Get promotions matching specific conditions.
+     * Get promotion query where matching conditions
      */
-    public function getPromotionsByConditions(array $where): Collection
+    public function wherePromotionQuery(array $where): Builder|Promotion
     {
-        return Promotion::where($where)->get();
+        return Promotion::where($where);
     }
 }

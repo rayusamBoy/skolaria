@@ -23,7 +23,7 @@
                         @foreach ($students as $student)
                             <li class="nav-item p-1">
                                 <a target="_blank" href="{{ route('students.show', Qs::hash($student->id)) }}"
-                                    >{{ $loop->iteration }} - {{ $student->user->name }}</a>
+                                    >{{ $loop->iteration }} &middot; {{ $student->user->name }}</a>
                             </li>
                         @endforeach
                     </ul>

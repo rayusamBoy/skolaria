@@ -11,7 +11,7 @@
                 </div>
                 <div class="mt-2" style="font-size: 16px">
                     <strong>
-                        RESULTS SHEET: {{ strtoupper($my_class->name) }} - {{ strtoupper($ex->name) }} ({{ $year }})
+                        RESULTS SHEET: {{ strtoupper($my_class->name) }} &middot; {{ strtoupper($ex->name) }} ({{ $year }})
                     </strong>
                 </div>
             </td>
@@ -28,7 +28,7 @@
                 </div>
                 <div class="mt-2" style="font-size: 16px">
                     <strong>
-                        RESULTS SHEET: {{ strtoupper($my_class->name) }} - {{ strtoupper($ex->name) }} ({{ $year }})
+                        RESULTS SHEET: {{ strtoupper($my_class->name) }} &middot; {{ strtoupper($ex->name) }} ({{ $year }})
                     </strong>
                 </div>
             </td>

@@ -51,7 +51,6 @@ class TenancyRolesTableSeeder extends Seeder
                     '/^messages\.(delete)/',
                     '/^roles\.(store|update|delete)/',
                     '/^bin\.(empty_soft_deleted_model|user_force_delete)/',
-                    '/^childrens?\./',
                 ],
             ],
 
@@ -120,7 +119,6 @@ class TenancyRolesTableSeeder extends Seeder
                     '/^time_tables?\.view/',
                     '/^time_tables?\.print_record/',
                     '/^schedules?\.view/',
-                    '/^childrens?\./',
                     '/^statistics?\.view/',
                     '/^pins\.enter_pin/',
                 ],

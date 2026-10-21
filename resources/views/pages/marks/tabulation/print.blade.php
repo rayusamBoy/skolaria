@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <title>
-        Tabulation Sheet - {{ strtoupper($settings->firstWhere('key', 'system_title')->value) }} - {{ $my_class->name }}
+        Tabulation Sheet - {{ strtoupper($settings->firstWhere('key', 'system_title')->value) }} &middot; {{ $my_class->name }}
         @if (isset($section)) {{ $section->name }} @endif
         {{ $ex->name }} ({{ $year }})
     </title>

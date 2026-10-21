@@ -290,7 +290,7 @@
                                         <span
                                             class="material-symbols-rounded mr-2 mb-1"
                                             >{{ $bs->device['desktop'] ? 'computer' : ($bs->device['tablet'] ? 'tablet' : ($bs->device['mobile'] ? 'smartphone' : 'devices')) }}</span
-                                        >{{ $bs->device['platform'] }} - {{ $bs->device['browser'] }}
+                                        >{{ $bs->device['platform'] }} &middot; {{ $bs->device['browser'] }}
                                     </li>
                                     <li>
                                         <span class="material-symbols-rounded mr-2 mb-1">bring_your_own_ip</span>

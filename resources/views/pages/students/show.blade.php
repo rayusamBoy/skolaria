@@ -28,6 +28,9 @@
                         <li class="nav-item">
                             <a href="#school-info" class="nav-link" data-toggle="tab">School Info</a>
                         </li>
+                        <li class="nav-item">
+                            <a href="#promo-hist" class="nav-link" data-toggle="tab">Promotion History</a>
+                        </li>
                     </ul>
 
                     <div class="tab-content">
@@ -127,7 +130,6 @@
                                 </tbody>
                             </table>
                         </div>
-
                         {{--School Info--}}
                         <div class="tab-pane fade show" id="school-info">
                             <table class="table-bordered table">
@@ -168,7 +170,7 @@
                                     @endif
                                     <tr>
                                         <td class="font-weight-bold">Class</td>
-                                        <td>{{ $sr->my_class->name }} - {{ $sr->section->name }}</td>
+                                        <td>{{ $sr->my_class->name }} &middot; {{ $sr->section->name }}</td>
                                     </tr>
                                     @if ($sr->user->nationality_id)
                                         <tr>
@@ -200,6 +202,67 @@
                                             <td><a href="{{ tenant_asset($sr->birth_certificate) }}">View</a></td>
                                         </tr>
                                     @endif
+                                </tbody>
+                            </table>
+                        </div>
+                        {{-- Promotion History --}}
+                        <div class="tab-pane fade show" id="promo-hist">
+                            <table class="table-bordered table">
+                                <thead>
+                                    <tr>
+                                        <th class="font-weight-bold">#</th>
+                                        <th class="font-weight-bold">From Session</th>
+                                        <th class="font-weight-bold">From Class</th>
+                                        <th class="font-weight-bold">To Session</th>
+                                        <th class="font-weight-bold">To Class</th>
+                                        <th class="font-weight-bold">Status</th>
+                                        <th class="font-weight-bold">Date</th>
+                                        <th class="font-weight-bold">Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($promotions as $promo)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $promo->from_session }}</td>
+                                            <td>
+                                                {{ $promo->fc?->name ?? '—' }}
+                                                @if ($promo->fs)
+                                                    &middot; {{ $promo->fs->name }}
+                                                @endif
+                                            </td>
+                                            <td>{{ $promo->to_session }}</td>
+                                            <td>
+                                                {{ $promo->tc?->name ?? '—' }}
+                                                @if ($promo->ts)
+                                                    &middot; {{ $promo->ts->name }}
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @switch ($promo->status)
+                                                    @case ('P')
+                                                        <span class="badge badge-success">Promoted</span>
+                                                        @break
+                                                    @case ('D')
+                                                        <span class="badge badge-warning">Not Promoted</span>
+                                                        @break
+                                                    @case ('G')
+                                                        <span class="badge badge-info">Graduated</span>
+                                                        @break
+                                                    @default
+                                                        <span class="badge badge-secondary">{{ $promo->status }}</span>
+                                                @endswitch
+                                            </td>
+                                            <td>{{ Qs::formatDate($promo->created_at) }}</td>
+                                            <td class="break-all">{{ $promo->remarks ?: '—' }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="8" class="text-muted text-center">
+                                                No promotion records found for this student.
+                                            </td>
+                                        </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>

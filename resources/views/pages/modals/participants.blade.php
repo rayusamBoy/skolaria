@@ -26,7 +26,7 @@
                                 <span class="participant">
                                     <li>
                                         <a target="_blank" href="{{ route('users.show', Qs::hash($pt->id)) }}"
-                                            >{{ $loop->iteration }} - {{ $pt->name }}</a>
+                                            >{{ $loop->iteration }} &middot; {{ $pt->name }}</a>
                                     </li>
                                     @can($tenant_permissions['message_threads']['remove_participant']['permission'])
                                         <a

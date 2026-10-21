@@ -349,10 +349,10 @@
 
                                 {{-- Marks (sub‑group) --}}
                                 @canany([$tenant_permissions['marks']['batch']['permission'], $tenant_permissions['marks']['manage']['permission']])
-                                    <li class="nav-item nav-item-submenu {{ request()->routeIs('marks.*') ? 'nav-item-expanded' : '' }}">
+                                    <li class="nav-item nav-item-submenu {{ request()->routeIs('marks.batch', 'marks.manage') ? 'nav-item-expanded' : '' }}">
                                         <a
                                             href="#"
-                                            class="nav-link {{ request()->routeIs('marks.*') ? 'active' : '' }}"
+                                            class="nav-link {{ request()->routeIs('marks.batch', 'marks.manage') ? 'active' : '' }}"
                                         >
                                             Marks
                                         </a>

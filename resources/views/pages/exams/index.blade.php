@@ -176,7 +176,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div
-                                    class="alert alert-info alert-dismissible has-do-not-show-again-button border-0"
+                                    class="alert alert-info alert-dismissible has-do-not-show-again-button alert-styled-left"
                                     id="exam-alert-info"
                                 >
                                     <button type="button" class="close" data-dismiss="alert">
@@ -350,7 +350,7 @@
                                 <div class="col-md-5">
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <div class="alert alert-warning border-0">
+                                            <div class="alert alert-warning alert-styled-left">
                                                 <span>
                                                     Set whether this exam includes Assessments (CA) before publishing.
                                                     After publishing, the exam cannot be edited, so this choice cannot

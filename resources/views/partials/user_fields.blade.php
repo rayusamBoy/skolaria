@@ -1,5 +1,5 @@
 {{-- PERSONAL DATA --}}
-<h6 class="text-white">Personal Data</h6>
+<h6>Personal Data</h6>
 <fieldset>
     <div class="row">
         {{-- ROLES --}}
