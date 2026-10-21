@@ -97,45 +97,52 @@ $(document).ready(() => {
     $("select#roles").on("change", function () {
         const $fieldset = $(this).closest("fieldset");
         const $parentData = $fieldset.find("#parent-data");
-        const $parentDataInputs = $("#parent-data input");
+        const $parentDataInputs = $parentData.find("input");
+
         const $lastTab = $(".steps ul li.last");
         const $submitBtn = $(".actions ul li:last-child");
         const $navigationBtns = $(".actions ul li").not(":last-child");
-        // Middle vertical and horizontal aligned line that separates the steps headers.
+
+        // The line separating the step headers.
         const $stepsLineSeparator = $(".wizard > .steps > ul > li.current");
-        // Get selected options
-        let $selectedOptions = $(this).find(":selected");
 
-        // Collect & parse permissions
-        let optionPermissions = $selectedOptions
-            .map(function () {
-                const perms = $(this).attr("data-permissions");
-                return perms ? JSON.parse(perms) : [];
-            })
-            .get()
-            .flat(); // merge all permissions into one array
+        // Get the selected options.
+        const $selectedOptions = $(this).find("option:selected");
 
-        // If roles is parent (the one that includes permission with word 'children')
-        if (optionPermissions.some((p) => p.includes("children"))) {
-            // If is the only one selected
-            if ($selectedOptions.length === 1) {
-                $lastTab.hide();
-                $navigationBtns.hide();
-                $stepsLineSeparator.addClass("d-li-current-none");
-                $submitBtn.show();
-            }
+        // Check whether Parent is among the selected roles.
+        const hasParentRole = $selectedOptions
+            .toArray()
+            .some((option) => option.text.trim().toLowerCase() === "parent");
 
-            $parentData.show("150");
+        // Check whether Parent is the only selected role.
+        const isParentOnly = hasParentRole && $selectedOptions.length === 1;
+
+        // Show or hide the parent controls.
+        if (hasParentRole) {
+            $parentData.stop(true, true).show(150);
             $parentDataInputs.prop("disabled", false);
         } else {
+            $parentData.stop(true, true).hide(150);
+            $parentDataInputs.prop("disabled", true);
+        }
+
+        // Adjust wizard navigation.
+        if (isParentOnly) {
+            // Parent is the only selected role.
+            $lastTab.hide();
+            $navigationBtns.hide();
+            $stepsLineSeparator.addClass("d-li-current-none");
+            $submitBtn.show();
+        } else {
+            // Parent is selected with other roles, or Parent is not selected.
             $lastTab.show();
-            $parentData.hide("150");
             $navigationBtns.show();
             $submitBtn.hide();
             $stepsLineSeparator.removeClass("d-li-current-none");
-            $parentDataInputs.attr("disabled", true);
 
-            const $nextBtn = $(".wizard > .actions > ul > li + li");
+            // Re-enable the Next button if it is disabled.
+            const $nextBtn = $(".wizard > .actions > ul > li:nth-child(2)");
+
             if ($nextBtn.hasClass("disabled")) {
                 $nextBtn
                     .removeClass("disabled")
@@ -321,7 +328,14 @@ $("button.opt-all-as-graduate").on("click", function () {
 const $doNotShowButton = $(
     `<button type="button" class="btn btn-sm btn-info pt-0 pb-0 pr-1 pl-1 position-absolute right-0 font-size-xs do-not-show-again" style="bottom: -10px;" onclick="doNotShowAgain(this)">Do not show again</button>`,
 );
-$(".has-do-not-show-again-button").append($doNotShowButton);
+const $hasDoNotShowAgainBtnAlert = $(".alert.has-do-not-show-again-button");
+$hasDoNotShowAgainBtnAlert.append($doNotShowButton);
+if (
+    $hasDoNotShowAgainBtnAlert.hasClass("alert-styled-left") ||
+    $hasDoNotShowAgainBtnAlert.hasClass("alert-styled-right")
+) {
+    $doNotShowButton.removeClass("right-0").addClass("right-neg1");
+}
 
 const doNotShowAgain = (el) => {
     const $parent = $(el).closest(".has-do-not-show-again-button");
