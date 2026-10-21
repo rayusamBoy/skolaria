@@ -22,7 +22,7 @@
         "vite": "^6.2.3"
     },
     "dependencies": {
-        "firebase": "^12.12.1",
-        "puppeteer": "^24.43.1"
+        "firebase": "^13.0.0",
+        "puppeteer": "^25.14.0"
     }
 }
