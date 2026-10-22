@@ -323,7 +323,7 @@ class AssessmentController extends Controller
         }
 
         $class_type_ids = $asrs->pluck('my_class.class_type_id')->unique()->toArray();
-        $assessments = $this->assessment->getAssessmentsWithValidExam(['exam', 'record'])
+        $assessments = $this->assessment->getAssessmentsWithValidExam([], ['exam', 'record'])
             ->where('exam.year', $year)
             ->whereIn('exam.class_type_id', $class_type_ids);
 
@@ -417,7 +417,7 @@ class AssessmentController extends Controller
             // insert duplicate rows.
             $student_ids = $asmnt_records->pluck('student_id')->unique()->values()->all();
 
-            $classAvg = $this->assessment->getClassAverageTermMark($assessment->exam, $class_id, $this->year);
+            $classAvg = $this->assessment->getClassAverageTermMark($assessment, $class_id, $this->year);
 
             foreach ($student_ids as $st_id) {
                 // Prefer the request's section when it was provided;
@@ -434,9 +434,9 @@ class AssessmentController extends Controller
                         'year' => $this->year,
                     ],
                     [
-                        'average' => $this->assessment->getAverageTermMark($assessment->exam, $st_id, $class_id, $studentSection, $this->year),
+                        'average' => $this->assessment->getAverageTermMark($assessment, $st_id, $class_id, $studentSection, $this->year),
                         'class_average' => $classAvg,
-                        'total' => $this->assessment->getTotalTermMark($assessment->exam, $st_id, $class_id, $this->year),
+                        'total' => $this->assessment->getTotalTermMark($assessment, $st_id, $class_id, $this->year),
                     ]
                 );
             }
@@ -444,7 +444,6 @@ class AssessmentController extends Controller
             // ── 3. Window-function positions — always class-wide ──────
             $this->assessment->refreshSubjectPositions(
                 $assessment_id,
-                $assessment->exam->id,
                 $class_id,
                 $this->year,
                 $assessment->exam->term
@@ -452,7 +451,6 @@ class AssessmentController extends Controller
 
             $this->assessment->refreshSummaryPositions(
                 $assessment_id,
-                $assessment->exam->id,
                 $class_id,
                 $this->year,
                 $assessment->exam->ca_student_position_by_value,
@@ -462,7 +460,6 @@ class AssessmentController extends Controller
 
             $this->assessment->refreshSummaryPositions(
                 $assessment_id,
-                $assessment->exam->id,
                 $class_id,
                 $this->year,
                 $assessment->exam->ca_student_position_by_value,
@@ -600,6 +597,7 @@ class AssessmentController extends Controller
             'tex' => $tex,
             'stds_texs' => $this->assessment->getTermTotalsDescending($d, $tex),
             'section_id' => $section_id,
+            'year' => $year
         ]);
     }
 

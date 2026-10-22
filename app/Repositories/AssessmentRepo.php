@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class AssessmentRepo
 {
-    public function __construct(protected string $assessments_table = 'assessments', protected string $assessments_records_table = 'assessments_records') {}
+    public function __construct(protected string $assessments_table = 'assessments', protected string $assessments_records_table = 'assessment_records') {}
 
     /*********** Assessments ***************/
 
@@ -163,12 +163,12 @@ class AssessmentRepo
     /**
      * Sum of term marks for a student in a specific exam and class.
      *
-     * @param  mixed  $exam  Exam model
+     * @param  mixed  $assessment  Exam model
      */
-    public function getTotalTermMark($exam, int $st_id, int $class_id, string $year): float
+    public function getTotalTermMark($assessment, int $st_id, int $class_id, string $year): float
     {
-        $d = ['student_id' => $st_id, 'exam_id' => $exam->id, 'my_class_id' => $class_id, 'year' => $year];
-        $tex = "tex{$exam->term}";
+        $d = ['student_id' => $st_id, 'assessment_id' => $assessment->id, 'my_class_id' => $class_id, 'year' => $year];
+        $tex = "tex{$assessment->exam->term}";
 
         return AssessmentRecord::where($d)->select($tex)->sum($tex);
     }
@@ -176,18 +176,18 @@ class AssessmentRepo
     /**
      * Average of term marks for a student in a specific exam, class, and section.
      *
-     * @param  mixed  $exam
+     * @param  mixed  $assessment
      */
-    public function getAverageTermMark($exam, int $st_id, int $class_id, int $sec_id, string $year): float
+    public function getAverageTermMark($assessment, int $st_id, int $class_id, int $sec_id, string $year): float
     {
         $d = [
             'student_id' => $st_id,
-            'exam_id' => $exam->id,
+            'assessment_id' => $assessment->id,
             'my_class_id' => $class_id,
             'section_id' => $sec_id,
             'year' => $year,
         ];
-        $tex = "tex{$exam->term}";
+        $tex = "tex{$assessment->exam->term}";
         $avg = AssessmentRecord::where($d)
             ->where($tex, '>=', 0)
             ->avg($tex);
@@ -198,12 +198,12 @@ class AssessmentRepo
     /**
      * Class average for a given exam.
      *
-     * @param  mixed  $exam
+     * @param  mixed  $assessment
      */
-    public function getClassAverageTermMark($exam, int $class_id, string $year): float
+    public function getClassAverageTermMark($assessment, int $class_id, string $year): float
     {
-        $d = ['exam_id' => $exam->id, 'my_class_id' => $class_id, 'year' => $year];
-        $tex = "tex{$exam->term}";
+        $d = ['assessment_id' => $assessment->id, 'my_class_id' => $class_id, 'year' => $year];
+        $tex = "tex{$assessment->exam->term}";
         $avg = AssessmentRecord::where($d)->select($tex)->avg($tex);
 
         return round((float) $avg, 1);
@@ -335,7 +335,6 @@ class AssessmentRepo
 
     public function refreshSubjectPositions(
         int $assessment_id,
-        int $exam_id,
         int $class_id,
         string $year,
         int $term,
@@ -349,7 +348,6 @@ class AssessmentRepo
                 "DENSE_RANK() OVER (PARTITION BY subject_id ORDER BY {$tex} DESC) AS pos"
             )
             ->where('assessment_id', $assessment_id)
-            ->where('exam_id', $exam_id)
             ->where('my_class_id', $class_id)
             ->where('year', $year)
             ->whereNotNull('subject_id')
@@ -373,7 +371,6 @@ class AssessmentRepo
      */
     public function refreshSummaryPositions(
         int $assessment_id,
-        int $exam_id,
         int $class_id,
         string $year,
         string $orderByColumn,
@@ -392,15 +389,13 @@ class AssessmentRepo
                 "DENSE_RANK() OVER (PARTITION BY {$partition} ORDER BY {$orderByColumn} {$direction}) AS pos"
             )
             ->where('assessment_id', $assessment_id)
-            ->where('exam_id', $exam_id)
             ->where('my_class_id', $class_id)
             ->where('year', $year)
             ->whereNotNull($orderByColumn)
-            ->whereIn('id', function ($sub) use ($assessment_id, $exam_id, $class_id, $year, $section_id) {
+            ->whereIn('id', function ($sub) use ($assessment_id, $class_id, $year, $section_id) {
                 $sub->from($this->assessments_records_table)
                     ->selectRaw('MIN(id)')
                     ->where('assessment_id', $assessment_id)
-                    ->where('exam_id', $exam_id)
                     ->where('my_class_id', $class_id)
                     ->where('year', $year)
                     ->when($section_id !== null, fn ($q) => $q->where('section_id', $section_id))
@@ -417,7 +412,6 @@ class AssessmentRepo
         $studentIds = $repRows->keys()->all();
 
         $rows = AssessmentRecord::where('assessment_id', $assessment_id)
-            ->where('exam_id', $exam_id)
             ->where('my_class_id', $class_id)
             ->where('year', $year)
             ->whereIn('student_id', $studentIds)

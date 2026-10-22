@@ -1176,7 +1176,6 @@ class MarkController extends Controller
         // Subject position — class-wide
         $this->assessment->refreshSubjectPositions(
             $assessment->id,
-            $exam->id,
             $class_id,
             $this->year,
             $exam->term
@@ -1185,7 +1184,6 @@ class MarkController extends Controller
         // Section position — PARTITION BY section_id handles scoping
         $this->assessment->refreshSummaryPositions(
             $assessment->id,
-            $exam->id,
             $class_id,
             $this->year,
             $exam->ca_student_position_by_value,
@@ -1196,7 +1194,6 @@ class MarkController extends Controller
         // Class position — always recomputed
         $this->assessment->refreshSummaryPositions(
             $assessment->id,
-            $exam->id,
             $class_id,
             $this->year,
             $exam->ca_student_position_by_value,
