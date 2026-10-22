@@ -38,7 +38,7 @@
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $as->exam->name }} Assessment</td>
-                                    <td>{{ ucfirst(NUmber::spellOrdinal($as->exam->term)) . 'Term ' }}</td>
+                                    <td>{{ ucfirst(Number::spellOrdinal($as->exam->term)) . 'Term ' }}</td>
                                     <td>{{ $as->exam->year }}</td>
                                     <td>{{ $as->exam->category->name }}</td>
                                     <td>{{ $as->exam->is_locked ? "Yes" : "No" }}</td>
