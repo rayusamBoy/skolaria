@@ -16,7 +16,7 @@
                             >
                                 <option value="">Select Assessment</option>
                                 @foreach ($assessments as $as)
-                                    <option @selected($selected && $exam->id == $as->id) value="{{ $as->id }}">
+                                    <option @selected($selected && $exam->id == $as->exam->id) value="{{ $as->id }}">
                                         {{ $as->exam->name }} assessment
                                     </option>
                                 @endforeach
