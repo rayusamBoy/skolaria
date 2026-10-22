@@ -32,10 +32,10 @@ class StudentRepo
     /**
      * Get active students in a specific class, excluding soft‑deleted users, sorted by name.
      */
-    public function getActiveStudentsByClass(int $class_id, array $with = ['user']): Collection
+    public function getActiveStudentsByClass(array $where = [], array $with = ['user']): Collection
     {
         return $this->getActiveStudentsQuery()
-            ->where('my_class_id', $class_id)
+            ->where($where)
             ->with($with)
             ->get()
             ->whereNotNull('user')

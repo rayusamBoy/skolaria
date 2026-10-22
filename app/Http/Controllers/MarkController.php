@@ -844,12 +844,14 @@ class MarkController extends Controller
         if ($section_id === null && $sub_recs->whereNull('section_id')->whereNull('students_ids')->isNotEmpty()) {
             return $this->student->getActiveStudentsQueryWithRelations([
                 'my_class_id' => $class_id,
+                'session' => $this->year,
             ])->get();
         }
 
         return $this->student->getActiveStudentsQueryWithRelations([
             'my_class_id' => $class_id,
             'section_id' => $section_id,
+            'session' => $this->year,
         ])->get();
     }
 
@@ -1259,7 +1261,6 @@ class MarkController extends Controller
         );
 
         $students = $this->student->getStudentsByUserIdsQuery($st_ids->toArray())
-            ->where('session', $year)
             ->get()
             ->whereNotNull('user');
 

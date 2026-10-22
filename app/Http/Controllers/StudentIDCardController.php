@@ -14,10 +14,13 @@ use Illuminate\View\View;
 
 class StudentIDCardController extends Controller
 {
+    protected string $session;
+
     public function __construct(protected MyClassRepo $my_class, protected StudentRepo $student)
     {
         $this->permissionMap = config('permissions.names.tenant.student_id_cards');
         parent::__construct();
+        $this->session = Qs::getCurrentSession();
     }
 
     /**
@@ -51,6 +54,7 @@ class StudentIDCardController extends Controller
         if ($req->filled(['my_class_id', 'issued_date', 'expire_date', 'id_theme'])) {
             $students = $this->student->getActiveStudentsQueryWithRelations([
                 'my_class_id' => $req->my_class_id,
+                'session' => $this->session,
             ])->get()->whereNotNull('user')->sortBy('user.name');
 
             if ($students->count() < 1) {
@@ -74,14 +78,15 @@ class StudentIDCardController extends Controller
         string $expire,
         string $theme,
         string $phone,
-        int $class_from,
-        int $class_to,
+        string $class_from,
+        string $class_to,
         string $motto,
         $brightness = 1,
         $website_link = null
     ): View {
         $data['students'] = $this->student->getActiveStudentsQueryWithRelations([
             'my_class_id' => $class_id,
+            'session' => $this->session,
         ])->with('my_class')->get()->whereNotNull('user')->sortBy('user.name');
 
         $data['issued'] = $issued;

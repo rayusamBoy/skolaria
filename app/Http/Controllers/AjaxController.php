@@ -60,7 +60,7 @@ class AjaxController extends Controller
      */
     public function get_class_students(int $class_id): array
     {
-        $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class_id])->get()->whereNotNull('user');
+        $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class_id, 'session' => Qs::getCurrentSession()])->get()->whereNotNull('user');
 
         return $students->map(fn ($q) => ['id' => $q->user->id, 'name' => $q->user->name])->values()->all();
     }

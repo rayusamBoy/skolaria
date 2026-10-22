@@ -149,7 +149,7 @@ class ExamController extends Controller
         $class_id = $request->input('class_id');
         $section_id = $request->input('section_id') ?: null;
 
-        $students = $this->student->getActiveStudentsByClass($class_id, ['user', 'section'])
+        $students = $this->student->getActiveStudentsByClass(['my_class_id' => $class_id, 'session' => $this->year], ['user', 'section'])
             ->when($section_id, fn ($q) => $q->where('section_id', $section_id))
             ->sortBy('user.name');
 
@@ -256,7 +256,7 @@ class ExamController extends Controller
         }
 
         // Fetch students
-        $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class->id], ['user'])
+        $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class->id, 'session' => $this->year], ['user'])
             ->when($section_id, fn ($q) => $q->where('section_id', $section_id))
             ->get()
             ->whereNotNull('user')

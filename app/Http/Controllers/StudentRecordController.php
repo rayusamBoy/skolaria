@@ -205,7 +205,7 @@ class StudentRecordController extends Controller
         }
 
         $data['class_id'] = $class_id;
-        $data['students'] = $this->student->getActiveStudentsByClass($class_id, ['section', 'user', 'my_parent', 'user.exam_records']);
+        $data['students'] = $this->student->getActiveStudentsByClass(['my_class_id' => $class_id, 'session' => $this->session], ['section', 'user', 'my_parent', 'user.exam_records']);
         $data['sections'] = $this->my_class->getClassSections($class_id);
 
         return view('pages.students.list', $data);
@@ -429,7 +429,7 @@ class StudentRecordController extends Controller
      */
     protected function getUserIdsByClass(int $class_id): array
     {
-        return $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class_id])
+        return $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class_id, 'session' => $this->session])
             ->get()
             ->pluck('user_id')
             ->toArray();

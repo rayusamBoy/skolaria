@@ -197,7 +197,7 @@ class PaymentController extends Controller
         $data['selected'] = false;
 
         if ($class_id) {
-            $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class_id])
+            $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class_id, 'session' => $this->year])
                 ->get()
                 ->whereNotNull('user')
                 ->sortBy('user.name');
@@ -233,7 +233,7 @@ class PaymentController extends Controller
         $global_payments = $this->pay->getGlobalPayments(['year' => $this->year])->get();
         $payments = $global_payments->isNotEmpty() ? $class_payments->merge($global_payments) : $class_payments;
 
-        $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class_id])->get();
+        $students = $this->student->getActiveStudentsQueryWithRelations(['my_class_id' => $class_id, 'session' => $this->year])->get();
 
         if ($payments->isNotEmpty() && $students->isNotEmpty()) {
             foreach ($payments as $payment) {

@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Helpers\Qs;
 use App\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 use Spatie\Activitylog\LogOptions;
@@ -67,6 +69,11 @@ class StudentRecord extends Eloquent
     public function promotion()
     {
         return $this->hasMany(Promotion::class, 'student_id');
+    }
+
+    public function scopeCurrentSession(Builder $query): Builder
+    {
+        return $query->where('session_id', Qs::getCurrentSession());
     }
 
     public function getActivitylogOptions(): LogOptions
