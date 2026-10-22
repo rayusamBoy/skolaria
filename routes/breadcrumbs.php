@@ -348,7 +348,7 @@ Breadcrumbs::for('assessments.year_selector', function (BreadcrumbTrail $trail, 
 });
 
 Breadcrumbs::for('assessments.show', function (BreadcrumbTrail $trail, $id, $year): void {
-    $trail->parent('assessments.year_selector', params: Usr::hash($id));
+    $trail->parent('assessments.year_selector', Usr::hash($id));
     $trail->push('Assessment Sheet', route('assessments.show', [$id, $year]));
 });
 
