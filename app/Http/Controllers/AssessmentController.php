@@ -119,6 +119,10 @@ class AssessmentController extends Controller
         $data = [
             'assessment_id' => $assessment_id,
             'asmnt_records' => $records,
+            'exam' => $first->exam,
+            'my_class_id' => $class_id,
+            'subject_id' => $subject_id,
+            'year' => $this->year,
             'm' => $first,
             'assessments' => $this->assessment->getAssessmentsWithValidExam([])->where('exam.year', $this->year),
             'sections' => $this->my_class->getAllSections(),
@@ -564,11 +568,11 @@ class AssessmentController extends Controller
     {
         $assessment = $this->assessment->getAssessmentsWithValidExam(['id' => $assessment_id])->first();
         $d = $section_id === null
-            ? ['exam_id' => $assessment->exam->id, 'my_class_id' => $class_id, 'subject_id' => $subject_id, 'year' => $year]
-            : ['exam_id' => $assessment->exam->id, 'my_class_id' => $class_id, 'section_id' => $section_id, 'subject_id' => $subject_id, 'year' => $year];
+            ? ['my_class_id' => $class_id, 'subject_id' => $subject_id, 'year' => $year]
+            : ['my_class_id' => $class_id, 'section_id' => $section_id, 'subject_id' => $subject_id, 'year' => $year];
 
-        $marks_updated_at = $this->mark->getMarkValue($d, 'updated_at');
-        $asmnts_updated_at = $this->assessment->getAssessmentRecordValue($d, 'updated_at');
+        $marks_updated_at = $this->mark->getMarkValue([...$d, 'exam_id' => $assessment->exam->id], 'updated_at');
+        $asmnts_updated_at = $this->assessment->getAssessmentRecordValue([...$d, 'assessment_id' => $assessment_id], 'updated_at');
 
         $assessment_records = $this->assessment->getAssessmentRecordsWithRelations($d, ['exam', 'user', 'subject', 'my_class', 'section', 'grade']);
 
