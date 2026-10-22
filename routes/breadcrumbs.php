@@ -323,9 +323,9 @@ Breadcrumbs::for('assessments.index', function (BreadcrumbTrail $trail): void {
     $trail->push('Manage Assessments', route('assessments.index'));
 });
 
-Breadcrumbs::for('assessments.manage', function (BreadcrumbTrail $trail): void {
+Breadcrumbs::for('assessments.manage', function (BreadcrumbTrail $trail, $assessment, $class, $subject, $section = null): void {
     $trail->parent(Usr::tenancyInitialized() ? 'dashboard' : 'central_dashboard');
-    $trail->push('Assessments Management', route('assessments.manage'));
+    $trail->push('Assessments Management', route('assessments.manage', [$assessment, $class, $subject, $section]));
 });
 
 Breadcrumbs::for('assessments.progressive', function (BreadcrumbTrail $trail): void {
