@@ -56,7 +56,7 @@
                                 @endcan
                             </div>
                         @endcan
-                        <a class="list-icons-item" data-action="fullscreen"></a>
+                        <a class="list-icons-item disabled" data-action="fullscreen"></a>
                         <a class="list-icons-item" data-action="collapse"></a>
                         <a class="list-icons-item" data-action="remove"></a>
                     </div>
