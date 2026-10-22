@@ -131,7 +131,7 @@
                     <div class="tab-pane fade" id="new-division">
                         <div class="row mb-3">
                             <div class="col-md-12">
-                                <div class="alert alert-info alert-dismissible border-0">
+                                <div class="alert alert-info alert-dismissible alert-styled-left">
                                     <button type="button" class="close" data-dismiss="alert">
                                         <span>&times;</span>
                                     </button>

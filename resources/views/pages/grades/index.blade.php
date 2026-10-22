@@ -121,7 +121,7 @@
                     <div class="tab-pane fade" id="new-grade">
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="alert alert-info alert-dismissible border-0">
+                                <div class="alert alert-info alert-dismissible alert-styled-left">
                                     <button type="button" class="close" data-dismiss="alert">
                                         <span>&times;</span>
                                     </button>

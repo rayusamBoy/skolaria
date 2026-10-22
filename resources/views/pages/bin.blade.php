@@ -47,7 +47,7 @@
         </div>
 
     @else
-        <div class="alert alert-warning alert-dismissible has-do-not-show-again-button border-0" id="bin-info">
+        <div class="alert alert-warning alert-dismissible has-do-not-show-again-button alert-styled-left" id="bin-info">
             <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
             <span>
                 Deleting a record will permanently remove it along with all its associated data. This action cannot be

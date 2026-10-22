@@ -18,7 +18,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div
-                    class="alert alert-info alert-dismissible has-do-not-show-again-button border-0"
+                    class="alert alert-info alert-dismissible has-do-not-show-again-button alert-styled-left"
                     id="assessments-manage"
                 >
                     <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>

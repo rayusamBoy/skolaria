@@ -6,7 +6,7 @@
     @if ($ticket->is_closed())
         <div class="row">
             <div class="col-md-12">
-                <div class="alert alert-info alert-dismissible border-0">
+                <div class="alert alert-info alert-dismissible alert-styled-left">
                     <span>This ticket is closed. You may reply to this ticket to reopen it.</span>
                 </div>
             </div>

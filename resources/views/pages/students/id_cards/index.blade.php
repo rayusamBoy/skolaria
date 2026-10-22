@@ -181,7 +181,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div
-                    class="alert alert-info alert-dismissible has-do-not-show-again-button border-0"
+                    class="alert alert-info alert-dismissible has-do-not-show-again-button alert-styled-left"
                     id="id-cards-info"
                 >
                     <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
@@ -199,7 +199,7 @@
         {{--Warning--}}
         <div class="row">
             <div class="col-md-12">
-                <div class="alert alert-danger alert-dismissible border-0">
+                <div class="alert alert-danger alert-dismissible alert-styled-left">
                     <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
                     <span
                         >Make sure all required students' data are filled in the data table below. Otherwise, consider
