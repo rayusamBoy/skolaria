@@ -938,7 +938,6 @@ class MarkController extends Controller
                                 $st_rec->user_id,
                                 $class->id,
                                 $sec->id,
-                                $exam->id,
                                 $this->year,
                                 $sub->id,
                                 $mk->id,

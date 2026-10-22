@@ -320,13 +320,12 @@ class AssessmentRepo
      * @param  int  $sec_id  section_id
      * @param  int  $sub_id  subject_id
      */
-    public function firstOrCreateAssessmentRecord(int $sid, int $class_id, int $sec_id, int $exam_id, string $year, int $sub_id, int $mark_id, int $assessment_id): AssessmentRecord
+    public function firstOrCreateAssessmentRecord(int $sid, int $class_id, int $sec_id, string $year, int $sub_id, int $mark_id, int $assessment_id): AssessmentRecord
     {
         return AssessmentRecord::firstOrCreate([
             'student_id' => $sid,
             'my_class_id' => $class_id,
             'section_id' => $sec_id,
-            'exam_id' => $exam_id,
             'year' => $year,
             'subject_id' => $sub_id,
             'mark_id' => $mark_id,
