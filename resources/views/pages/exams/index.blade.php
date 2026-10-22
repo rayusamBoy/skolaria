@@ -76,7 +76,7 @@
                                         @if ($ex->is_published)
                                             <span class="badge bg-success">published</span>
                                         @else
-                                            <span class="badge bg-danger">not published</span>
+                                            <span class="badge bg-danger">unpublished</span>
                                         @endif
                                         @if ($ex->hasAssessment())
                                             <span class="badge bg-info">has assessment</span>
