@@ -43,6 +43,7 @@ return new class extends Migration
             $table->integer('tex2')->nullable();
             $table->integer('tex3')->nullable();
             $table->integer('subject_position')->nullable();
+            $table->integer('class_position')->nullable();
             $table->integer('section_position')->nullable();
             $table->integer('total')->nullable();
             $table->decimal('average')->nullable();
