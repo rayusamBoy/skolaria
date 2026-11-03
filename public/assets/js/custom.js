@@ -1985,13 +1985,12 @@ function resizeChartInstances() {
  */
 const offlineDiv = document.getElementById("offline-alert");
 const $submitBtns = $("button[type=submit]");
-const currentUrl = window.location.href;
 
 const updateOfflineStatus = () => {
-    if (
-        !currentUrl.includes("localhost") &&
-        !currentUrl.includes("127.0.0.1")
-    ) {
+    const hostname = window.location.hostname;
+    const isLocalHost = ["localhost", "127.0.0.1", "::1"].includes(hostname);
+
+    if (!isLocalHost) {
         if (navigator.onLine) {
             offlineDiv.style.display = "none";
             $submitBtns

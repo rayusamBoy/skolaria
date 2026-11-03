@@ -220,7 +220,12 @@
     // Redirect — force a server-side logout to avoid guest-middleware bounce
     // ------------------------------------------------------------------
     function redirectToLogin() {
-        if (redirecting) return;
+        const hostname = window.location.hostname;
+        const isLocalHost = ["localhost", "127.0.0.1", "::1"].includes(
+            hostname,
+        );
+
+        if (redirecting || isLocalHost) return;
         redirecting = true;
 
         try {
