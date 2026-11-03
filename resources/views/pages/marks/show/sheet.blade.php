@@ -43,7 +43,8 @@
             </td>
             <td colspan="2"><strong>FINAL AVERAGE GRADE: </strong> {{ $exr->grade?->name ?? 'N/A' }}</td>
             <td colspan="2">
-                <strong>CLASS AVERAGE GRADE: </strong> {{ $exr->class_average != null ? Mk::getGradeNameByScore($exr->class_average) : 'N/A' }}
+                <strong>CLASS AVERAGE GRADE: </strong>
+                {{ $exr->class_average != null ? Mk::getGradeNameByScore($exr->class_average) : 'N/A' }}
             </td>
         </tr>
         <tr>
