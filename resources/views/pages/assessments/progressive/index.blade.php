@@ -15,16 +15,16 @@
                 <div class="row">
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="exam_id" class="col-form-label font-weight-bold">Assessments for:</label>
+                            <label for="assessment_id" class="col-form-label font-weight-bold">Assessments for:</label>
                             <select
                                 required
-                                id="exam_id"
-                                name="exam_id"
+                                id="assessment_id"
+                                name="assessment_id"
                                 class="form-control select"
                                 data-placeholder="Select Exam"
                             >
                                 @foreach ($assessments as $as)
-                                    <option @selected($selected && $exam_id == $as->id) value="{{ $as->id }}">
+                                    <option @selected($selected && $assessment->exam->id == $as->exam->id) value="{{ $as->id }}">
                                         {{ $as->exam->name }}
                                     </option>
                                 @endforeach
@@ -96,7 +96,7 @@
                 <h6 class="font-weight-bold">
                     Progressive Sheet for {{ $my_class->name }}
                     @if (isset($section)) {{ $section->name }} @endif
-                    - {{ $ex->name }} ({{ Number::spellOrdinal($asr->first()->exam->term) }} term, {{ $year }})
+                    - {{ $assessment->exam->name }} ({{ Number::spellOrdinal($asr->first()->exam->term) }} term, {{ $year }})
                 </h6>
                 <div class="header-elements pt-0">
                     <div class="list-icons">

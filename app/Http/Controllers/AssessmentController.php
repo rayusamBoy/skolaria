@@ -6,6 +6,7 @@ use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Mk;
 use App\Helpers\Usr;
 use App\Http\Requests\Assessment\AssessmentSelector;
+use App\Models\Assessment;
 use App\Models\AssessmentRecord;
 use App\Models\ClassType;
 use App\Models\Exam;
@@ -185,7 +186,7 @@ class AssessmentController extends Controller
         ];
 
         if ($class_id && $assessment_id && $section_id) {
-            $core = $this->getProgressiveCoreData($class_id, $assessments->first()->exam, $section_id, true);
+            $core = $this->getProgressiveCoreData($class_id, $assessments->first(), $section_id, true);
             if ($core === null) {
                 return Mk::goWithDanger('assessments.progressive', __('msg.srnf'));
             }
@@ -209,7 +210,7 @@ class AssessmentController extends Controller
         $data['selected'] = false;
 
         if ($class_id && $assessment_id && $section_id) {
-            $core = $this->getProgressiveCoreData($class_id, $assessment_id, $section_id);
+            $core = $this->getProgressiveCoreData($class_id, $this->assessment->getAssessmentByConditions(['id' => $assessment_id]), $section_id);
             if ($core === null) {
                 return Mk::goWithDanger('assessments.progressive', __('msg.srnf'));
             }
@@ -597,7 +598,7 @@ class AssessmentController extends Controller
             'tex' => $tex,
             'stds_texs' => $this->assessment->getTermTotalsDescending($d, $tex),
             'section_id' => $section_id,
-            'year' => $year
+            'year' => $year,
         ]);
     }
 
@@ -750,13 +751,13 @@ class AssessmentController extends Controller
      * Build the core data used by both progressive and print_progressive views.
      * Returns null if required data is missing (calling methods then redirect).
      */
-    protected function getProgressiveCoreData(int $class_id, Exam $exam, int $section_id, bool $validateExamClassType = false): ?array
+    protected function getProgressiveCoreData(int $class_id, Assessment $assessment, int $section_id, bool $validateExamClassType = false): ?array
     {
         if ($validateExamClassType) {
             $class_type = $this->my_class->findClassTypeByClassId($class_id);
-            $examBelongsToClass = $this->assessment->getAssessmentsWithValidExam([])
+
+            $examBelongsToClass = $this->assessment->getAssessmentsWithValidExam(['id' => $assessment->id])
                 ->where('exam.class_type_id', $class_type->id)
-                ->where('exam_id', $exam->id)
                 ->isNotEmpty();
 
             if (! $examBelongsToClass) {
@@ -767,13 +768,18 @@ class AssessmentController extends Controller
         $where = [
             'my_class_id' => $class_id,
             'section_id' => $section_id,
-            'exam_id' => $exam->id,
+            'exam_id' => $assessment->exam->id,
             'year' => $this->year,
         ];
 
         $sub_ids = $this->mark->getDistinctSubjectIds($where);
         $st_ids = $this->mark->getDistinctStudentIds($where);
-        $asr = $this->assessment->getAssessmentRecordsWithRelations($where, ['user', 'exam', 'grade']);
+        $asr = $this->assessment->getAssessmentRecordsWithRelations([
+            'my_class_id' => $class_id,
+            'section_id' => $section_id,
+            'assessment_id' => $assessment->id,
+            'year' => $this->year,
+        ], ['user', 'exam', 'grade']);
 
         if ($sub_ids->isEmpty() || $st_ids->isEmpty() || $asr->isEmpty()) {
             return null;
@@ -786,8 +792,10 @@ class AssessmentController extends Controller
             ? $this->my_class->getTeacherClassSections($class_id, auth()->id())
             : $this->my_class->getAllSections();
 
+        $tex = "tex{$assessment->exam->term}";
+
         return [
-            'students_summary' => $this->buildProgressiveStudentData($asr, $subjects, "tex{$exam->term}", $class_type_id),
+            'students_summary' => $this->buildProgressiveStudentData($asr, $subjects, $tex, $class_type_id),
             'students' => $this->student->getStudentsByUserIdsQuery($st_ids->toArray())
                 ->get()
                 ->whereNotNull('user')
@@ -798,14 +806,13 @@ class AssessmentController extends Controller
             'selected' => true,
             'my_class_id' => $class_id,
             'section_id' => $section_id,
-            'exam_id' => $exam->id,
             'year' => $this->year,
             'asr' => $asr,
             'my_class' => $this->my_class->findClass($class_id),
             'section' => $this->my_class->findSection($section_id),
-            'ex' => $exam,
-            'tex' => "tex{$exam->term}",
+            'tex' => $tex,
             'grades' => $this->exam->getGrades()->pluck('name'),
+            'assessment' => $assessment,
         ];
     }
 

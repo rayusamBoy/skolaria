@@ -32,7 +32,7 @@
                                 data-placeholder="Select Class"
                                 onchange="
                                     getClassSubjects(this.value);
-                                    getClassSections(this.value);
+                                    getClassSections(this.value, '#section_id_add_not_applicable');
                                 "
                                 id="my_class_id"
                                 name="my_class_id"
@@ -50,10 +50,11 @@
 
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="section_id" class="col-form-label font-weight-bold">Section:</label>
+                            <label for="section_id_add_not_applicable" class="col-form-label font-weight-bold"
+                                >Section:</label>
                             <select
                                 required
-                                id="section_id"
+                                id="section_id_add_not_applicable"
                                 name="section_id"
                                 data-placeholder="Select Class First"
                                 class="form-control select"

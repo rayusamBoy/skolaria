@@ -5,7 +5,7 @@
     <title>
         Progressive Sheet &bull; {{ $my_class->name }}
         @if (isset($section)) {{ $section->name }} @endif
-        - {{ $ex->name }} ({{ $year }})
+        - {{ $assessment->exam->name }} ({{ $year }})
     </title>
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/print_assessments.css') }}" />
     @laravelPWA
@@ -21,7 +21,7 @@
         <h3 class="text-center">
             PROGRESSIVE SHEET FOR {{ strtoupper($my_class->name) }}
             @if (isset($section)) {{ strtoupper($section->name) }} @endif
-            - {{ strtoupper($ex->name) }} ({{ strtoupper(Number::spellOrdinal($asr->first()->exam->term)) }} TERM, {{ $year }})
+            - {{ strtoupper($assessment->exam->name) }} ({{ strtoupper(Number::spellOrdinal($asr->first()->exam->term)) }} TERM, {{ $year }})
         </h3>
         {{-- Print Area --}}
         <div id="print">
