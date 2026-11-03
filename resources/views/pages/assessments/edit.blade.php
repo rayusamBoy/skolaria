@@ -365,7 +365,7 @@
     <div class="mt-2 text-center">
         {{-- Update Button --}}
         <button type="submit" class="btn btn-sm btn-primary" id="update">
-            Update <i class="material-symbols-rounded ml-2">save</i>
+            <i class="material-symbols-rounded mr-2">save</i> Update
         </button>
         {{-- Print Button --}}
         <a
