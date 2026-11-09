@@ -860,7 +860,7 @@ class Qs
      */
     public static function getAppIcon(): string
     {
-        return asset('images/icons/icon-rounded.png');
+        return asset('images/icons/icon-512x512.png');
     }
 
     /**
