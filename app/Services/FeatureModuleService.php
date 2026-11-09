@@ -33,15 +33,15 @@ class FeatureModuleService
         $tenantId = tenant('id') ?? 'central';
         $cacheKey = "disabled_modules:{$tenantId}";
 
-        // return $this->disabledCache = Cache::remember(
-        //  $cacheKey,
-        // config('modules.cache_ttl', 3600),
-        // function () {
-        $raw = $this->setting->get('disabled_modules');
+        return $this->disabledCache = Cache::remember(
+            $cacheKey,
+            config('modules.cache_ttl', 3600),
+            function () {
+                $raw = $this->setting->get('disabled_modules');
 
-        return $raw ? array_filter(explode(',', $raw)) : [];
-        //   }
-        // );
+                return $raw ? array_filter(explode(',', $raw)) : [];
+            }
+        );
     }
 
     /**
