@@ -11,10 +11,5 @@ use Attribute;
 #[Attribute(Attribute::TARGET_METHOD)]
 class Permission
 {
-    public string $name;
-
-    public function __construct(string $name)
-    {
-        $this->name = $name;
-    }
+    public function __construct(public string $name) {}
 }
