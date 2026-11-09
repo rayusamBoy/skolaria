@@ -77,6 +77,7 @@ class ClassTypeController extends Controller
             return back()->with('flash_danger', 'This class type has classes attached to it. You cannot delete it.');
         }
 
+        $this->setting->delete('next_term_fees_'.strtolower($class_type->code));
         $class_type->delete();
 
         return back()->with('flash_success', __('msg.del_ok'));

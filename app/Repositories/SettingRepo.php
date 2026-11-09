@@ -51,4 +51,14 @@ class SettingRepo
     {
         return Setting::where('key', $old_key)->update(['key' => $new_key]);
     }
+
+    /**
+     * Delete a setting by its key.
+     *
+     * @return int Number of deleted rows
+     */
+    public function delete(string $key): int
+    {
+        return Setting::where('key', $key)->delete();
+    }
 }
