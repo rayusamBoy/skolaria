@@ -638,17 +638,30 @@ class Usr extends Qs
     }
 
     /**
-     * Get a tenancy‑aware image URL (or the default background) with cache busting.
+     * Resolve the login/related-pages background image URL, tenancy‑aware,
+     * with a cache‑busting query string.
      *
-     * @param  mixed  $img  must have value and updated_at properties.
+     * Accepts:
+     *   - a Setting model (or any object with `value` and `updated_at`)
+     *   - null (falls back to the default background image)
+     *
+     * @param  object|null  $img
+     * @return string
      */
-    public static function getTenancyAwareImgOrDefaultBgUrl($img): string
+    public static function getTenancyAwareImgOrDefaultBgUrl(?object $img): string
     {
         $img_desc = $img?->value;
+    
         $img_url = $img_desc === null
-            ? asset(path: self::getLoginAndRelatedPagesBgValue())
+            ? asset(self::getLoginAndRelatedPagesBgValue())
             : (self::tenancyInitialized() ? tenant_asset($img_desc) : asset($img_desc));
-
-        return "$img_url?".strtotime($img->updated_at);
+    
+        // Use the image's own mtime when available, otherwise fall back to "now"
+        // so the URL is never cached without a version string.
+        $version = $img?->updated_at
+            ? strtotime($img->updated_at)
+            : time();
+    
+        return "{$img_url}?{$version}";
     }
 }
