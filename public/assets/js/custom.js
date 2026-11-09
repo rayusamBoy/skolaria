@@ -577,13 +577,13 @@ if ($("table.data-table input").length > 0 && pageReloaded) {
  *-------------------------------------------------------------
  */
 const $authPagesInput = $("#login-and-related-pgs-bg-input");
-const $authPagesPreviewBtns = $("div.auth-pages-preview");
+const $authPagesPreviewDiv = $("div.auth-pages-preview");
 
 $authPagesInput.on("change", function () {
     if (this.files.length >= 1) {
-        $authPagesPreviewBtns.find("select, input").prop("disabled", false);
+        $authPagesPreviewDiv.find("select, input").prop("disabled", false);
     } else {
-        $authPagesPreviewBtns.find("select, input").prop("disabled", true);
+        $authPagesPreviewDiv.find("select, input").prop("disabled", true);
     }
 });
 

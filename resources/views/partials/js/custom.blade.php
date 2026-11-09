@@ -12,7 +12,9 @@
      *-------------------------------------------------------------
      */
     @if (session()->has('show_login_and_related_pgs_preview'))
-    $('#auth-pages-preview').modal('show');
+    const $authPagePreviewModal = $('#auth-pages-preview');
+    $authPagePreviewModal.closest('.card').removeClass('card-collapsed');
+    $authPagePreviewModal.modal('show');
     @endif
 
     /**

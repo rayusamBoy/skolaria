@@ -377,7 +377,6 @@
                                 <label class="form-check-label">
                                     Preview
                                     <input
-                                        disabled
                                         type="checkbox"
                                         name="show_login_and_related_pgs_preview"
                                         class="form-input-styled"
