@@ -19,7 +19,10 @@ use Illuminate\View\View;
 
 class QueryBuilderController extends Controller
 {
-    public function __construct(protected UserRepo $user, protected PermissionRepo $permission) {}
+    public function __construct(protected UserRepo $user, protected PermissionRepo $permission) {
+        $this->permissionMap = config('permissions.names.tenant.query_builders');
+        parent::__construct();
+    }
 
     /**
      * Show the query builder index page.
@@ -53,7 +56,7 @@ class QueryBuilderController extends Controller
         $data['select'] = $select = Qs::getSelectedTableColumns($from, $select_var);
         $data['placeholder'] = Qs::getPresentableTableColumns($from, $select_var);
 
-        if ($select === null) {
+        if (empty($select)) {
             return back()->with('flash_danger', __('msg.denied'));
         }
 
@@ -364,7 +367,7 @@ class QueryBuilderController extends Controller
             }
         }
 
-        $logo = Qs::imgToBase64(Usr::getTenancyAwareImgOrDefaultBgUrl(Qs::getSetting('logo')));
+        $logo = Qs::imgToBase64(Usr::getTenancyAwareImgOrDefaultBgUrl(Qs::getSettings()->firstWhere('key', 'logo')));
         $unique_keys = array_unique($keys);
         $users_arr = $users->toArray();
         $total = \count($users_arr);
