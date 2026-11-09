@@ -327,6 +327,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
                 Route::get('analytics/google/disable', [SettingController::class, 'disable_analytics'])->name('settings.disable_analytics');
                 Route::get('analytics/google/enable', [SettingController::class, 'enable_analytics'])->name('settings.enable_analytics');
                 Route::get('login-form/preview', [SettingController::class, 'preview_login_form'])->name('settings.preview_login_form');
+                Route::put('modules/{module}', [SettingController::class, 'toggle_feature_module'])->name('settings.modules.toggle');
             });
 
             // Bin / soft-delete management

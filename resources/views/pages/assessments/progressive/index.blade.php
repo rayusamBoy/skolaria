@@ -24,7 +24,10 @@
                                 data-placeholder="Select Exam"
                             >
                                 @foreach ($assessments as $as)
-                                    <option @selected($selected && $assessment->exam->id == $as->exam->id) value="{{ $as->id }}">
+                                    <option
+                                        @selected($selected && $assessment->exam->id == $as->exam->id)
+                                        value="{{ $as->id }}"
+                                    >
                                         {{ $as->exam->name }}
                                     </option>
                                 @endforeach

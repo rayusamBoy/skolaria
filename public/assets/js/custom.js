@@ -2480,3 +2480,38 @@ const copyToClipboard = (text, element) => {
         $(element).attr("data-original-title", title).tooltip("hide");
     }, 3000);
 };
+
+/**
+ *-------------------------------------------------------------
+ *  Feature Module toggle functionality (Settings)
+ *-------------------------------------------------------------
+ */
+$(document).on("change", ".module-toggle", function () {
+    const timeout = 1000; // 1 second delay before reload
+    const $el = $(this);
+    const module = $el.data("module");
+    const url = $el.data("url");
+
+    $.ajax({
+        url,
+        method: "PUT",
+        data: {
+            enabled: $el.is(":checked") ? 1 : 0,
+        },
+        success: () => {
+            // Reload so the sidebar, roles UI, and other Blade conditionals
+            // pick up the new module state immediately.
+            pop({
+                msg: "Module state changed successfully. Reloading now...",
+                type: "success",
+            });
+            setTimeout(() => {
+                window.location.reload();
+            }, timeout);
+        },
+        error: () => {
+            $el.prop("checked", !$el.is(":checked"));
+            pop({ msg: "Could not change module state.", type: "error" });
+        },
+    });
+});

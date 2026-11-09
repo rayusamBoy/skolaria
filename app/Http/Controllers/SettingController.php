@@ -6,14 +6,18 @@ use App\Helpers\Qs;
 use App\Http\Requests\SettingUpdate;
 use App\Repositories\MyClassRepo;
 use App\Repositories\SettingRepo;
+use App\Services\FeatureModuleService;
 use ColorThief\ColorThief;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\View\View;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class SettingController extends Controller
 {
-    public function __construct(protected SettingRepo $setting, protected MyClassRepo $my_class)
+    public function __construct(protected SettingRepo $setting, protected MyClassRepo $my_class, protected FeatureModuleService $modules)
     {
         $this->permissionMap = config('permissions.names.tenant.settings');
         parent::__construct();
@@ -91,6 +95,21 @@ class SettingController extends Controller
     public function preview_login_form(): View
     {
         return view('auth.login');
+    }
+
+    public function toggle_feature_module(Request $request, string $module): JsonResponse
+    {
+        if (! $this->modules->isToggleable($module)) {
+            throw new NotFoundHttpException;
+        }
+
+        $request->validate(['enabled' => 'required|boolean']);
+
+        $request->boolean('enabled')
+            ? $this->modules->enable($module)
+            : $this->modules->disable($module);
+
+        return Qs::jsonUpdateOk();
     }
 
     // ----------------------------------------------------------------------

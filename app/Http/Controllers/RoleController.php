@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Usr;
 use App\Repositories\PermissionRepo;
+use App\Services\FeatureModuleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,7 +23,8 @@ class RoleController extends Controller
      */
     public function index(): View
     {
-        $permissions = $this->permission->getAllPermissions();
+        $permissions = $this->permission->getAllPermissions()->filter(fn ($p) => app(FeatureModuleService::class)->isPermissionAllowed($p->name));
+
         $data['permissions'] = $permissions;
         $data['grouped_permissions'] = $permissions->groupBy(
             fn ($perm) => explode('.', $perm->name)[0]
@@ -64,7 +66,8 @@ class RoleController extends Controller
             return redirect()->route('roles.index')->with('flash_warning', __('msg.denied'));
         }
 
-        $permissions = $this->permission->getAllPermissions();
+        $permissions = $this->permission->getAllPermissions()->filter(fn ($p) => app(FeatureModuleService::class)->isPermissionAllowed($p->name));
+
         $data['grouped_permissions'] = $permissions->groupBy(
             fn ($perm) => explode('.', $perm->name)[0]
         );

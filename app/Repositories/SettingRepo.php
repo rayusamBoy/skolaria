@@ -9,6 +9,14 @@ class SettingRepo
     /*********** Settings ***************/
 
     /**
+     * Get a setting by its key.
+     */
+    public function get(string $key): ?string
+    {
+        return Setting::where('key', $key)->value('value');
+    }
+
+    /**
      * Create a new setting key/value pair.
      */
     public function create(string $key, string $value): Setting
@@ -24,6 +32,14 @@ class SettingRepo
     public function update(string $key, ?string $value): int
     {
         return Setting::where('key', $key)->update(['value' => $value]);
+    }
+
+    /**
+     * Update or create the setting key/value pair.
+     */
+    public function updateOrCreate(string $key, ?string $value): Setting
+    {
+        return Setting::updateOrCreate(['key' => $key], ['value' => $value]);
     }
 
     /**
