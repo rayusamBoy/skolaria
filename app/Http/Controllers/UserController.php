@@ -191,7 +191,7 @@ class UserController extends Controller
     {
         $this->user->updateStaffRecord(
             ['user_id' => $req->id],
-            $req->input('allow_staff_data_edit')
+            ['allow_staff_data_edit' => $req->input('allow_staff_data_edit')]
         );
 
         return Usr::json('ok');
