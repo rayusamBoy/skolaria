@@ -2497,6 +2497,7 @@ $(document).on("change", ".module-toggle", function () {
         method: "PUT",
         data: {
             enabled: $el.is(":checked") ? 1 : 0,
+            module: module,
         },
         success: () => {
             // Reload so the sidebar, roles UI, and other Blade conditionals
