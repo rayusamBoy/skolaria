@@ -644,24 +644,21 @@ class Usr extends Qs
      * Accepts:
      *   - a Setting model (or any object with `value` and `updated_at`)
      *   - null (falls back to the default background image)
-     *
-     * @param  object|null  $img
-     * @return string
      */
     public static function getTenancyAwareImgOrDefaultBgUrl(?object $img): string
     {
         $img_desc = $img?->value;
-    
+
         $img_url = $img_desc === null
             ? asset(self::getLoginAndRelatedPagesBgValue())
             : (self::tenancyInitialized() ? tenant_asset($img_desc) : asset($img_desc));
-    
+
         // Use the image's own mtime when available, otherwise fall back to "now"
         // so the URL is never cached without a version string.
         $version = $img?->updated_at
             ? strtotime($img->updated_at)
             : time();
-    
+
         return "{$img_url}?{$version}";
     }
 }

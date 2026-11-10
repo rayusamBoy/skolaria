@@ -19,7 +19,8 @@ use Illuminate\View\View;
 
 class QueryBuilderController extends Controller
 {
-    public function __construct(protected UserRepo $user, protected PermissionRepo $permission) {
+    public function __construct(protected UserRepo $user, protected PermissionRepo $permission)
+    {
         $this->permissionMap = config('permissions.names.tenant.query_builders');
         parent::__construct();
     }
