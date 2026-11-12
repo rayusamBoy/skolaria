@@ -1,0 +1,51 @@
+{
+    "name": "skolaria/laravel-permission-kit",
+    "description": "Generate, sync and enforce Spatie permissions by scanning controller methods.",
+    "license": "MIT",
+    "type": "library",
+    "scripts": {
+        "test": "pest"
+    },
+    "require": {
+        "php": "^8.3",
+        "illuminate/support": "^13.0",
+        "illuminate/console": "^13.0",
+        "illuminate/contracts": "^13.0",
+        "illuminate/filesystem": "^13.0",
+        "spatie/laravel-permission": "^7.0 || ^8.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^11.0",
+        "orchestra/pest-plugin-testbench": "^5.0",
+        "pestphp/pest": "^5.0",
+        "pestphp/pest-plugin-laravel": "^5.0.1",
+        "laravel/pint": "^1.32"
+    },
+    "autoload": {
+        "psr-4": {
+            "PermissionKit\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PermissionKit\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "PermissionKit\\PermissionKitServiceProvider"
+            ],
+            "aliases": {
+                "PermissionKit": "PermissionKit\\Facades\\PermissionKit"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}
