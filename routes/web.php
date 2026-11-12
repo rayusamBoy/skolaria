@@ -29,6 +29,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate'], 'prefix' => 'centr
     Route::group(['middleware' => '2fa'], function () {
         /*************** Central namespace (central admin) ***************/
         Route::group(['namespace' => 'Central'], function () {
+            Route::delete('model/{model}/soft-deleted/empty', [CentralSoftDeleteController::class, 'empty_soft_deleted_model'])->name('central.model.empty_soft_deleted');
             Route::get('bin', [CentralSoftDeleteController::class, 'bin'])->name('central_bin')->middleware('password.confirm');
             // Tenants soft-delete actions
             Route::post('tenant/{id}/restore', [CentralSoftDeleteController::class, 'tenant_restore'])->name('central.tenant.restore');
