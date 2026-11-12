@@ -31,6 +31,7 @@
         "pragmarx/recovery": "^0.2.1",
         "pusher/pusher-php-server": "^7.2",
         "silviolleite/laravelpwa": "^2.0",
+        "skolaria/laravel-permission-kit": "dev-main",
         "spatie/browsershot": "^5.3",
         "spatie/image": "^3.9",
         "spatie/laravel-activitylog": "^4.8",
@@ -97,5 +98,14 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/laravel-permission-kit",
+            "options": {
+                "symlink": true
+            }
+        }
+    ]
 }

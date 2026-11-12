@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "58a9c3c3c4a9b278b670cd5bdf5faba9",
+    "content-hash": "df3b834d1caf1f4404e3206bec8ee90a",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -8524,6 +8524,64 @@
                 "source": "https://github.com/silviolleite/laravel-pwa/tree/2.0.3"
             },
             "time": "2020-08-20T12:19:16+00:00"
+        },
+        {
+            "name": "skolaria/laravel-permission-kit",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/laravel-permission-kit",
+                "reference": "cc26b9228f4a87cd140828da23c061e45a83a99c"
+            },
+            "require": {
+                "illuminate/console": "^13.0",
+                "illuminate/contracts": "^13.0",
+                "illuminate/filesystem": "^13.0",
+                "illuminate/support": "^13.0",
+                "php": "^8.3",
+                "spatie/laravel-permission": "^7.0 || ^8.0"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.32",
+                "orchestra/pest-plugin-testbench": "^5.0",
+                "orchestra/testbench": "^11.0",
+                "pestphp/pest": "^5.0",
+                "pestphp/pest-plugin-laravel": "^5.0.1"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "PermissionKit\\PermissionKitServiceProvider"
+                    ],
+                    "aliases": {
+                        "PermissionKit": "PermissionKit\\Facades\\PermissionKit"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PermissionKit\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "PermissionKit\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "pest"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Generate, sync and enforce Spatie permissions by scanning controller methods.",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "spatie/browsershot",
@@ -17098,6 +17156,7 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "laravel/reverb": 10,
+        "skolaria/laravel-permission-kit": 20,
         "stancl/tenancy": 20
     },
     "prefer-stable": true,
