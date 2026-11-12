@@ -4,7 +4,7 @@
 
 @section('content')
     {{-- Query Print --}}
-    @can($tenant_permissions['query_builders']['print_users_data']['permission'])
+    @can('query_builders.print_users_data')
         <div class="card card-collapsed">
             <div class="card-header header-elements-inline">
                 <h6 class="card-title"><i class="material-symbols-rounded mr-2">print</i> Query Print</h6>
@@ -70,7 +70,7 @@
     @endcan
 
     {{-- Query Select --}}
-    @can($tenant_permissions['query_builders']['select']['permission'])
+    @can('query_builders.select')
         <div class="card card-collapsed" id="query-box">
             <div class="card-header header-elements-inline">
                 <h6 class="card-title"><i class="material-symbols-rounded mr-2">lasso_select</i> Query Select</h6>

@@ -17,12 +17,12 @@
 @section('content')
     @php
         // Central permissions
-        $canRestoreUser = auth()->user()->can($central_permissions['central_soft_deletes']['user_restore']['permission']);
-        $canForceDelUser = auth()->user()->can($central_permissions['central_soft_deletes']['user_force_delete']['permission']);
+        $canRestoreUser = auth()->user()->can('central.central_soft_deletes.user_restore');
+        $canForceDelUser = auth()->user()->can('central.central_soft_deletes.user_force_delete');
         $hasUserActions = $canRestoreUser || $canForceDelUser;
 
-        $canRestoreTenant = auth()->user()->can($central_permissions['central_soft_deletes']['tenant_restore']['permission']);
-        $canForceDelTenant = auth()->user()->can($central_permissions['central_soft_deletes']['tenant_force_delete']['permission']);
+        $canRestoreTenant = auth()->user()->can('central.central_soft_deletes.tenant_restore');
+        $canForceDelTenant = auth()->user()->can('central.central_soft_deletes.tenant_force_delete');
         $hasTenantActions = $canRestoreTenant || $canForceDelTenant;
 
         $isSuperAdmin = auth()->user()->hasRole(config('roles.root_roles.central.root'));
@@ -169,10 +169,15 @@
                                         {{ $tenant->identification_mode === 'request_data' ? 'Request Data' : 'Domain' }}
                                     </td>
                                     <td>
-                                        @if ($tenant->identification_mode === 'domain')
-                                            {{ Qs::formatDomain($tenant->domain->domain) ?? '—' }}
+                                        @php
+                                        $tenantDomain = $tenant->domain->domain ?? $tenant->domain;
+                                        @endphp
+                                        @if ($tenantDomain)
+                                            <span>{{ Qs::formatDomain($tenantDomain) }}</span>
+                                        @elseif ($tenant->tenant_entry_domain)
+                                            <span class="text-muted">{{ $tenant->tenant_entry_domain }} / {{ $tenant->tenant_slug }}</span>
                                         @else
-                                            {{ $tenant->tenant_slug ?? '—' }}
+                                            <span class="text-muted">—</span>
                                         @endif
                                     </td>
                                     <td>{{ Qs::formatDate($tenant->deleted_at) }}</td>
@@ -253,7 +258,7 @@
                             <form
                                 method="post"
                                 id="item-delete-{{ $model_name }}"
-                                action="{{ route('model.empty_soft_deleted', $model_name) }}"
+                                action="{{ route('central.model.empty_soft_deleted', $model_name) }}"
                                 class="hidden"
                             >
                                 @csrf

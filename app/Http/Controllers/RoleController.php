@@ -9,26 +9,31 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class RoleController extends Controller
 {
-    public function __construct(protected PermissionRepo $permission)
-    {
-        $this->permissionMap = config('permissions.names.tenant.roles');
-        parent::__construct();
-    }
+    use AuthorizesPermissions;
+
+    public function __construct(
+        protected PermissionRepo $permission,
+        protected FeatureModuleService $featureModules
+    ) {}
 
     /**
      * Display a listing of roles.
      */
     public function index(): View
     {
-        $permissions = $this->permission->getAllPermissions()->filter(fn ($p) => app(FeatureModuleService::class)->isPermissionAllowed($p->name));
+        $permissions = $this->permission
+            ->getAllPermissions()
+            ->filter(fn ($p) => $this->featureModules->isPermissionAllowed($p->name));
 
         $data['permissions'] = $permissions;
         $data['grouped_permissions'] = $permissions->groupBy(
             fn ($perm) => explode('.', $perm->name)[0]
         );
+
         $data['roles'] = $this->permission->getAllRoles([], ['users', 'permissions']);
 
         return view('pages.roles.index', $data);
@@ -66,7 +71,7 @@ class RoleController extends Controller
             return redirect()->route('roles.index')->with('flash_warning', __('msg.denied'));
         }
 
-        $permissions = $this->permission->getAllPermissions()->filter(fn ($p) => app(FeatureModuleService::class)->isPermissionAllowed($p->name));
+        $permissions = $this->permission->getAllPermissions()->filter(fn ($p) => $this->featureModules->isPermissionAllowed($p->name));
 
         $data['grouped_permissions'] = $permissions->groupBy(
             fn ($perm) => explode('.', $perm->name)[0]

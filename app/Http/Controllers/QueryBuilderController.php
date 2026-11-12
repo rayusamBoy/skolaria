@@ -16,14 +16,13 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class QueryBuilderController extends Controller
 {
-    public function __construct(protected UserRepo $user, protected PermissionRepo $permission)
-    {
-        $this->permissionMap = config('permissions.names.tenant.query_builders');
-        parent::__construct();
-    }
+    use AuthorizesPermissions;
+
+    public function __construct(protected UserRepo $user, protected PermissionRepo $permission) {}
 
     /**
      * Show the query builder index page.

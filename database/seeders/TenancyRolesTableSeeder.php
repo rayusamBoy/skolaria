@@ -18,7 +18,7 @@ class TenancyRolesTableSeeder extends Seeder
 
         // Load roles from config
         $rootRoles = (array) array_values(config('roles.root_roles.tenant', []));
-        $defaultRoles = (array) array_values(config('roles.default_roles.ttenant', []));
+        $defaultRoles = (array) array_values(config('roles.default_roles.tenant', []));
 
         // Clean existing roles
         Role::query()->delete();

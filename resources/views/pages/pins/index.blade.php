@@ -100,7 +100,7 @@
                             </table>
                         </div>
 
-                        @can($tenant_permissions['pins']['destroy']['permission'])
+                        @can('pins.destroy')
                             @if ($used_pins->isNotEmpty())
                                 <div class="col-md-12">
                                     <a

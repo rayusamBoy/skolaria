@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($tenant_permissions['books']['edit']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['books']['destroy']['permission']);
+        $canEdit = auth()->user()->can('books.edit');
+        $canDelete = auth()->user()->can('books.destroy');
         $hasActions = $canEdit || $canDelete;
     @endphp
 
@@ -27,7 +27,7 @@
                     </div>
                 </li>
 
-                @can($tenant_permissions['books']['store']['permission'])
+                @can('books.store')
                     <li class="nav-item">
                         <a href="#new-book" class="nav-link" data-toggle="tab">Add a Book</a>
                     </li>
@@ -36,7 +36,7 @@
 
             <div class="tab-content">
                 {{-- Add New Book Form --}}
-                @can($tenant_permissions['books']['store']['permission'])
+                @can('books.store')
                     <div class="tab-pane fade" id="new-book">
                         <form
                             method="post"

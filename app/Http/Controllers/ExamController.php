@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Mk;
 use App\Helpers\Usr;
 use App\Http\Requests\Exam\ExamAnnounce;
@@ -24,15 +23,17 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use PermissionKit\Attributes\SkipPermission;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class ExamController extends Controller
 {
+    use AuthorizesPermissions;
+
     protected string $year;
 
     public function __construct(protected ExamRepo $exam, protected AssessmentRepo $assessment, protected MyClassRepo $my_class, protected StudentRepo $student)
     {
-        $this->permissionMap = config('permissions.names.tenant.exams');
-        parent::__construct();
         $this->year = Mk::getSetting('current_session');
     }
 

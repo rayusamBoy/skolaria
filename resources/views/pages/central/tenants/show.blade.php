@@ -21,10 +21,19 @@
                                 <td class="font-weight-bold">Identification Mode</td>
                                 <td>
                                     <span class="badge">{{ Str::headline($tenant->identification_mode) }}</span>
-                                    <a
-                                        href="{{ Qs::formatDomain($tenant->domain->domain ?? $tenant->domain) ?? url('/') . "/slug/{$tenant->tenant_slug}" }}"
-                                        target="_blank"
-                                    >{{ Qs::formatDomain($tenant->domain->domain) ?? $tenant->domain ?? url('/') . "/slug/{$tenant->tenant_slug}" }}</a>
+                                    @php
+                                        $tenantDomain = $tenant->domain->domain ?? $tenant->domain;
+                                    @endphp
+                                    @if ($tenantDomain)
+                                        <a
+                                            href="{{ Qs::formatDomain($tenantDomain) }}"
+                                            target="_blank"
+                                        >{{ Qs::formatDomain($tenantDomain) }}</a>
+                                    @elseif ($tenant->tenant_entry_domain)
+                                        <span class="text-muted">{{ $tenant->tenant_entry_domain }} / {{ $tenant->tenant_slug }}</span>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
                                 </td>
                             </tr>
                             <tr>

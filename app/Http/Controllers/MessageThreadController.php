@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Auth\Attributes\SkipPermission;
 use App\Events\MessageArrived;
 use App\Events\MessageDeleted;
 use App\Helpers\Usr;
@@ -24,6 +23,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use PermissionKit\Attributes\SkipPermission;
 use Throwable;
 
 class MessageThreadController extends Controller

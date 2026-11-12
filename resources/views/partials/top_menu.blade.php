@@ -12,13 +12,13 @@
         </span>
 
         @if ($is_tenant_context)
-            @can($tenant_permissions['message_threads']['index']['permission'])
+            @can('message_threads.view')
                 <a class="navbar-toggler text-default" title="Messages" href="{{ route('message_threads.index') }}">
                     @include('messenger.unread-count')
                 </a>
             @endcan
         @else
-            @can($tenant_permissions['tickets']['index']['permission'])
+            @can('tickets.view')
                 <div class="navbar-toggler">
                     @include('pages.central.support.tickets.badge')
                 </div>
@@ -113,34 +113,34 @@
                             </a>
                         @endif
                         {{-- Artisan Commands --}}
-                        @canany(array_column($central_permissions['artisan_commands'], 'permission'))
+                        @can('artisan_commands.view')
                             <a
                                 href="{{ route('artisan_commands.index') }}"
                                 class="dropdown-item {{ request()->routeIs('artisan_commands.index') ? 'active' : '' }}"
                             >
                                 <i class="material-symbols-rounded">terminal</i>Artisan Commands
                             </a>
-                        @endcanany
+                        @endcan
                         {{-- Central Activity Log --}}
-                        @canany(array_column($central_permissions['central_logs'], 'permission'))
+                        @can('central.logs.view')
                             <a
                                 href="{{ route('central_logs.index') }}"
                                 class="dropdown-item {{ request()->routeIs('central_logs.index') ? 'active' : '' }}"
                             >
                                 <i class="material-symbols-rounded">browse_activity</i>Activity Log
                             </a>
-                        @endcanany
+                        @endcan
 
                     @else
                         {{-- Tenant Activity Log --}}
-                        @canany(array_column($tenant_permissions['logs'], 'permission'))
+                        @can('logs.view')
                             <a
                                 href="{{ route('logs.index') }}"
                                 class="dropdown-item {{ request()->routeIs('logs.index') ? 'active' : '' }}"
                             >
                                 <i class="material-symbols-rounded">browse_activity</i>Activity Log
                             </a>
-                        @endcanany
+                        @endcan
                     @endunless
 
                     <div class="dropdown-divider"></div>

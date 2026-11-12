@@ -4,9 +4,9 @@
 
 @section('content')
     @php
-        $canApprove = auth()->user()->can($tenant_permissions['users']['approve']['permission']);
-        $canReject = auth()->user()->can($tenant_permissions['users']['reject']['permission']);
-        $canCancel = auth()->user()->can($tenant_permissions['users']['cancel']['permission']);
+        $canApprove = auth()->user()->can('users.approve');
+        $canReject = auth()->user()->can('users.reject');
+        $canCancel = auth()->user()->can('users.cancel');
         $hasActions = $canApprove || $canReject || $canCancel;
     @endphp
 
@@ -21,7 +21,7 @@
                 <li class="nav-item">
                     <a href="#pending-users" class="nav-link active" data-toggle="tab">Registrations</a>
                 </li>
-                @can($tenant_permissions['users']['invite_user']['permission'])
+                @can('users.invite_user')
                     <li class="nav-item">
                         <a href="#invite-user" class="nav-link" data-toggle="tab">Invite User</a>
                     </li>
@@ -29,7 +29,7 @@
             </ul>
 
             <div class="tab-content">
-                @can($tenant_permissions['users']['invite_user']['permission'])
+                @can('users.invite_user')
                     <div class="tab-pane fade" id="invite-user">
                         <form id="invite-user-form" class="mb-3">
                             <div class="alert alert-warning alert-styled-left">

@@ -134,7 +134,7 @@
                 </h6>
                 <div class="header-elements pt-0">
                     <div class="list-icons">
-                        @can($tenant_permissions['marks']['print_tabulation']['permission'])
+                        @can('marks.print_tabulation')
                             <a
                                 class="list-icons-item"
                                 target="_blank"

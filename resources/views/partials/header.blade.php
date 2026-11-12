@@ -29,13 +29,13 @@
 
                 @if ($is_tenant_context)
                     {{-- Analytics --}}
-                    @can($tenant_permissions['analytics']['index']['permission'])
+                    @can('analytics.view')
                         <a href="{{ route('analytics.index') }}" class="btn btn-link btn-float text-default"
                             ><i class="material-symbols-rounded text-primary">analytics</i>
                             <span class="d-none d-sm-block">Analytics</span></a>
                     @endcan
                     {{-- Statistics --}}
-                    @can($tenant_permissions['statistics']['index']['permission'])
+                    @can('statistics.view')
                         <a href="{{ route('statistics.index') }}" class="btn btn-link btn-float text-default"
                             ><i class="material-symbols-rounded text-primary">query_stats</i
                             ><span class="d-none d-sm-block">Statistics</span></a>
@@ -43,13 +43,13 @@
                     {{-- Invoices --}}
                     {{-- <a href="javascript:;" class="btn btn-link btn-float text-default"><i class="material-symbols-rounded text-primary">calculate</i> <span class="d-none d-sm-block">Invoices</span></a> --}}
                     {{-- Schedule --}}
-                    @can($tenant_permissions['schedules']['index']['permission'])
+                    @can('schedules.view')
                         <a href="{{ route('schedule.index') }}" class="btn btn-link btn-float text-default"
                             ><i class="material-symbols-rounded text-primary">calendar_month</i>
                             <span class="d-none d-sm-block">Schedule</span></a>
                     @endcan
                     <a
-                        href="{{ auth()->user()->canany(array_column($tenant_permissions['settings'], 'permission')) ? route('settings.index') : '' }}"
+                        href="{{ auth()->user()->can('settings.view') ? route('settings.index') : '' }}"
                         class="btn btn-link btn-float text-default"
                         ><i class="material-symbols-rounded text-primary d-none d-sm-block">arrow_downward_alt</i>
                         <span class="font-weight-semibold d-flex" id="current-session"
@@ -75,7 +75,7 @@
                 </div>
 
                 @if ($is_tenant_context)
-                    @can($tenant_permissions['message_threads']['index']['permission'])
+                    @can('message_threads.view')
                         <a
                             class="breadcrumb-elements-item d-none d-md-block"
                             data-toggle="tooltip"
@@ -85,7 +85,7 @@
                             @include('messenger.unread-count')
                         </a>
                     @endcan
-                    @can($tenant_permissions['tickets']['index']['permission'])
+                    @can('tickets.view')
                         <div class="breadcrumb-elements-item dropdown">
                             <a href="javascript:;" class="breadcrumb-elements-item" data-toggle="dropdown">
                                 <i class="material-symbols-rounded mr-1">support</i>
@@ -102,14 +102,14 @@
                             </div>
                         </div>
                     @endcan
-                @elseif (auth()->user()->can($central_permissions['tickets']['index_central']['permission']))
+                @elseif (auth()->user()->can('tickets.index_central'))
                     <div class="breadcrumb-elements-item d-none d-md-block">
                         @include('pages.central.support.tickets.badge')
                     </div>
                 @endif
 
                 @if ($is_tenant_context)
-                    @can($tenant_permissions['soft_deletes']['bin']['permission'])
+                    @can('central.soft_deletes.bin')
                         <div class="breadcrumb-elements-item">
                             <a
                                 href="{{ route('bin') }}"
@@ -121,7 +121,7 @@
                         </div>
                     @endcan
                 @else
-                    @can($central_permissions['central_soft_deletes']['bin']['permission'])
+                    @can('central.soft_deletes.bin')
                         <div class="breadcrumb-elements-item">
                             <a
                                 href="{{ route('central_bin') }}"

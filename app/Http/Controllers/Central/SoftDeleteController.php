@@ -8,14 +8,13 @@ use App\Repositories\TenantRepo;
 use App\Repositories\UserRepo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class SoftDeleteController extends Controller
 {
-    public function __construct(protected UserRepo $user, protected TenantRepo $tenant)
-    {
-        $this->permissionMap = config('permissions.names.central.central_soft_deletes');
-        parent::__construct();
-    }
+    use AuthorizesPermissions;
+
+    public function __construct(protected UserRepo $user, protected TenantRepo $tenant) {}
 
     /**
      * Display the central recycle bin with trashed users and tenants.

@@ -12,9 +12,12 @@ use App\Repositories\UserRepo;
 use App\Validators\ExamIdValidator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class StatisticsController extends Controller
 {
+    use AuthorizesPermissions;
+
     protected string $year;
 
     public function __construct(
@@ -24,8 +27,6 @@ class StatisticsController extends Controller
         protected StudentRepo $student,
         protected MarkRepo $mark
     ) {
-        $this->permissionMap = config('permissions.names.tenant.statistics');
-        parent::__construct();
         $this->year = Mk::getSetting('current_session');
     }
 

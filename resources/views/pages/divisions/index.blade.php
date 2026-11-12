@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($tenant_permissions['divisions']['edit']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['divisions']['destroy']['permission']);
+        $canEdit = auth()->user()->can('divisions.edit');
+        $canDelete = auth()->user()->can('divisions.destroy');
         $hasActions = $canEdit || $canDelete;
     @endphp
 
@@ -21,7 +21,7 @@
                     <a href="#all-divisions" class="nav-link active" data-toggle="tab">Manage Divisions</a>
                 </li>
 
-                @can($tenant_permissions['divisions']['store']['permission'])
+                @can('divisions.store')
                     <li class="nav-item">
                         <a href="#new-division" class="nav-link" data-toggle="tab">Add Division</a>
                     </li>
@@ -127,7 +127,7 @@
                 </div>
 
                 {{-- Create Divisions tab --}}
-                @can($tenant_permissions['divisions']['store']['permission'])
+                @can('divisions.store')
                     <div class="tab-pane fade" id="new-division">
                         <div class="row mb-3">
                             <div class="col-md-12">

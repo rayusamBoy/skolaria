@@ -8,14 +8,13 @@ use App\Repositories\MyClassRepo;
 use App\Repositories\UserRepo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class LogController extends Controller
 {
-    public function __construct(protected UserRepo $user, protected MyClassRepo $my_class, protected LogRepo $log)
-    {
-        $this->permissionMap = config('permissions.names.central.central_logs');
-        parent::__construct();
-    }
+    use AuthorizesPermissions;
+
+    public function __construct(protected UserRepo $user, protected MyClassRepo $my_class, protected LogRepo $log) {}
 
     /**
      * Display central logs dashboard.

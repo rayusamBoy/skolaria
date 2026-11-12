@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Mk;
 use App\Helpers\Usr;
 use App\Http\Requests\Assessment\AssessmentSelector;
@@ -22,9 +21,13 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\View\View;
+use PermissionKit\Attributes\SkipPermission;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class AssessmentController extends Controller
 {
+    use AuthorizesPermissions;
+
     protected string $year;
 
     protected const int CW_COUNT = 10;
@@ -40,8 +43,6 @@ class AssessmentController extends Controller
         protected StudentRepo $student,
         protected MarkRepo $mark
     ) {
-        $this->permissionMap = config('permissions.names.tenant.assessments');
-        parent::__construct();
         $this->year = Mk::getSetting('current_session');
     }
 

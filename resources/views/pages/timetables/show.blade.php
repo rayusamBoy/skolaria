@@ -14,7 +14,7 @@
 
             <div class="header-elements pt-0">
                 <div class="list-icons">
-                    @can($tenant_permissions['time_tables']['print_record']['permission'])
+                    @can('time_tables.print_record')
                         <a
                             class="list-icons-item"
                             target="_blank"

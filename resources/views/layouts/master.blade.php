@@ -39,7 +39,7 @@
     @stack('css')
 </head>
 
-<body class="{{ in_array(request()->route()->getName(), ['payments.invoice', 'marks.tabulation', 'marks.manage', 'assessments.manage', 'assessments.index', 'assessments.show', 'assessments.progressive', 'assessments.sheets', 'marks.show', 'ttr.manage', 'ttr.show', 'bin', 'events.manage', 'events.edit', 'query_builder.index', 'query_builder.select', 'notices.index', 'notices.edit', 'users.index', 'logs.index', 'students.promotion_manage', 'tenants.index', 'settings.index', 'settings_non_tenancy.index', 'analytics.index', 'analytics.fetch_data', 'tickets.reply', 'tickets.index_central', 'tickets.answer']) || $user_preferences['always_minimize_sidebar'] == 1 ? 'sidebar-xs' : '' }}">
+<body class="{{ in_array(request()->route()->getName(), ['payments.invoice', 'marks.tabulation', 'marks.manage', 'assessments.manage', 'assessments.view', 'assessments.show', 'assessments.progressive', 'assessments.sheets', 'marks.show', 'ttr.manage', 'ttr.show', 'bin', 'events.manage', 'events.edit', 'query_builder.view', 'query_builder.select', 'notices.view', 'notices.edit', 'users.view', 'logs.view', 'students.promotion_manage', 'tenants.view', 'central.settings.view', 'settings.view', 'analytics.view', 'analytics.fetch_data', 'tickets.reply', 'tickets.index_central', 'tickets.answer']) || $user_preferences['always_minimize_sidebar'] == 1 ? 'sidebar-xs' : '' }}">
     {{-- Block UI -- Loading page indicator; Will be removed by js script on page load; Copied from Block UI interface implementation --}}
     <div class="blockUI blockOverlay custom"></div>
     <div class="blockUI blockMsg blockPage custom">

@@ -18,7 +18,7 @@
                     <h6 class="font-weight-bold">{{ "{$ex->name} - {$ex->year}" }}</h6>
                     <div class="header-elements pt-0">
                         <div class="list-icons">
-                            @if (auth()->user()->can($tenant_permissions['marks']['print_view']['permission']))
+                            @if (auth()->user()->can('marks.print_view'))
                                 <a
                                     class="list-icons-item"
                                     target="_blank"
@@ -40,10 +40,10 @@
             </div>
 
             {{-- EXAM COMMENTS   --}}
-            @includeWhen(auth()->user()->can($tenant_permissions['marks']['comment_update']['permission']), 'pages.marks.show.comments')
+            @includeWhen(auth()->user()->can('marks.comment_update'), 'pages.marks.show.comments')
 
             {{-- SKILL RATING --}}
-            @includeWhen(auth()->user()->can($tenant_permissions['marks']['skills_update']['permission']), 'pages.marks.show.skills')
+            @includeWhen(auth()->user()->can('marks.skills_update'), 'pages.marks.show.skills')
 
         @endforeach
     @endforeach

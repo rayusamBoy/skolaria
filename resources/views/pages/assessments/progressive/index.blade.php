@@ -103,7 +103,7 @@
                 </h6>
                 <div class="header-elements pt-0">
                     <div class="list-icons">
-                        @if (auth()->user()->can($tenant_permissions['assessments']['print_progressive']['permission']))
+                        @if (auth()->user()->can('assessments.print_progressive'))
                             <a
                                 class="list-icons-item"
                                 target="_blank"

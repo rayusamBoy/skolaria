@@ -14,15 +14,16 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class TimeTableController extends Controller
 {
+    use AuthorizesPermissions;
+
     protected string $year;
 
     public function __construct(protected TimeTableRepo $tt, protected MyClassRepo $my_class, protected ExamRepo $exam)
     {
-        $this->permissionMap = config('permissions.names.tenant.time_tables');
-        parent::__construct();
         $this->year = Qs::getCurrentSession();
     }
 

@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($tenant_permissions['payments']['edit']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['payments']['destroy']['permission']);
+        $canEdit = auth()->user()->can('payments.edit');
+        $canDelete = auth()->user()->can('payments.destroy');
         $hasActions = $canEdit || $canDelete;
     @endphp
 
@@ -16,7 +16,7 @@
         </div>
 
         <div class="card-body">
-            @can($tenant_permissions['payments']['select_year']['permission'])
+            @can('payments.select_year')
                 <form method="post" action="{{ route('payments.select_year') }}">
                     @csrf
                     <div class="row">
@@ -68,7 +68,7 @@
             </div>
 
             <div class="card-body">
-                @can($tenant_permissions['payments']['index']['permission'])
+                @can('payments.view')
                     <ul class="nav nav-tabs nav-tabs-highlight">
                         <li class="nav-item">
                             <a href="#all-payments" class="nav-link active" data-toggle="tab">All Payments</a>

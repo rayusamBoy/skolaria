@@ -4,12 +4,12 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($tenant_permissions['users']['edit']['permission']);
-        $canView = auth()->user()->can($tenant_permissions['users']['show']['permission']);
-        $canResetPassword = auth()->user()->can($tenant_permissions['users']['reset_password']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['users']['destroy']['permission']);
-        $canToggleBlock = auth()->user()->can($tenant_permissions['users']['toggle_user_block']['permission']);
-        $canToggleStaffEdit = auth()->user()->can($tenant_permissions['users']['toggle_staff_data_editing']['permission']);
+        $canEdit = auth()->user()->can('users.edit');
+        $canView = auth()->user()->can('users.show');
+        $canResetPassword = auth()->user()->can('users.reset_password');
+        $canDelete = auth()->user()->can('users.destroy');
+        $canToggleBlock = auth()->user()->can('users.toggle_user_block');
+        $canToggleStaffEdit = auth()->user()->can('users.toggle_staff_data_editing');
         $hasActions = $canEdit || $canView || $canResetPassword || $canDelete;
     @endphp
 
@@ -34,13 +34,13 @@
                         @endforeach
                     </div>
                 </li>
-                @can($tenant_permissions['users']['store']['permission'])
+                @can('users.store')
                     <li class="nav-item"><a href="#new-user" class="nav-link" data-toggle="tab">Create New User</a></li>
                 @endcan
             </ul>
 
             <div class="tab-content">
-                @can($tenant_permissions['users']['store']['permission'])
+                @can('users.store')
                     <div class="tab-pane fade" id="new-user">
                         <form
                             method="post"

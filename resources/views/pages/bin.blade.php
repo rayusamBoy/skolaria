@@ -17,24 +17,24 @@
 @section('content')
     @php
         // Pre‑compute soft‑delete permissions per resource
-        $canRestorePayment = auth()->user()->can($tenant_permissions['soft_deletes']['payment_restore']['permission']);
-        $canForceDelPayment = auth()->user()->can($tenant_permissions['soft_deletes']['payment_force_delete']['permission']);
+        $canRestorePayment = auth()->user()->can('soft_deletes.payment_restore');
+        $canForceDelPayment = auth()->user()->can('soft_deletes.payment_force_delete');
         $hasPaymentActions = $canRestorePayment || $canForceDelPayment;
 
-        $canRestoreUser = auth()->user()->can($tenant_permissions['soft_deletes']['user_restore']['permission']);
-        $canForceDelUser = auth()->user()->can($tenant_permissions['soft_deletes']['user_force_delete']['permission']);
+        $canRestoreUser = auth()->user()->can('soft_deletes.user_restore');
+        $canForceDelUser = auth()->user()->can('soft_deletes.user_force_delete');
         $hasUserActions = $canRestoreUser || $canForceDelUser;
 
-        $canRestoreClass = auth()->user()->can($tenant_permissions['soft_deletes']['my_class_restore']['permission']);
-        $canForceDelClass = auth()->user()->can($tenant_permissions['soft_deletes']['my_class_force_delete']['permission']);
+        $canRestoreClass = auth()->user()->can('soft_deletes.my_class_restore');
+        $canForceDelClass = auth()->user()->can('soft_deletes.my_class_force_delete');
         $hasClassActions = $canRestoreClass || $canForceDelClass;
 
-        $canRestoreExam = auth()->user()->can($tenant_permissions['soft_deletes']['exam_restore']['permission']);
-        $canForceDelExam = auth()->user()->can($tenant_permissions['soft_deletes']['exam_force_delete']['permission']);
+        $canRestoreExam = auth()->user()->can('soft_deletes.exam_restore');
+        $canForceDelExam = auth()->user()->can('soft_deletes.exam_force_delete');
         $hasExamActions = $canRestoreExam || $canForceDelExam;
 
-        $canRestoreThread = auth()->user()->can($tenant_permissions['soft_deletes']['thread_restore']['permission']);
-        $canForceDelThread = auth()->user()->can($tenant_permissions['soft_deletes']['thread_force_delete']['permission']);
+        $canRestoreThread = auth()->user()->can('soft_deletes.thread_restore');
+        $canForceDelThread = auth()->user()->can('soft_deletes.thread_force_delete');
         $hasThreadActions = $canRestoreThread || $canForceDelThread;
 
         $isSuperAdmin = auth()->user()->hasRole(config('roles.default_roles.tenant.superadmin'));

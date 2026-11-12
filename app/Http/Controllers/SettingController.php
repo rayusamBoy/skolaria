@@ -13,15 +13,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class SettingController extends Controller
 {
-    public function __construct(protected SettingRepo $setting, protected MyClassRepo $my_class, protected FeatureModuleService $modules)
-    {
-        $this->permissionMap = config('permissions.names.tenant.settings');
-        parent::__construct();
-    }
+    use AuthorizesPermissions;
+
+    public function __construct(protected SettingRepo $setting, protected MyClassRepo $my_class, protected FeatureModuleService $modules) {}
 
     /**
      * Display the settings page.

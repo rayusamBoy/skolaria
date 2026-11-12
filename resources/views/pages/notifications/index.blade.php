@@ -5,9 +5,9 @@
 @section('content')
     @php
         $user = auth()->user();
-        $canDelete = $user->can($tenant_permissions['notifications']['destroy']['permission']);
-        $canMarkAllRead = $user->can($tenant_permissions['notifications']['mark_all_read']['permission']);
-        $canMarkAsRead = $user->can($tenant_permissions['notifications']['mark_as_read']['permission']);
+        $canDelete = $user->can('notifications.destroy');
+        $canMarkAllRead = $user->can('notifications.mark_all_read');
+        $canMarkAsRead = $user->can('notifications.mark_as_read');
         $hasActions = $canMarkAsRead || $canDelete;
     @endphp
 
@@ -41,7 +41,7 @@
         @endphp
 
         <div class="card-body">
-            @can($tenant_permissions['notifications']['update_notification_preferences']['permission'])
+            @can('notifications.update_notification_preferences')
                 <form method="post" action="{{ route('notifications.update.notification_preferences') }}">
                     @csrf
                     @method('put')

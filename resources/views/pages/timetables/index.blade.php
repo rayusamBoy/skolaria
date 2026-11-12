@@ -4,10 +4,10 @@
 
 @section('content')
     @php
-        $canView = auth()->user()->can($tenant_permissions['time_tables']['show_record']['permission']);
-        $canEdit = auth()->user()->can($tenant_permissions['time_tables']['edit_record']['permission']);
-        $canManage = auth()->user()->can($tenant_permissions['time_tables']['manage_record']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['time_tables']['delete_record']['permission']);
+        $canView = auth()->user()->can('time_tables.show_record');
+        $canEdit = auth()->user()->can('time_tables.edit_record');
+        $canManage = auth()->user()->can('time_tables.manage_record');
+        $canDelete = auth()->user()->can('time_tables.delete_record');
         $hasActions = $canView || $canEdit || $canManage || $canDelete;
     @endphp
 
@@ -28,7 +28,7 @@
                         @endforeach
                     </div>
                 </li>
-                @can($tenant_permissions['time_tables']['store']['permission'])
+                @can('time_tables.store')
                     <li class="nav-item">
                         <a href="#add-tt" class="nav-link" data-toggle="tab">Create Timetable</a>
                     </li>
@@ -36,7 +36,7 @@
             </ul>
 
             <div class="tab-content">
-                @can($tenant_permissions['time_tables']['store']['permission'])
+                @can('time_tables.store')
                     <div class="tab-pane fade" id="add-tt">
                         <div class="col-md-8">
                             <form class="ajax-store" method="post" action="{{ route('ttr.store') }}">

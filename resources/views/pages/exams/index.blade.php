@@ -4,11 +4,11 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($tenant_permissions['exams']['edit']['permission']);
-        $canPublish = auth()->user()->can($tenant_permissions['exams']['publish']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['exams']['destroy']['permission']);
-        $canToggleLock = auth()->user()->can($tenant_permissions['exams']['update_lock_state']['permission']);
-        $canAnnounce = auth()->user()->can($tenant_permissions['exams']['announce']['permission']);
+        $canEdit = auth()->user()->can('exams.edit');
+        $canPublish = auth()->user()->can('exams.publish');
+        $canDelete = auth()->user()->can('exams.destroy');
+        $canToggleLock = auth()->user()->can('exams.update_lock_state');
+        $canAnnounce = auth()->user()->can('exams.announce');
         $hasActions = $canEdit || $canPublish || $canDelete;
     @endphp
 
@@ -29,7 +29,7 @@
                     >Manage Exam</a>
                 </li>
                 {{-- Add exam item --}}
-                @can($tenant_permissions['exams']['store']['permission'])
+                @can('exams.store')
                     <li class="nav-item">
                         <a
                             href="#new-exam"
@@ -171,7 +171,7 @@
                 </div>
 
                 {{-- Add exam tab --}}
-                @can($tenant_permissions['exams']['store']['permission'])
+                @can('exams.store')
                     <div class="{{ $errors->any() ? 'tab-pane fade show active' : 'tab-pane fade' }}" id="new-exam">
                         <div class="row">
                             <div class="col-md-12">

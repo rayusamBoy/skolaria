@@ -6,9 +6,9 @@
 
     <div class="card-body">
         @php
-            $canEdit = auth()->user()->can($tenant_permissions['schedules']['edit_event']['permission']);
-            $canDelete = auth()->user()->can($tenant_permissions['schedules']['delete_event']['permission']);
-            $canUpdate = auth()->user()->can($tenant_permissions['schedules']['update_event']['permission']);
+            $canEdit = auth()->user()->can('schedules.edit_event');
+            $canDelete = auth()->user()->can('schedules.delete_event');
+            $canUpdate = auth()->user()->can('schedules.update_event');
             $hasActions = $canEdit || $canDelete;
         @endphp
 

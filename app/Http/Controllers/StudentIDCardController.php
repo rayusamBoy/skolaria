@@ -11,15 +11,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class StudentIDCardController extends Controller
 {
+    use AuthorizesPermissions;
+
     protected string $session;
 
     public function __construct(protected MyClassRepo $my_class, protected StudentRepo $student)
     {
-        $this->permissionMap = config('permissions.names.tenant.student_id_cards');
-        parent::__construct();
         $this->session = Qs::getCurrentSession();
     }
 

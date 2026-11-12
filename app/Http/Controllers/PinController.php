@@ -10,14 +10,13 @@ use App\Repositories\UserRepo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class PinController extends Controller
 {
-    public function __construct(protected PinRepo $pin, protected UserRepo $user)
-    {
-        $this->permissionMap = config('permissions.names.tenant.pins');
-        parent::__construct();
-    }
+    use AuthorizesPermissions;
+
+    public function __construct(protected PinRepo $pin, protected UserRepo $user) {}
 
     /**
      * Display a listing of pins (valid and used).

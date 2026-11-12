@@ -8,7 +8,7 @@
             </h6>
             <div class="header-elements print-none">
                 <div class="list-icons">
-                    @can($tenant_permissions['message_threads']['destroy']['permission'])
+                    @can('message_threads.destroy')
                         <a
                             id="{{ $thread->id }}"
                             type="button"

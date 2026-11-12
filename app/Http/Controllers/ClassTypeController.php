@@ -12,14 +12,13 @@ use App\Repositories\UserRepo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class ClassTypeController extends Controller
 {
-    public function __construct(protected MyClassRepo $my_class, protected UserRepo $user, protected SettingRepo $setting)
-    {
-        $this->permissionMap = config('permissions.names.tenant.class_types');
-        parent::__construct();
-    }
+    use AuthorizesPermissions;
+
+    public function __construct(protected MyClassRepo $my_class, protected UserRepo $user, protected SettingRepo $setting) {}
 
     /**
      * Display a listing of class types.

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 
 class DatabaseSeederNonTenancy extends Seeder
 {
@@ -16,8 +17,8 @@ class DatabaseSeederNonTenancy extends Seeder
         $this->call(BloodGroupsTableSeeder::class);
         // Not tenancy specific seeders
         $this->call(NonTenancySettingsTableSeeder::class);
+        Artisan::call('permission-kit:sync', ['--context' => 'central']);
         $this->call(NonTenancyRolesTableSeeder::class);
-        $this->call(NonTenancyPermissionsTableSeeder::class);
         $this->call(NonTenancyUsersTableSeeder::class);
         $this->call(NonTenancyStaffRecordsTableSeeder::class);
     }

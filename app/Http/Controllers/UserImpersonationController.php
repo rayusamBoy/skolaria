@@ -10,10 +10,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\View\View;
+use PermissionKit\Attributes\SkipPermission;
+use PermissionKit\Concerns\AuthorizesPermissions;
 use Stancl\Tenancy\Features\UserImpersonation;
 
 class UserImpersonationController extends Controller
 {
+    use AuthorizesPermissions;
+
     public function __construct(
         protected UserRepo $user,
         protected TenantRepo $tenant
@@ -47,6 +51,7 @@ class UserImpersonationController extends Controller
         }
     }
 
+    #[SkipPermission]
     public function redirect_to_impersonation_route(string $tenant_id, int $user_id): RedirectResponse
     {
         $tenant = $this->tenant->findOrFailTenant($tenant_id);

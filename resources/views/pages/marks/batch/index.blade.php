@@ -22,10 +22,10 @@
         </div>
     </div>
 
-    @includeWhen(auth()->user()->can($tenant_permissions['marks']['initialize_marks']['permission']), 'pages/marks/batch/initialize')
-    @includeWhen(auth()->user()->can($tenant_permissions['marks']['batch_template']['permission']), 'pages/marks/batch/template')
-    @includeWhen(auth()->user()->can($tenant_permissions['marks']['batch_upload']['permission']), 'pages/marks/batch/upload')
-    @includeWhen(auth()->user()->can($tenant_permissions['marks']['batch_update']['permission']), 'pages/marks/batch/update')
-    @includeWhen(auth()->user()->can($tenant_permissions['marks']['batch_delete']['permission']), 'pages/marks/batch/delete')
+    @includeWhen(auth()->user()->can('marks.initialize_marks'), 'pages/marks/batch/initialize')
+    @includeWhen(auth()->user()->can('marks.batch_template'), 'pages/marks/batch/template')
+    @includeWhen(auth()->user()->can('marks.batch_upload'), 'pages/marks/batch/upload')
+    @includeWhen(auth()->user()->can('marks.batch_update'), 'pages/marks/batch/update')
+    @includeWhen(auth()->user()->can('marks.batch_delete'), 'pages/marks/batch/delete')
 
 @endsection

@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($tenant_permissions['subjects']['edit']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['subjects']['destroy']['permission']);
+        $canEdit = auth()->user()->can('subjects.edit');
+        $canDelete = auth()->user()->can('subjects.destroy');
         $hasActions = $canEdit || $canDelete;
     @endphp
 
@@ -28,14 +28,14 @@
                     </div>
                 </li>
                 {{-- Create Subject --}}
-                @can($tenant_permissions['subjects']['store']['permission'])
+                @can('subjects.store')
                     <li class="nav-item"><a href="#new-subject" class="nav-link" data-toggle="tab">Add Subject</a></li>
                 @endcan
             </ul>
 
             {{-- Create Subject Tab --}}
             <div class="tab-content">
-                @can($tenant_permissions['subjects']['store']['permission'])
+                @can('subjects.store')
                     <div class="tab-pane fade" id="new-subject">
                         <div class="row">
                             <div class="col-md-8">

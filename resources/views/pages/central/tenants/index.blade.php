@@ -4,10 +4,10 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($central_permissions['tenants']['edit']['permission']);
-        $canShow = auth()->user()->can($central_permissions['tenants']['show']['permission']);
-        $canDelete = auth()->user()->can($central_permissions['tenants']['destroy']['permission']);
-        $canRunCommand = auth()->user()->can($central_permissions['tenants']['run_command']['permission']);
+        $canEdit = auth()->user()->can('central.tenants.edit');
+        $canShow = auth()->user()->can('central.tenants.show');
+        $canDelete = auth()->user()->can('central.tenants.destroy');
+        $canRunCommand = auth()->user()->can('central.tenants.run_command');
         $hasActions = $canEdit || $canShow || $canDelete || $canRunCommand;
     @endphp
 
@@ -16,7 +16,7 @@
             <h6 class="card-title">Manage Tenants</h6>
             <div class="header-elements pt-0">
                 <div class="list-icons">
-                    @if (auth()->user()->can($central_permissions['master_data_syncs']['sync']['permission']) && config('tenancy.active_identification_mode') === 'request_data')
+                    @if (auth()->user()->can('master_data_syncs.sync') && config('tenancy.active_identification_mode') === 'request_data')
                         <a
                             class="list-icons-item"
                             href="{{ route('master_data_sync.index') }}"
@@ -34,13 +34,13 @@
                 <li class="nav-item">
                     <a href="#manage-tenants" class="nav-link active" data-toggle="tab">Manage Tenants</a>
                 </li>
-                @can($central_permissions['tenants']['store']['permission'])
+                @can('central.tenants.store')
                     <li class="nav-item"><a href="#new-tenant" class="nav-link" data-toggle="tab">Create Tenant</a></li>
                 @endcan
             </ul>
 
             <div class="tab-content">
-                @can($central_permissions['tenants']['store']['permission'])
+                @can('central.tenants.store')
                     <div class="tab-pane fade" id="new-tenant">
                         <form
                             class="ajax-store"
@@ -280,10 +280,19 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a
-                                            href="{{ Qs::formatDomain($tenant->domain->domain ?? $tenant->domain) ?? url('/') . "/slug/{$tenant->tenant_slug}" }}"
-                                            target="_blank"
-                                        >{{ Qs::formatDomain($tenant->domain->domain ?? $tenant->domain) ?? url('/') . "/slug/{$tenant->tenant_slug}" }}</a>
+                                        @php
+                                            $tenantDomain = $tenant->domain->domain ?? $tenant->domain;
+                                        @endphp
+                                        @if ($tenantDomain)
+                                            <a
+                                                href="{{ Qs::formatDomain($tenantDomain) }}"
+                                                target="_blank"
+                                            >{{ Qs::formatDomain($tenantDomain) }}</a>
+                                        @elseif ($tenant->tenant_entry_domain)
+                                            <span class="text-muted">{{ $tenant->tenant_entry_domain }} / {{ $tenant->tenant_slug }}</span>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
                                     </td>
                                     <td>{{ $tenant->created_at->diffForHumans() }}</td>
                                     <td>{{ $tenant->updated_at->diffForHumans() }}</td>

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Central;
 
-use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Usr;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserBlockedState;
@@ -17,18 +16,19 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use PermissionKit\Attributes\SkipPermission;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class UserController extends Controller
 {
+    use AuthorizesPermissions;
+
     public function __construct(
         protected UserRepo $user,
         protected LocationRepo $loc,
         protected MyClassRepo $my_class,
         protected PermissionRepo $permission
-    ) {
-        $this->permissionMap = config('permissions.names.central.central_users');
-        parent::__construct();
-    }
+    ) {}
 
     /**
      * Display list of central users.

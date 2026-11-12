@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Usr;
 use App\Http\Requests\UserBlockedState;
 use App\Http\Requests\UserRequest;
@@ -18,9 +17,13 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use PermissionKit\Attributes\SkipPermission;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class UserController extends Controller
 {
+    use AuthorizesPermissions;
+
     public function __construct(
         protected UserRepo $user,
         protected StudentRepo $student,
@@ -28,10 +31,7 @@ class UserController extends Controller
         protected MyClassRepo $my_class,
         protected PermissionRepo $permission,
         protected UserService $userService
-    ) {
-        $this->permissionMap = config('permissions.names.tenant.users');
-        parent::__construct();
-    }
+    ) {}
 
     /**
      * Display list of tenant users.

@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $canViewProfile = auth()->user()->can($tenant_permissions['student_records']['show']['permission']);
-        $canManagePayments = auth()->user()->can($tenant_permissions['payments']['invoice']['permission']);
+        $canViewProfile = auth()->user()->can('student_records.show');
+        $canManagePayments = auth()->user()->can('payments.invoice');
         $hasActions = $canViewProfile || $canManagePayments;
     @endphp
 
@@ -16,7 +16,7 @@
         </div>
 
         <div class="card-body">
-            @can($tenant_permissions['payments']['select_class']['permission'])
+            @can('payments.select_class')
                 <form method="post" action="{{ route('payments.select_class') }}">
                     @csrf
                     <div class="row">

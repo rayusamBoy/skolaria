@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($tenant_permissions['dorms']['edit']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['dorms']['destroy']['permission']);
+        $canEdit = auth()->user()->can('dorms.edit');
+        $canDelete = auth()->user()->can('dorms.destroy');
         $hasActions = $canEdit || $canDelete;
     @endphp
 
@@ -21,7 +21,7 @@
                     <a href="#all-dorms" class="nav-link active" data-toggle="tab">Manage Dorms</a>
                 </li>
 
-                @can($tenant_permissions['dorms']['store']['permission'])
+                @can('dorms.store')
                     <li class="nav-item">
                         <a href="#new-dorm" class="nav-link" data-toggle="tab">Create New Dorm</a>
                     </li>
@@ -92,7 +92,7 @@
                     </table>
                 </div>
 
-                @can($tenant_permissions['dorms']['store']['permission'])
+                @can('dorms.store')
                     <div class="tab-pane fade" id="new-dorm">
                         <div class="row">
                             <div class="col-md-6">

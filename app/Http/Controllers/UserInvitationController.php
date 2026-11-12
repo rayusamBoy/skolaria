@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Qs;
 use App\Http\Requests\UserInviteRequest;
 use App\Http\Requests\UserRequest;
@@ -20,9 +19,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use PermissionKit\Attributes\SkipPermission;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class UserInvitationController extends Controller
 {
+    use AuthorizesPermissions;
+
     public function __construct(
         protected UserRepo $user,
         protected StudentRepo $student,
@@ -30,10 +33,7 @@ class UserInvitationController extends Controller
         protected MyClassRepo $my_class,
         protected PermissionRepo $permission,
         protected UserService $userService
-    ) {
-        $this->permissionMap = config('permissions.names.tenant.users');
-        parent::__construct();
-    }
+    ) {}
 
     public function view_registrations(): View
     {

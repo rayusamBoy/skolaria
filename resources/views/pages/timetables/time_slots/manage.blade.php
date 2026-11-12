@@ -6,8 +6,8 @@
 
     <div class="card-body collapse">
         @php
-            $canEdit = auth()->user()->can($tenant_permissions['time_tables']['edit_time_slot']['permission']);
-            $canDelete = auth()->user()->can($tenant_permissions['time_tables']['delete_time_slot']['permission']);
+            $canEdit = auth()->user()->can('time_tables.edit_time_slot');
+            $canDelete = auth()->user()->can('time_tables.delete_time_slot');
             $hasActions = $canEdit || $canDelete;
         @endphp
 

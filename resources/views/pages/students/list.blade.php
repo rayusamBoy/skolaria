@@ -8,16 +8,16 @@
 @section('content')
     @php
         // Pre‑compute all relevant permissions for this view
-        $canViewProfile = auth()->user()->can($tenant_permissions['student_records']['show']['permission']);
-        $canEdit = auth()->user()->can($tenant_permissions['student_records']['edit']['permission']);
-        $canResetPassword = auth()->user()->can($tenant_permissions['student_records']['reset_password']['permission']);
-        $canMarksheet = auth()->user()->can($tenant_permissions['marks']['year_selector']['permission']);
-        $canAssessmentsheet = auth()->user()->can($tenant_permissions['assessments']['show']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['users']['destroy']['permission']);
+        $canViewProfile = auth()->user()->can('student_records.show');
+        $canEdit = auth()->user()->can('student_records.edit');
+        $canResetPassword = auth()->user()->can('student_records.reset_password');
+        $canMarksheet = auth()->user()->can('marks.year_selector');
+        $canAssessmentsheet = auth()->user()->can('assessments.show');
+        $canDelete = auth()->user()->can('users.destroy');
 
         // Block/Unblock permissions
-        $canBlockAll = auth()->user()->can($tenant_permissions['student_records']['block_all_class']['permission']);
-        $canUnblockAll = auth()->user()->can($tenant_permissions['student_records']['unblock_all_class']['permission']);
+        $canBlockAll = auth()->user()->can('student_records.block_all_class');
+        $canUnblockAll = auth()->user()->can('student_records.unblock_all_class');
         $canToggleBlock = $canBlockAll || $canUnblockAll;
 
         // Does the user have any action at all?

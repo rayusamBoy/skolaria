@@ -8,16 +8,15 @@ use App\Http\Requests\Analytic\Request as AnalyticRequest;
 use App\Repositories\SettingRepo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 use Spatie\Analytics\Facades\Analytics;
 use Spatie\Analytics\Period;
 
 class AnalyticController extends Controller
 {
-    public function __construct(protected SettingRepo $setting)
-    {
-        $this->permissionMap = config('permissions.names.tenant.analytics');
-        parent::__construct();
-    }
+    use AuthorizesPermissions;
+
+    public function __construct(protected SettingRepo $setting) {}
 
     /**
      * Display the analytics dashboard, optionally filtered by period.

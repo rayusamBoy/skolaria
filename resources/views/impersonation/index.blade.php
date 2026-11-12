@@ -19,7 +19,9 @@
                             <th>S/N</th>
                             <th>Name</th>
                             <th>Domain / Entry</th>
-                            <th class="text-center">Action</th>
+                            @can('user_impersonation.impersonate')
+                                <th class="text-center">Action</th>
+                            @endcan
                         </tr>
                     </thead>
                     <tbody>
@@ -28,31 +30,36 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $tenant->name }}</td>
                                 <td>
-                                    @if ($tenant->domain)
+                                    @php
+                                        $tenantDomain = $tenant->domain->domain ?? $tenant->domain;
+                                    @endphp
+                                    @if ($tenantDomain)
                                         <a
-                                            href="{{ Qs::formatDomain($tenant->domain->domain ?? $tenant->domain) }}"
+                                            href="{{ Qs::formatDomain($tenantDomain) }}"
                                             target="_blank"
-                                        >{{ Qs::formatDomain($tenant->domain->domain ?? $tenant->domain) }}</a>
+                                        >{{ Qs::formatDomain($tenantDomain) }}</a>
                                     @elseif ($tenant->tenant_entry_domain)
                                         <span class="text-muted">{{ $tenant->tenant_entry_domain }} / {{ $tenant->tenant_slug }}</span>
                                     @else
                                         <span class="text-muted">—</span>
                                     @endif
                                 </td>
-                                <td class="text-center">
-                                    @if ($current_tenant_id == $tenant->id)
-                                        <span class="btn btn-secondary disabled btn-sm">
-                                            <i class="material-symbols-rounded mr-1">blur_on</i> Current
-                                        </span>
-                                    @else
-                                        <a
-                                            href="{{ route('tenant.impersonation.redirect', ['tenant_id' => $tenant->id, 'user_id' => $tenant_super_admin_user_id]) }}"
-                                            class="btn btn-primary btn-sm"
-                                        >
-                                            <i class="material-symbols-rounded mr-1">login</i> Login As SuperAdmin
-                                        </a>
-                                    @endif
-                                </td>
+                                @can('user_impersonation.impersonate')
+                                    <td class="text-center">
+                                        @if ($current_tenant_id == $tenant->id)
+                                            <span class="btn btn-secondary disabled btn-sm">
+                                                <i class="material-symbols-rounded mr-1">blur_on</i> Current
+                                            </span>
+                                        @else
+                                            <a
+                                                href="{{ route('tenant.impersonation.redirect', ['tenant_id' => $tenant->id, 'user_id' => $tenant_super_admin_user_id]) }}"
+                                                class="btn btn-primary btn-sm"
+                                            >
+                                                <i class="material-symbols-rounded mr-1">login</i> Login As SuperAdmin
+                                            </a>
+                                        @endif
+                                    </td>
+                                @endcan
                             </tr>
                         @endforeach
                     </tbody>

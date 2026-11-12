@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,7 +19,7 @@ class DatabaseSeeder extends Seeder
         $this->call(TenancyExamCategoriesTableSeeder::class);
         $this->call(TenancySkillsTableSeeder::class);
         $this->call(TenancySettingsTableSeeder::class);
-        $this->call(TenancyPermissionsTableSeeder::class);
+        Artisan::call('permission-kit:sync', ['--context' => 'tenant']);
         $this->call(TenancyRolesTableSeeder::class);
         $this->call(TenancyUsersTableSeeder::class);
         $this->call(TenancyStaffRecordsTableSeeder::class);

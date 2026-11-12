@@ -4,11 +4,11 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($central_permissions['central_users']['edit']['permission']);
-        $canShow = auth()->user()->can($central_permissions['central_users']['show']['permission']);
-        $canResetPassword = auth()->user()->can($central_permissions['central_users']['reset_password']['permission']);
-        $canDelete = auth()->user()->can($central_permissions['central_users']['destroy']['permission']);
-        $canToggleBlock = auth()->user()->can($central_permissions['central_users']['toggle_user_block']['permission']);
+        $canEdit = auth()->user()->can('central.central_users.edit');
+        $canShow = auth()->user()->can('central.central_users.show');
+        $canResetPassword = auth()->user()->can('central.central_users.reset_password');
+        $canDelete = auth()->user()->can('central.central_users.destroy');
+        $canToggleBlock = auth()->user()->can('central.central_users.toggle_user_block');
         $hasActions = $canEdit || $canShow || $canResetPassword || $canDelete;
     @endphp
 
@@ -33,13 +33,13 @@
                         @endforeach
                     </div>
                 </li>
-                @can($central_permissions['central_users']['store']['permission'])
+                @can('central.central_users.store')
                     <li class="nav-item"><a href="#new-user" class="nav-link" data-toggle="tab">Create New User</a></li>
                 @endcan
             </ul>
 
             <div class="tab-content">
-                @can($central_permissions['central_users']['store']['permission'])
+                @can('central.central_users.store')
                     <div class="tab-pane fade" id="new-user">
                         <form
                             method="post"

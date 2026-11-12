@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $canReset = auth()->user()->can($tenant_permissions['payments']['reset_record']['permission']);
-        $canReceipt = auth()->user()->can($tenant_permissions['payments']['receipts']['permission']);
+        $canReset = auth()->user()->can('payments.reset_record');
+        $canReceipt = auth()->user()->can('payments.receipts');
         $hasActions = $canReset || $canReceipt;
     @endphp
 

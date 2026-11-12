@@ -5,11 +5,11 @@
 @section('content')
     @php
         // Pre‑compute permissions for Login Histories
-        $canViewProfile = auth()->user()->can($tenant_permissions['users']['show']['permission']);
+        $canViewProfile = auth()->user()->can('users.show');
         $hasLoginActions = $canViewProfile;
 
         // Pre‑compute permissions for Activity Logs
-        $canDeleteActivity = auth()->user()->can($tenant_permissions['logs']['delete_activity']['permission']);
+        $canDeleteActivity = auth()->user()->can('logs.delete_activity');
     @endphp
 
     {{-- Login Histories --}}
@@ -191,7 +191,7 @@
             </table>
         </div>
 
-        @can($tenant_permissions['logs']['clean_activity_log']['permission'])
+        @can('logs.clean_activity_log')
             <div class="m-2">
                 <button
                     class="btn btn-danger float-right"

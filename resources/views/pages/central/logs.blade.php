@@ -5,11 +5,11 @@
 @section('content')
     @php
         // Pre‑compute permissions for Login Histories
-        $canViewProfile = auth()->user()->can($central_permissions['central_users']['show']['permission']);
+        $canViewProfile = auth()->user()->can('central.central_users.show');
         $hasLoginActions = $canViewProfile;
 
         // Pre‑compute permissions for Activity Logs
-        $canDeleteActivity = auth()->user()->can($central_permissions['central_logs']['delete_activity']['permission']);
+        $canDeleteActivity = auth()->user()->can('central.central_logs.delete_activity');
     @endphp
 
     {{-- Login Histories --}}

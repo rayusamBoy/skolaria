@@ -19,8 +19,8 @@
 
 {{-- Users & Roles --}}
 @canany([
-    ...array_column($central_permissions['central_users'], 'permission'),
-    ...array_column($central_permissions['roles'], 'permission'),
+    'central.users.view',
+    'roles.view',
 ])
     <li class="nav-item nav-item-submenu {{ request()->routeIs('central_users.*','roles.*') ? 'nav-item-expanded nav-item-open' : '' }}">
         <a href="#" class="nav-link">
@@ -28,7 +28,7 @@
             <span>Users & Roles</span>
         </a>
         <ul class="nav nav-group-sub" data-submenu-title="Users & Roles">
-            @canany(array_column($central_permissions['central_users'], 'permission'))
+            @can('central.users.view')
                 <li class="nav-item">
                     <a
                         href="{{ route('central_users.index') }}"
@@ -37,8 +37,8 @@
                         Users
                     </a>
                 </li>
-            @endcanany
-            @can($central_permissions['roles']['index']['permission'])
+            @endcan
+            @can('central.roles.view')
                 <li class="nav-item">
                     <a
                         href="{{ route('roles.index') }}"
@@ -53,17 +53,17 @@
 @endcanany
 
 {{-- Tenants --}}
-@canany(array_column($central_permissions['tenants'], 'permission'))
+@can('central.tenants.view')
     <li class="nav-item">
         <a href="{{ route('tenants.index') }}" class="nav-link {{ request()->routeIs('tenants.*') ? 'active' : '' }}">
             <i class="material-symbols-rounded">manage_accounts</i>
             <span>Tenants</span>
         </a>
     </li>
-@endcanany
+@endcan
 
 {{-- Support --}}
-@canany(array_column($central_permissions['tickets'], 'permission'))
+@can(['tickets.index_central'])
     <li class="nav-item nav-item-submenu {{ request()->routeIs('tickets.index_central') ? 'nav-item-expanded nav-item-open' : '' }}">
         <a href="#" class="nav-link">
             <i class="material-symbols-rounded">support</i>
@@ -80,10 +80,10 @@
             </li>
         </ul>
     </li>
-@endcanany
+@endcan
 
 {{-- Settings --}}
-@can($central_permissions['settings_non_tenancy']['index']['permission'])
+@can('central.settings.view')
     <li class="nav-item">
         <a
             href="{{ route('settings_non_tenancy.index') }}"

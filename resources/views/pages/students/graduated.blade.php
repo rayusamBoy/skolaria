@@ -28,13 +28,13 @@
                 {{-- All Graduates --}}
                 <div class="tab-pane fade show active" id="all-students">
                     {{-- Bulk Block/Unblock --}}
-                    @canany([$tenant_permissions['student_records']['block_all_graduated']['permission'], $tenant_permissions['student_records']['unblock_all_graduated']['permission']])
+                    @canany(['student_records.block_all_graduated', 'student_records.unblock_all_graduated'])
                         @php
                             $unique_blocked_values = $grad_students->pluck('user')->pluck('is_blocked')->unique();
                         @endphp
                         <div class="card mb-3">
                             <div class="card-body text-center">
-                                @can($tenant_permissions['student_records']['block_all_graduated']['permission'])
+                                @can('student_records.block_all_graduated')
                                     <button
                                         id="students-block-all-gradudated"
                                         @disabled($grad_students->isEmpty() || $unique_blocked_values->hasSole(fn ($value, $key) => (bool) $value === true))
@@ -44,7 +44,7 @@
                                     </button>
                                 @endcan
 
-                                @can($tenant_permissions['student_records']['unblock_all_graduated']['permission'])
+                                @can('student_records.unblock_all_graduated')
                                     <button
                                         id="students-unblock-all-graduated"
                                         @disabled($grad_students->isEmpty() || $unique_blocked_values->hasSole(fn ($value, $key) => (bool) $value === false))
@@ -89,7 +89,7 @@
                                     <td>{{ $gs->from_session }}</td>
                                     <td>{{ $gs->remarks }}</td>
 
-                                    @if (auth()->user()->canAny([$tenant_permissions['student_records']['block_all_graduated']['permission'], $tenant_permissions['student_records']['unblock_all_graduated']['permission']]))
+                                    @if (auth()->user()->canAny(['student_records.block_all_graduated', 'student_records.unblock_all_graduated']))
                                         <td>
                                             <label class="form-switch m-0">
                                                 <input

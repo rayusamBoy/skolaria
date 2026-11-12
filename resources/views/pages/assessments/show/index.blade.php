@@ -17,7 +17,7 @@
                 <h6 class="font-weight-bold">Assessments - {{ $as->exam->name . ' - ' . $as->exam->year }}</h6>
                 <div class="header-elements pt-0">
                     <div class="list-icons">
-                        @if (auth()->user()->canAny([$tenant_permissions['assessments']['print_cover']['permission'], $tenant_permissions['assessments']['print_minimal']['permission'], $tenant_permissions['assessments']['print_detailed']['permission']]))
+                        @if (auth()->user()->canAny(['assessments.print_cover', 'assessments.print_minimal', 'assessments.print_detailed']))
                             <a
                                 class="list-icons-item"
                                 target="_blank"
@@ -27,7 +27,7 @@
                                 data-action="print"
                             ></a>
                             <div class="dropdown-menu">
-                                @can($tenant_permissions['assessments']['print_cover']['permission'])
+                                @can('assessments.print_cover')
                                     <a
                                         target="_blank"
                                         href="{{ route('assessments.print_cover', Qs::hash($student_id)) }}"
@@ -36,7 +36,7 @@
                                         Print Cover
                                     </a>
                                 @endcan
-                                @can($tenant_permissions['assessments']['print_minimal']['permission'])
+                                @can('assessments.print_minimal')
                                     <a
                                         target="_blank"
                                         href="{{ route('assessments.print_minimal', [Qs::hash($student_id), $as->id, $year]) }}"
@@ -45,7 +45,7 @@
                                         Print Minimal
                                     </a>
                                 @endcan
-                                @can($tenant_permissions['assessments']['print_detailed']['permission'])
+                                @can('assessments.print_detailed')
                                     <a
                                         target="_blank"
                                         href="{{ route('assessments.print_detailed', [Qs::hash($student_id), $as->id, $year]) }}"
@@ -65,14 +65,14 @@
 
             <div class="card-body collapse">
                 {{-- Sheet Table --}}
-                @includeWhen(auth()->user()->can($tenant_permissions['assessments']['show']['permission']), 'pages.assessments.show.sheet')
+                @includeWhen(auth()->user()->can('assessments.show'), 'pages.assessments.show.sheet')
             </div>
         </div>
 
         {{-- Assessment Comments --}}
-        @includeWhen(auth()->user()->can($tenant_permissions['assessments']['comment_update']['permission']), 'pages.assessments.show.comments')
+        @includeWhen(auth()->user()->can('assessments.comment_update'), 'pages.assessments.show.comments')
         {{-- Skill Rating --}}
-        @includeWhen(auth()->user()->can($tenant_permissions['assessments']['skills_update']['permission']), 'pages.assessments.show.skills')
+        @includeWhen(auth()->user()->can('assessments.skills_update'), 'pages.assessments.show.skills')
 
     @endforeach
 

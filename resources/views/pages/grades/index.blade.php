@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($tenant_permissions['grades']['edit']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['grades']['destroy']['permission']);
+        $canEdit = auth()->user()->can('grades.edit');
+        $canDelete = auth()->user()->can('grades.destroy');
         $hasActions = $canEdit || $canDelete;
     @endphp
 
@@ -20,7 +20,7 @@
                 <li class="nav-item">
                     <a href="#all-grades" class="nav-link active" data-toggle="tab">Manage Grades</a>
                 </li>
-                @can($tenant_permissions['grades']['store']['permission'])
+                @can('grades.store')
                     <li class="nav-item"><a href="#new-grade" class="nav-link" data-toggle="tab">Add Grade</a></li>
                 @endcan
             </ul>
@@ -117,7 +117,7 @@
                     </table>
                 </div>
 
-                @can($tenant_permissions['grades']['store']['permission'])
+                @can('grades.store')
                     <div class="tab-pane fade" id="new-grade">
                         <div class="row">
                             <div class="col-md-12">

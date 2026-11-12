@@ -12,9 +12,12 @@ use App\Repositories\UserRepo;
 use App\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class SoftDeleteController extends Controller
 {
+    use AuthorizesPermissions;
+
     protected string $year;   // not actively used in this controller
 
     public function __construct(
@@ -24,8 +27,6 @@ class SoftDeleteController extends Controller
         protected ExamRepo $exam,
         protected StudentRepo $student
     ) {
-        $this->permissionMap = config('permissions.names.tenant.soft_deletes');
-        parent::__construct();
         $this->year = Usr::getCurrentSession();
     }
 

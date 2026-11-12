@@ -16,15 +16,16 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class PaymentController extends Controller
 {
+    use AuthorizesPermissions;
+
     protected string $year;
 
     public function __construct(protected MyClassRepo $my_class, protected PaymentRepo $pay, protected StudentRepo $student)
     {
-        $this->permissionMap = config('permissions.names.tenant.payments');
-        parent::__construct();
         $this->year = Qs::getCurrentSession();
     }
 

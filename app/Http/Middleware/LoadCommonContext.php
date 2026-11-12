@@ -28,8 +28,6 @@ class LoadCommonContext
             'user_preferences' => $preferences,
             'my_classes' => $my_classes,
             'settings' => $settings,
-            'tenant_permissions' => config('permissions.names.tenant', []),
-            'central_permissions' => config('permissions.names.central', []),
             'current_tenant_id' => tenant()?->getTenantKey() ?? null,
             'is_tenant_context' => $is_tenant_context,
         ]);

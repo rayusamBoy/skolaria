@@ -11,15 +11,14 @@ use App\Repositories\TenantRepo;
 use App\Repositories\UserRepo;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use PermissionKit\Concerns\AuthorizesPermissions;
 use Stancl\Tenancy\Resolvers\DomainTenantResolver;
 
 class TenantController extends Controller
 {
-    public function __construct(protected TenantRepo $tenant, protected UserRepo $user, protected SettingRepo $setting)
-    {
-        $this->permissionMap = config('permissions.names.central.tenants');
-        parent::__construct();
-    }
+    use AuthorizesPermissions;
+
+    public function __construct(protected TenantRepo $tenant, protected UserRepo $user, protected SettingRepo $setting) {}
 
     /**
      * Display a listing of the resource.

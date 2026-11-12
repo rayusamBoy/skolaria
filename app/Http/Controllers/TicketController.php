@@ -12,14 +12,13 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class TicketController extends Controller
 {
-    public function __construct(protected TicketRepo $ticket, protected UserRepo $user)
-    {
-        $this->permissionMap = config('permissions.names.tenant.tickets');
-        parent::__construct();
-    }
+    use AuthorizesPermissions;
+
+    public function __construct(protected TicketRepo $ticket, protected UserRepo $user) {}
 
     /**
      * Priorities valid for a ticket.

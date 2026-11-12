@@ -48,7 +48,7 @@
                     </table>
                 </div>
 
-                @can($tenant_permissions['schedules']['create_event']['permission'])
+                @can('schedules.create_event')
                     <button class="btn btn-info btn-sm float-right" id="add-button">Add Event</button>
                 @endcan
             </div>

@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $canAssign = auth()->user()->can($tenant_permissions['subjects']['update_record']['permission']);
-        $canGenerate = auth()->user()->can($tenant_permissions['exams']['store']['permission']);
+        $canAssign = auth()->user()->can('subjects.update_record');
+        $canGenerate = auth()->user()->can('exams.store');
     @endphp
 
     <div class="card">
@@ -63,12 +63,12 @@
                 <button type="button" id="load-exam-numbers-btn" class="btn btn-primary">
                     <i class="material-symbols-rounded mr-1">refresh</i> Load Students
                 </button>
-                @if ($tenant_permissions['exams']['generate_exam_numbers']['permission'])
+                @if ('exams.generate_exam_numbers')
                     <button type="button" id="generate-exam-numbers-btn" class="btn btn-success" disabled>
                         <i class="material-symbols-rounded mr-1">autorenew</i> Generate Numbers
                     </button>
                 @endif
-                @if ($tenant_permissions['exams']['exam_numbers_save']['permission'])
+                @if ('exams.exam_numbers_save')
                     <button type="button" id="save-exam-numbers-btn" class="btn btn-info" disabled>
                         <i class="material-symbols-rounded mr-1">save</i> Save Changes
                     </button>

@@ -4,10 +4,10 @@
 
 @section('content')
     @php
-        $canViewProfile = auth()->user()->can($tenant_permissions['student_records']['show']['permission']);
-        $canMarksheet = auth()->user()->can($tenant_permissions['marks']['year_selector']['permission']);
-        $canAssessmentsheet = auth()->user()->can($tenant_permissions['assessments']['year_selector']['permission']);
-        $canPaymentStatus = auth()->user()->can($tenant_permissions['payments']['status']['permission']);
+        $canViewProfile = auth()->user()->can('student_records.show');
+        $canMarksheet = auth()->user()->can('marks.year_selector');
+        $canAssessmentsheet = auth()->user()->can('assessments.year_selector');
+        $canPaymentStatus = auth()->user()->can('payments.status');
         $hasActions = $canViewProfile || $canMarksheet || $canAssessmentsheet || $canPaymentStatus;
     @endphp
 

@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $canEditRecord = auth()->user()->can($tenant_permissions['subjects']['edit_record']['permission']);
-        $canDeleteRecord = auth()->user()->can($tenant_permissions['subjects']['delete_record']['permission']);
+        $canEditRecord = auth()->user()->can('subjects.edit_record');
+        $canDeleteRecord = auth()->user()->can('subjects.delete_record');
         $hasActions = $canEditRecord || $canDeleteRecord;
     @endphp
 
@@ -26,13 +26,13 @@
                         @endforeach
                     </div>
                 </li>
-                @can($tenant_permissions['subjects']['store_record']['permission'])
+                @can('subjects.store_record')
                     <li class="nav-item"><a href="#new-subject" class="nav-link" data-toggle="tab">Add Record</a></li>
                 @endcan
             </ul>
 
             <div class="tab-content">
-                @can($tenant_permissions['subjects']['store_record']['permission'])
+                @can('subjects.store_record')
                     <div class="tab-pane show fade" id="new-subject">
                         <div class="row">
                             <div class="col-md-12">

@@ -10,11 +10,14 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Throwable;
 
 class ArtisanCommandsController extends Controller
 {
+    use AuthorizesPermissions;
+
     /**
      * Command ID mapping for run_command action.
      */
@@ -24,11 +27,7 @@ class ArtisanCommandsController extends Controller
         '2' => 'tenants:seed',
     ];
 
-    public function __construct()
-    {
-        $this->permissionMap = config('permissions.names.central.artisan_commands');
-        parent::__construct();
-    }
+    public function __construct() {}
 
     /**
      * Display the Artisan commands dashboard.

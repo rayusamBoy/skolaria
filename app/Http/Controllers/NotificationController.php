@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Usr;
 use App\Notifications\NotificationMarkedAsRead;
 use App\Repositories\UserRepo;
@@ -12,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use NotificationChannels\Fcm\FcmChannel;
+use PermissionKit\Attributes\SkipPermission;
 
 class NotificationController extends Controller
 {

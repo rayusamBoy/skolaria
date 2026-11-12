@@ -11,14 +11,13 @@ use App\Repositories\UserRepo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class SectionController extends Controller
 {
-    public function __construct(protected MyClassRepo $my_class, protected UserRepo $user)
-    {
-        $this->permissionMap = config('permissions.names.tenant.sections');
-        parent::__construct();
-    }
+    use AuthorizesPermissions;
+
+    public function __construct(protected MyClassRepo $my_class, protected UserRepo $user) {}
 
     /**
      * Display a listing of sections.

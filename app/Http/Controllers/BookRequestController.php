@@ -10,14 +10,13 @@ use App\Repositories\UserRepo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class BookRequestController extends Controller
 {
-    public function __construct(protected BookRepo $book, protected UserRepo $user)
-    {
-        $this->permissionMap = config('permissions.names.tenant.book_requests');
-        parent::__construct();
-    }
+    use AuthorizesPermissions;
+
+    public function __construct(protected BookRepo $book, protected UserRepo $user) {}
 
     /**
      * Display a listing of book requests.

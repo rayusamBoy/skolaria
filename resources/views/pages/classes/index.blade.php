@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($tenant_permissions['my_classes']['edit']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['my_classes']['destroy']['permission']);
+        $canEdit = auth()->user()->can('my_classes.edit');
+        $canDelete = auth()->user()->can('my_classes.destroy');
         $hasActions = $canEdit || $canDelete;
     @endphp
 
@@ -21,7 +21,7 @@
                     <a href="#all-classes" class="nav-link active" data-toggle="tab">Manage Classes</a>
                 </li>
 
-                @can($tenant_permissions['my_classes']['store']['permission'])
+                @can('my_classes.store')
                     <li class="nav-item">
                         <a href="#new-class" class="nav-link" data-toggle="tab">Create New Class</a>
                     </li>
@@ -95,7 +95,7 @@
                     </table>
                 </div>
 
-                @can($tenant_permissions['my_classes']['store']['permission'])
+                @can('my_classes.store')
                     <div class="tab-pane fade" id="new-class">
                         <div class="row mb-3">
                             <div class="col-md-12">

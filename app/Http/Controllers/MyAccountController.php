@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Qs;
 use App\Helpers\Usr;
 use App\Http\Requests\UserChangePass;
@@ -14,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
+use PermissionKit\Attributes\SkipPermission;
 
 class MyAccountController extends Controller
 {

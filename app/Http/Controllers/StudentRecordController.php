@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Auth\Attributes\SkipPermission;
 use App\Exports\StudentsBatchAddExport;
 use App\Helpers\Usr;
 use App\Http\Requests\Student\StudentRecordCreate;
@@ -22,10 +21,15 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
+use PermissionKit\Attributes\SkipPermission;
+use PermissionKit\Attributes\SkipPermission as AttributesSkipPermission;
+use PermissionKit\Concerns\AuthorizesPermissions;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class StudentRecordController extends Controller
 {
+    use AuthorizesPermissions;
+
     protected string $students_batch_file_name_description;
 
     protected string $session;
@@ -36,8 +40,6 @@ class StudentRecordController extends Controller
         protected UserRepo $user,
         protected StudentRepo $student,
     ) {
-        $this->permissionMap = config('permissions.names.tenant.student_records');
-        parent::__construct();
         $this->students_batch_file_name_description = 'students batch add template';
         $this->session = Usr::getCurrentSession();
     }
@@ -146,6 +148,7 @@ class StudentRecordController extends Controller
     /**
      * Get user record headings.
      */
+    #[AttributesSkipPermission]
     public static function getUserHeadings(bool $values_only = true): array
     {
         return Usr::getUserRecordFields([], $values_only);

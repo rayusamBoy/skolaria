@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Auth\Attributes\SkipPermission;
 use App\Exports\MarksExport;
 use App\Helpers\Mk;
 use App\Helpers\Usr;
@@ -26,9 +25,13 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
+use PermissionKit\Attributes\SkipPermission;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class MarkController extends Controller
 {
+    use AuthorizesPermissions;
+
     protected string $year;
 
     public function __construct(
@@ -38,8 +41,6 @@ class MarkController extends Controller
         protected MarkRepo $mark,
         protected AssessmentRepo $assessment
     ) {
-        $this->permissionMap = config('permissions.names.tenant.marks');
-        parent::__construct();
         $this->year = Mk::getCurrentSession();
     }
 

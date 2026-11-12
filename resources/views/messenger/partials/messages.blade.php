@@ -19,7 +19,7 @@
 
         {{-- Super admin "delete" button for other people's messages --}}
         @if (! $isOwnMessage && $message->deleted_at === null)
-            @can($tenant_permissions['message_threads']['user_delete']['permission'])
+            @can('message_threads.user_delete')
                 <button
                     data-toggle="popover"
                     data-placement="right"

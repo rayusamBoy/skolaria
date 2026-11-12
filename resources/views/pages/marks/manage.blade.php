@@ -10,7 +10,7 @@
         </div>
 
         <div class="card-body">
-            @can($tenant_permissions['marks']['selector']['permission'])
+            @can('marks.selector')
                 @include('pages.marks.selector')
             @endcan
         </div>
@@ -35,7 +35,7 @@
                 </div>
             </div>
 
-            @php $is_restricted = $exam->is_locked && auth()->user()->cannot($tenant_permissions['marks']['update']['permission']) @endphp
+            @php $is_restricted = $exam->is_locked && auth()->user()->cannot('marks.update') @endphp
 
             <div class="card-body">
                 @include('pages.marks.edit')

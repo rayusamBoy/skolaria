@@ -4,14 +4,14 @@
 
 @section('content')
     @php
-        $canAnswer = auth()->user()->can($central_permissions['tickets']['answer']['permission']);
-        $canLock = auth()->user()->can($central_permissions['tickets']['lock_ticket']['permission']);
-        $canUnlock = auth()->user()->can($central_permissions['tickets']['unlock_ticket']['permission']);
-        $canDelete = auth()->user()->can($central_permissions['tickets']['delete']['permission']);
+        $canAnswer = auth()->user()->can('tickets.answer');
+        $canLock = auth()->user()->can('tickets.lock_ticket');
+        $canUnlock = auth()->user()->can('tickets.unlock_ticket');
+        $canDelete = auth()->user()->can('tickets.delete');
         $hasActions = $canAnswer || $canLock || $canUnlock || $canDelete;
     @endphp
 
-    @can($central_permissions['tickets']['update_properties']['permission'])
+    @can('tickets.update_properties')
         <div class="card card-collapsed card-ticket">
             <div class="card-header header-elements-inline">
                 <h6 class="card-title">Manage Properties</h6>

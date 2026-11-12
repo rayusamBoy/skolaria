@@ -4,9 +4,9 @@
 
 @section('content')
     @php
-        $canReply = auth()->user()->can($tenant_permissions['tickets']['reply']['permission']);
-        $canArchive = auth()->user()->can($tenant_permissions['tickets']['archive_ticket']['permission']);
-        $canUnarchive = auth()->user()->can($tenant_permissions['tickets']['unarchive_ticket']['permission']);
+        $canReply = auth()->user()->can('tickets.reply');
+        $canArchive = auth()->user()->can('tickets.archive_ticket');
+        $canUnarchive = auth()->user()->can('tickets.unarchive_ticket');
         $hasActions = $canReply || $canArchive;
     @endphp
 

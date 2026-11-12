@@ -10,15 +10,14 @@ use ColorThief\ColorThief;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class SettingController extends Controller
 {
-    public function __construct(protected SettingRepo $setting, protected MyClassRepo $my_class)
-    {
-        $this->permissionMap = config('permissions.names.central.settings_non_tenancy');
-        parent::__construct();
-    }
+    use AuthorizesPermissions;
+
+    public function __construct(protected SettingRepo $setting, protected MyClassRepo $my_class) {}
 
     /**
      * Display the central settings page.

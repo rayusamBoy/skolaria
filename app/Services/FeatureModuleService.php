@@ -36,7 +36,7 @@ class FeatureModuleService
         return $this->disabledCache = Cache::remember(
             $cacheKey,
             config('modules.cache_ttl', 3600),
-            function () {
+            function (): mixed {
                 $raw = $this->setting->get('disabled_modules');
 
                 return $raw ? array_filter(explode(',', $raw)) : [];

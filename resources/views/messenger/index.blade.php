@@ -7,7 +7,7 @@
 
     @each('messenger.partials.thread', $threads, 'thread', 'messenger.partials.no-threads')
 
-    @can($tenant_permissions['message_threads']['store']['permission'])
+    @can('message_threads.store')
         @include('messenger.create')
         <button
             type="button"

@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($tenant_permissions['roles']['edit']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['roles']['destroy']['permission']);
+        $canEdit = auth()->user()->can('roles.edit');
+        $canDelete = auth()->user()->can('roles.destroy');
         $rootRoles = Usr::getTenancyAwareRootRoles();
         $defaultRoles = Usr::getTenancyAwareDefaultRoles();
     @endphp
@@ -21,14 +21,14 @@
                 <li class="nav-item">
                     <a href="#manage-roles" class="nav-link active" data-toggle="tab">Manage Roles</a>
                 </li>
-                @can($tenant_permissions['roles']['store']['permission'])
+                @can('roles.store')
                     <li class="nav-item"><a href="#create-role" class="nav-link" data-toggle="tab">Create Role</a></li>
                 @endcan
             </ul>
 
             <div class="tab-content">
                 {{-- Create Role Tab --}}
-                @can($tenant_permissions['roles']['store']['permission'])
+                @can('roles.store')
                     <div class="tab-pane fade" id="create-role">
                         <form
                             method="POST"

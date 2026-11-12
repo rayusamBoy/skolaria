@@ -28,7 +28,7 @@
                                         <a target="_blank" href="{{ route('users.show', Qs::hash($pt->id)) }}"
                                             >{{ $loop->iteration }} &middot; {{ $pt->name }}</a>
                                     </li>
-                                    @can($tenant_permissions['message_threads']['remove_participant']['permission'])
+                                    @can('message_threads.remove_participant')
                                         <a
                                             onclick="
                                                 event.preventDefault();
@@ -55,7 +55,7 @@
                     </ul>
                 </div>
             </div>
-            @if ($thread->hasDirtyParticipant($thread->id) && auth()->user()->can($tenant_permissions['message_threads']['activate_all_participants']['permission']))
+            @if ($thread->hasDirtyParticipant($thread->id) && auth()->user()->can('message_threads.activate_all_participants'))
                 <div class="modal-footer">
                     <a
                         onclick="

@@ -9,14 +9,13 @@ use App\Repositories\DormRepo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class DormController extends Controller
 {
-    public function __construct(protected DormRepo $dorm)
-    {
-        $this->permissionMap = config('permissions.names.tenant.dorms');
-        parent::__construct();
-    }
+    use AuthorizesPermissions;
+
+    public function __construct(protected DormRepo $dorm) {}
 
     /**
      * Display a listing of dormitories.

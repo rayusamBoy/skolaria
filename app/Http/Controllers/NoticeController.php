@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Auth\Attributes\SkipPermission;
 use App\Helpers\Qs;
 use App\Http\Requests\Notice\NoticeCreate;
 use App\Http\Requests\Notice\NoticeSetAsViewed;
@@ -13,15 +12,17 @@ use App\Repositories\UserRepo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use PermissionKit\Attributes\SkipPermission;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class NoticeController extends Controller
 {
+    use AuthorizesPermissions;
+
     protected string $year;
 
     public function __construct(protected NoticeRepo $notice, protected UserRepo $user)
     {
-        $this->permissionMap = config('permissions.names.tenant.notices');
-        parent::__construct();
         $this->year = Qs::getCurrentSession();
     }
 

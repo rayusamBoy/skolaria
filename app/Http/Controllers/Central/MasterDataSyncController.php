@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers\Central;
 
-use App\Auth\Attributes\SkipPermission;
 use App\Http\Controllers\Controller;
 use App\Repositories\TenantRepo;
 use App\Services\SyncMasterDataService;
 use Illuminate\Http\Request;
+use PermissionKit\Attributes\SkipPermission;
+use PermissionKit\Concerns\AuthorizesPermissions;
 
 class MasterDataSyncController extends Controller
 {
-    public function __construct(protected TenantRepo $tenant)
-    {
-        $this->permissionMap = config('permissions.names.central.master_data_syncs');
-        parent::__construct();
-    }
+    use AuthorizesPermissions;
+
+    public function __construct(protected TenantRepo $tenant) {}
 
     /**
      * Display a listing of the resource.

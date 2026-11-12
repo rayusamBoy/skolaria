@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($tenant_permissions['sections']['edit']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['sections']['destroy']['permission']);
+        $canEdit = auth()->user()->can('sections.edit');
+        $canDelete = auth()->user()->can('sections.destroy');
         $hasActions = $canEdit || $canDelete;
     @endphp
 
@@ -27,7 +27,7 @@
                         @endforeach
                     </div>
                 </li>
-                @can($tenant_permissions['sections']['store']['permission'])
+                @can('sections.store')
                     <li class="nav-item">
                         <a href="#new-section" class="nav-link" data-toggle="tab">Create New Section</a>
                     </li>
@@ -36,7 +36,7 @@
 
             <div class="tab-content">
                 {{-- Create New Section --}}
-                @can($tenant_permissions['sections']['store']['permission'])
+                @can('sections.store')
                     <div class="tab-pane fade" id="new-section">
                         <div class="row">
                             <div class="col-md-6">

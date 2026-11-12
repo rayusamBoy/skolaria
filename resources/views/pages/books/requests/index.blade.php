@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($tenant_permissions['book_requests']['edit']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['book_requests']['destroy']['permission']);
+        $canEdit = auth()->user()->can('book_requests.edit');
+        $canDelete = auth()->user()->can('book_requests.destroy');
         $hasActions = $canEdit || $canDelete;
     @endphp
 
@@ -28,7 +28,7 @@
                 </li>
 
                 {{-- Only show the “Add Request” tab if the user can create requests --}}
-                @can($tenant_permissions['book_requests']['store']['permission'])
+                @can('book_requests.store')
                     <li class="nav-item">
                         <a href="#new-request" class="nav-link" data-toggle="tab">Add Request</a>
                     </li>
@@ -36,7 +36,7 @@
             </ul>
 
             <div class="tab-content">
-                @can($tenant_permissions['book_requests']['store']['permission'])
+                @can('book_requests.store')
                     <div class="tab-pane fade" id="new-request">
                         <form
                             method="post"

@@ -4,8 +4,8 @@
 
 @section('content')
     @php
-        $canEdit = auth()->user()->can($tenant_permissions['notices']['edit']['permission']);
-        $canDelete = auth()->user()->can($tenant_permissions['notices']['destroy']['permission']);
+        $canEdit = auth()->user()->can('notices.edit');
+        $canDelete = auth()->user()->can('notices.destroy');
         $hasActions = $canEdit || $canDelete;
     @endphp
 
@@ -26,14 +26,14 @@
                     >Manage Notices</a>
                 </li>
                 {{-- Add Notice --}}
-                @can($tenant_permissions['notices']['store']['permission'])
+                @can('notices.store')
                     <li class="nav-item">
                         <a href="#add-notice" class="nav-link" data-toggle="tab">Create Notice</a>
                     </li>
                 @endcan
                 {{-- Edit Notice --}}
                 @if ($edit)
-                    @can($tenant_permissions['notices']['edit']['permission'])
+                    @can('notices.edit')
                         <li class="nav-item">
                             <a
                                 href="#edit-notice"
@@ -47,7 +47,7 @@
 
             <div class="tab-content">
                 {{-- Add Notice --}}
-                @can($tenant_permissions['notices']['store']['permission'])
+                @can('notices.store')
                     <div class="tab-pane fade" id="add-notice">
                         <form
                             class="ajax-store"
@@ -95,7 +95,7 @@
                 @endcan
 
                 {{-- Manage Notices --}}
-                @can($tenant_permissions['notices']['index']['permission'])
+                @can('notices.view')
                     <div
                         class="{{ in_array(request()->route()->getName(), ['notices.edit']) ? 'tab-pane fade' : 'tab-pane fade show active' }}"
                         id="manage-notice"
@@ -106,7 +106,7 @@
                                     <th>S/N</th>
                                     <th>Title</th>
                                     <th>Body</th>
-                                    @can($tenant_permissions['users']['show']['permission'])
+                                    @can('users.show')
                                         <th>Creator</th>
                                     @endcan
                                     <th>Viewers</th>
@@ -123,7 +123,7 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td class="break-spaces break-all">{{ $ntc->title }}</td>
                                         <td class="break-spaces wmin-300 break-all">{{ $ntc->body }}</td>
-                                        @can($tenant_permissions['users']['show']['permission'])
+                                        @can('users.show')
                                             <td>
                                                 @php $user_id = $ntc->user->id @endphp
                                                 <a target="_blank" href="{{ route('users.show', Qs::hash($user_id)) }}">
@@ -197,7 +197,7 @@
 
                 {{-- Edit Notice --}}
                 @if ($edit)
-                    @can($tenant_permissions['notices']['edit']['permission'])
+                    @can('notices.edit')
                         <div
                             class="{{ in_array(request()->route()->getName(), ['notices.edit']) ? 'tab-pane fade show active' : 'tab-pane fade' }}"
                             id="edit-notice"
