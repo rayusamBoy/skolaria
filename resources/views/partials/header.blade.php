@@ -19,9 +19,9 @@
                     data-content="
                     <small>
                         <span class='text-default'>{{ config('app.name') }}</span><br />
-                        <em><i class='material-symbols-rounded text-default'>arrow_right</i><span class='text-default'>version: {{ config('app.version') }}</span></em><br />
+                        <em><i class='material-symbols-rounded'>arrow_right</i><span class='text-default'>version: {{ config('app.version') }}</span></em><br />
                     </small>"
-                    class="btn btn-link btn-float text-default"
+                    class="btn btn-link btn-float"
                 >
                     <i class="material-symbols-rounded text-primary">info</i>
                     <span class="d-none d-sm-block">About</span>
