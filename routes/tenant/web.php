@@ -386,11 +386,6 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
         // Resourceful controller for tickets
         Route::resource('tickets', TicketController::class);
     });
-
-    Route::prefix('session')->group(function () {
-        Route::get('status', [SessionController::class, 'status'])->name('session.status');
-        Route::post('heartbeat', [SessionController::class, 'heartbeat'])->name('session.heartbeat');
-    });
 });
 
 // Public registration routes (no auth)

@@ -13,6 +13,7 @@ use App\Http\Controllers\UserImpersonationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SessionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -88,6 +89,11 @@ Route::group(['middleware' => ['universal']], function () {
                 Route::put('update/notifiable', [NotificationController::class, 'update_notification_preferences'])->name('notifications.update.notification_preferences');
                 Route::match(['post', 'put', 'delete'], 'update/firebase/device-token', [NotificationController::class, 'update_firebase_device_token'])->name('notifications.firebase.update_device_token');
             });
+        });
+
+        Route::prefix('session')->group(function () {
+            Route::get('status', [SessionController::class, 'status'])->name('session.status');
+            Route::post('heartbeat', [SessionController::class, 'heartbeat'])->name('session.heartbeat');
         });
     });
 
