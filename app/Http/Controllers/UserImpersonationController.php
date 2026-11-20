@@ -32,7 +32,7 @@ class UserImpersonationController extends Controller
             return back();
         }
 
-        $tenants = $this->tenant->getAllTenants(false);
+        $tenants = $this->tenant->getAllTenants();
         $tenant_super_admin_user_id = 1;
 
         return view('impersonation.index', compact('tenants', 'tenant_super_admin_user_id'));

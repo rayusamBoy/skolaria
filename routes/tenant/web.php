@@ -11,6 +11,7 @@ use App\Http\Controllers\ChildrenController;
 use App\Http\Controllers\ClassTypeController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\DormController;
+use App\Http\Controllers\EntryController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\HomeController;
@@ -52,6 +53,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/impersonate/{token}', [UserImpersonationController::class, 'impersonate'])->name('tenant.impersonate');
+Route::post('tenant/logout', [EntryController::class, 'tenant_logout'])->name('tenant.logout');
 
 Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
     // Require 2FA for the routes below

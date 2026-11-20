@@ -225,7 +225,7 @@
                                         </div>
                                         <div class="alert alert-info">
                                             This school will be accessed via
-                                            <strong>the domain {{ url('/') }}</strong> using a cookie/header. A domain
+                                            <strong>the domain {{ url('/') }}</strong> using a cookie. A domain
                                             record is not created for this tenant.
                                         </div>
                                     </div>
@@ -268,6 +268,9 @@
                                             <span class="badge badge-success badge-default">Active</span>
                                         @else
                                             <span class="badge badge-secondary badge-default">New</span>
+                                        @endif
+                                        @if ($tenant?->is_template)
+                                            <span class="badge badge-info badge-default">Template</span>
                                         @endif
                                     </td>
                                     <td>{{ ucfirst($tenant->account_status) }}</td>

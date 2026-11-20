@@ -21,11 +21,16 @@ class MasterDataSyncController extends Controller
     #[SkipPermission]
     public function index()
     {
-        $this->validateRequestDataMode('domain');
+        $this->validateRequestDataMode(config('tenancy.active_identification_mode'));
 
         $tenants = $this->tenant->getAllTenants(false);
+
+        if ($tenants->where('is_template', '<>', 1)->isEmpty()) {
+            return redirect()->back()->with('flash_info', 'No target tenants found.');
+        }
+
         $tables = new SyncMasterDataService()->getSyncableTables();
-        $templateTenant = $this->tenant->whereTenantQuery(['data->is_template' => 1])->first();
+        $templateTenant = $tenants->where('is_template', 1)->first();
 
         return view('pages.central.master_data_sync', compact('tenants', 'tables', 'templateTenant'));
     }
@@ -35,7 +40,7 @@ class MasterDataSyncController extends Controller
      */
     public function sync(Request $request, SyncMasterDataService $service)
     {
-        $this->validateRequestDataMode('domain');
+        $this->validateRequestDataMode(config('tenancy.active_identification_mode'));
 
         $validated = $request->validate([
             'source_tenant_id' => 'required|exists:tenants,id',

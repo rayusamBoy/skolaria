@@ -21,13 +21,6 @@
                 @csrf
             </form>
         @endif
-        @if (config('tenancy.active_identification_mode') === 'request_data')
-            <li class="nav-item">
-                <a href="{{ route('entry.home') }}" class="navbar-nav-link text-color-custom"
-                    ><i class="material-symbols-rounded mr-2">school</i
-                    ><span class="d-none d-md-block">{{ 'Schools' }} </span></a>
-            </li>
-        @endif
         <li class="nav-item">
             <a href="{{ route('pages.privacy_policy') }}" class="navbar-nav-link text-color-custom" target="_blank"
                 ><i class="material-symbols-rounded mr-2">policy</i

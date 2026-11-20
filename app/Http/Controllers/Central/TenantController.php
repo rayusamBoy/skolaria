@@ -128,6 +128,8 @@ class TenantController extends Controller
             }
         } else {
             $data['tenant_slug'] = $request->tenant_slug;
+            $data['is_template'] = $request->is_template;
+            $data['lock_master_data'] = $request->lock_master_data;
         }
 
         $tenant->update($data);
