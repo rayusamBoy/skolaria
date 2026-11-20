@@ -747,7 +747,7 @@
                     @include('pages.central.menu')
                 @endif
 
-                @can('user_impersonation.view')
+                @can('user_impersonations.view')
                     @if ((session('impersonated_from_central') && $is_tenant_context) || ! $is_tenant_context && config('tenancy.allow_user_impersonation') === true)
                         <li class="nav-item">
                             <a
