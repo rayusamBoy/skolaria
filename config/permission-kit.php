@@ -116,6 +116,7 @@ return [
                 'App\\Http\\Controllers\\AnalyticController',
                 'App\\Http\\Controllers\\MyAccountController',
                 'App\\Http\\Controllers\\TicketController',
+                'App\\Http\\Controllers\\UserImpersonationController',
             ],
             'skip_names' => ['HomeController', 'AjaxController', 'CookieController', 'SessionController'],
             'skip_paths' => ['Controllers/Auth'],
