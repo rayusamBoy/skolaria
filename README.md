@@ -308,4 +308,4 @@ This project is based on the [lav_sms](https://github.com/4jean/lav_sms) project
 
 ## License
 
-The School Management System is open-sourced software licensed under the [MIT License](https://github.com/rayusamBoy/skolaria/blob/main/LICENSE).
+The School Management System is open-sourced software licensed under the [AGPL v3.0](https://github.com/rayusamBoy/skolaria/blob/main/LICENSE).
