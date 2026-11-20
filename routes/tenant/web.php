@@ -279,7 +279,7 @@ Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
             // Messages
             Route::delete('messages/{message}/user-delete', [MessageThreadController::class, 'user_delete_message'])->name('threads.messages.user_delete');
             Route::post('{thread}/messages/previous/{current_first_msg_id}', [MessageThreadController::class, 'load_previous_messages'])->name('threads.messages.previous');
-            Route::post('{thread}/add-message', [MessageThreadController::class, 'add_message'])->name('threads.messages.add');
+            Route::put('{thread}/add-message', [MessageThreadController::class, 'add_message'])->name('threads.messages.add');
         });
 
         /*************** Subject Record operations **********************/
