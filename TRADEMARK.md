@@ -13,8 +13,7 @@ grant any rights to the Skolaria name or logo.
 
 ## The Marks
 
-"Skolaria" and the Skolaria logo are trademarks of **[Your Name /
-Skolaria Ltd]**, referred to below as "we" or "us". Where a mark is
+"Skolaria" and the Skolaria logo are trademarks of **[Skolaria Ltd](https://skolaria.co.tz)**, referred to below as "we" or "us". Where a mark is
 used, it will appear with the ™ symbol: Skolaria™.
 
 We claim these marks to protect the project from confusion, not to
@@ -98,8 +97,7 @@ You must have a written agreement with us to:
   Skolaria name.
 
 If your intended use is commercial, or if you are unsure whether
-it is, email **hello@skolaria.co.tz** before proceeding. We generally
-respond within 3 business days, and we are usually happy to grant
+it is, email **rysmtulia07@gmail.com** before proceeding. We are usually happy to grant
 permission for commercial use when the request is clear and does not
 create confusion with the official project.
 
@@ -136,7 +134,7 @@ not about your internal installation.
 ## Reporting misuse
 
 If you believe someone is using the Skolaria marks in a way that
-breaches this policy, please email **hello@skolaria.co.tz** with:
+breaches this policy, please email **rysmtulia07@gmail.com** with:
 
 - A description of the use
 - A link or screenshot
@@ -159,6 +157,6 @@ please reach out. Most conversations are quick and friendly.
 
 ---
 
-**Last updated:** 2026-10-07
-**Contact:** hello@skolaria.co.tz
+**Last updated:** 2026-11-20
+**Contact:** rysmtulia07@gmail.com
 **Website:** https://skolaria.co.tz
