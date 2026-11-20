@@ -1,311 +1,485 @@
-<p align="center"><a href="https://github.com/rayusamBoy/skolaria" target="_blank"><img src="public/images/icons/skolaria-wordmark-horizontal.svg" height="120" alt="SMS Logo"></a></p>
+<p align="center">
+  <a href="https://github.com/rayusamBoy/skolaria">
+    <img src="public/images/icons/skolaria-wordmark-horizontal.svg" height="120" alt="Skolaria Logo">
+  </a>
+</p>
 
 <div align="center">
 
-[![License](https://img.shields.io/github/license/rayusamBoy/skolaria?label=license&style=flat-square)](https://github.com/rayusamBoy/skolaria/blob/main/LICENSE) [![GitHub issues](https://img.shields.io/github/issues/rayusamBoy/skolaria?label=issues&style=flat-square)](https://github.com/rayusamBoy/skolaria/issues) [![Contributors](https://img.shields.io/github/contributors/rayusamBoy/skolaria?label=contributors&style=flat-square)](https://github.com/rayusamBoy/skolaria/graphs/contributors) [![Last Commit](https://img.shields.io/github/last-commit/rayusamBoy/skolaria?label=last%20commit&style=flat-square)](https://github.com/rayusamBoy/skolaria/commits) [![Languages](https://img.shields.io/github/languages/count/rayusamBoy/skolaria?label=languages&style=flat-square)](https://github.com/rayusamBoy/skolaria)
+[![License](https://img.shields.io/github/license/rayusamBoy/skolaria?label=license&style=flat-square)](https://github.com/rayusamBoy/skolaria/blob/main/LICENSE)
+[![GitHub Issues](https://img.shields.io/github/issues/rayusamBoy/skolaria?label=issues&style=flat-square)](https://github.com/rayusamBoy/skolaria/issues)
+[![Contributors](https://img.shields.io/github/contributors/rayusamBoy/skolaria?label=contributors&style=flat-square)](https://github.com/rayusamBoy/skolaria/graphs/contributors)
+[![Last Commit](https://img.shields.io/github/last-commit/rayusamBoy/skolaria?label=last%20commit&style=flat-square)](https://github.com/rayusamBoy/skolaria/commits)
+[![Languages](https://img.shields.io/github/languages/count/rayusamBoy/skolaria?label=languages&style=flat-square)](https://github.com/rayusamBoy/skolaria)
 
 </div>
 
+# Skolaria – School Management System
+
 ## About
 
-The multi‑tenant, progressive web app (PWA) school management system powered by
-[Laravel 13](https://laravel.com), [Bootstrap 4](https://getbootstrap.com),
-[jQuery 3](https://jquery.com), and the
-[tenancyforlaravel package v4](https://v4.tenancyforlaravel.com), among others.
+**Skolaria** is a multi-tenant, Progressive Web App (PWA) School Management System powered by [Laravel 13](https://laravel.com), [Bootstrap 4](https://getbootstrap.com), [jQuery 3](https://jquery.com), and [Tenancy for Laravel v4](https://v4.tenancyforlaravel.com), among other technologies.
 
-This project provides a scalable, maintainable School Management System SaaS
-platform where each institution (tenant) has fully isolated data while sharing
-the same core codebase. Contributors are welcome to help improve features,
-fix issues, and enhance overall code quality.
+It provides a scalable and maintainable School Management System SaaS platform where multiple educational institutions operate independently while sharing the same core application and codebase.
+
+### Built for Multi-School Entities
+
+Beyond standard SaaS multi-tenancy, Skolaria is designed to support organizations managing multiple school branches.
+
+For example:
+
+- Peaceschool Academy – Main Campus
+- Peaceschool Academy – North Branch
+- Peaceschool Academy – South Branch
+
+Using `request_data` tenant identification and secure user impersonation, administrators can seamlessly switch between schools without requiring different domains or subdomains.
+
+Additionally, the built-in **Master Data Synchronization** service allows administrators to configure academic structures such as grades, divisions, subjects, and examination categories once and synchronize them across multiple schools.
+
+### Permission and Authorization
+
+Skolaria uses a custom permission and authorization package, **`laravel-permission-kit`**, developed as part of the project.
+
+The package source code is available within this repository:
+
+[`packages/laravel-permission-kit`](https://github.com/rayusamBoy/skolaria/tree/main/packages/laravel-permission-kit)
+
+> **Development status:** `laravel-permission-kit` is currently in its initial development stage. Although its source code is publicly accessible as part of the Skolaria repository, it has not yet been officially released as an independent Composer package. A standalone Composer release will be considered once the package has matured and is ready for wider adoption.
+
+---
+
+## Features
+
+<details>
+<summary><strong>View all features</strong></summary>
+
+### Multi-Tenancy and School Management
+
+- **Multi-School / Multi-Branch Support:** Manage multiple schools from a central context.
+- **Seamless School Switching:** Switch between schools using request-data tenant identification without changing domains.
+- **Secure Impersonation:** Securely access and manage individual tenant environments.
+- **Tenant Data Isolation:** Maintain independent data for each school or branch.
+
+### Master Data Management
+
+- **Master Data Synchronization:** Synchronize academic structures across multiple school branches.
+- **Centralized Configuration:** Configure classes, sections, subjects, grades, and divisions once.
+- **Master Data Locking:** Prevent local administrators from modifying standardized configurations through `locked_master_tables`.
+
+### Application Features
+
+- **Progressive Web App (PWA):** Installable application with offline capabilities.
+- **Role and Permission Management:** Custom authorization functionality powered by `laravel-permission-kit`.
+- **Light and Dark Modes:** Multiple theme skins with customizable appearance.
+- **Messaging and Notifications:** Built-in communication and notification functionality.
+- **Support Tickets:** Integrated support ticket management system.
+
+</details>
+
+---
+
+## Screenshots
+
+### Central Application (Non-Tenancy)
+
+<p align="center">
+&#x20; <img src="public/images/screenshots/non_tenancy/manage-tenants-dark.png" alt="Skolaria central tenant management dashboard in dark mode">
+&#x20; <img src="public/images/screenshots/non_tenancy/system-settings-light.png" alt="Skolaria central system settings in light mode">
+</p>
+
+### Tenant Application (Tenancy)
+
+<p align="center">
+&#x20; <img src="public/images/screenshots/tenancy/superadmin-dashboard-dark.png" alt="Skolaria tenant super administrator dashboard in dark mode">
+&#x20; <img src="public/images/screenshots/tenancy/teacher-batch-marks-dark.png" alt="Skolaria teacher batch marks entry interface in dark mode">
+</p>
+
+---
+
+## Requirements
+
+Ensure the following software and dependencies are installed before proceeding.
+
+| Dependency | Minimum Version                    |
+| ---------- | ---------------------------------- |
+| PHP        | 8.4                                |
+| Composer   | 2.9.1                              |
+| Node.js    | Compatible with npm 11.6.1         |
+| npm        | 11.6.1                             |
+| Database   | SQLite (for the quick-start setup) |
+
+### Required PHP Extensions
+
+- Ctype
+- cURL
+- DOM
+- Fileinfo
+- Filter
+- Hash
+- Mbstring
+- OpenSSL
+- PCRE
+- PDO
+- Session
+- Tokenizer
+- XML
 
 ---
 
 ## Quick Start
 
-> Run these commands to launch the app locally (you must have PHP, Composer, Node.js, and SQLite):
+Follow these steps to run Skolaria locally.
+
+### 1. Clone the Repository
 
 ```bash
-# 1. Clone repository
 git clone https://github.com/rayusamBoy/skolaria.git
-
-# 2. Navigate into project
 cd skolaria
+```
 
-# 3. Install PHP dependencies
+### 2. Install Dependencies
+
+Install PHP dependencies:
+
+```bash
 composer install
+```
 
-# 4. Install JS dependencies
+Install JavaScript dependencies:
+
+```bash
 npm install
+```
 
-# 5. Build frontend assets
+### 3. Build Frontend Assets
+
+```bash
 npm run build
+```
 
-# 6. Prepare database
+### 4. Configure the Environment
+
+Create your environment file:
+
+```bash
 cp .env.example .env
-php artisan key:generate
-php artisan storage:link
-php artisan database:ensure-sqlite
-php artisan migrate --seed --seeder=DatabaseSeederNonTenancy
+```
 
-# 7. Serve locally
+Generate the application key:
+
+```bash
+php artisan key:generate
+```
+
+Create the storage symbolic link:
+
+```bash
+php artisan storage:link
+```
+
+### 5. Prepare the Database
+
+For the default SQLite setup:
+
+```bash
+php artisan database:ensure-sqlite
+```
+
+Run migrations and seed the initial central application data:
+
+```bash
+php artisan migrate --seed --seeder=DatabaseSeederNonTenancy
+```
+
+### 6. Start the Application
+
+```bash
 php artisan serve
 ```
 
-> For full setup instructions, see [Installation](https://github.com/rayusamBoy/skolaria?tab=readme-ov-file#installation).
+Access the application at:
 
-## Getting Started
+```text
+http://localhost:8000
+```
 
-### Features
-
-<details>
-
-<summary>Details</summary>
-
-- Tenancy capability (multi‑tenant)
-- Progressive Web App (PWA) – offline access, installable
-- Light / dark colour modes with multiple theme skins
-- Built-in messaging, notifications, and support tickets
-- A Root account that manages non‑tenant (central) operations
-- Seven tenant roles managed entirely through permissions:
-  - `Super admin`, `Admin`, `Teacher`, `Student`, `Parent`, `Accountant`, `Librarian`
-    - Each role has a predefined set of permissions (configurable via seeders)
-    - Root roles bypass all permission checks
-- And much more
-
-</details>
-
-#### Screenshots
-
-<img alt="manage-tenants-dark" src="/public/images/screenshots/non_tenancy/manage-tenants-dark.png">
-<img alt="system-settings-light" src="/public/images/screenshots/non_tenancy/system-settings-light.PNG">
-
-`Non-tenancy` [more central screenshots](/public/images/screenshots/non_tenancy/).
+For complete installation and configuration details, see [Installation](#installation).
 
 ---
 
-<img alt="superadmin-dashboard-dark" src="/public/images/screenshots/tenancy/superadmin-dashboard-dark.png">
-<img alt="teacher-batch-marks-dark" src="/public/images/screenshots/tenancy/teacher-batch-marks-dark.png">
+## Installation
 
-`Tenancy` [more tenant screenshots](/public/images/screenshots/tenancy/).
-
-#### Prerequisites
-
-- [composer](https://getcomposer.org/) >= 2.9.1
-- [npm](https://www.npmjs.com/) >= 11.6.1
-- PHP >= 8.4
-- Required PHP extensions: Ctype, cURL, DOM, Fileinfo, Filter, Hash,
-  Mbstring, OpenSSL, PCRE, PDO, Session, Tokenizer, XML
-
-#### Installation
-
-1. Clone this repository, or you can download the [**zip**](https://github.com/rayusamBoy/skolaria/archive/refs/heads/main.zip) folder instead.
-
-    ```bash
-    git clone https://github.com/rayusamBoy/skolaria.git
-    ```
-
-2. Change to the app installation directory.
-
-    ```bash
-    cd skolaria
-    ```
-
-3. Install the Composer dependencies.
-
-    ```bash
-    composer install
-    ```
-
-4. Install then build the Node packages.
-
-    ```bash
-    npm install
-    ```
-
-    ```bash
-    npm run build
-    ```
-
-5. Create a `.env` file by copying the `.env.example` file.
-
-    ```bash
-    cp .env.example .env
-    ```
-
-6. Generate the `APP_KEY` by running the following command:
-
-    ```bash
-    php artisan key:generate
-    ```
-
-7. Generate the storage symlink.
-
-    ```bash
-    php artisan storage:link
-    ```
-
-8. Preparing the database
-
-    `.env`: ensure you copied `.env.example` to `.env` and set the following:
-
-    * `BROADCAST_CONNECTION` - default: `reverb`. You can also use `pusher`. For `pusher`, set the `PUSHER_*` keys and activate the credentials [in this file](resources/js/bootstrap.js).
-    * `APP_URL` - your full application URL (e.g. `http://localhost:8000`).
-    * `VITE_VAPID_KEY` - **(optional)**. Firebase Cloud Messaging (FCM) push services access token. [How to obtain a key](https://firebase.google.com/docs/cloud-messaging).
-
-    These control the database connection used by Laravel and the tenancy package. You can skip these configurations unless you use connection other than the default `sqlite`. For     the default connection `sqlite` you must run:
-
-    ```bash
-        php artisan database:ensure-sqlite
-    ```
-
-    Database connection (default: SQLite). For a different driver, refer to the `connections` section of `config/database.php`.
-
-    * `DB_CONNECTION` - default: `sqlite`.
-    * `DB_HOST` and `DB_PORT` (if applicable).
-    * `DB_DATABASE` - database name (create it first for central).
-    * `DB_USERNAME` - database username.
-    * `DB_PASSWORD` - database password.
-
-    **Central vs Tenant databases:**
-
-    * This project uses the `stancl/tenancy` package. The central application (system-wide data and tenant management) uses the database defined by your `DB_*` env settings.
-    * Tenant databases are managed by the tenancy package. Tenant database naming and creation are controlled in `config/tenancy.php` (see the `database` section). By default tenant DB names use the configured `prefix` + tenant id + `suffix`.
-
-    **Creating tenant databases:**
-
-    * After central migrations and seeders, you can create tenants (and their domains) from the central UI. The tenancy package will create tenant databases (and run all other operations like migrations, seeding, etc) automatically using the configured tenant database manager (MySQL, SQLite, or Postgres) when a tenant is provisioned.
-    * If you prefer to provision tenants via Artisan or Tinker, refer to the [stancl/tenancy documentation](https://v4.tenancyforlaravel.com/).
-
-    **Common Issues & Troubleshooting**
-
-    Database connection refused / Access denied:
-
-    * Verify your `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` values in `.env` and that the database server is reachable.
-    * Ensure the DB user has privileges to create databases if you rely on the tenancy package to create tenant databases automatically.
-        
-    Tenant migrations not running / empty tenant schema:
-        
-    * Ensure tenants were created successfully in the central app.
-    * Check `config/tenancy.php` `database.managers` and `prefix`/`suffix` to confirm tenant DB naming and manager behavior.
-
-    Central/tenant domain routing issues:
-        
-    * If you are using a custom central domain (not `localhost`), re-check the `APP_URL` and make sure it matches your domain. If you are using more than one central domains add      it to `config/tenancy.php` → `central_domains`.
-    * When testing locally with tenant domains, ensure your domains ends with `localhost:8000`, e.g. `foo.localhost:8000`.
-    
-    Storage & permissions errors:
-    
-    * Ensure `storage/` and `bootstrap/cache` are writable by the webserver user. Run `php artisan storage:link` after migrations to create the public storage symlink.
-
-9.  Migrate the database.
-
-    > Before running migrations make sure your environment is configured correctly.
-
-    ```bash
-    php artisan migrate
-    ```
-
-10. Seed the database.
-
-    ```bash
-    php artisan db:seed --class=DatabaseSeederNonTenancy
-    ```
-
-    if you get an error like this: `Insufficient memory limit detected! Current: 128M, Recommended: 512M`
-    then increase your PHP memory limit in `php.ini` file and restart your server.
-    Or run the command with the increased memory limit:
-
-    ```bash
-    php -d memory_limit=512M artisan db:seed --class=DatabaseSeederNonTenancy
-    ```
-
-11. **(optional)** If you have set the optional value for `VITE_VAPID_KEY`, you must also configure the Firebase [in this file](public/assets/js/firebase-config.js) and provide the Firebase service account credentials [in this file](storage/app/firebase/service-account-credentials.json). The app will work perfectly fine even if you do not set these values.
-    After changing these values, rebuild assets: `npm run build`
-
-12. **(optional)** Start the Reverb server:
-
-    ```bash
-    php artisan reverb:start
-    ```
-
-> [!IMPORTANT]
-> Any time you change a `VITE_*` environment variable or the
-> `BROADCAST_CONNECTION`, you must rebuild the Node packages:
->
-> ```bash
-> npm run build
-> ```
-
-## Usage & Deployment
-
-### Development
-
-Open a new terminal, then serve the `app` and access it via url `http://localhost:8000` by running:
+### 1. Clone the Repository
 
 ```bash
-php artisan serve
+git clone https://github.com/rayusamBoy/skolaria.git
+cd skolaria
 ```
 
-### Deployment
+### 2. Install Composer Dependencies
 
-Please review the official [Laravel deployment guide](https://laravel.com/docs/13.x/deployment), and consider searching online for tutorials on deploying a Laravel application tailored to your specific hosting environment.
+```bash
+composer install
+```
 
-### Usage
+### 3. Install and Build Frontend Dependencies
 
-1. Central app scope
+```bash
+npm install
+npm run build
+```
 
-    After installation, access the central app via the already running URL `http://localhost:8000` using.
+### 4. Configure Environment Variables
 
-    | Account Type | Username   | Email              | Password |
-    | ------------ | ---------- | ------------------ | -------- |
-    | Root         | `rootuser` | `rootuser@sms.com` | `root`   |
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Generate the application encryption key:
+
+```bash
+php artisan key:generate
+```
+
+Create the storage symbolic link:
+
+```bash
+php artisan storage:link
+```
+
+### 5. Configure Application Settings
+
+Update your `.env` file according to your environment.
+
+Important configuration variables include:
+
+| Variable               | Description                                                             |
+| ---------------------- | ----------------------------------------------------------------------- |
+| `APP_URL`              | Full application URL, e.g. `http://localhost:8000`.                     |
+| `BROADCAST_CONNECTION` | Broadcasting driver. Defaults to Reverb; Pusher can also be configured. |
+| `VITE_VAPID_KEY`       | Optional VAPID public key for web push notifications. [How to obtain a key](https://firebase.google.com/docs/cloud-messaging) |
+
+### 6. Configure the Database
+
+Skolaria supports a central database and separate tenant databases.
+
+Tenant database creation and naming are managed by the tenancy package and configured in:
+
+```text
+config/tenancy.php
+```
+
+For the default SQLite development environment:
+
+```bash
+php artisan database:ensure-sqlite
+```
+
+Run migrations:
+
+```bash
+php artisan migrate
+```
+
+Seed the central application:
+
+```bash
+php artisan db:seed --class=DatabaseSeederNonTenancy
+```
+
+### 7. Configure Notifications and Broadcasting (Optional)
+
+1. **Firebase Push Notifications:** If you set `VITE_VAPID_KEY` in your `.env` file, configure Firebase in `public/assets/js/firebase-config.js` and add your service account credentials to `storage/app/firebase/service-account-credentials.json`.
+
+   Firebase is optional; the application works without it.
+
+2. **Rebuild assets** after configuring Firebase:
+
+   ```bash
+   npm run build
+
+To start the Laravel Reverb WebSocket server:
+
+```bash
+php artisan reverb:start
+```
+
+---
+
+## Deep Dive: Multi-School Architecture
+
+Skolaria supports two distinct tenant identification modes configured through `config/tenancy.php`.
+
+### 1. Domain Identification
+
+Each school is accessed through its own domain or subdomain.
+
+For example:
+
+```text
+school1.skolaria.co.tz
+school2.skolaria.co.tz
+school3.skolaria.co.tz
+```
+
+The tenancy package identifies and initializes the appropriate tenant based on the requested domain.
+
+### 2. Request Data Identification
+
+Recommended for multi-school organizations managing several branches.
+
+All schools can be accessed through a single application URL. The active tenant is identified using request data, with a secure cookie tracking the currently selected school.
+
+For example:
+
+```text
+https://school.skolaria.co.tz
+```
+
+This approach allows central administrators to switch between schools without changing domains or subdomains.
+
+---
+
+## Seamless School Impersonation
+
+When using `request_data` identification mode, central administrators can seamlessly switch between tenant environments.
+
+The `UserImpersonationController` generates a secure impersonation token and establishes the tenant context through a cookie.
+
+Example:
+
+```php
+if (config('tenancy.active_identification_mode') === 'request_data') {
+    return redirect("/impersonate/{$token->token}")->withCookie(
+        Cookie::make('tenant', $tenant->id, 120)
+    );
+}
+```
+
+This allows administrators to access and manage different schools through a single application interface.
+
+---
+
+## Master Data Synchronization
+
+Managing academic configurations independently across multiple school branches can be time-consuming and prone to inconsistencies.
+
+Skolaria addresses this challenge through the `SyncMasterDataService`.
+
+Administrators can:
+
+1. Select a source school.
+2. Select one or more target schools.
+3. Choose the master data to synchronize.
+4. Push the selected configurations to the target schools.
+
+### Why Is This Useful?
+
+Consider an organization operating ten school branches that all use the same grading system:
+
+| Grade | Score Range |
+| ----- | ----------- |
+| A     | 80–100      |
+| B     | 70–79       |
+| C     | 60–69       |
+| D     | 50–59       |
+| F     | 0–49        |
+
+Instead of configuring the grading system independently in all ten schools, the administrator configures it once in the main branch and synchronizes it with the remaining nine branches.
+
+### Supported Master Data
+
+The synchronization service supports academic structures including:
+
+- Classes
+- Sections
+- Subjects
+- Grades
+- Divisions
+- Examination categories
+
+### Master Data Locking
+
+The service also supports locking selected master data tables in target tenants through:
+
+```php
+locked_master_tables
+```
+
+This prevents local administrators from accidentally modifying standardized configurations established by the central organization.
+
+---
+
+## Getting Started
+
+Skolaria provides two application scopes: Central and Tenant.
+
+### 1. Central Application Scope
+
+After installation, access the central application:
+
+```text
+http://localhost:8000
+```
+
+Use the following default account:
+
+| Account Type | Username   | Email              | Password |
+| ------------ | ---------- | ------------------ | -------- |
+| Root         | `rootuser` | `rootuser@sms.com` | `root`   |
 
 > [!IMPORTANT]
->
-> When using a central domain other than `localhost` (e.g., `sms.edu`):
->
-> Set it as the `APP_URL`. If you have more than one central domain, add them to config/tenancy.php → central_domains:
->
-> ```php
-> 'identification' => [
->      /**
->      * The list of domains hosting your central app.
->      *
->      * Only relevant if you're using the domain or subdomain identification middleware.
->      */
->      'central_domains' => [
->         str(env('APP_URL'))->after('://')->before('/')->before(':')->toString(),
->         sms.edu, // Add you central domain here
->      ],
->  ...
->
-> ```
+> When using a central domain other than `localhost` (for example, `school.skolaria.co.tz`), update `APP_URL` in your `.env` file or add the domain to `central_domains` in `config/tenancy.php`.
 
-1. Tenant app scope
+### 2. Tenant Application Scope
 
-    Create a tenant and its domain via the central UI. Then use that domain to log in with any of the following seeded accounts:
+Create a tenant and its associated domain through the central application interface.
 
-    | Account Type | Username     | Email                | Password     |
-    | ------------ | ------------ | -------------------- | ------------ |
-    | Super Admin  | `superadmin` | `superadmin@sms.com` | `superadmin` |
-    | Admin        | `admin`      | `admin@sms.com`      | `admin`      |
-    | Teacher      | `teacher`    | `teacher@sms.com`    | `teacher`    |
-    | Parent       | `parent`     | `parent@sms.com`     | `parent`     |
-    | Accountant   | `accountant` | `accountant@sms.com` | `accountant` |
-    | Librarian    | `librarian`  | `librarian@sms.com`  | `librarian`  |
-    | Student      | `student`    | `student@sms.com`    | `student`    |
+Once the tenant has been created, access its domain and log in using one of the following seeded accounts.
+
+| Account Type | Username     | Email                | Password     |
+| ------------ | ------------ | -------------------- | ------------ |
+| Super Admin  | `superadmin` | `superadmin@sms.com` | `superadmin` |
+| Admin        | `admin`      | `admin@sms.com`      | `admin`      |
+| Teacher      | `teacher`    | `teacher@sms.com`    | `teacher`    |
+| Parent       | `parent`     | `parent@sms.com`     | `parent`     |
+| Accountant   | `accountant` | `accountant@sms.com` | `accountant` |
+| Librarian    | `librarian`  | `librarian@sms.com`  | `librarian`  |
+| Student      | `student`    | `student@sms.com`    | `student`    |
+
+> [!WARNING]
+> These uses default password credentials. Change them before or shortly after deploying the application to a production environment.
 
 > [!NOTE]
-> For more information please refer to the [stancl/tenancy documentation](https://v4.tenancyforlaravel.com).
+> For additional information about tenancy configuration and management, refer to the [Tenancy for Laravel documentation](https://v4.tenancyforlaravel.com).
+
+---
 
 ## Contributing
 
-Please see [contributing](https://github.com/rayusamBoy/skolaria/blob/main/CONTRIBUTING.md) for details. If you find this project useful, consider starring it on GitHub!
+Contributions are welcome!
 
-## Acknowledgement
+If you would like to contribute to Skolaria, please see the project's contributing guidelines.
 
-This project is based on the [lav_sms](https://github.com/4jean/lav_sms) project by [4jean](https://github.com/4jean). I would like to express my sincere gratitude to 4jean, to everyone whose code was used, and to all contributors.
+Whether you are reporting bugs, suggesting improvements, submitting features, or improving documentation, your contributions are appreciated.
+
+If you find this project useful, consider giving it a ⭐ on GitHub.
+
+---
+
+## Acknowledgements
+
+This project is based on the original `lav_sms` project by [4jean](https://github.com/4jean).
+
+I would like to express my sincere gratitude to 4jean, everyone whose code and contributions have helped shape this project, and all other contributors.
+
+---
 
 ## License
 
-The School Management System is open-sourced software licensed under the [AGPL v3.0](https://github.com/rayusamBoy/skolaria/blob/main/LICENSE).
+Skolaria is open-source software licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
+
+See the [LICENSE](LICENSE) file for more information.
+
