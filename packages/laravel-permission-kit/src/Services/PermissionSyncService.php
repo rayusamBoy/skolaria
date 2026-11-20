@@ -21,7 +21,7 @@ class PermissionSyncService
     {
         // Removed the class properties so it re-checks on every database switch.
         // Schema::hasColumn is fast enough for a sync command.
-        return Schema::hasColumn('permissions', 'label') 
+        return Schema::hasColumn('permissions', 'label')
             && Schema::hasColumn('permissions', 'description');
     }
 

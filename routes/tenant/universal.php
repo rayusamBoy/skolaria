@@ -8,12 +8,12 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MyAccountController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SessionController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\UserImpersonationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SessionController;
 
 /*
 |--------------------------------------------------------------------------
