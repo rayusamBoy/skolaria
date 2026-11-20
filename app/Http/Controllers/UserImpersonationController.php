@@ -38,6 +38,7 @@ class UserImpersonationController extends Controller
         return view('impersonation.index', compact('tenants', 'tenant_super_admin_user_id'));
     }
 
+    #[SkipPermission]
     public function impersonate(string|Model $token): RedirectResponse
     {
         try {
@@ -51,7 +52,6 @@ class UserImpersonationController extends Controller
         }
     }
 
-    #[SkipPermission]
     public function redirect_to_impersonation_route(string $tenant_id, int $user_id): RedirectResponse
     {
         $tenant = $this->tenant->findOrFailTenant($tenant_id);

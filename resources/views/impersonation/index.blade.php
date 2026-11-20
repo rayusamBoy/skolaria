@@ -19,7 +19,7 @@
                             <th>S/N</th>
                             <th>Name</th>
                             <th>Domain / Entry</th>
-                            @can('user_impersonations.impersonate')
+                            @can('user_impersonations.redirect_to_impersonation_route')
                                 <th class="text-center">Action</th>
                             @endcan
                         </tr>
@@ -44,7 +44,7 @@
                                         <span class="text-muted">—</span>
                                     @endif
                                 </td>
-                                @can('user_impersonations.impersonate')
+                                @can('user_impersonations.redirect_to_impersonation_route')
                                     <td class="text-center">
                                         @if ($current_tenant_id == $tenant->id)
                                             <span class="btn btn-secondary disabled btn-sm">
