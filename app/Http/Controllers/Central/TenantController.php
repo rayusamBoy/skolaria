@@ -69,7 +69,7 @@ class TenantController extends Controller
         try {
             $tenant = $this->tenant->createTenant($data);
         } catch (\Throwable $t) {
-            logger()->error('Tenant creation failed', ['error' => $t->getMessage()]);
+            logger()->error('Tenant creation failed', ['error' => $t->getMessage(), 'trace' => $t->getTrace()]);
 
             return Qs::json(msg: '', arr: ['msg' => $t->getMessage(), 'ok' => false, 'pop' => true, 'pop_timer' => 0]);
         }
@@ -88,7 +88,7 @@ class TenantController extends Controller
             try {
                 $tenant->createDomain(['domain' => $request->domain]);
             } catch (\Throwable $t) {
-                logger()->error('Domain creation failed', ['error' => $t->getMessage()]);
+                logger()->error('Domain creation failed', ['error' => $t->getMessage(), 'trace' => $t->getTrace()]);
 
                 return Qs::json(msg: '', arr: ['msg' => $t->getMessage(), 'ok' => false, 'pop' => true, 'pop_timer' => 0]);
             }
