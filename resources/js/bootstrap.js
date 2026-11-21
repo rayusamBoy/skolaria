@@ -5,15 +5,41 @@
  */
 
 import axios from "axios";
+
 window.axios = axios;
 
 window.axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 
 /**
- * Here you may activate the broadcasting service you want.
- * Comment any service you do not want to use. You can only use one service at a time.
- * Don't forget to change Broadcast Connection in the .env file if you change the default one.
+ * Automatically load the broadcasting service configured in .env.
+ * Supported drivers: reverb, pusher
+ * The VITE_BROADCAST_CONNECTION variable mirrors BROADCAST_CONNECTION.
  */
 
-//import "./pusher";
-import "./reverb";
+const broadcastConnection = (
+    import.meta.env.VITE_BROADCAST_CONNECTION || "reverb"
+).toLowerCase();
+
+(async () => {
+    try {
+        switch (broadcastConnection) {
+            case "reverb":
+                await import("./reverb");
+                break;
+
+            case "pusher":
+                await import("./pusher");
+                break;
+
+            default:
+                console.warn(
+                    `Unsupported broadcasting connection: ${broadcastConnection}`
+                );
+        }
+    } catch (error) {
+        console.error(
+            `Failed to initialize ${broadcastConnection} broadcasting:`,
+            error
+        );
+    }
+})();
