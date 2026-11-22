@@ -8,7 +8,7 @@
 
 # Skolaria
 
-## A Multi-School Management Platform
+## Multi-School Management Platform
 
 **One platform. Multiple schools. Centralized management.**
 
@@ -25,32 +25,38 @@
 
 ---
 
-## About Skolaria
+## About
 
-**Skolaria** is a multi-tenant, Progressive Web App (PWA) School Management System built with Laravel. It provides a unified platform for managing academic and administrative operations across independent schools and multi-branch educational organizations.
+**Skolaria** is a multi-tenant, Progressive Web App (PWA) School Management System built with Laravel.
 
-Unlike conventional school management applications designed around a single institution, Skolaria supports organizations that manage multiple schools through a centralized application while maintaining independent school environments.
+It provides a centralized platform for managing multiple independent schools while keeping their academic records, users, settings, and operational data isolated.
+
+Skolaria is designed for organizations that operate multiple schools or branches and need centralized administration without sacrificing the independence of individual school environments.
 
 Its architecture combines:
 
-- Centralized organization and school management.
-- Independent tenant environments.
-- Multiple tenant identification strategies.
-- Cross-school master data synchronization.
-- Role-based access control and permission management.
-- Academic and administrative management tools.
+- Centralized school and tenant administration.
+- Separate tenant databases.
+- Domain-based and request-data tenant identification.
+- Tenant provisioning and lifecycle management.
+- Centralized academic master-data synchronization.
+- Role-based access control and automatic permission management.
+- Academic, financial, and administrative management.
+- Tenant-aware storage, cache, sessions, and queues.
 
-Skolaria is designed to reduce repetitive administrative work, standardize academic configurations, and simplify the management of multiple educational institutions.
+## Features
 
-## Key Capabilities
+### 1. Multi-Tenancy
 
-### Multi-Tenancy and Multi-School Management
+Skolaria uses [Tenancy for Laravel](https://tenancyforlaravel.com/) to manage independent school environments.
 
-Skolaria supports two tenant identification strategies:
+Each school is represented by a tenant with its own database and tenant-specific application context.
+
+The application supports two identification strategies.
 
 #### Domain-based identification
 
-Each school can be accessed through its own domain or subdomain.
+Each school can be accessed through its assigned domain or subdomain.
 
 ```text
 school1.example.com
@@ -60,180 +66,312 @@ school3.example.com
 
 #### Request-data identification
 
-Multiple schools can be accessed through a single application URL. The active school is determined using request data; a tenant cookie.
+Multiple schools can use a shared application URL. The application determines the active tenant from configured request data.
+
+In the current application configuration, the tenant cookie is used for this identification mode.
 
 ```text
 https://school.example.com
 ```
 
-This approach is particularly useful for organizations operating multiple school branches.
-
-### Centralized School Administration
-
-The central application provides organization-level management capabilities, including:
-
-- School and tenant registration.
-- Tenant management.
-- Central user management.
-- Application settings.
-- Central support ticket management.
-- Administrative operations.
-- Cross-school master data synchronization.
-
-### Master Data Synchronization
-
-Managing academic configurations independently across multiple schools can introduce inconsistencies and unnecessary administrative work.
-
-Skolaria provides a master data synchronization service that allows administrators to select a source school, choose target schools, and synchronize selected academic configurations.
-
-Supported academic structures include:
-
-- Classes
-- Sections
-- Subjects
-- Grades
-- Divisions
-- Examination categories
-
-#### Example
-
-An organization operating ten schools can configure its grading system in the main school and synchronize the configuration across the other nine schools.
-
-Skolaria also supports master data locking through `locked_master_tables`, helping prevent local administrators from unintentionally changing standardized configurations.
-
-### Academic Management
-
-The tenant application provides academic management functionality, including:
-
-- Student records and profiles.
-- Student enrollment and batch import.
-- Class and section management.
-- Subject management.
-- Examination management.
-- Assessment and marks management.
-- Student promotion and graduation.
-- Timetable management.
-- Student identification cards.
-- Academic statistics and reporting.
-
-### Administrative Management
-
-Additional functionality includes:
-
-- User and staff management.
-- User invitations and registration approval.
-- Notices and announcements.
-- Messaging and communication.
-- Payment records, invoices and receipts.
-- Library book management and requests.
-- Support tickets.
-- Student records and administrative reporting.
-
-### Application Experience
-
-- Progressive Web App capabilities.
-- Installable application experience.
-- Light and dark appearance modes.
-- Multiple theme skins.
-- Notifications and messaging.
-- Laravel Reverb broadcasting support.
-- Firebase Cloud Messaging integration.
-- Responsive web interface.
-
----
-
-## Technology Stack
-
-Skolaria is built using the Laravel ecosystem and complementary frontend and infrastructure packages.
-
-| Component | Technology |
-| --- | --- |
-| Backend framework | Laravel 13 |
-| Programming language | PHP 8.4+ |
-| Frontend framework | Bootstrap 4 |
-| JavaScript | jQuery 3 |
-| CSS preprocessing | Sass |
-| Frontend build tool | Vite |
-| Multi-tenancy | Tenancy for Laravel v4 |
-| Authorization | laravel-permission-kit and Spatie Laravel Permission |
-| Authentication | Laravel UI |
-| API authentication | Laravel Sanctum |
-| Real-time broadcasting | Laravel Reverb |
-| Push notifications | Firebase Cloud Messaging |
-| Database | SQLite, MySQL or PostgreSQL |
-| Reporting and exports | Laravel Excel |
-| PDF generation | DomPDF |
-| Testing | Pest and PHPUnit |
-
----
-
-## Architecture
-
-### Central and Tenant Applications
-
-Skolaria separates organization-level functionality from school-level operations.
-
-#### Central application
-
-The central application manages the overall organization and its schools.
-
-Responsibilities include:
-
-- Tenant registration and management.
-- Central users and administration.
-- Organization-level settings.
-- Master data synchronization.
-- Central support operations.
-
-#### Tenant application
-
-Each tenant represents an independent school or institution.
-
-Responsibilities include:
-
-- Student and staff management.
-- Academic administration.
-- Examinations and assessments.
-- Timetables and schedules.
-- Payments and financial records.
-- School communication.
-- Reports and statistics.
-
-### Database Architecture
-
-Skolaria uses the Tenancy for Laravel package to manage tenant initialization and database connections.
-
-The configuration is maintained in:
-
-```text
-config/tenancy.php
-```
-
-The application supports a central database and separately managed tenant databases, with tenant database naming controlled through configuration.
-
-### Tenant Identification
-
-The default identification mode is configurable through:
+The identification strategy is controlled by:
 
 ```env
 TENANCY_IDENTIFICATION_MODE=domain
 ```
 
-For request-data identification:
+Or:
 
 ```env
 TENANCY_IDENTIFICATION_MODE=request_data
 ```
 
-Request-data identification supports:
+### 2. Central Administration
 
-- `tenant` cookie.
+The central application manages the organization and its registered schools.
 
-The selected identification strategy is configured in `config/tenancy.php`.
+Central administration includes:
 
-### Tenant-Aware Services
+- Tenant registration and management.
+- Central user management.
+- Tenant database and lifecycle operations.
+- Application settings.
+- Central support ticket management.
+- Central administrative operations.
+- Master-data synchronization.
+- Tenant impersonation management.
+- Central permission and authorization management.
 
-Skolaria configures tenancy bootstrappers for several Laravel services, including:
+Central routes are separated from tenant routes to avoid route collisions and to maintain distinct application contexts.
+
+### 3. Tenant Provisioning and Lifecycle Management
+
+Tenant creation and deletion are integrated with the tenancy package's event system.
+
+When a tenant is created, the application performs its configured provisioning workflow:
+
+1. Creates the tenant database.
+2. Runs tenant migrations.
+3. Executes the configured tenant database seeder.
+4. Creates tenant storage.
+
+Tenant deletion also triggers application-specific cleanup:
+
+- Deletes associated domains.
+- Removes tenant storage.
+- Deletes the tenant database.
+- Removes tenant-specific student ID-card theme files.
+
+These operations are handled through the tenant lifecycle event pipeline rather than requiring administrators to manually clean up each resource.
+
+### 4. Master Data Synchronization
+
+Skolaria provides a centralized master-data synchronization service.
+
+Administrators can select a source school, choose target schools, and synchronize selected academic configurations.
+
+The synchronization service supports:
+
+- Selecting the source tenant.
+- Selecting one or more target tenants.
+- Selecting the master-data tables to synchronize.
+- Maintaining table dependency order.
+- Optionally locking synchronized tables.
+- Excluding selected tenants from locking.
+
+Supported master-data tables include:
+
+- Examination categories.
+- Class types.
+- Classes.
+- Sections.
+- Grades.
+- Divisions.
+- Subjects.
+- Subject records.
+- Examinations.
+- Timetable records.
+- Time slots.
+- Skills.
+
+#### Master-data locking
+
+The application stores lock information on each tenant through:
+
+```text
+locked_master_tables
+```
+
+Central administrators manage synchronization and lock status from the central context.
+
+Within a tenant context, the application's authorization layer checks the tenant's lock configuration and restricts write permissions for locked master tables while retaining the configured read permissions.
+
+Root-role authorization and the feature-module restrictions are handled separately by the application's Gate authorization logic.
+
+### 5. Academic Management
+
+The tenant application provides tools for managing school academic operations.
+
+Implemented application areas include:
+
+- Student records and profiles.
+- Student enrollment and batch registration.
+- Student identification cards.
+- Class and section management.
+- Subject management.
+- Examination categories and examinations.
+- Assessment management.
+- Marks entry and batch marks processing.
+- Examination tabulation.
+- Grades, divisions, and results.
+- Student promotion and graduation.
+- Timetables and timetable records.
+- Time-slot management.
+- Academic statistics and reporting.
+
+### 6. Student and User Management
+
+Tenant administrators can manage school users and student records.
+
+User management includes:
+
+- User accounts and profiles.
+- Staff management.
+- Student accounts.
+- User invitations.
+- Registration approval and rejection.
+- User blocking and unblocking.
+- Password reset operations.
+- Account preferences.
+- Account security settings.
+
+### 7. Financial and Administrative Management
+
+Skolaria includes administrative tools for managing school operations.
+
+These include:
+
+- Payment records.
+- Student invoices.
+- Payment status and receipts.
+- Notices and announcements.
+- Messaging and communication.
+- Library books and book requests.
+- Dormitory management.
+- Support tickets.
+- User activity and application logs.
+
+### 8. Support Ticket Management
+
+Skolaria includes a support ticket workflow connecting individual schools with central support administrators.
+
+The workflow supports:
+
+- Ticket creation and replies.
+- Ticket categories and labels.
+- Ticket assignment.
+- Ticket status and property updates.
+- Ticket locking and unlocking.
+- Ticket archiving and unarchiving.
+- Central support administration.
+
+This allows schools to receive support without requiring direct access to the central administration interface.
+
+### 9. Authentication and Account Security
+
+The application uses Laravel UI authentication and includes additional account-security functionality.
+
+Implemented security features include:
+
+- Two-factor authentication.
+- Password update enforcement.
+- Account recovery functionality.
+- Session status and heartbeat endpoints.
+- Session reauthentication.
+- Browser-session management.
+- User impersonation.
+
+User impersonation is configurable:
+
+```env
+TENANCY_ALLOW_USER_IMPERSONATION=false
+```
+
+When disabled, the application prevents the impersonation initiation workflow.
+
+### 10. Roles and Permissions
+
+Skolaria uses:
+
+- [Spatie Laravel Permission](https://spatie.be/docs/laravel-permission)
+- [Laravel Permission Kit](packages/laravel-permission-kit)
+
+The application maintains separate central and tenant permission contexts.
+
+Tenant roles include:
+
+- Super Admin.
+- Admin.
+- Teacher.
+- Parent.
+- Student.
+- Librarian.
+- Accountant.
+
+The authorization design distinguishes root-level access from ordinary role permissions.
+
+Sensitive administrative capabilities are not automatically granted to ordinary tenant administrators.
+
+The application also includes custom authorization rules for:
+
+- Feature-module availability.
+- Locked master tables.
+- Restricted log deletion operations.
+- Root-role authorization.
+
+See [Permission Kit](packages/laravel-permission-kit/README.md) for the package implementation and configuration.
+
+### 11. Progressive Web App
+
+Skolaria provides Progressive Web App functionality.
+
+The application supports an installable experience and offline access to previously cached pages.
+
+Offline functionality is intended primarily for viewing cached content.
+
+Operations requiring communication with the server, including creating and updating records, require an active internet connection.
+
+### 12. Notifications and Real-Time Communication
+
+Skolaria integrates several notification and broadcasting technologies.
+
+| Integration | Purpose |
+| --- | --- |
+| Laravel Notifications | Application notifications |
+| Firebase Cloud Messaging | Optional push notifications |
+| Laravel Reverb | Real-time broadcasting |
+| Pusher | Alternative broadcasting provider |
+
+Firebase configuration is optional.
+
+Real-time broadcasting can use Reverb or Pusher depending on the application's broadcasting configuration.
+
+---
+
+## Architecture
+
+### Central and Tenant Contexts
+
+Skolaria separates organization-level administration from school-level operations.
+
+| Area | Central context | Tenant context |
+| --- | --- | --- |
+| Tenant management | Yes | No |
+| Central users | Yes | No |
+| School users | No | Yes |
+| Academic records | Master-data source and synchronization | School-specific records |
+| Database | Central database | Tenant database |
+| Permissions | Central permissions | Tenant permissions |
+| Support | Central ticket administration | School ticket operations |
+| Impersonation | Initiates tenant access | Receives impersonated access |
+
+### Database Architecture
+
+Skolaria uses a central database and separately managed tenant databases.
+
+```text
+                    Skolaria Application
+                            |
+                 +----------+----------+
+                 |                     |
+           Central Context        Tenant Context
+                 |                     |
+          Central Database       Tenant Database
+                 |                     |
+          Tenant Records         School Records
+          Central Users          School Users
+          Central Settings       Academic Data
+          Tenant Domains         School Settings
+```
+
+The tenancy configuration is maintained in:
+
+```text
+config/tenancy.php
+```
+
+Tenant database names are controlled through configuration:
+
+```env
+TENANT_DATABASE_PREFIX=tenant
+TENANT_DATABASE_SUFFIX=
+```
+
+The application configures database managers for SQLite, MySQL/MariaDB, PostgreSQL, and SQL Server.
+
+### Tenant-Aware Laravel Services
+
+The application configures tenancy bootstrappers for:
 
 - Database connections.
 - Cache.
@@ -241,39 +379,68 @@ Skolaria configures tenancy bootstrappers for several Laravel services, includin
 - Queues.
 - Database-backed sessions.
 
-This allows tenant context to be applied across supported application services.
+Tenant initialization applies the corresponding context to these services. When tenancy ends, the application restores the central context.
 
-### School Switching and Impersonation
+### Tenant Storage
 
-Skolaria includes tenant impersonation functionality for administrators who need to access individual school environments.
+Tenant storage is isolated using the tenancy filesystem bootstrapper.
 
-The implementation uses the tenancy package's impersonation functionality and application-level tenant switching.
+The application uses tenant-specific storage paths for local and public files.
 
-Impersonation availability is configurable:
+Student ID-card theme directories are also included in tenant lifecycle cleanup.
 
-```env
-TENANCY_ALLOW_USER_IMPERSONATION=false
+### Routes
+
+The application separates routes into central, tenant, and universal groups.
+
+```text
+routes/
+├── web.php
+└── tenant/
+    ├── web.php
+    └── universal.php
 ```
 
-Use appropriate security controls and trusted authorization checks before enabling impersonation in production.
+- `web.php` contains central application routes.
+- `tenant/web.php` contains tenant-specific application routes.
+- `tenant/universal.php` contains routes shared across central and tenant contexts.
+
+The route configuration is maintained in:
+
+```text
+bootstrap/app.php
+```
 
 ---
 
-## Permission and Authorization
+## Technology Stack
 
-Skolaria integrates a custom Laravel authorization package, **[laravel-permission-kit](packages/laravel-permission-kit)**.
+| Component | Technology |
+| --- | --- |
+| Backend framework | Laravel 13 |
+| Programming language | PHP 8.4+ |
+| Frontend | Blade |
+| CSS framework | Bootstrap 4 |
+| JavaScript | jQuery 3 |
+| CSS preprocessing | Sass |
+| Frontend build tool | Vite |
+| Multi-tenancy | Stancl Tenancy |
+| Authentication | Laravel UI |
+| Authorization | Laravel Permission Kit |
+| Role and permission storage | Spatie Laravel Permission |
+| API authentication dependency | Laravel Sanctum |
+| Broadcasting | Laravel Reverb / Pusher |
+| Push notifications | Firebase Cloud Messaging |
+| Spreadsheet processing | Laravel Excel |
+| PDF generation | DomPDF |
+| Activity logging | Spatie Laravel Activitylog |
+| Analytics | Spatie Laravel Analytics |
+| PWA | Laravel PWA |
+| Testing | Pest / PHPUnit |
 
-The package is maintained within the Skolaria repository and is currently in its initial development stage.
+### Important Dependencies
 
-It provides the permission generation, synchronization, and authorization functionality used by the application.
-
-The package is publicly available as source code within this repository but has not yet been independently published on Packagist.
-
-A standalone Composer release will be considered once the package has matured and is ready for wider adoption.
-
-For package-specific information, development instructions, and usage details, see the [Permission Kit README](packages/laravel-permission-kit/README.md).
-
-The package currently uses a local Composer path repository:
+The application uses a local Composer path repository for Laravel Permission Kit.
 
 ```json
 {
@@ -282,41 +449,25 @@ The package currently uses a local Composer path repository:
 }
 ```
 
----
+The tenancy package is currently configured through its development branch in Composer.
 
-## Screenshots
-
-### Central Application
-
-<p align="center">
-  <img src="public/images/screenshots/non_tenancy/manage-tenants-dark.png" alt="Central tenant management" width="48%">
-  <img src="public/images/screenshots/non_tenancy/system-settings-light.png" alt="Central application settings" width="48%">
-</p>
-
-### Tenant Application
-
-<p align="center">
-  <img src="public/images/screenshots/tenancy/superadmin-dashboard-dark.png" alt="Tenant administrator dashboard" width="48%">
-  <img src="public/images/screenshots/tenancy/teacher-batch-marks-dark.png" alt="Teacher batch marks entry" width="48%">
-</p>
+For reproducible deployments, retain the application's committed dependency lock file and use the versions resolved by Composer.
 
 ---
 
 ## Requirements
 
-The following software is required for local development.
-
-| Dependency | Minimum version |
+| Dependency | Requirement |
 | --- | --- |
-| PHP | 8.4 |
-| Composer | 2.9.1 |
-| Node.js | Compatible with npm 11.6.1 |
-| npm | 11.6.1 |
-| Database | SQLite, MySQL or PostgreSQL |
+| PHP | 8.4 or later |
+| Composer | 2.x |
+| Node.js | Compatible with the project's npm dependencies |
+| npm | Compatible with the project's package lock |
+| Database | SQLite, MySQL/MariaDB, PostgreSQL, or SQL Server, subject to driver configuration |
 
 ### PHP Extensions
 
-Ensure the following PHP extensions are enabled:
+Enable the PHP extensions required by Laravel and the installed application dependencies, including:
 
 - Ctype
 - cURL
@@ -349,7 +500,13 @@ cd skolaria
 composer install
 ```
 
-The repository includes `laravel-permission-kit` as a local Composer path dependency. Keep the package directory in place when installing dependencies.
+The repository includes Laravel Permission Kit as a local Composer path dependency.
+
+Make sure the package directory is present:
+
+```text
+packages/laravel-permission-kit/
+```
 
 ### 3. Install frontend dependencies
 
@@ -371,7 +528,7 @@ npm run dev
 
 ### 5. Configure the environment
 
-Create your environment file:
+Create the environment file:
 
 ```bash
 cp .env.example .env
@@ -391,39 +548,42 @@ php artisan storage:link
 
 ### 6. Configure the database
 
-Skolaria supports SQLite, MySQL and PostgreSQL.
+Skolaria supports SQLite, MySQL, MariaDB, PostgreSQL, and SQL Server through its configured database managers.
 
-For the default SQLite development configuration, prepare the database:
+For SQLite development, prepare the central database:
 
 ```bash
 php artisan database:ensure-sqlite
 ```
 
-For MySQL or PostgreSQL, create the database and configure the appropriate connection settings in `.env`.
+For MySQL or PostgreSQL, create the central database and configure the appropriate connection in `.env`.
 
-Review the tenant database configuration in:
+Review:
 
 ```text
+config/database.php
 config/tenancy.php
 ```
 
-### 7. Run migrations and seed central data
+Also configure the tenant database prefix and suffix if required.
 
-Run the central migrations:
+### 7. Run central migrations
 
 ```bash
 php artisan migrate
 ```
 
-Seed the central application:
+### 8. Seed central application data
 
 ```bash
 php artisan db:seed --class=DatabaseSeederNonTenancy
 ```
 
-Tenant database migrations and seeders should be executed through the configured tenancy workflow.
+Tenant databases are provisioned through the tenant creation workflow, which runs the configured tenant migrations and seeder.
 
-### 8. Start the application
+Avoid manually creating tenant databases outside the application's provisioning workflow unless you are performing a deliberate maintenance operation.
+
+### 9. Start the application
 
 ```bash
 php artisan serve
@@ -435,164 +595,223 @@ Open:
 http://localhost:8000
 ```
 
-> **Important:** The central and tenant applications have different responsibilities. Complete tenant creation and initialization through the central application before accessing the tenant environment.
+Complete the initial central application setup and create a tenant before accessing its school environment.
 
 ---
 
 ## Environment Configuration
 
-Some important environment settings are listed below.
+Important environment variables include:
 
 | Variable | Description |
 | --- | --- |
 | `APP_NAME` | Application name |
 | `APP_URL` | Application base URL |
 | `APP_ENV` | Application environment |
-| `APP_DEBUG` | Debug mode; disable in production |
+| `APP_DEBUG` | Debug mode |
 | `DB_CONNECTION` | Central database connection |
 | `DB_DATABASE` | Central database name or SQLite path |
-| `BROADCAST_CONNECTION` | Broadcasting driver |
-| `QUEUE_CONNECTION` | Queue driver |
 | `CACHE_STORE` | Cache driver |
 | `SESSION_DRIVER` | Session storage driver |
+| `QUEUE_CONNECTION` | Queue driver |
 | `FILESYSTEM_DISK` | Default filesystem disk |
 | `TENANCY_IDENTIFICATION_MODE` | Tenant identification strategy |
 | `TENANT_DATABASE_PREFIX` | Tenant database prefix |
 | `TENANT_DATABASE_SUFFIX` | Tenant database suffix |
-| `TENANCY_ALLOW_USER_IMPERSONATION` | Controls impersonation availability |
+| `TENANCY_ALLOW_USER_IMPERSONATION` | Enables or disables impersonation |
+| `BROADCAST_CONNECTION` | Broadcasting provider |
+| `VITE_BROADCAST_CONNECTION` | Frontend broadcasting provider |
 | `VITE_VAPID_KEY` | Public push notification key |
 
-Refer to `.env.example` for the complete list of application configuration variables.
+Refer to `.env.example` for the complete application configuration.
 
-Never commit actual credentials, private keys, production passwords or service-account files to the repository.
+Never commit real credentials, private keys, production passwords, or service-account files.
 
 ---
 
 ## Notifications and Real-Time Communication
 
-### Firebase Push Notifications
+### Firebase Cloud Messaging
 
-Firebase Cloud Messaging (FCM) provides optional push notification functionality.
+Firebase Cloud Messaging provides optional browser push notifications.
 
-To enable Firebase push notifications:
+To configure Firebase:
 
-1. Set `VITE_VAPID_KEY` in your `.env` file.
-2. Configure your Firebase project settings in `public/assets/js/firebase-config.js`.
-3. Add your Firebase service account credentials to:
+1. Create or select a Firebase project.
+2. Configure the Firebase client settings in:
 
-   `storage/app/firebase/service-account-credentials.json`
+   ```text
+   public/assets/js/firebase-config.js
+   ```
 
-Firebase configuration and service-account credentials are required for push notifications to work. Keep the service-account credentials outside the public web directory and never commit them to Git.
+3. Configure the public VAPID key:
 
-Firebase integration is optional. Skolaria works without Firebase push notifications.
+   ```env
+   VITE_VAPID_KEY=your-public-vapid-key
+   ```
 
-After configuring Firebase, rebuild the frontend assets:
+4. Place the Firebase service-account credentials in:
 
-```bash
-npm run build
-```
+   ```text
+   storage/app/firebase/service-account-credentials.json
+   ```
 
-### Laravel Reverb and Pusher
+5. Rebuild frontend assets:
 
-Skolaria supports real-time communication through Laravel broadcasting. You can use either **Laravel Reverb** or **Pusher**.
+   ```bash
+   npm run build
+   ```
 
-The broadcasting driver is selected automatically based on the `BROADCAST_CONNECTION` setting in your `.env` file. You do not need to manually edit the frontend broadcasting imports.
+Keep service-account credentials outside the public web directory and never commit them.
 
-#### Option 1: Laravel Reverb (default)
+Firebase push notifications are optional.
+
+### Laravel Reverb
+
+Reverb provides the application's WebSocket broadcasting functionality.
+
+Configure the broadcasting connection:
 
 ```env
 BROADCAST_CONNECTION=reverb
 VITE_BROADCAST_CONNECTION="${BROADCAST_CONNECTION}"
 ```
 
-Configure your Reverb credentials in `.env` and start the Reverb server:
+Configure the required Reverb credentials and start the server:
 
 ```bash
 php artisan reverb:start
 ```
 
-#### Option 2: Pusher
+For production, run Reverb under a process manager such as Supervisor or systemd and configure the reverse proxy for WebSocket traffic.
+
+### Pusher
+
+Pusher is an alternative broadcasting provider.
+
+Configure:
 
 ```env
 BROADCAST_CONNECTION=pusher
 VITE_BROADCAST_CONNECTION="${BROADCAST_CONNECTION}"
 ```
 
-Configure the appropriate `PUSHER_*` environment variables and activate the Pusher credentials in:
+Set the appropriate Pusher credentials in `.env`.
 
-`resources/js/pusher.js`
-
-#### How driver selection works
-
-The application reads `VITE_BROADCAST_CONNECTION` and automatically loads the corresponding frontend broadcasting configuration:
-
-- `reverb` loads `resources/js/reverb.js`.
-- `pusher` loads `resources/js/pusher.js`.
-
-The `VITE_BROADCAST_CONNECTION` value mirrors `BROADCAST_CONNECTION`, so changing the broadcasting driver in `.env` automatically selects the matching frontend configuration.
-
-After changing the broadcasting configuration, rebuild the frontend assets:
+After changing the broadcasting configuration, rebuild frontend assets:
 
 ```bash
 npm run build
 ```
 
-**Note:** Reverb and Pusher are alternative broadcasting drivers. Only one is initialized at a time.
-
----
-
-## Progressive Web App (PWA)
-
-Skolaria provides Progressive Web App functionality, allowing users to install the application and access previously visited pages when an internet connection becomes unavailable.
-
-### Offline Access
-
-When users allow offline caching, previously visited pages can be cached and accessed again even when the network connection is interrupted.
-
-Offline behavior includes:
-
-- Accessing previously cached pages.
-- Viewing available cached content without an active internet connection.
-- Detecting offline connectivity.
-- Disabling form submission and other server-dependent actions while offline.
-
-For data integrity, submission buttons are automatically disabled (grayed out) when the application detects that the user is offline.
-
-**Important:** Offline access is intended for viewing previously cached content. Creating, updating, or submitting records requires an active internet connection.
-
-Pages that have not previously been cached may not be available offline. The offline experience also depends on browser caching policies and available device storage.
+Only the selected broadcasting provider should be initialized by the frontend.
 
 ---
 
 ## Development and Testing
 
-Contributions and development improvements are welcome.
+Skolaria uses Pest and PHPUnit for automated testing.
 
-The repository contains application tests under:
+The application tests cover custom application behavior and integrations, including tenant lifecycle operations, database isolation, authorization boundaries, and application-specific tenancy configuration.
 
-```text
-tests/
-├── Feature/
-└── Unit/
-```
-
-Run the test suite:
+### Run the complete test suite
 
 ```bash
 php artisan test
 ```
 
-Run Laravel code formatting:
+### Run a specific test file
+
+```bash
+php artisan test tests/Feature/Tenancy/TenantProvisioningTest.php
+```
+
+### Run tests by name
+
+```bash
+php artisan test --filter="tenant"
+```
+
+### Code formatting
+
+Run Laravel Pint:
 
 ```bash
 vendor/bin/pint
 ```
 
-For the permission package, its development dependencies and test configuration are maintained separately under:
+### Testing strategy
+
+Skolaria's tests focus on behavior implemented by the application rather than duplicating functionality already provided by Stancl Tenancy.
+
+Important application-specific test areas include:
+
+| Area | What is tested |
+| --- | --- |
+| Tenant provisioning | Application's tenant creation and provisioning workflow |
+| Tenant deletion | Database, storage, and application-specific resource cleanup |
+| Domain management | Domain creation, resolution, and deletion behavior |
+| Tenant isolation | School data isolation between tenants |
+| Context restoration | Returning to central context after tenant operations |
+| Storage cleanup | Tenant storage and ID-card theme cleanup |
+| Role boundaries | Tenant role permissions and sensitive authorization rules |
+| Impersonation | Application-level impersonation feature restrictions |
+| Master-data locking | Tenant-specific authorization for locked master tables |
+
+The test suite uses SQLite for isolated tenant database testing where appropriate.
+
+Stancl Tenancy's own package behavior is not duplicated unnecessarily in the application test suite.
+
+---
+
+## Project Structure
+
+The main application directories are organized as follows:
 
 ```text
-packages/laravel-permission-kit/
+skolaria/
+├── app/
+│   ├── Console/
+│   ├── Helpers/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   ├── Middleware/
+│   │   └── Requests/
+│   ├── Jobs/
+│   ├── Models/
+│   ├── Providers/
+│   ├── Repositories/
+│   └── Services/
+├── bootstrap/
+├── config/
+├── database/
+│   ├── factories/
+│   ├── migrations/
+│   └── seeders/
+├── packages/
+│   └── laravel-permission-kit/
+├── public/
+├── resources/
+├── routes/
+│   └── tenant/
+├── storage/
+└── tests/
+    ├── Feature/
+    └── Unit/
 ```
+
+---
+
+## Documentation
+
+Additional documentation is available within the repository:
+
+| Resource | Description |
+| --- | --- |
+| [Laravel Permission Kit](packages/laravel-permission-kit/README.md) | Permission discovery, synchronization, and authorization |
+| [Contributing Guidelines](CONTRIBUTING.md) | Contribution process |
+| [Code of Conduct](CODE_OF_CONDUCT.md) | Community standards |
+| [Security Policy](SECURITY.md) | Reporting security vulnerabilities |
 
 ---
 
@@ -600,13 +819,16 @@ packages/laravel-permission-kit/
 
 Contributions are welcome.
 
-If you are interested in improving Skolaria, reporting bugs or proposing new functionality, please start by reviewing:
+If you want to improve Skolaria, report bugs, or propose new functionality, please:
 
-- [Contributing Guidelines](CONTRIBUTING.md)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
-- [Security Policy](SECURITY.md)
+1. Review the existing implementation.
+2. Open an issue for significant changes.
+3. Follow the project's coding conventions.
+4. Add or update tests for application-specific behavior.
+5. Run the relevant test suite.
+6. Run Laravel Pint before submitting changes.
 
-For significant changes, consider opening an issue first to discuss the proposed implementation.
+For significant architectural changes, discuss the proposal before implementation.
 
 ---
 
@@ -614,9 +836,11 @@ For significant changes, consider opening an issue first to discuss the proposed
 
 Security is particularly important in a multi-tenant application.
 
-If you discover a vulnerability, please follow the instructions in [SECURITY.md](SECURITY.md) rather than publishing sensitive vulnerability details in a public issue.
+Please do not disclose vulnerabilities through public issues.
 
-Never use production credentials or real student information in development or testing environments.
+Follow the instructions in [SECURITY.md](SECURITY.md) to report security problems responsibly.
+
+Never use production credentials or real student information in development and testing environments.
 
 ---
 
@@ -626,7 +850,7 @@ Skolaria builds upon the work of the open-source community and the Laravel ecosy
 
 This project is based on the original `lav_sms` project by [4jean](https://github.com/4jean).
 
-Special thanks to 4jean, the developers of the libraries and frameworks used in this project, and everyone who has contributed to its development.
+Special thanks to 4jean, the developers of the frameworks and libraries used in this project, and everyone who has contributed to its development.
 
 ---
 
@@ -640,7 +864,7 @@ See the [LICENSE](LICENSE) file for the complete license terms.
 
 <div align="center">
 
-**Skolaria – One platform. Multiple schools. Centralized management.**
+**Skolaria — One platform. Multiple schools. Centralized management.**
 
 [GitHub Repository](https://github.com/rayusamBoy/skolaria) · [Project Website](https://skolaria.co.tz)
 
