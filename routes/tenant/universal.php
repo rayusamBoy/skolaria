@@ -27,6 +27,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::group(['middleware' => ['universal']], function () {
+    Route::get('/', fn () => redirect()->route('login'));
+
     Auth::routes();
 
     // The helper route page only sets theme and skin preferences for the PWA GeneratePwaScreenshots command
