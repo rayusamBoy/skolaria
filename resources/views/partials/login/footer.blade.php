@@ -17,7 +17,7 @@
                     ><i class="material-symbols-rounded mr-2">exit_to_app</i
                     ><span class="d-none d-md-block">{{ 'Back to Central' }} </span></a>
             </li>
-            <form method="POST" id="tenant-logout-form" action="{{ route('tenant.logout') }}" class="hidden">
+            <form method="POST" id="tenant-logout-form" action="{{ route('tenant.leave') }}" class="hidden">
                 @csrf
             </form>
         @endif

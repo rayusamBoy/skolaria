@@ -41,9 +41,11 @@ class EntryController extends Controller
     }
 
     /**
-     * Logout from the current school and return to the central context.
+     * Exit from the current tenant context and return to the central context.
+     * 
+     * This only apply for the request_data (ie., cookie) identification mode
      */
-    public function tenant_logout(Request $request)
+    public function leave_tenant(Request $request)
     {
         return redirect('/')->withCookie(
             Cookie::forget('tenant')

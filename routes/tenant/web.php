@@ -53,7 +53,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/impersonate/{token}', [UserImpersonationController::class, 'impersonate'])->name('tenant.impersonate');
-Route::post('tenant/logout', [EntryController::class, 'tenant_logout'])->name('tenant.logout');
+Route::post('tenant/leave', [EntryController::class, 'leave_tenant'])->name('tenant.leave');
 
 Route::group(['middleware' => ['auth', 'checkForPassUpdate']], function () {
     // Require 2FA for the routes below
