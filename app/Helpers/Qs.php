@@ -866,7 +866,7 @@ class Qs
     /**
      * Determine the path to the tenant‑specific ID card themes directory.
      */
-    public static function getTenancyAwareIDCardsThemeDir(?int $tenant_id = null): string
+    public static function getTenancyAwareIDCardsThemeDir(string|int|null $tenant_id = null): string
     {
         $id = $tenant_id ?? tenant()?->getTenantKey();
 
