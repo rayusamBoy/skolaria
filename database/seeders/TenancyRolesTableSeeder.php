@@ -3,54 +3,61 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class TenancyRolesTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $default_guard = config('auth.defaults.guard');
+        $guard = config('auth.defaults.guard');
 
-        // Load roles from config
-        $rootRoles = (array) array_values(config('roles.root_roles.tenant', []));
-        $defaultRoles = (array) array_values(config('roles.default_roles.tenant', []));
+        $registrar = app(PermissionRegistrar::class);
+        $registrar->forgetCachedPermissions();
 
-        // Clean existing roles
-        Role::query()->delete();
+        $rootRoles = array_values(
+            config('roles.root_roles.tenant', [])
+        );
 
-        // Create roles
+        $defaultRoles = array_values(
+            config('roles.default_roles.tenant', [])
+        );
+
+        // Create or retrieve configured tenant roles without deleting existing roles.
         $createdRoles = [];
+
         foreach ($defaultRoles as $roleName) {
             $roleName = (string) $roleName;
-            $createdRoles[$roleName] = Role::create([
+
+            $createdRoles[$roleName] = Role::firstOrCreate([
                 'name' => $roleName,
-                'guard_name' => $default_guard,
+                'guard_name' => $guard,
             ]);
         }
 
-        // Remove root roles from the created list to avoid assigning permissions to them
-        $createdRoles = array_filter($createdRoles, fn ($r) => ! \in_array($r->name, $rootRoles));
+        // Only permissions registered for this guard are eligible.
+        $allPermissions = Permission::query()
+            ->where('guard_name', $guard)
+            ->get();
 
-        // Fetch all permission names present in this tenant DB
-        $allPermissions = Permission::all()->pluck('name')->toArray();
-
-        /**
-         * Role -> array with 'patterns' and optional 'exclude'.
-         * Patterns are regexes to match permission names.
-         * Exclude can be an array of regexes (or exact strings) to remove permissions.
+        /*
+         * Role permission definitions.
+         *
+         * Root roles are deliberately excluded from these definitions.
+         * They receive their privileges through the root-role Gate bypass.
          */
         $roleDefinitions = [
             config('roles.default_roles.tenant.admin') => [
                 'patterns' => ['/.*/'],
                 'exclude' => [
-                    '/^messages\.(delete)/',
-                    '/^roles\.(store|update|delete)/',
-                    '/^bin\.(empty_soft_deleted_model|user_force_delete)/',
+                    // Sensitive Super Admin-only functionality.
+                    '/^soft_deletes\./',
+                    // Restrict role management.
+                    '/^roles\.(create|update|delete)$/',
+                    // Restrict destructive messaging actions.
+                    '/^messages\.(delete)$/',
                 ],
             ],
 
@@ -161,91 +168,67 @@ class TenancyRolesTableSeeder extends Seeder
             ],
         ];
 
-        // Helper: collect permission names matching any of the patterns, then exclude those matching exclude patterns
-        $collectMatching = function (array $patterns, array $excludePatterns = []) use ($allPermissions) {
-            $matches = [];
-            foreach ($allPermissions as $perm) {
-                $matched = false;
-                foreach ($patterns as $pat) {
-                    try {
-                        if (preg_match($pat, $perm)) {
-                            $matched = true;
-                            break;
-                        }
-                    } catch (\Throwable $e) {
-                        continue;
-                    }
-                }
-                if (! $matched) {
-                    continue;
-                }
-
-                // Check exclusions
-                $excluded = false;
-                foreach ($excludePatterns as $exPat) {
-                    try {
-                        if (preg_match($exPat, $perm)) {
-                            $excluded = true;
-                            break;
-                        }
-                    } catch (\Throwable $e) {
-                        continue;
-                    }
-                }
-                if (! $excluded) {
-                    $matches[] = $perm;
+        // Match permission names against the configured patterns.
+        $matchesPatterns = static function (
+            string $permission,
+            array $patterns
+        ): bool {
+            foreach ($patterns as $pattern) {
+                if (@preg_match($pattern, $permission) === 1) {
+                    return true;
                 }
             }
 
-            return array_values(array_unique($matches));
+            return false;
         };
 
-        // Build a lowercase name -> Role instance map for robust matching
-        $rolesMap = [];
-        foreach ($createdRoles as $rName => $rObj) {
-            $rolesMap[mb_strtolower($rName)] = $rObj;
-        }
+        /** @var Role $role */
+        foreach ($createdRoles as $roleName => $role) {
+            // Root roles deliberately have no directly assigned permissions.
+            if (\in_array($roleName, $rootRoles, true)) {
+                $role->syncPermissions([]);
 
-        // Assign permissions for each defined role
-        foreach ($roleDefinitions as $roleName => $def) {
-            $key = mb_strtolower($roleName);
-            $role = $rolesMap[$key] ?? null;
-
-            if (! $role) {
-                // fuzzy match for slight spelling differences
-                foreach ($rolesMap as $lowerName => $r) {
-                    if (Str::contains($lowerName, $key) || Str::contains($key, $lowerName)) {
-                        $role = $r;
-                        break;
-                    }
-                }
-            }
-
-            if (! $role) {
-                continue; // role not seeded (e.g., it was a root role)
-            }
-
-            $patterns = $def['patterns'] ?? [];
-            $exclude = $def['exclude'] ?? [];
-
-            if (empty($patterns)) {
                 continue;
             }
 
-            $permsForRole = $collectMatching($patterns, $exclude);
+            $definition = $roleDefinitions[$roleName] ?? null;
 
-            if (property_exists($this, 'command') && $this->command) {
-                $this->command->info("Role: {$role->name} will get ".\count($permsForRole).' permissions:');
-                foreach ($permsForRole as $p) {
-                    $this->command->line(" - {$p}");
+            if (! $definition) {
+                $role->syncPermissions([]);
+
+                continue;
+            }
+
+            $patterns = $definition['patterns'] ?? [];
+            $exclusions = $definition['exclude'] ?? [];
+
+            /** @var Collection $permission */
+            $permissions = $allPermissions->filter(
+                function (Permission $permission) use (
+                    $patterns,
+                    $exclusions,
+                    $matchesPatterns
+                ): bool {
+                    $name = $permission->name;
+
+                    if (! $matchesPatterns($name, $patterns)) {
+                        return false;
+                    }
+
+                    return ! $matchesPatterns($name, $exclusions);
                 }
-            }
+            );
 
-            if (! empty($permsForRole)) {
-                $role->givePermissionTo($permsForRole);
-            }
+            // Replace existing assignments rather than accumulating stale permissions.
+            $role->syncPermissions($permissions->modelKeys());
+
+            $this->command?->info(
+                "Role: {$roleName} assigned {$permissions->count()} permissions."
+            );
         }
 
-        $this->command->info('Non‑root roles seeded successfully.');
+        $registrar->forgetCachedPermissions();
+
+        $this->command?->info('Tenant roles synchronized successfully.');
     }
 }
