@@ -1008,14 +1008,6 @@ php artisan permission-kit:sync --context=tenant
 
 If the manifest contains both `tenant` and `central` definitions, **both contexts will be synchronized**. The command does not currently restrict synchronization to the requested context.
 
-The command should display a warning when this situation occurs:
-
-```text
-WARNING: A permission manifest is being used and contains multiple contexts.
-The --context option does not filter manifest entries.
-All contexts in the manifest will be synchronized.
-```
-
 This is a known limitation of the current implementation. Context-aware manifest filtering is planned for a future update.
 
 **Recommendation:** When synchronizing separate central and tenant databases, be aware that a multi-context manifest may synchronize definitions from both contexts. Ensure the target database and permission configuration are appropriate before running the command.
