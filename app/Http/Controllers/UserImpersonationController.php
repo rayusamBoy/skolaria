@@ -54,6 +54,10 @@ class UserImpersonationController extends Controller
 
     public function redirect_to_impersonation_route(string $tenant_id, int $user_id): RedirectResponse
     {
+        if (config('tenancy.allow_user_impersonation') === false) {
+            return back();
+        }
+    
         $tenant = $this->tenant->findOrFailTenant($tenant_id);
         $token = $this->generateToken($tenant, $user_id);
 
