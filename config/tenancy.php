@@ -166,9 +166,9 @@ return [
             ],
             Resolvers\RequestDataTenantResolver::class => [
                 // Set any of these to null to disable that method of identification
-                'header' => 'X-Tenant',
+                'header' => null,
                 'cookie' => 'tenant',
-                'query_parameter' => 'tenant',
+                'query_parameter' => null,
 
                 'tenant_model_column' => null, // null = tenant key
 
