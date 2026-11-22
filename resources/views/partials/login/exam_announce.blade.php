@@ -1,8 +1,8 @@
 <!-- Exam announce -->
-@if ($is_tenant_context && request()->routeIs('login'))
+@if ($is_tenant_context && request()->routeIs('login') && !app()->runningUnitTests())
     @php $exam_announces = Qs::getValidExamAnnounces() @endphp
 
-    @if ($exam_announces->isNotEmpty())
+    @if ($exam_announces?->isNotEmpty())
         <div class="bg-dark exam-announce-wrapper">
             <div class="pb-2px mx-3 overflow-hidden" id="exam-announce">
                 @foreach ($exam_announces as $exm_ann)

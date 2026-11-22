@@ -20,7 +20,7 @@
 <script src="{{ asset('global_assets/js/main/color-modes.js') }}"></script>
 
 @php
-    $colors = $settings->firstWhere('key', 'login_and_related_pgs_txts_and_bg_colors')->value;
+    $colors = $settings->firstWhere('key', 'login_and_related_pgs_txts_and_bg_colors')?->value;
     $texts_color = 'var(--navbar-text)';
     $bg_color = 'var(--navbar-bg)';
     if ($colors !== null) {
