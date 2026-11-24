@@ -225,8 +225,8 @@
                                         </div>
                                         <div class="alert alert-info">
                                             This school will be accessed via
-                                            <strong>the domain {{ url('/') }}</strong> using a cookie. A domain
-                                            record is not created for this tenant.
+                                            <strong>the domain {{ url('/') }}</strong> using a cookie. A domain record
+                                            is not created for this tenant.
                                         </div>
                                     </div>
                                 </div>

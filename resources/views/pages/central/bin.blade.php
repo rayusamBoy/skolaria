@@ -170,7 +170,7 @@
                                     </td>
                                     <td>
                                         @php
-                                        $tenantDomain = $tenant->domain->domain ?? $tenant->domain;
+                                            $tenantDomain = $tenant->domain->domain ?? $tenant->domain;
                                         @endphp
                                         @if ($tenantDomain)
                                             <span>{{ Qs::formatDomain($tenantDomain) }}</span>

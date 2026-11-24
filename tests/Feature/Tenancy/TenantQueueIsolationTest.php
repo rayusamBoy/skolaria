@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Queue\CallQueuedClosure;
 use Illuminate\Support\Facades\Queue;
 use Tests\Support\CreatesTestTenant;
 
@@ -23,7 +24,7 @@ it('dispatches queued closures without changing the active tenant context', func
         //
     });
 
-    Queue::assertPushed(\Illuminate\Queue\CallQueuedClosure::class);
+    Queue::assertPushed(CallQueuedClosure::class);
 
     expect(tenancy()->initialized)->toBeTrue()
         ->and(tenant('id'))->toBe($tenantId)

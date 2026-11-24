@@ -42,7 +42,7 @@ class EntryController extends Controller
 
     /**
      * Exit from the current tenant context and return to the central context.
-     * 
+     *
      * This only apply for the request_data (ie., cookie) identification mode
      */
     public function leave_tenant(Request $request)

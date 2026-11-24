@@ -1,16 +1,16 @@
 
 <?php
 
-use App\Models\Tenant;
+use App\Helpers\Usr;
 use App\Services\FeatureModuleService;
 use App\User;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Support\CreatesTestTenant;
-use Illuminate\Support\Facades\Artisan;
 
 uses(CreatesTestTenant::class);
 
@@ -80,11 +80,11 @@ it('allows reading but denies updating a locked master table for an admin', func
     $this->tenant->update([
         'locked_master_tables' => ['my_classes'],
     ]);
-    
+
     expect(tenancy()->initialized)->toBeTrue()
-    ->and(tenancy()->tenant->id)->toBe($this->tenant->id)
-    ->and(tenancy()->tenant->locked_master_tables)->toBe(['my_classes'])
-    ->and($admin->hasAnyRole(\App\Helpers\Usr::getTenancyAwareRootRoles()))->toBeFalse();
+        ->and(tenancy()->tenant->id)->toBe($this->tenant->id)
+        ->and(tenancy()->tenant->locked_master_tables)->toBe(['my_classes'])
+        ->and($admin->hasAnyRole(Usr::getTenancyAwareRootRoles()))->toBeFalse();
 
     expect(Gate::forUser($admin)->allows('my_classes.view'))->toBeTrue()
         ->and(Gate::forUser($admin)->allows('my_classes.update'))->toBeFalse();

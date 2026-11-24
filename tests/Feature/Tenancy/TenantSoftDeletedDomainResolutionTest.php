@@ -2,10 +2,10 @@
 
 use App\Models\Tenant;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Artisan;
-use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
+use Illuminate\Support\Str;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedOnDomainException;
+use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 
 beforeEach(function () {
     config([
@@ -33,10 +33,10 @@ it('does not resolve a soft-deleted tenant by domain', function () {
     try {
         $tenant = Tenant::create([
             'id' => (string) Str::uuid(),
-            'tenancy_db_name' => 'soft_deleted_domain_' . Str::uuid() . '.sqlite',
+            'tenancy_db_name' => 'soft_deleted_domain_'.Str::uuid().'.sqlite',
         ]);
 
-        $domain = strtolower('deleted-' . Str::random(8) . '.test');
+        $domain = strtolower('deleted-'.Str::random(8).'.test');
 
         $tenant->domains()->create(['domain' => $domain]);
 

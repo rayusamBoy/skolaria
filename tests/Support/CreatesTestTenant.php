@@ -28,7 +28,7 @@ trait CreatesTestTenant
 
         $id = (string) Str::uuid();
         $databaseName = "test_tenant_{$id}.sqlite";
-        $databasePath = $directory . DIRECTORY_SEPARATOR . $databaseName;
+        $databasePath = $directory.DIRECTORY_SEPARATOR.$databaseName;
 
         $tenant = Tenant::withoutEvents(function () use ($id, $databaseName) {
             return Tenant::create([
@@ -76,7 +76,7 @@ trait CreatesTestTenant
         }
 
         foreach ($this->testTenants as $tenant) {
-            Tenant::withoutEvents(fn() => $tenant->delete());
+            Tenant::withoutEvents(fn () => $tenant->delete());
         }
 
         foreach ($this->testTenantDatabasePaths as $path) {
@@ -88,7 +88,6 @@ trait CreatesTestTenant
         $this->testTenants = [];
         $this->testTenantDatabasePaths = [];
     }
-
 
     protected function createAdditionalTestTenant(): Tenant
     {

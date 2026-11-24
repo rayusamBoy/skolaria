@@ -1,13 +1,13 @@
 
 <?php
 
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Tests\Support\CreatesTestTenant;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
 
 class TestTenantQueueJob implements ShouldQueue
 {
@@ -44,17 +44,17 @@ it('adds the active tenant context to queued job payloads', function () {
         ->delete();
 
     Queue::connection('database')->push(
-    new TestTenantQueueJob()
-);
+        new TestTenantQueueJob
+    );
 
-$payload = DB::connection(
-    config('tenancy.database.central_connection')
-)->table('jobs')->value('payload');
+    $payload = DB::connection(
+        config('tenancy.database.central_connection')
+    )->table('jobs')->value('payload');
 
-expect($payload)->not->toBeNull();
+    expect($payload)->not->toBeNull();
 
-$decodedPayload = json_decode($payload, true);
+    $decodedPayload = json_decode($payload, true);
 
-expect($decodedPayload)->toBeArray()
-    ->and($decodedPayload['tenant_id'] ?? null)->toBe($tenant->id);
+    expect($decodedPayload)->toBeArray()
+        ->and($decodedPayload['tenant_id'] ?? null)->toBe($tenant->id);
 });

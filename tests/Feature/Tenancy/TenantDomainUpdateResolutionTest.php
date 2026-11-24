@@ -2,10 +2,10 @@
 
 use App\Models\Tenant;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Artisan;
-use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
+use Illuminate\Support\Str;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedOnDomainException;
+use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 
 beforeEach(function () {
     config([
@@ -33,11 +33,11 @@ it('resolves the new domain after a tenant domain is changed', function () {
     try {
         $tenant = Tenant::create([
             'id' => (string) Str::uuid(),
-            'tenancy_db_name' => 'domain_update_' . Str::uuid() . '.sqlite',
+            'tenancy_db_name' => 'domain_update_'.Str::uuid().'.sqlite',
         ]);
 
-        $oldDomain = strtolower('old-' . Str::random(8) . '.test');
-        $newDomain = strtolower('new-' . Str::random(8) . '.test');
+        $oldDomain = strtolower('old-'.Str::random(8).'.test');
+        $newDomain = strtolower('new-'.Str::random(8).'.test');
 
         $domain = $tenant->domains()->create([
             'domain' => $oldDomain,

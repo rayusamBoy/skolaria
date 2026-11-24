@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
-use Tests\Support\CreatesTestTenant;
-use Illuminate\Support\Facades\Artisan;
-use Spatie\Permission\Models\Role;
-use Database\Seeders\TenancyRolesTableSeeder;
 use App\User;
+use Database\Seeders\TenancyRolesTableSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
+use Tests\Support\CreatesTestTenant;
 
 uses(RefreshDatabase::class, CreatesTestTenant::class);
 
@@ -93,7 +93,6 @@ it('enforces tenant Admin and Super Admin authorization boundaries', function ()
         ->and($admin->hasPermissionTo('soft_deletes.payment_force_delete'))->toBeFalse()
         ->and(Gate::forUser($admin)->denies('soft_deletes.payment_force_delete'))->toBeTrue();
 });
-
 
 it('isolates user records between tenant databases', function () {
     $tenantA = call_user_func([$this, 'createTestTenant']);

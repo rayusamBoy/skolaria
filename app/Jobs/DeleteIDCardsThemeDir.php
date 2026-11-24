@@ -5,21 +5,19 @@ namespace App\Jobs;
 use App\Events\TenantDeletingIDCardsThemeDir;
 use App\Events\TenantIDCardsThemeDirDeleted;
 use App\Helpers\Qs;
-use Illuminate\Support\Facades\File;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\File;
 use Stancl\Tenancy\Database\Contracts\TenantWithDatabase;
 
 class DeleteIDCardsThemeDir implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(protected TenantWithDatabase $tenant)
-    {
-    }
+    public function __construct(protected TenantWithDatabase $tenant) {}
 
     /**
      * Execute the job.
@@ -31,7 +29,7 @@ class DeleteIDCardsThemeDir implements ShouldQueue
         $dir = Qs::getTenancyAwareIDCardsThemeDir(
             (string) $this->tenant->getTenantKey()
         );
-        
+
         if (is_dir($dir)) {
             File::deleteDirectory($dir);
         } // Delete tenant's students id cards theme file's specific dir.

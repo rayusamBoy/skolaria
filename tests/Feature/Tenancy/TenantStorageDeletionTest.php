@@ -2,10 +2,10 @@
 <?php
 
 use App\Models\Tenant;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Stancl\Tenancy\Database\TenantDatabaseManagers\SQLiteDatabaseManager;
-use Illuminate\Support\Facades\Artisan;
 
 beforeEach(function () {
     config([
@@ -38,8 +38,8 @@ it('deletes tenant storage when a tenant is permanently deleted', function () {
     SQLiteDatabaseManager::$path = $databaseDirectory;
 
     $tenantId = (string) Str::uuid();
-    $databaseName = 'storage_deletion_' . $tenantId . '.sqlite';
-    $databasePath = $databaseDirectory . DIRECTORY_SEPARATOR . $databaseName;
+    $databaseName = 'storage_deletion_'.$tenantId.'.sqlite';
+    $databasePath = $databaseDirectory.DIRECTORY_SEPARATOR.$databaseName;
 
     $tenant = null;
     $tenantStoragePath = null;
@@ -61,7 +61,7 @@ it('deletes tenant storage when a tenant is permanently deleted', function () {
         File::ensureDirectoryExists($tenantStoragePath);
 
         File::put(
-            $tenantStoragePath . DIRECTORY_SEPARATOR . 'deletion-test.txt',
+            $tenantStoragePath.DIRECTORY_SEPARATOR.'deletion-test.txt',
             'Tenant storage'
         );
 

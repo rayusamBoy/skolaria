@@ -33,14 +33,14 @@ it('deletes tenant resources when a tenant is permanently deleted', function () 
     SQLiteDatabaseManager::$path = $directory;
 
     $tenantId = (string) Str::uuid();
-    $databaseName = 'deletion_' . $tenantId . '.sqlite';
-    $databasePath = $directory . DIRECTORY_SEPARATOR . $databaseName;
+    $databaseName = 'deletion_'.$tenantId.'.sqlite';
+    $databasePath = $directory.DIRECTORY_SEPARATOR.$databaseName;
 
     $themeDir = resource_path(
         'views/pages/students/id_cards/themes/'
-        . config('tenancy.database.prefix')
-        . $tenantId
-        . '/'
+        .config('tenancy.database.prefix')
+        .$tenantId
+        .'/'
     );
 
     $tenant = null;
@@ -52,7 +52,7 @@ it('deletes tenant resources when a tenant is permanently deleted', function () 
         ]);
 
         File::ensureDirectoryExists($themeDir);
-        File::put($themeDir . 'test-theme.php', '<?php // test');
+        File::put($themeDir.'test-theme.php', '<?php // test');
 
         expect(File::exists($databasePath))->toBeTrue()
             ->and(File::isDirectory($themeDir))->toBeTrue();

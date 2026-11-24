@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Http\Request;
-use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedOnDomainException;
+use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 
 it('does not resolve a tenant when the domain is empty', function () {
     $middleware = app(InitializeTenancyByDomain::class);

@@ -2,9 +2,9 @@
 <?php
 
 use App\Models\Tenant;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 beforeEach(function () {
     config([
@@ -35,16 +35,16 @@ it('deletes tenant domains without affecting other tenants', function () {
     try {
         $tenantA = Tenant::create([
             'id' => (string) Str::uuid(),
-            'tenancy_db_name' => 'domain_deletion_a_' . Str::uuid() . '.sqlite',
+            'tenancy_db_name' => 'domain_deletion_a_'.Str::uuid().'.sqlite',
         ]);
 
         $tenantB = Tenant::create([
             'id' => (string) Str::uuid(),
-            'tenancy_db_name' => 'domain_deletion_b_' . Str::uuid() . '.sqlite',
+            'tenancy_db_name' => 'domain_deletion_b_'.Str::uuid().'.sqlite',
         ]);
 
-        $domainA = Str::lower('tenant-a-' . Str::random(8) . '.test');
-        $domainB = Str::lower('tenant-b-' . Str::random(8) . '.test');
+        $domainA = Str::lower('tenant-a-'.Str::random(8).'.test');
+        $domainB = Str::lower('tenant-b-'.Str::random(8).'.test');
 
         $tenantA->domains()->create(['domain' => $domainA]);
         $tenantB->domains()->create(['domain' => $domainB]);

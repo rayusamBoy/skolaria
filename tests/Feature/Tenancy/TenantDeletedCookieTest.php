@@ -14,7 +14,7 @@ afterEach(function () {
 it('does not initialize tenancy when the tenant from the cookie has been deleted', function () {
     config(['tenancy.active_identification_mode' => 'request_data']);
 
-    $tenant =     call_user_func([$this, 'createTestTenant']);
+    $tenant = call_user_func([$this, 'createTestTenant']);
     $tenantId = $tenant->id;
 
     // Delete the tenant record without triggering tenant database cleanup.

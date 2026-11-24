@@ -2,8 +2,8 @@
 
 use App\Models\Tenant;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Str;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 
 beforeEach(function () {
@@ -32,12 +32,12 @@ it('resolves multiple domains to the same tenant', function () {
     try {
         $tenant = Tenant::create([
             'id' => (string) Str::uuid(),
-            'tenancy_db_name' => 'multiple_domains_' . Str::uuid() . '.sqlite',
+            'tenancy_db_name' => 'multiple_domains_'.Str::uuid().'.sqlite',
         ]);
 
         $domains = [
-            strtolower('school-' . Str::random(8) . '.test'),
-            strtolower('school-alias-' . Str::random(8) . '.test'),
+            strtolower('school-'.Str::random(8).'.test'),
+            strtolower('school-alias-'.Str::random(8).'.test'),
         ];
 
         foreach ($domains as $domain) {

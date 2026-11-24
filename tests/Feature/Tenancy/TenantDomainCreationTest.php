@@ -2,9 +2,9 @@
 <?php
 
 use App\Models\Tenant;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 beforeEach(function () {
     config([
@@ -32,10 +32,10 @@ it('creates and associates a domain with its tenant', function () {
     try {
         $tenant = Tenant::create([
             'id' => (string) Str::uuid(),
-            'tenancy_db_name' => 'domain_creation_' . Str::uuid() . '.sqlite',
+            'tenancy_db_name' => 'domain_creation_'.Str::uuid().'.sqlite',
         ]);
 
-        $domain = 'Tenant-' . Str::random(8) . '.Test';
+        $domain = 'Tenant-'.Str::random(8).'.Test';
         $normalizedDomain = strtolower($domain);
 
         $tenant->domains()->create([

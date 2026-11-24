@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 use App\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Tests\Support\CreatesTestTenant;
-use Illuminate\Support\Facades\Auth;
 
 uses(RefreshDatabase::class, CreatesTestTenant::class);
 
@@ -54,7 +54,7 @@ it('does not reuse one tenant user session in another tenant', function () {
 
     // Keep the same browser session cookie for subsequent requests.
     $sessionCookie = collect($loginResponse->headers->getCookies())
-        ->first(fn($cookie) => $cookie->getName() === config('session.cookie'));
+        ->first(fn ($cookie) => $cookie->getName() === config('session.cookie'));
 
     expect($sessionCookie)->not->toBeNull();
 
@@ -84,4 +84,3 @@ it('does not reuse one tenant user session in another tenant', function () {
 
     $response->assertRedirect('/login');
 });
-

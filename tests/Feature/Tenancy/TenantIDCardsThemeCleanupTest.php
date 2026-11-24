@@ -2,9 +2,9 @@
 <?php
 
 use App\Jobs\DeleteIDCardsThemeDir;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Tests\Support\CreatesTestTenant;
-use Illuminate\Support\Facades\Artisan;
 
 uses(CreatesTestTenant::class);
 
@@ -24,14 +24,14 @@ it('deletes the correct tenant ID card theme directory after tenancy has ended',
 
     $themeDir = resource_path(
         'views/pages/students/id_cards/themes/'
-        . config('tenancy.database.prefix')
-        . $tenantId
-        . '/'
+        .config('tenancy.database.prefix')
+        .$tenantId
+        .'/'
     );
 
     try {
         File::ensureDirectoryExists($themeDir);
-        File::put($themeDir . 'test-theme.php', '<?php // test');
+        File::put($themeDir.'test-theme.php', '<?php // test');
 
         expect(File::isDirectory($themeDir))->toBeTrue();
 
@@ -54,24 +54,24 @@ it('does not delete another tenant ID card theme directory', function () {
 
     $themeDirA = resource_path(
         'views/pages/students/id_cards/themes/'
-        . config('tenancy.database.prefix')
-        . $tenantA->getTenantKey()
-        . '/'
+        .config('tenancy.database.prefix')
+        .$tenantA->getTenantKey()
+        .'/'
     );
 
     $themeDirB = resource_path(
         'views/pages/students/id_cards/themes/'
-        . config('tenancy.database.prefix')
-        . $tenantB->getTenantKey()
-        . '/'
+        .config('tenancy.database.prefix')
+        .$tenantB->getTenantKey()
+        .'/'
     );
 
     try {
         File::ensureDirectoryExists($themeDirA);
         File::ensureDirectoryExists($themeDirB);
 
-        File::put($themeDirA . 'test-theme.php', '<?php // tenant A');
-        File::put($themeDirB . 'test-theme.php', '<?php // tenant B');
+        File::put($themeDirA.'test-theme.php', '<?php // tenant A');
+        File::put($themeDirB.'test-theme.php', '<?php // tenant B');
 
         tenancy()->end();
 

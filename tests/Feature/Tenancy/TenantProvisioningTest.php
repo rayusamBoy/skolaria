@@ -25,7 +25,6 @@ beforeEach(function () {
         'tenancy.cache.stores' => ['file'],
     ]);
 });
-;
 
 it('provisions a tenant database and runs tenant migrations when a tenant is created', function () {
     $directory = storage_path('framework/testing-tenants');
@@ -34,8 +33,8 @@ it('provisions a tenant database and runs tenant migrations when a tenant is cre
 
     SQLiteDatabaseManager::$path = $directory;
 
-    $databaseName = 'provisioning_' . Str::uuid() . '.sqlite';
-    $databasePath = $directory . DIRECTORY_SEPARATOR . $databaseName;
+    $databaseName = 'provisioning_'.Str::uuid().'.sqlite';
+    $databasePath = $directory.DIRECTORY_SEPARATOR.$databaseName;
 
     $tenant = null;
 
@@ -47,7 +46,7 @@ it('provisions a tenant database and runs tenant migrations when a tenant is cre
 
         $tenantStoragePath = tenancy()->run(
             $tenant,
-            fn() => storage_path()
+            fn () => storage_path()
         );
 
         expect(File::isDirectory($tenantStoragePath))->toBeTrue();
@@ -105,7 +104,7 @@ it('provisions a tenant database and runs tenant migrations when a tenant is cre
         }
 
         if ($tenant) {
-            Tenant::withoutEvents(fn() => $tenant->forceDelete());
+            Tenant::withoutEvents(fn () => $tenant->forceDelete());
         }
 
         DB::purge('tenant');

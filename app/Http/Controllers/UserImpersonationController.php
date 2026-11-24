@@ -57,7 +57,7 @@ class UserImpersonationController extends Controller
         if (config('tenancy.allow_user_impersonation') === false) {
             return back();
         }
-    
+
         $tenant = $this->tenant->findOrFailTenant($tenant_id);
         $token = $this->generateToken($tenant, $user_id);
 

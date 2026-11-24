@@ -4,6 +4,7 @@ use App\Http\Controllers\UserImpersonationController;
 use App\Repositories\TenantRepo;
 use App\Repositories\UserRepo;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Str;
 use Mockery;
 
 it('does not initiate impersonation when the feature is disabled', function () {
@@ -17,7 +18,7 @@ it('does not initiate impersonation when the feature is disabled', function () {
 
     $response = app(UserImpersonationController::class)
         ->redirect_to_impersonation_route(
-            (string) \Illuminate\Support\Str::uuid(),
+            (string) Str::uuid(),
             1
         );
 

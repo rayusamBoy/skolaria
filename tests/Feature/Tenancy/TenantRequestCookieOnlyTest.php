@@ -31,7 +31,7 @@ it('does not initialize tenancy from the tenant query parameter', function () {
 
     tenancy()->end();
 
-    $this->get('/privacy-policy?tenant=' . $tenant->id)
+    $this->get('/privacy-policy?tenant='.$tenant->id)
         ->assertSuccessful();
 
     expect(tenancy()->initialized)->toBeFalse();

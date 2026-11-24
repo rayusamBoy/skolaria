@@ -2,11 +2,11 @@
 <?php
 
 use App\Models\Tenant;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
-use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
+use Illuminate\Support\Str;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedOnDomainException;
+use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 
 beforeEach(function () {
     config([
@@ -35,17 +35,17 @@ it('resolves domains to their correct tenants', function () {
     try {
         $tenantA = Tenant::create([
             'id' => (string) Str::uuid(),
-            'tenancy_db_name' => 'domain_resolution_a_' . Str::uuid() . '.sqlite',
+            'tenancy_db_name' => 'domain_resolution_a_'.Str::uuid().'.sqlite',
         ]);
 
         $tenantB = Tenant::create([
             'id' => (string) Str::uuid(),
-            'tenancy_db_name' => 'domain_resolution_b_' . Str::uuid() . '.sqlite',
+            'tenancy_db_name' => 'domain_resolution_b_'.Str::uuid().'.sqlite',
         ]);
 
-        $domainA = strtolower('tenant-a-' . Str::random(8) . '.test');
-        $domainB = strtolower('tenant-b-' . Str::random(8) . '.test');
-        $unknownDomain = strtolower('unknown-' . Str::random(8) . '.test');
+        $domainA = strtolower('tenant-a-'.Str::random(8).'.test');
+        $domainB = strtolower('tenant-b-'.Str::random(8).'.test');
+        $unknownDomain = strtolower('unknown-'.Str::random(8).'.test');
 
         $tenantA->domains()->create(['domain' => $domainA]);
         $tenantB->domains()->create(['domain' => $domainB]);
