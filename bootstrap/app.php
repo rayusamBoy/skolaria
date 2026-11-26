@@ -26,7 +26,6 @@ return Application::configure(basePath: dirname(__DIR__))
         using: function () {
             $centralDomains = config('tenancy.identification.central_domains');
             $activeIdentificationMode = config('tenancy.active_identification_mode');
-            Route::middleware('api')->prefix('api')->group(base_path('routes/api.php'));
 
             if ($activeIdentificationMode === 'domain') {
                 foreach ($centralDomains as $domain) {
