@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use App\Traits\CentralDatabase;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Laravel\Sanctum\HasApiTokens;
 
-class ApiClient extends Model
+class ApiClient extends Authenticatable
 {
     use CentralDatabase;
     use HasApiTokens;
