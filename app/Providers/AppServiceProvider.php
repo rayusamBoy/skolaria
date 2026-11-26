@@ -46,42 +46,13 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function booted(): void
-    {
-        $middleware = [
-            'auth:sanctum',
-            EnsureApiClientIsActive::class,
-            'abilities:reference-data:read',
-        ];
-
-        foreach (['countries.index', 'states.index', 'cities.index'] as $name) {
-            $route = Route::getRoutes()->getByName($name);
-
-            if (! $route) {
-                throw new \RuntimeException(
-                    "The World package route [{$name}] was not registered."
-                );
-            }
-
-            $route->middleware($middleware);
-        }
-
-        // Protect the other World API endpoints as well, if enabled.
-        foreach (Route::getRoutes() as $route) {
-            if (str_starts_with(
-                $route->getActionName(),
-                'Nnjeim\\World\\Http\\Controllers\\'
-            )) {
-                $route->middleware($middleware);
-            }
-        }
-    }
-
     public function boot(): void
     {
         Sanctum::usePersonalAccessTokenModel(
             CentralPersonalAccessToken::class
         );
+
+        $this->protectWorldApiRoutes();
 
         require_once base_path('routes/tenant/channels.php');
 
@@ -91,5 +62,27 @@ class AppServiceProvider extends ServiceProvider
         Event::subscribe(TenantEventSubscriber::class);
         Paginator::useBootstrapFour();
         Model::preventLazyLoading(! app()->isProduction());
+    }
+
+    /**
+     * Require an active Sanctum API client with the reference-data ability
+     * for every endpoint exposed by the World package.
+     */
+    private function protectWorldApiRoutes(): void
+    {
+        $middleware = [
+            'auth:sanctum',
+            EnsureApiClientIsActive::class,
+            'abilities:reference-data:read',
+        ];
+
+        foreach (Route::getRoutes() as $route) {
+            if (str_starts_with(
+                $route->getActionName(),
+                'Nnjeim\\World\\Http\\Controllers\\'
+            )) {
+                $route->middleware($middleware);
+            }
+        }
     }
 }
