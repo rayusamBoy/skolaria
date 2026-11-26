@@ -76,11 +76,16 @@ class AppServiceProvider extends ServiceProvider
             'abilities:reference-data:read',
         ];
 
-        foreach (Route::getRoutes() as $route) {
-            if (str_starts_with(
-                $route->getActionName(),
-                'Nnjeim\\World\\Http\\Controllers\\'
-            )) {
+        $protectedRouteNames = [
+            'countries.index',
+            'states.index',
+            'cities.index',
+        ];
+
+        foreach ($protectedRouteNames as $name) {
+            $route = Route::getRoutes()->getByName($name);
+
+            if ($route) {
                 $route->middleware($middleware);
             }
         }
