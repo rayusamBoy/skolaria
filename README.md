@@ -653,7 +653,7 @@ To configure Firebase:
 4. Place the Firebase service-account credentials in:
 
    ```text
-   storage/app/firebase/service-account-credentials.json
+   storage/app/private/firebase/service-account-credentials.json
    ```
 
 5. Rebuild frontend assets:

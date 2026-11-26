@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Listeners\HandleFailedFcmNotifications;
 use App\Listeners\RecordLoginHistory;
 use App\Listeners\TenantEventSubscriber;
+use App\Models\CentralPersonalAccessToken;
 use App\Observers\UserPasswordObserver;
 use App\User;
 use Illuminate\Auth\Events\Login;
@@ -16,6 +17,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Sanctum\Sanctum;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -44,6 +46,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Sanctum::usePersonalAccessTokenModel(
+            CentralPersonalAccessToken::class
+        );
+
         require_once base_path('routes/tenant/channels.php');
 
         User::observe(UserPasswordObserver::class);
