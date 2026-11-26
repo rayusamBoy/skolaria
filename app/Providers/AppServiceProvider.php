@@ -52,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
             CentralPersonalAccessToken::class
         );
 
-        $this->protectWorldApiRoutes();
+        $this->app->booted(fn () => $this->protectWorldApiRoutes());
 
         require_once base_path('routes/tenant/channels.php');
 
