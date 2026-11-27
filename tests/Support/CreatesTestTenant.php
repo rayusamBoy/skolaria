@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Tests\\Support;
+namespace Tests\Support;
 
-use App\\Models\\Tenant;
-use Illuminate\\Support\\Facades\\Artisan;
-use Illuminate\\Support\\Facades\\DB;
-use Illuminate\\Support\\Facades\\File;
-use Illuminate\\Support\\Str;
-use Stancl\\Tenancy\\Database\\TenantDatabaseManagers\\SQLiteDatabaseManager;
+use App\Models\Tenant;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use Stancl\Tenancy\Database\TenantDatabaseManagers\SQLiteDatabaseManager;
 
 trait CreatesTestTenant
 {
