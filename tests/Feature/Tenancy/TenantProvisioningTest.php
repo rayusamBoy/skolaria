@@ -37,6 +37,7 @@ it('provisions a tenant database and runs tenant migrations when a tenant is cre
     $databasePath = $directory.DIRECTORY_SEPARATOR.$databaseName;
 
     $tenant = null;
+    $tenantStoragePath = null;
 
     try {
         $tenant = Tenant::create([
@@ -107,10 +108,18 @@ it('provisions a tenant database and runs tenant migrations when a tenant is cre
             Tenant::withoutEvents(fn () => $tenant->forceDelete());
         }
 
+        // Close SQLite PDO handles before unlinking files (required on Windows).
         DB::purge('tenant');
 
-        if (File::exists($databasePath)) {
-            File::delete($databasePath);
+        File::delete([
+            $databasePath,
+            $databasePath.'-journal',
+            $databasePath.'-wal',
+            $databasePath.'-shm',
+        ]);
+
+        if ($tenantStoragePath && File::isDirectory($tenantStoragePath)) {
+            File::deleteDirectory($tenantStoragePath);
         }
     }
 });
