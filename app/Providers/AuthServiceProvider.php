@@ -27,52 +27,72 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::before(function ($user, $ability) {
-            // 1. Hard denies – even root cannot bypass these
+            // Hard denies – even root cannot bypass these.
             if ($ability === 'deleteLogFolder' || $ability === 'deleteLogFile') {
                 return false;
             }
 
-            // 2. Disabled feature modules
-            if (\is_string($ability) && str_contains($ability, '.')) {
+            // Disabled feature modules.
+            if (is_string($ability) && str_contains($ability, '.')) {
                 if (! app(FeatureModuleService::class)->isPermissionAllowed($ability)) {
                     return false;
                 }
             }
 
-            // 3. Root users bypass everything else
-            if ($user?->hasAnyRole(Usr::getTenancyAwareRootRoles())) {
-                return true;
+            return null;
+        });
+
+        /*
+         * Spatie registers its own Gate::before callback to grant assigned
+         * permissions. An earlier callback can return true before another
+         * Gate::before callback gets a chance to enforce table locks.
+         *
+         * Gate::after runs after the permission result has been calculated,
+         * allowing locked master-table restrictions to remain authoritative.
+         */
+        Gate::after(function ($user, $ability, $result, $arguments) {
+            if (! is_string($ability) || $result === false) {
+                return null;
             }
 
-            // 4. Locked master tables (only in request_data identification mode)
-            if (config('tenancy.active_identification_mode') === 'request_data') {
-                $tenant = tenancy()->tenant;
+            // Root users retain their full access.
+            if ($user?->hasAnyRole(Usr::getTenancyAwareRootRoles())) {
+                return null;
+            }
 
-                if ($tenant) {
-                    $lockedTables = $tenant->locked_master_tables ?? [];
+            if (config('tenancy.active_identification_mode') !== 'request_data') {
+                return null;
+            }
 
-                    if (! empty($lockedTables)) {
-                        $tablePermissionMap = (new SyncMasterDataService)->getSyncableMappedTables();
-                        $readVerbs = ['view', 'show', 'list', 'index', 'manage'];
+            $tenant = tenancy()->tenant;
 
-                        foreach ($lockedTables as $table) {
-                            $prefix = $tablePermissionMap[$table] ?? null;
-                            if (! $prefix) {
-                                continue;
-                            }
+            if (! $tenant) {
+                return null;
+            }
 
-                            if (str_starts_with($ability, "$prefix.")) {
-                                $verb = substr($ability, \strlen($prefix) + 1);
-                                if (! \in_array($verb, $readVerbs, true)) {
-                                    return false;
-                                }
-                            }
-                        }
-                    }
+            $lockedTables = $tenant->locked_master_tables ?? [];
+
+            if (empty($lockedTables)) {
+                return null;
+            }
+
+            $tablePermissionMap = (new SyncMasterDataService)->getSyncableMappedTables();
+            $readVerbs = ['view', 'show', 'list', 'index', 'manage'];
+
+            foreach ($lockedTables as $table) {
+                $prefix = $tablePermissionMap[$table] ?? null;
+
+                if (! $prefix || ! str_starts_with($ability, "$prefix.")) {
+                    continue;
+                }
+
+                $verb = substr($ability, strlen($prefix) + 1);
+
+                if (! in_array($verb, $readVerbs, true)) {
+                    return false;
                 }
             }
 
-            // 5. Fall through to Spatie permission check
             return null;
         });
 
