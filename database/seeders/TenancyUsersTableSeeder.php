@@ -1,246 +1,125 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\\Seeders;
 
-use App\User;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
+use App\\User;
+use Illuminate\\Database\\Seeder;
+use Illuminate\\Support\\Facades\\Hash;
 
 class TenancyUsersTableSeeder extends Seeder
 {
     /**
-     * Auto generated seed file
+     * Create predictable demonstration accounts in non-production environments.
      *
-     * @return void
+     * Production tenants receive their first real administrator through the
+     * school-owner invitation flow, never through a shared default password.
      */
-    public function run()
+    public function run(): void
     {
+        if (app()->environment('production')) {
+            return;
+        }
 
-        \DB::table('users')->delete();
+        $users = [
+            [
+                'name' => 'Super Admin',
+                'username' => 'superadmin',
+                'email' => 'superadmin@sms.com',
+                'code' => 'SUPERADMIN',
+                'password' => 'superadmin',
+                'role' => config('roles.default_roles.tenant.superadmin'),
+                'lga_id' => 120781,
+            ],
+            [
+                'name' => 'Admin',
+                'username' => 'admin',
+                'email' => 'admin@sms.com',
+                'code' => 'ADMIN',
+                'password' => 'admin',
+                'role' => config('roles.default_roles.tenant.admin'),
+                'lga_id' => 120780,
+            ],
+            [
+                'name' => 'Teacher',
+                'username' => 'teacher',
+                'email' => 'teacher@sms.com',
+                'code' => 'TEACHER',
+                'password' => 'teacher',
+                'role' => config('roles.default_roles.tenant.teacher'),
+                'lga_id' => 120780,
+            ],
+            [
+                'name' => 'Accountant',
+                'username' => 'accountant',
+                'email' => 'accountant@sms.com',
+                'code' => 'ACCOUNTANT',
+                'password' => 'accountant',
+                'role' => config('roles.default_roles.tenant.accountant'),
+                'lga_id' => 120780,
+            ],
+            [
+                'name' => 'Librarian',
+                'username' => 'librarian',
+                'email' => 'librarian@sms.com',
+                'code' => 'LIBRARIAN',
+                'password' => 'librarian',
+                'role' => config('roles.default_roles.tenant.librarian'),
+                'lga_id' => 120780,
+            ],
+            [
+                'name' => 'Parent',
+                'username' => 'parent',
+                'email' => 'parent@sms.com',
+                'code' => 'PARENT',
+                'password' => 'parent',
+                'role' => config('roles.default_roles.tenant.parent'),
+                'lga_id' => 120780,
+            ],
+            [
+                'name' => 'Student',
+                'username' => 'student',
+                'email' => 'student@sms.com',
+                'code' => 'STUDENT',
+                'password' => 'student',
+                'role' => config('roles.default_roles.tenant.student'),
+                'lga_id' => 120780,
+            ],
+        ];
 
-        $super_admin = User::create([
-            'name' => 'Super Admin',
-            'is_blocked' => false,
-            'religion' => 'Islam',
-            'email' => 'superadmin@sms.com',
-            'code' => 'SUPERADMIN',
-            'username' => 'superadmin',
-            'occupation' => null,
-            'date_of_birth' => null,
-            'gender' => 'Male',
-            'photo_path' => 'global_assets/images/user.png',
-            'primary_identification_number' => 'SUPERADMIN',
-            'secondary_identification_number' => 'SUPERADMIN',
-            'primary_mobile' => '+255123456789',
-            'secondary_mobile' => null,
-            'blood_group_id' => 2,
-            'state_id' => 4081,
-            'lga_id' => 120781,
-            'nationality_id' => 220,
-            'address' => 'address',
-            'email_verified_at' => null,
-            'password' => Hash::make('superadmin'),
-            'remember_token' => null,
-            'password_updated_at' => null,
-            'twofa_secret_code' => null,
-            'twofa_recovery_codes' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-            'deleted_at' => null,
-        ]);
+        foreach ($users as $attributes) {
+            $role = $attributes['role'];
+            $password = $attributes['password'];
 
-        $admin = User::create([
-            'name' => 'Admin',
-            'is_blocked' => false,
-            'religion' => 'Islam',
-            'email' => 'admin@sms.com',
-            'code' => 'ADMIN',
-            'username' => 'admin',
-            'occupation' => null,
-            'date_of_birth' => null,
-            'gender' => 'Male',
-            'photo_path' => 'global_assets/images/user.png',
-            'primary_identification_number' => 'ADMIN',
-            'secondary_identification_number' => 'ADMIN',
-            'primary_mobile' => '+255123456789',
-            'secondary_mobile' => null,
-            'blood_group_id' => 2,
-            'state_id' => 4081,
-            'lga_id' => 120780,
-            'nationality_id' => 220,
-            'address' => 'address',
-            'email_verified_at' => null,
-            'password' => Hash::make('admin'),
-            'remember_token' => null,
-            'password_updated_at' => null,
-            'twofa_secret_code' => null,
-            'twofa_recovery_codes' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-            'deleted_at' => null,
-        ]);
+            unset($attributes['role'], $attributes['password']);
 
-        $teacher = User::create([
-            'name' => 'Teacher',
-            'is_blocked' => false,
-            'religion' => 'Islam',
-            'email' => 'teacher@sms.com',
-            'code' => 'TEACHER',
-            'username' => 'teacher',
-            'occupation' => null,
-            'date_of_birth' => null,
-            'gender' => 'Male',
-            'photo_path' => 'global_assets/images/user.png',
-            'primary_identification_number' => 'TEACHER',
-            'secondary_identification_number' => 'TEACHER',
-            'primary_mobile' => '+255123456789',
-            'secondary_mobile' => null,
-            'blood_group_id' => 2,
-            'state_id' => 4081,
-            'lga_id' => 120780,
-            'nationality_id' => 220,
-            'address' => 'address',
-            'email_verified_at' => null,
-            'password' => Hash::make('teacher'),
-            'remember_token' => null,
-            'password_updated_at' => null,
-            'twofa_secret_code' => null,
-            'twofa_recovery_codes' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-            'deleted_at' => null,
-        ]);
+            $user = User::firstOrCreate(
+                ['username' => $attributes['username']],
+                [
+                    ...$attributes,
+                    'is_blocked' => false,
+                    'religion' => 'Islam',
+                    'occupation' => null,
+                    'date_of_birth' => null,
+                    'gender' => 'Male',
+                    'photo_path' => 'global_assets/images/user.png',
+                    'primary_identification_number' => $attributes['code'],
+                    'secondary_identification_number' => $attributes['code'],
+                    'primary_mobile' => '+255123456789',
+                    'secondary_mobile' => null,
+                    'blood_group_id' => 2,
+                    'state_id' => 4081,
+                    'nationality_id' => 220,
+                    'address' => 'address',
+                    'email_verified_at' => null,
+                    'password' => Hash::make($password),
+                    'remember_token' => null,
+                    'password_updated_at' => null,
+                    'twofa_secret_code' => null,
+                    'twofa_recovery_codes' => null,
+                ]
+            );
 
-        $accountant = User::create([
-            'name' => 'Accountant',
-            'is_blocked' => false,
-            'religion' => 'Islam',
-            'email' => 'accountant@sms.com',
-            'code' => 'ACCOUNTANT',
-            'username' => 'accountant',
-            'occupation' => null,
-            'date_of_birth' => null,
-            'gender' => 'Male',
-            'photo_path' => 'global_assets/images/user.png',
-            'primary_identification_number' => 'ACCOUNTANT',
-            'secondary_identification_number' => 'ACCOUNTANT',
-            'primary_mobile' => '+255123456789',
-            'secondary_mobile' => null,
-            'blood_group_id' => 2,
-            'state_id' => 4081,
-            'lga_id' => 120780,
-            'nationality_id' => 220,
-            'address' => 'address',
-            'email_verified_at' => null,
-            'password' => Hash::make('accountant'),
-            'remember_token' => null,
-            'password_updated_at' => null,
-            'twofa_secret_code' => null,
-            'twofa_recovery_codes' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-            'deleted_at' => null,
-        ]);
-
-        $librarian = User::create([
-            'name' => 'Librarian',
-            'is_blocked' => false,
-            'religion' => 'Islam',
-            'email' => 'librarian@sms.com',
-            'code' => 'LIBRARIAN',
-            'username' => 'librarian',
-            'occupation' => null,
-            'date_of_birth' => null,
-            'gender' => 'Male',
-            'photo_path' => 'global_assets/images/user.png',
-            'primary_identification_number' => 'LIBRARIAN',
-            'secondary_identification_number' => 'LIBRARIAN',
-            'primary_mobile' => '+255123456789',
-            'secondary_mobile' => null,
-            'blood_group_id' => 2,
-            'state_id' => 4081,
-            'lga_id' => 120780,
-            'nationality_id' => 220,
-            'address' => 'address',
-            'email_verified_at' => null,
-            'password' => Hash::make('librarian'),
-            'remember_token' => null,
-            'password_updated_at' => null,
-            'twofa_secret_code' => null,
-            'twofa_recovery_codes' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-            'deleted_at' => null,
-        ]);
-
-        $parent = User::create([
-            'name' => 'Parent',
-            'is_blocked' => false,
-            'religion' => 'Islam',
-            'email' => 'parent@sms.com',
-            'code' => 'PARENT',
-            'username' => 'parent',
-            'occupation' => null,
-            'date_of_birth' => null,
-            'gender' => 'Male',
-            'photo_path' => 'global_assets/images/user.png',
-            'primary_identification_number' => 'PARENT',
-            'secondary_identification_number' => 'PARENT',
-            'primary_mobile' => '+255123456789',
-            'secondary_mobile' => null,
-            'blood_group_id' => 2,
-            'state_id' => 4081,
-            'lga_id' => 120780,
-            'nationality_id' => 220,
-            'address' => 'address',
-            'email_verified_at' => null,
-            'password' => Hash::make('parent'),
-            'remember_token' => null,
-            'password_updated_at' => null,
-            'twofa_secret_code' => null,
-            'twofa_recovery_codes' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-            'deleted_at' => null,
-        ]);
-
-        $student = User::create([
-            'name' => 'Student',
-            'is_blocked' => false,
-            'religion' => 'Islam',
-            'email' => 'student@sms.com',
-            'code' => 'STUDENT',
-            'username' => 'student',
-            'occupation' => null,
-            'date_of_birth' => null,
-            'gender' => 'Male',
-            'photo_path' => 'global_assets/images/user.png',
-            'primary_identification_number' => 'STUDENT',
-            'secondary_identification_number' => 'STUDENT',
-            'primary_mobile' => '+255123456789',
-            'secondary_mobile' => null,
-            'blood_group_id' => 2,
-            'state_id' => 4081,
-            'lga_id' => 120780,
-            'nationality_id' => 220,
-            'address' => 'address',
-            'email_verified_at' => null,
-            'password' => Hash::make('student'),
-            'remember_token' => null,
-            'password_updated_at' => null,
-            'twofa_secret_code' => null,
-            'twofa_recovery_codes' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-            'deleted_at' => null,
-        ]);
-
-        $super_admin->assignRole(config('roles.default_roles.tenant.superadmin'));
-        $admin->assignRole(config('roles.default_roles.tenant.admin'));
-        $teacher->assignRole(config('roles.default_roles.tenant.teacher'));
-        $accountant->assignRole(config('roles.default_roles.tenant.accountant'));
-        $librarian->assignRole(config('roles.default_roles.tenant.librarian'));
-        $parent->assignRole(config('roles.default_roles.tenant.parent'));
-        $student->assignRole(config('roles.default_roles.tenant.student'));
+            $user->assignRole($role);
+        }
     }
 }
