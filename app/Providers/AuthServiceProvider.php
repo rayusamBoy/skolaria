@@ -43,57 +43,51 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         /*
-         * Spatie registers its own Gate::before callback to grant assigned
-         * permissions. An earlier callback can return true before another
-         * Gate::before callback gets a chance to enforce table locks.
-         *
-         * Gate::after runs after the permission result has been calculated,
-         * allowing locked master-table restrictions to remain authoritative.
+         * Register after every service provider has booted. Spatie registers
+         * its permission-granting Gate::before callback during boot, so this
+         * callback must be appended afterwards to make table locks authoritative.
          */
-        Gate::after(function ($user, $ability, $result, $arguments) {
-            if (! is_string($ability) || $result === false) {
-                return null;
-            }
-
-            // Root users retain their full access.
-            if ($user?->hasAnyRole(Usr::getTenancyAwareRootRoles())) {
-                return null;
-            }
-
-            if (config('tenancy.active_identification_mode') !== 'request_data') {
-                return null;
-            }
-
-            $tenant = tenancy()->tenant;
-
-            if (! $tenant) {
-                return null;
-            }
-
-            $lockedTables = $tenant->locked_master_tables ?? [];
-
-            if (empty($lockedTables)) {
-                return null;
-            }
-
-            $tablePermissionMap = (new SyncMasterDataService)->getSyncableMappedTables();
-            $readVerbs = ['view', 'show', 'list', 'index', 'manage'];
-
-            foreach ($lockedTables as $table) {
-                $prefix = $tablePermissionMap[$table] ?? null;
-
-                if (! $prefix || ! str_starts_with($ability, "$prefix.")) {
-                    continue;
+        $this->app->booted(function () {
+            Gate::before(function ($user, $ability) {
+                if (! is_string($ability) || $user?->hasAnyRole(Usr::getTenancyAwareRootRoles())) {
+                    return null;
                 }
 
-                $verb = substr($ability, strlen($prefix) + 1);
-
-                if (! in_array($verb, $readVerbs, true)) {
-                    return false;
+                if (config('tenancy.active_identification_mode') !== 'request_data') {
+                    return null;
                 }
-            }
 
-            return null;
+                $tenant = tenancy()->tenant;
+
+                if (! $tenant) {
+                    return null;
+                }
+
+                $lockedTables = $tenant->locked_master_tables ?? [];
+
+                if (empty($lockedTables)) {
+                    return null;
+                }
+
+                $tablePermissionMap = (new SyncMasterDataService)->getSyncableMappedTables();
+                $readVerbs = ['view', 'show', 'list', 'index', 'manage'];
+
+                foreach ($lockedTables as $table) {
+                    $prefix = $tablePermissionMap[$table] ?? null;
+
+                    if (! $prefix || ! str_starts_with($ability, "$prefix.")) {
+                        continue;
+                    }
+
+                    $verb = substr($ability, strlen($prefix) + 1);
+
+                    if (! in_array($verb, $readVerbs, true)) {
+                        return false;
+                    }
+                }
+
+                return null;
+            });
         });
 
         Gate::define('viewLogViewer', fn (?User $user) => $user?->hasAnyRole(Usr::getTenancyAwareRootRoles()));
